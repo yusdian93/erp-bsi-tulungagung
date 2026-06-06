@@ -293,10 +293,10 @@
                         <i class="bi bi-sim-fill"></i>
                     </div>
                     <div>
-                        <div class="stat-card-title-modern text-silver">Total Transaksi</div>
+                        <div class="stat-card-title-modern text-silver" id="lbl-judul-trx">Total Transaksi</div>
                         <div class="stat-card-value-modern" id="dash-transaksi" style="color: #F8FAFC;">Memuat...</div>
                     </div>
-                    <div class="stat-card-subtitle text-silver">
+                    <div class="stat-card-subtitle text-silver" id="lbl-sub-trx">
                         <i class="bi bi-activity me-2"></i> Mutasi Operasional BSI
                     </div>
                 </div>
@@ -310,10 +310,10 @@
                         <i class="bi bi-sim-fill"></i>
                     </div>
                     <div>
-                        <div class="stat-card-title-modern text-gold">Mitra BSU Aktif</div>
+                        <div class="stat-card-title-modern text-gold" id="lbl-judul-mitra">Mitra BSU Aktif</div>
                         <div class="stat-card-value-modern" id="dash-nasabah" style="color: #FFEDD5;">0</div>
                     </div>
-                    <div class="stat-card-subtitle" style="color: #FFEDD5;">
+                    <div class="stat-card-subtitle" style="color: #FFEDD5;" id="lbl-sub-mitra">
                         <i class="bi bi-shield-check me-2"></i> Jaringan Unit Binaan
                     </div>
                 </div>
@@ -327,10 +327,10 @@
                         <i class="bi bi-sim-fill"></i>
                     </div>
                     <div>
-                        <div class="stat-card-title-modern text-silver">Liabilitas Saldo BSU</div>
+                        <div class="stat-card-title-modern text-silver" id="lbl-judul-saldo">Liabilitas Saldo BSU</div>
                         <div class="stat-card-value-modern" id="dash-rupiah" style="color: #F8FAFC;">Rp 0</div>
                     </div>
-                    <div class="stat-card-subtitle text-silver">
+                    <div class="stat-card-subtitle text-silver" id="lbl-sub-saldo">
                         <i class="bi bi-bank me-2"></i> Total Hutang Mengendap
                     </div>
                 </div>
@@ -2370,14 +2370,35 @@ function eksporExcel() {
     function terapkanFilterUnit() {
         let idDipilih = document.getElementById('filterUnitBSI').value;
         
-        // Logika penyaringan
+        // Logika penyaringan & Perubahan Teks Kartu Dinamis
         if (idDipilih === "SEMUA") {
-            dataNasabah = [...masterNasabah];      // Kembalikan semua data
+            dataNasabah = [...masterNasabah];      
             dataTransaksi = [...masterTransaksi];
+            
+            // KEMBALIKAN TEKS KE MODE BSI (PUSAT)
+            document.getElementById('lbl-judul-trx').innerText = "Total Transaksi";
+            document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Mutasi Operasional BSI';
+            
+            document.getElementById('lbl-judul-mitra').innerText = "Mitra BSU Aktif";
+            document.getElementById('lbl-sub-mitra').innerHTML = '<i class="bi bi-shield-check me-2"></i> Jaringan Unit Binaan';
+            
+            document.getElementById('lbl-judul-saldo').innerText = "Liabilitas Saldo BSU";
+            document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-bank me-2"></i> Total Hutang Mengendap';
+
         } else {
             // Saring dan hanya tampilkan yang ID Unit-nya cocok
             dataNasabah = masterNasabah.filter(n => String(n.id_unit) === String(idDipilih));
             dataTransaksi = masterTransaksi.filter(t => String(t.id_unit) === String(idDipilih));
+            
+            // UBAH TEKS KE MODE BSU CABANG (RETAIL)
+            document.getElementById('lbl-judul-trx').innerText = "Transaksi Unit";
+            document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Aktivitas Warga';
+            
+            document.getElementById('lbl-judul-mitra').innerText = "Nasabah Warga";
+            document.getElementById('lbl-sub-mitra').innerHTML = '<i class="bi bi-person-lines-fill me-2"></i> Pemegang Rekening Tabungan';
+            
+            document.getElementById('lbl-judul-saldo').innerText = "Kewajiban Tabungan";
+            document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-wallet2 me-2"></i> Saldo Hak Warga';
         }
         
         // Perintahkan aplikasi untuk menggambar ulang tabel dan dasbor
@@ -2385,10 +2406,10 @@ function eksporExcel() {
         updateDropdownNasabah('pilihNasabah'); 
         if(document.getElementById('pilihNasabahSaldo')) updateDropdownNasabah('pilihNasabahSaldo');
         updateDashboard();
- 	updateGrafikVisual();
+        updateGrafikVisual();
         updateBukuBesar(); 
         updateLaporan();
-	updateMonitorBSU();
+        updateMonitorBSU();
     }
 
 </script>
