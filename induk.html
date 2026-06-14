@@ -1359,7 +1359,7 @@
             </div>
 
 <script>
-    // =========================================================
+   // =========================================================
     // 1. URL GOOGLE APPS SCRIPT
     // =========================================================
     const scriptURL ='https://script.google.com/macros/s/AKfycbxyobiaV3dZFb7D8uEKFJYdFEe5ujxKtLGX-4UMnPpfE3IZOW64HjCMVh-83-6yLLVgag/exec';
@@ -1368,12 +1368,12 @@
     const CURRENT_ROLE = 'BSI'; 
     const CURRENT_UNIT_ID = ''; 
 
-    // Mencegah akses langsung tanpa melewati index.html
+    // Mencegah akses langsung tanpa melewati pintu gerbang index.html
     if (localStorage.getItem('ROLE_PENGGUNA') !== 'BSI') {
         alert("Akses Terlarang! Anda harus login sebagai Admin.");
         window.location.href = 'index.html';
-    } 
- // ===================================================================
+    }
+    // ===============================================================
     let dataNasabah = []; let dataTransaksi = []; let dataKategori = [];let dataUnit = [];let dataPenjualan = []; let dataAset = []; let dataProduksi = []; let dataArmada = []; let dataQC = []; let dataRetail = []; 
 
 // Variabel penyimpanan data asli (Master) untuk BSI
