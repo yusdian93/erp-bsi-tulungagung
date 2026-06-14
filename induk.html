@@ -2561,7 +2561,11 @@ function eksporExcel() {
         formData.append('total', document.getElementById('pj_total').value);
         formData.append('status_bayar', document.getElementById('pj_status').value);
 
-        fetch(scriptURL, { method: 'POST', body: formData })
+        fetch(scriptURL, { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: formData.toString() 
+            })
             .then(res => res.text())
             .then(hasil => {
                 alert('Berhasil! Data penjualan telah dicatat.');
