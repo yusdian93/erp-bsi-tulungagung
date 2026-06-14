@@ -90,7 +90,10 @@
                 <label style="font-weight: 700; color: #0F172A; font-size: 0.85rem; margin-bottom: 8px;">Kata Sandi</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
-                    <input type="password" id="password" class="form-control border-start-0 ps-0" placeholder="Masukkan kata sandi..." required>
+                    <input type="password" id="password" class="form-control border-start-0 border-end-0 ps-0" placeholder="Masukkan kata sandi..." required>
+                    <span class="input-group-text bg-white border-start-0 text-muted" onclick="lihatSandi('password', 'iconMataLogin')" style="cursor: pointer;">
+                        <i class="bi bi-eye-slash-fill" id="iconMataLogin"></i>
+                    </span>
                 </div>
             </div>
 
@@ -106,7 +109,25 @@
         // URL Script Google Sheets
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxyobiaV3dZFb7D8uEKFJYdFEe5ujxKtLGX-4UMnPpfE3IZOW64HjCMVh-83-6yLLVgag/exec';
 
-        function prosesLogin(event) {
+// Fungsi untuk mengaktifkan tombol intip sandi
+        function lihatSandi(inputId, iconId) {
+            let input = document.getElementById(inputId);
+            let icon = document.getElementById(iconId);
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye-slash-fill");
+                icon.classList.add("bi-eye-fill"); // Ikon mata terbuka
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye-fill");
+                icon.classList.add("bi-eye-slash-fill"); // Ikon mata tercoret
+            }
+        }        
+
+
+
+
+function prosesLogin(event) {
             // Perintah ini WAJIB ada untuk mencegah halaman me-refresh (mental)
             event.preventDefault();
             
