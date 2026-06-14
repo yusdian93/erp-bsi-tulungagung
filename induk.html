@@ -1569,16 +1569,20 @@ function simpanNasabah(e) {
     e.preventDefault();
     let nama = document.getElementById('namaNasabah').value.trim();
     let hp = document.getElementById('hpNasabah').value.trim();
-    let password = document.getElementById('passNasabah').value.trim(); // Menangkap password
+    let password = document.getElementById('passNasabah').value.trim(); 
     
     if(nama === '') return alert("Nama tidak boleh kosong!");
     
+    // Generate 6 digit angka acak untuk No.REG BSU
+    let random6Digit = Math.floor(100000 + Math.random() * 900000);
+    let regBaru = 'BSU-' + random6Digit;
+    
     let formData = new URLSearchParams();
     formData.append('action', 'tambahNasabah'); 
-    formData.append('id', 'NSB-' + Date.now());
+    formData.append('id', regBaru); 
     formData.append('nama', nama); 
     formData.append('hp', hp);
-    formData.append('password', password); // Mengirim password ke Google Sheets
+    formData.append('password', password); 
 
     let btnSubmit = e.target.querySelector('button[type="submit"]');
     btnSubmit.disabled = true; 
