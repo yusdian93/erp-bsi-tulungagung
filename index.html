@@ -70,7 +70,7 @@
 <body>
 
     <div class="login-card text-center">
-        <img src="LOGO_DLH.png" alt="Logo DLH Tulungagung" style="height: 110px; margin-bottom: 20px; object-fit: contain;">
+        <img src="logo_dlh.png" alt="Logo DLH Tulungagung" style="height: 110px; margin-bottom: 20px; object-fit: contain;" onerror="this.src='LOGO_DLH.png'">
         
         <h4 style="font-weight: 800; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 5px;">PORTAL TERPADU</h4>
         <p style="color: #475569; font-size: 0.9rem; font-weight: 600; margin-bottom: 30px; line-height: 1.4;">
@@ -103,23 +103,23 @@
     </div>
 
     <script>
-       <script>
-        // Memakai URL Script Google Sheets milik Anda
+        // URL Script Google Sheets
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxyobiaV3dZFb7D8uEKFJYdFEe5ujxKtLGX-4UMnPpfE3IZOW64HjCMVh-83-6yLLVgag/exec';
 
         function prosesLogin(event) {
+            // Perintah ini WAJIB ada untuk mencegah halaman me-refresh (mental)
             event.preventDefault();
             
             let user = document.getElementById('username').value.trim();
             let pass = document.getElementById('password').value.trim();
             let btnSubmit = document.getElementById('btnSubmit');
 
-            // Ubah efek visual tombol menjadi "Loading" untuk semua pengguna
+            // Ubah efek visual tombol menjadi "Loading"
             let originalText = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memeriksa Database...';
 
-            // Menarik data dari Google Sheets (termasuk data Nasabah BSU dan Sandi Admin)
+            // Menarik data dari Google Sheets (termasuk data Sandi Admin)
             fetch(scriptURL + "?role=BSI&id_unit=") 
                 .then(response => response.json())
                 .then(data => {
@@ -127,11 +127,12 @@
                     // ==========================================
                     // CEK 1: APAKAH INI ADMIN PUSAT (BSI) ?
                     // ==========================================
-                    // Mengambil id & sandi admin dari database (jika kosong, gunakan default 'admin')
-                    let idAdminAsli = data.admin_user ? String(data.admin_user) : 'admin';
-                    let passAdminAsli = data.admin_pass ? String(data.admin_pass) : 'admin123';
+                    // Jika di Google Sheets kosong, gunakan 'admin' sebagai cadangan
+                    let idAdminAsli = data.admin_user ? String(data.admin_user).trim() : 'admin';
+                    let passAdminAsli = data.admin_pass ? String(data.admin_pass).trim() : 'admin123';
 
-                    if (user === idAdminAsli) {
+                    // toLowerCase() membuat login kebal terhadap salah ketik huruf besar/kecil di ID
+                    if (user.toLowerCase() === idAdminAsli.toLowerCase()) {
                         if (pass === passAdminAsli) {
                             localStorage.setItem('ROLE_PENGGUNA', 'BSI');
                             localStorage.setItem('ID_UNIT_PENGGUNA', 'PUSAT');
@@ -139,17 +140,17 @@
                         } else {
                             alert('Akses Ditolak: Kata Sandi Admin Pusat salah!');
                         }
-                        return; // Hentikan script jika sudah diproses sebagai admin
+                        return; // Hentikan script jika masuk sebagai admin
                     }
 
                     // ==========================================
                     // CEK 2: APAKAH INI PENGURUS UNIT (BSU) ?
                     // ==========================================
                     let dataNasabah = data.nasabah || [];
-                    let bsuDitemukan = dataNasabah.find(n => String(n.id) === user);
+                    let bsuDitemukan = dataNasabah.find(n => String(n.id).trim().toLowerCase() === user.toLowerCase());
 
                     if (bsuDitemukan) {
-                        if (String(bsuDitemukan.password) === pass) {
+                        if (String(bsuDitemukan.password).trim() === pass) {
                             localStorage.setItem('ROLE_PENGGUNA', 'BSU');
                             localStorage.setItem('ID_UNIT_PENGGUNA', bsuDitemukan.id);
                             localStorage.setItem('NAMA_UNIT_PENGGUNA', bsuDitemukan.nama);
@@ -163,10 +164,11 @@
                     }
                 })
                 .catch(error => {
-                    console.error(error);
-                    alert('Gagal terhubung ke Server Database. Pastikan koneksi internet stabil.');
+                    console.error("Terjadi Kesalahan:", error);
+                    alert('Gagal terhubung ke Server Database. Pastikan Anda sudah mendeploy versi baru di Apps Script.');
                 })
                 .finally(() => {
+                    // Mengembalikan tombol kembali seperti semula
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = originalText;
                 });
