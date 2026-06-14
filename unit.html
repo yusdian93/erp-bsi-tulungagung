@@ -276,12 +276,9 @@
 <body>
 <body>
 
-<div id="login-screen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, var(--bg-color) 0%, var(--primary-dark) 100%); z-index: 9999; display: flex; align-items: center; justify-content: center;">
-    <div class="card p-4 p-md-5 mx-3" style="width: 100%; max-width: 420px; border-radius: 24px; background: rgba(255,255,255,0.85) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important; margin-top: 0;">
-        <div class="text-center mb-4">
-            <div style="background: linear-gradient(135deg, var(--primary-main), var(--primary-dark)); width: 70px; height: 70px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px auto; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.3);">
-                <i class="bi bi-shield-lock-fill fs-1 text-white"></i>
-            </div>
+
+
+
             <h4 class="fw-bold" style="color: var(--primary-dark); letter-spacing: -0.5px;">Portal Akses BSU</h4>
             <p class="text-muted small fw-medium">Sistem Manajemen Bank Sampah Manfaat</p>
         </div>
@@ -306,7 +303,7 @@
     </div>
 </div>
 
-<div id="main-app" style="display: none;">
+<div id="main-app" style="display: block;">
     
     <div class="nav-wrapper" style="padding: 15px;">
         </div>
@@ -684,70 +681,28 @@
 
 <script>
     const scriptURL ='https://script.google.com/macros/s/AKfycbxyobiaV3dZFb7D8uEKFJYdFEe5ujxKtLGX-4UMnPpfE3IZOW64HjCMVh-83-6yLLVgag/exec';
-    const CURRENT_ROLE = 'BSU'; 
-let CURRENT_UNIT_ID = ''; // <-- Sekarang dibiarkan kosong & dinamis
-let CURRENT_UNIT_NAMA = ''; 
+const CURRENT_ROLE = 'BSU'; 
 
-// loadDataDatabase() JANGAN DIPANGGIL DULU. Nanti dipanggil setelah berhasil login. 
+// 1. Ambil data dari hasil login portal (index.html)
+let CURRENT_UNIT_ID = localStorage.getItem('ID_UNIT_PENGGUNA'); 
+let CURRENT_UNIT_NAMA = localStorage.getItem('NAMA_UNIT_PENGGUNA'); 
+
+// 2. Kunci Keamanan: Tendang pengguna yang mencoba masuk tanpa login
+if (!CURRENT_UNIT_ID || CURRENT_UNIT_ID === 'PUSAT') {
+    alert("Sesi tidak valid atau telah berakhir! Silakan login melalui portal utama.");
+    window.location.href = 'index.html';
+} else {
+    // 3. Jika valid, atur judul nama BSU dan muat database
+    let judulApp = document.getElementById('judul-app-bsu');
+    if(judulApp) {
+        judulApp.innerText = "BANK SAMPAH UNIT " + CURRENT_UNIT_NAMA.toUpperCase();
+    }
+    document.querySelector('.app-subtitle').innerHTML = `<i class="bi bi-geo-alt-fill text-danger me-1"></i> KODE REGISTRASI: ${CURRENT_UNIT_ID}`;
+
+    loadDataDatabase(); // Mulai memuat data dari Google Sheets
+}
     
-    let dataNasabah = []; let dataTransaksi = []; let dataKategori = []; let dataUnit = []; 
-    let masterNasabah = []; let masterTransaksi = [];
-    
-function prosesLogin(e) {
-    e.preventDefault();
-    let idInput = document.getElementById('loginId').value.trim();
-    let passInput = document.getElementById('loginPassword').value.trim();
-    let btn = document.getElementById('btnLogin');
-
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memverifikasi...';
-    
-    let formData = new URLSearchParams();
-    formData.append('action', 'loginBSU');
-    formData.append('id_unit', idInput);
-    formData.append('password', passInput);
-
-    // KODE FETCH YANG SUDAH DIREVISI HEADER-NYA
-    fetch(scriptURL, { 
-        method: 'POST', 
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-        body: formData.toString() 
-    })
-    .then(response => response.json())
-    .then(data => {
-        if(data.status === 'success') {
-            // LOGIN BERHASIL
-            CURRENT_UNIT_ID = data.id_unit;
-            CURRENT_UNIT_NAMA = data.nama_unit;
-            
-            let judulApp = document.getElementById('judul-app-bsu');
-            if(judulApp) {
-                judulApp.innerText = "BANK SAMPAH UNIT " + CURRENT_UNIT_NAMA.toUpperCase();
-            }
-            
-            document.querySelector('.app-subtitle').innerHTML = `<i class="bi bi-geo-alt-fill text-danger me-1"></i> KODE REGISTRASI: ${CURRENT_UNIT_ID}`;
-            
-            document.getElementById('login-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('main-app').style.display = 'block';
-                loadDataDatabase();
-            }, 400);
-
-        } else {
-            // MENAMPILKAN ALASAN SPESIFIK JIKA GAGAL
-            alert("GAGAL LOGIN: " + (data.message || "ID BSU atau Kata Sandi salah."));
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Masuk ke Sistem';
-        }
-    })
-    .catch(error => {
-        alert("Terjadi masalah saat menghubungi Server Google. Pastikan koneksi internet stabil.");
-        console.error("Error Detail:", error);
-        btn.disabled = false;
-        btn.innerHTML = '<i class="bi bi-box-arrow-in-right me-2"></i>Masuk ke Sistem';
-    });
-}   
+   
 
 
 
