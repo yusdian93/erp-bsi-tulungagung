@@ -261,7 +261,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                     <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
+                    
+                    <!-- MENU PANTAU BSU -->
                     <li class="nav-link nav-btn" onclick="showTab('pantau-bsu', this)"><i class="bi bi-display me-2"></i>Pantau BSU</li>
+                    
                     <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-truck-flatbed me-2"></i>Penerimaan BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-bank me-2"></i>Rekening BSU</li>
@@ -371,12 +374,12 @@
         
 	    <div class="card p-4 p-md-5 mt-5">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h5 class="m-0 fw-bold" style="color: var(--primary-dark);"><i class="bi bi-clock-history me-2 text-success"></i>Riwayat Transaksi Terbaru</h5>
+                <h5 class="m-0 fw-bold" style="color: var(--primary-dark);"><i class="bi bi-bar-chart-fill me-2 text-success"></i>Grafik Statistik Transaksi</h5>
             </div>
             
-            <div class="row mb-4">
+            <div class="row">
                 <div class="col-md-7 mb-3 mb-md-0">
-                    <div class="card p-3 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="card p-3 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 0;">
                         <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-bar-chart-line-fill me-2"></i>Rekap Volume Per Bank Sampah Unit</h6>
                         <div style="height: 250px;">
                             <canvas id="grafikTren"></canvas>
@@ -384,28 +387,13 @@
                     </div>
                 </div>
                 <div class="col-md-5">
-                    <div class="card p-3 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="card p-3 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0; margin-top: 0;">
                         <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-pie-chart-fill me-2"></i>Komposisi Kategori</h6>
                         <div style="height: 250px;">
                             <canvas id="grafikKategori"></canvas>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                        <tr>
-                            <th>Waktu Transaksi</th>
-                            <th>Identitas BSU (Cabang)</th>
-                            <th>Aktivitas / Material</th>
-                            <th>Total Nominal</th>
-                            <th class="text-center">Aksi Struk</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-riwayat"></tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -1447,13 +1435,21 @@
         if(!sel) return;
         sel.innerHTML = '<option value="SEMUA">-- Tampilkan Semua BSU (Mode Induk) --</option>';
         
+        // Hanya memunculkan nama BSU menggunakan data yang murni dari dataUnit
         let uniqueUnits = [];
-        masterNasabah.forEach(n => {
-            if (!uniqueUnits.includes(n.id)) {
-                uniqueUnits.push(n.id);
-                sel.innerHTML += `<option value="${n.id}">${n.nama}</option>`;
-            }
-        });
+        if (dataUnit && dataUnit.length > 0) {
+            dataUnit.forEach(u => {
+                if (!uniqueUnits.includes(u.id_unit)) {
+                    uniqueUnits.push(u.id_unit);
+                    sel.innerHTML += `<option value="${u.id_unit}">${u.nama_unit} (${u.id_unit})</option>`;
+                }
+            });
+        } else {
+            // Fallback apabila tabel dataUnit kebetulan belum ada
+            masterNasabah.forEach(n => {
+                sel.innerHTML += `<option value="${n.id}">${n.nama} (${n.id})</option>`;
+            });
+        }
     }
 
     function terapkanFilterUnitPantau() {
@@ -1470,13 +1466,13 @@
             document.getElementById('lbl-judul-saldo').innerText = "Liabilitas Saldo BSU";
             document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-bank me-2"></i> Total Hutang Mengendap';
         } else {
-            // Cari data BSU yang dipilih berdasarkan ID
-            let bsuTerpilih = masterNasabah.find(n => String(n.id) === String(idDipilih));
-            let namaBsu = bsuTerpilih ? bsuTerpilih.nama : idDipilih;
+            // Cari nama unit yang sesuai dengan ID untuk memastikan filter akurat
+            let unitTerpilih = dataUnit.find(u => String(u.id_unit) === String(idDipilih));
+            let namaUnit = unitTerpilih ? unitTerpilih.nama_unit : idDipilih;
 
-            // Filter HANYA untuk BSU tersebut
-            dataNasabah = masterNasabah.filter(n => String(n.id) === String(idDipilih));
-            dataTransaksi = masterTransaksi.filter(t => String(t.nama).trim() === String(namaBsu));
+            // Filter nasabah dan transaksi HANYA milik BSU yang dipilih
+            dataNasabah = masterNasabah.filter(n => String(n.id) === String(idDipilih) || String(n.nama) === String(namaUnit));
+            dataTransaksi = masterTransaksi.filter(t => String(t.id_unit).trim() === String(idDipilih) || String(t.nama).trim() === String(namaUnit));
             
             document.getElementById('lbl-judul-trx').innerText = "Transaksi Unit";
             document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Aktivitas BSU Terpilih';
@@ -1495,7 +1491,7 @@
         updateLaporan();
         updateMonitorBSU();
 
-        // Pindah otomatis ke halaman dashboard untuk melihat hasilnya
+        // Pindah ke tab dashboard untuk memperlihatkan hasilnya
         showTab('dashboard', document.querySelector('.dashboard-tab'));
     }
 
@@ -1798,19 +1794,10 @@
     }
 
     function updateDashboard() {
-        document.getElementById('dash-transaksi').innerText = dataTransaksi.length; document.getElementById('dash-nasabah').innerText = dataNasabah.length;
-        let totalRupiah = dataTransaksi.reduce((sum, t) => sum + t.total, 0); document.getElementById('dash-rupiah').innerText = 'Rp ' + totalRupiah.toLocaleString('id-ID');
-        let tbody = document.getElementById('tabel-riwayat'); tbody.innerHTML = '';
-        if(dataTransaksi.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">Belum ada aktivitas.</td></tr>`;
-        dataTransaksi.slice().reverse().slice(0, 10).forEach((t, i) => {
-            // Untuk index struk PDF/WA
-            let indexAsli = dataTransaksi.indexOf(t);
-            let absTotal = Math.abs(t.total); let sign = t.total < 0 ? '-' : ''; let colorClass = t.total < 0 ? 'text-danger' : 'text-success'; let beratHtml = t.jenis !== 'Penarikan Tunai' ? `<br><small class="text-muted fw-normal">${t.berat} Kg</small>` : '';
-            tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${t.jenis}</span></td>
-                <td class="fw-bold ${colorClass} align-middle">${sign} Rp ${absTotal.toLocaleString('id-ID')} ${beratHtml}</td>
-                <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStruk(${indexAsli})"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
-                <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStruk(${indexAsli})"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
-        });
+        document.getElementById('dash-transaksi').innerText = dataTransaksi.length; 
+        document.getElementById('dash-nasabah').innerText = dataNasabah.length;
+        let totalRupiah = dataTransaksi.reduce((sum, t) => sum + t.total, 0); 
+        document.getElementById('dash-rupiah').innerText = 'Rp ' + totalRupiah.toLocaleString('id-ID');
     }
 
     let chartTren = null;
