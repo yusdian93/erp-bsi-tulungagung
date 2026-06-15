@@ -292,15 +292,6 @@
         <div class="text-center mt-4 mb-5">
             <h4 class="app-title">BANK SAMPAH INDUK (BSI)</h4>
             <h6 class="app-subtitle">Pusat Kendali Eksekutif - DLH Kabupaten Tulungagung</h6>
-        
-            <div id="area-filter-bsi" class="mt-4 mx-auto" style="max-width: 450px; display: none;">
-                <div class="input-group shadow-sm" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--primary-main);">
-                    <span class="input-group-text bg-white border-0" style="color: var(--primary-main);"><i class="bi bi-funnel-fill me-1"></i> Filter Unit:</span>
-                    <select id="filterUnitBSI" class="form-select border-0 fw-bold" style="color: var(--text-main);" onchange="terapkanFilterUnit()">
-                        <option value="SEMUA">-- Tampilkan Semua Bank Sampah --</option>
-                    </select>
-                </div>
-            </div>
         </div>
         
         <div class="row mt-4 g-4">
@@ -369,7 +360,7 @@
                 </div>
                 <div class="col-md-5">
                     <div class="card p-3 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-pie-chart-fill me-2"></i>KomposComposition Kategori</h6>
+                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-pie-chart-fill me-2"></i>Komposisi Kategori</h6>
                         <div style="height: 250px;">
                             <canvas id="grafikKategori"></canvas>
                         </div>
@@ -1357,11 +1348,6 @@
             dataNasabah = [...masterNasabah]; 
             dataTransaksi = [...masterTransaksi];
 
-            if(CURRENT_ROLE === 'BSI') {
-                document.getElementById('area-filter-bsi').style.display = 'flex';
-                updateDropdownFilterUnit();
-            }
-
             dataTransaksi.forEach(t => {
                 if (typeof t.tgl === 'string' && t.tgl.includes('T') && t.tgl.includes('Z')) {
                     let pisah = t.tgl.split('T');
@@ -1625,7 +1611,7 @@
         let nama = document.getElementById('pilihNasabah').value; let selSampah = document.getElementById('pilihSampah');
         if (!nama || selSampah.value === "") return alert("Harap lengkapi form!");
         let jenisSampah = selSampah.options[selSampah.selectedIndex].text; let harga = parseInt(selSampah.value); let berat = parseFloat(document.getElementById('beratSampah').value);
-        let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + tgl.getMinutes().toString().padStart(2, '0');
         let jenisBersih = jenisSampah.split(' (')[0]; 
         let formData = new URLSearchParams();
         formData.append('action', 'tambahTransaksi'); 
@@ -2671,51 +2657,6 @@
                 <td class="text-end fw-bold text-muted">Rp ${parseFloat(r.biaya_retribusi || 0).toLocaleString('id-ID')}</td>
             </tr>`;
         });
-    }
-
-    function updateDropdownFilterUnit() {
-        let sel = document.getElementById('filterUnitBSI');
-        if(!sel) return;
-        sel.innerHTML = '<option value="SEMUA">-- Tampilkan Semua Bank Sampah --</option>';
-        
-        masterNasabah.forEach(n => {
-            sel.innerHTML += `<option value="${n.nama}">${n.nama} (${n.id})</option>`;
-        });
-    }
-
-    function terapkanFilterUnit() {
-        let namaDipilih = document.getElementById('filterUnitBSI').value;
-        
-        if (namaDipilih === "SEMUA") {
-            dataNasabah = [...masterNasabah];      
-            dataTransaksi = [...masterTransaksi];
-            
-            document.getElementById('lbl-judul-trx').innerText = "Total Transaksi";
-            document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Mutasi Operasional BSI';
-            document.getElementById('lbl-judul-mitra').innerText = "Mitra BSU Aktif";
-            document.getElementById('lbl-sub-mitra').innerHTML = '<i class="bi bi-shield-check me-2"></i> Jaringan Unit Binaan';
-            document.getElementById('lbl-judul-saldo').innerText = "Liabilitas Saldo BSU";
-            document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-bank me-2"></i> Total Hutang Mengendap';
-        } else {
-            dataNasabah = masterNasabah.filter(n => String(n.nama) === String(namaDipilih));
-            dataTransaksi = masterTransaksi.filter(t => String(t.nama) === String(namaDipilih));
-            
-            document.getElementById('lbl-judul-trx').innerText = "Transaksi Unit";
-            document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Aktivitas BSU Terpilih';
-            document.getElementById('lbl-judul-mitra').innerText = "Profil Unit";
-            document.getElementById('lbl-sub-mitra').innerHTML = '<i class="bi bi-person-lines-fill me-2"></i> Detail BSU';
-            document.getElementById('lbl-judul-saldo').innerText = "Kewajiban Saldo";
-            document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-wallet2 me-2"></i> Saldo Hak BSU Terpilih';
-        }
-        
-        updateTabelNasabah(); 
-        updateDropdownNasabah('pilihNasabah'); 
-        if(document.getElementById('pilihNasabahSaldo')) updateDropdownNasabah('pilihNasabahSaldo');
-        updateDashboard();
-        updateGrafikVisual();
-        updateBukuBesar(); 
-        updateLaporan();
-        updateMonitorBSU();
     }
 
     function simpanArmada() {
