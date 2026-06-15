@@ -261,10 +261,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                     <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
-                    
-                    <!-- MENU PANTAU BSU -->
                     <li class="nav-link nav-btn" onclick="showTab('pantau-bsu', this)"><i class="bi bi-display me-2"></i>Pantau BSU</li>
-                    
                     <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-truck-flatbed me-2"></i>Penerimaan BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-bank me-2"></i>Rekening BSU</li>
@@ -1337,8 +1334,24 @@
         fetch(urlDenganParameter)
         .then(response => response.json())
         .then(data => {
-            masterNasabah = data.nasabah || []; 
-            masterTransaksi = data.transaksi || []; 
+            let mentahNasabah = data.nasabah || []; 
+            let mentahTransaksi = data.transaksi || []; 
+
+            // === FILTER GLOBAL: HANYA MASUKKAN DATA BSU ===
+            // Fungsi ini akan membersihkan data dari nasabah individu/perorangan
+            masterNasabah = mentahNasabah.filter(n => {
+                let id = String(n.id || '').toUpperCase();
+                let nama = String(n.nama || '').toUpperCase();
+                return id.includes('BSU') || nama.includes('BSU') || nama.includes('BANK SAMPAH');
+            });
+
+            masterTransaksi = mentahTransaksi.filter(t => {
+                let nama = String(t.nama || '').toUpperCase();
+                let id_unit = String(t.id_unit || '').toUpperCase();
+                return nama.includes('BSU') || nama.includes('BANK SAMPAH') || id_unit.includes('BSU');
+            });
+            // ==============================================
+
             dataKategori = data.kategori || [];
             dataUnit = data.unit || []; 
             dataPenjualan = data.penjualan || []; 
@@ -1433,16 +1446,9 @@
         
         let uniqueUnits = [];
         masterNasabah.forEach(n => {
-            let idValid = String(n.id).toUpperCase();
-            let namaValid = String(n.nama).toUpperCase();
-            
-            // KUNCI FILTER: Hanya loloskan data yang ID-nya mengandung "BSU" 
-            // atau namanya mengandung "BSU" / "BANK SAMPAH"
-            if (idValid.includes('BSU') || namaValid.includes('BSU') || namaValid.includes('BANK SAMPAH')) {
-                if (!uniqueUnits.includes(n.id)) {
-                    uniqueUnits.push(n.id);
-                    sel.innerHTML += `<option value="${n.id}">${n.nama}</option>`;
-                }
+            if (!uniqueUnits.includes(n.id)) {
+                uniqueUnits.push(n.id);
+                sel.innerHTML += `<option value="${n.id}">${n.nama}</option>`;
             }
         });
     }
@@ -1794,7 +1800,9 @@
         let tbody = document.getElementById('tabel-riwayat'); tbody.innerHTML = '';
         if(dataTransaksi.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">Belum ada aktivitas.</td></tr>`;
         dataTransaksi.slice().reverse().slice(0, 10).forEach((t, i) => {
-            let indexAsli = dataTransaksi.length - 1 - i; let absTotal = Math.abs(t.total); let sign = t.total < 0 ? '-' : ''; let colorClass = t.total < 0 ? 'text-danger' : 'text-success'; let beratHtml = t.jenis !== 'Penarikan Tunai' ? `<br><small class="text-muted fw-normal">${t.berat} Kg</small>` : '';
+            // Untuk index struk PDF/WA
+            let indexAsli = dataTransaksi.indexOf(t);
+            let absTotal = Math.abs(t.total); let sign = t.total < 0 ? '-' : ''; let colorClass = t.total < 0 ? 'text-danger' : 'text-success'; let beratHtml = t.jenis !== 'Penarikan Tunai' ? `<br><small class="text-muted fw-normal">${t.berat} Kg</small>` : '';
             tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${t.jenis}</span></td>
                 <td class="fw-bold ${colorClass} align-middle">${sign} Rp ${absTotal.toLocaleString('id-ID')} ${beratHtml}</td>
                 <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStruk(${indexAsli})"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
