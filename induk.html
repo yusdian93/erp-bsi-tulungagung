@@ -1431,15 +1431,27 @@
         if(!sel) return;
         sel.innerHTML = '<option value="SEMUA">-- Tampilkan Semua BSU (Mode Induk) --</option>';
         
-        masterNasabah.forEach(n => {
-            sel.innerHTML += `<option value="${n.nama}">${n.nama} (${n.id})</option>`;
-        });
+        // Hanya memunculkan nama BSU menggunakan data yang murni dari dataUnit
+        let uniqueUnits = [];
+        if (dataUnit && dataUnit.length > 0) {
+            dataUnit.forEach(u => {
+                if (!uniqueUnits.includes(u.id_unit)) {
+                    uniqueUnits.push(u.id_unit);
+                    sel.innerHTML += `<option value="${u.id_unit}">${u.nama_unit} (${u.id_unit})</option>`;
+                }
+            });
+        } else {
+            // Fallback apabila tabel dataUnit kebetulan belum ada
+            masterNasabah.forEach(n => {
+                sel.innerHTML += `<option value="${n.id}">${n.nama} (${n.id})</option>`;
+            });
+        }
     }
 
     function terapkanFilterUnitPantau() {
-        let namaDipilih = document.getElementById('filterUnitBSI').value;
+        let idDipilih = document.getElementById('filterUnitBSI').value;
         
-        if (namaDipilih === "SEMUA") {
+        if (idDipilih === "SEMUA") {
             dataNasabah = [...masterNasabah];      
             dataTransaksi = [...masterTransaksi];
             
@@ -1450,8 +1462,13 @@
             document.getElementById('lbl-judul-saldo').innerText = "Liabilitas Saldo BSU";
             document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-bank me-2"></i> Total Hutang Mengendap';
         } else {
-            dataNasabah = masterNasabah.filter(n => String(n.nama) === String(namaDipilih));
-            dataTransaksi = masterTransaksi.filter(t => String(t.nama) === String(namaDipilih));
+            // Cari nama unit yang sesuai dengan ID untuk memastikan filter akurat
+            let unitTerpilih = dataUnit.find(u => String(u.id_unit) === String(idDipilih));
+            let namaUnit = unitTerpilih ? unitTerpilih.nama_unit : idDipilih;
+
+            // Filter nasabah dan transaksi HANYA milik BSU yang dipilih
+            dataNasabah = masterNasabah.filter(n => String(n.id) === String(idDipilih) || String(n.nama) === String(namaUnit));
+            dataTransaksi = masterTransaksi.filter(t => String(t.id_unit).trim() === String(idDipilih) || String(t.nama).trim() === String(namaUnit));
             
             document.getElementById('lbl-judul-trx').innerText = "Transaksi Unit";
             document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Aktivitas BSU Terpilih';
@@ -1470,7 +1487,7 @@
         updateLaporan();
         updateMonitorBSU();
 
-        // Pindah ke tab dashboard untuk memperlihatkan hasilnya
+        // Pindah otomatis ke halaman dashboard untuk melihat hasilnya
         showTab('dashboard', document.querySelector('.dashboard-tab'));
     }
 
