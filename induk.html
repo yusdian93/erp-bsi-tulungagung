@@ -398,7 +398,7 @@
                     <thead>
                         <tr>
                             <th>Waktu Transaksi</th>
-                            <th>Identitas Nasabah</th>
+                            <th>Identitas BSU (Cabang)</th>
                             <th>Aktivitas / Material</th>
                             <th>Total Nominal</th>
                             <th class="text-center">Aksi Struk</th>
@@ -1345,10 +1345,13 @@
                 return id.includes('BSU') || nama.includes('BSU') || nama.includes('BANK SAMPAH');
             });
 
+            // Ambil daftar nama BSU yang valid
+            let listNamaBSU = masterNasabah.map(n => String(n.nama).trim().toUpperCase());
+
+            // Filter transaksi: Hanya loloskan jika nama pelakunya ada di list BSU ATAU namanya mengandung kata BSU
             masterTransaksi = mentahTransaksi.filter(t => {
-                let nama = String(t.nama || '').toUpperCase();
-                let id_unit = String(t.id_unit || '').toUpperCase();
-                return nama.includes('BSU') || nama.includes('BANK SAMPAH') || id_unit.includes('BSU');
+                let namaTrx = String(t.nama || '').trim().toUpperCase();
+                return namaTrx.includes('BSU') || namaTrx.includes('BANK SAMPAH') || listNamaBSU.includes(namaTrx);
             });
             // ==============================================
 
@@ -1949,8 +1952,8 @@
     function cetakPdfStruk(index) {
         let t = dataTransaksi[index]; let txt = t.total < 0 ? "PENARIKAN SALDO" : "SETORAN MATERIAL";
         let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:320px;margin:0 auto;padding:25px;border:1px solid #e2e8f0;border-radius:12px;">
-            <h3 style="text-align:center;margin:0;font-weight:800;font-size:18px;">BANK SAMPAH GANG DAWET</h3><p style="text-align:center;margin:5px 0 15px 0;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p><hr style="border-top:1px dashed #cbd5e1;">
-            <table style="width:100%;font-size:14px;margin:10px 0;"><tr><td style="color:#64748b;">Tgl</td><td style="text-align:right;font-weight:600;">${t.tgl}</td></tr><tr><td style="color:#64748b;">Nasabah</td><td style="text-align:right;font-weight:600;">${t.nama}</td></tr></table>
+            <h3 style="text-align:center;margin:0;font-weight:800;font-size:18px;">BANK SAMPAH INDUK BSI</h3><p style="text-align:center;margin:5px 0 15px 0;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p><hr style="border-top:1px dashed #cbd5e1;">
+            <table style="width:100%;font-size:14px;margin:10px 0;"><tr><td style="color:#64748b;">Tgl</td><td style="text-align:right;font-weight:600;">${t.tgl}</td></tr><tr><td style="color:#64748b;">Unit BSU</td><td style="text-align:right;font-weight:600;">${t.nama}</td></tr></table>
             <hr style="border-top:1px dashed #cbd5e1;"><div style="margin:15px 0;"><div style="font-weight:700;margin-bottom:5px;">${t.jenis}</div><div style="display:flex;justify-content:space-between;font-size:14px;color:#64748b;"><span>Vol: ${t.berat} Kg</span><span>Rp ${Math.abs(t.total).toLocaleString('id-ID')}</span></div></div>
             <hr style="border-top:1px dashed #cbd5e1;"><div style="display:flex;justify-content:space-between;font-weight:800;margin-top:15px;color:${t.total < 0 ? '#e11d48' : '#059669'};"><span>${txt}</span><span>Rp ${Math.abs(t.total).toLocaleString('id-ID')}</span></div></div>`;
         document.getElementById('area-laporan-a4').innerHTML = html; document.body.className = 'mode-cetak'; window.print(); document.body.className = '';
@@ -1959,7 +1962,7 @@
     function kirimWaStruk(index) {
         let t = dataTransaksi[index]; let n = dataNasabah.find(x => x.nama === t.nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
         if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
-        let pesan = `*STRUK BANK SAMPAH*\nTgl: ${t.tgl}\nNasabah: *${t.nama}*\n\n▪ Aktivitas: ${t.jenis}\n▪ Volume: ${t.berat} Kg\n*TOTAL: Rp ${Math.abs(t.total).toLocaleString('id-ID')}*`;
+        let pesan = `*STRUK BANK SAMPAH INDUK*\nTgl: ${t.tgl}\nUnit BSU: *${t.nama}*\n\n▪ Aktivitas: ${t.jenis}\n▪ Volume: ${t.berat} Kg\n*TOTAL: Rp ${Math.abs(t.total).toLocaleString('id-ID')}*`;
         window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
@@ -1980,7 +1983,7 @@
         let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return alert("Pilih nasabah dulu.");
         let totRp = 0, totKg = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => { totRp += t.total; totKg += t.berat; });
         let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:400px;margin:0 auto;padding:30px;border:1px solid #cbd5e1;border-radius:16px;">
-            <div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:15px;margin-bottom:20px;"><h3 style="margin:0;font-weight:800;">BANK SAMPAH GANG DAWET</h3><p style="margin:5px 0 0 0;font-size:12px;font-weight:600;">REKENING KORAN</p></div>
+            <div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:15px;margin-bottom:20px;"><h3 style="margin:0;font-weight:800;">BANK SAMPAH INDUK BSI</h3><p style="margin:5px 0 0 0;font-size:12px;font-weight:600;">REKENING KORAN</p></div>
             <table style="width:100%;font-size:13px;margin-bottom:20px;"><tr><td style="color:#64748b;">Entitas</td><td style="font-weight:700;">: ${nama}</td></tr></table>
             <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:20px;"><p style="margin:0 0 5px 0;font-size:12px;color:#64748b;">Akumulasi Volume</p><h4 style="margin:0 0 20px 0;color:#334155;">${totKg.toFixed(1)} Kg</h4>
             <p style="margin:0 0 5px 0;font-size:12px;color:#64748b;">Kewajiban Saldo (IDR)</p><h3 style="margin:0;color:#059669;font-weight:800;font-size:24px;">Rp ${totRp.toLocaleString('id-ID')}</h3></div></div>`;
@@ -1992,7 +1995,7 @@
         let totRp = 0, totKg = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => { totRp += t.total; totKg += t.berat; });
         let n = dataNasabah.find(x => x.nama === nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
         if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
-        let pesan = `Yth. *${nama}*,\nBerikut posisi saldo Anda:\n📊 Volume: *${totKg.toFixed(1)} Kg*\n💳 Saldo: *Rp ${totRp.toLocaleString('id-ID')}*`;
+        let pesan = `Yth. Pengurus *${nama}*,\nBerikut posisi saldo BSU Anda di Induk:\n📊 Volume: *${totKg.toFixed(1)} Kg*\n💳 Saldo: *Rp ${totRp.toLocaleString('id-ID')}*`;
         window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
