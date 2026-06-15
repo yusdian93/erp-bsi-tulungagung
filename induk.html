@@ -261,7 +261,10 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                     <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
-                    <li class="nav-link nav-btn" onclick="showTab('monitor', this)"><i class="bi bi-activity me-2"></i>Pantau BSU</li>
+                    
+                    <!-- MENU PANTAU BSU -->
+                    <li class="nav-link nav-btn" onclick="showTab('pantau-bsu', this)"><i class="bi bi-display me-2"></i>Pantau BSU</li>
+                    
                     <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-truck-flatbed me-2"></i>Penerimaan BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-bank me-2"></i>Rekening BSU</li>
@@ -289,6 +292,30 @@
 
 <div class="container pb-5">
     
+    <!-- HALAMAN PANTAU BSU -->
+    <div id="pantau-bsu" class="tab-content" style="display:none;">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card p-4 p-md-5 mt-4">
+                    <h4 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-display me-2 text-primary"></i>Pantau Aplikasi Cabang (BSU)</h4>
+                    <div class="alert alert-info" style="font-size: 0.9rem; border-radius: 12px;">
+                        <i class="bi bi-info-circle-fill me-2"></i>Pilih unit BSU di bawah ini. Setelah dipilih, <b>seluruh data di aplikasi ini (Dashboard, Laporan, Buku Besar, dll) akan otomatis difilter</b> hanya menampilkan data milik BSU yang dipilih, persis seperti yang dilihat oleh pengurus BSU tersebut.
+                    </div>
+                    
+                    <div class="mt-4 mx-auto" style="max-width: 500px;">
+                        <label class="form-label fw-bold text-muted">Pilih Bank Sampah Unit (BSU):</label>
+                        <div class="input-group shadow-sm" style="border-radius: 14px; overflow: hidden; border: 2px solid var(--primary-main);">
+                            <span class="input-group-text bg-white border-0" style="color: var(--primary-main);"><i class="bi bi-funnel-fill"></i></span>
+                            <select id="filterUnitBSI" class="form-select border-0 fw-bold" style="color: var(--text-main);" onchange="terapkanFilterUnitPantau()">
+                                <option value="SEMUA">-- Tampilkan Semua BSU (Mode Induk) --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="dashboard" class="tab-content" style="display:block;">
         <div class="text-center mt-4 mb-5">
             <h4 class="app-title">BANK SAMPAH INDUK (BSI)</h4>
@@ -679,24 +706,37 @@
         </div>
     </div>
 
-    <div id="monitor" class="tab-content" style="display:none;">
+    <div id="kinerja" class="tab-content" style="display:none;">
         <div class="card p-4 p-md-5">
-            <h4 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-activity me-2 text-success"></i>Papan Peringkat & Keaktifan Cabang</h4>
-            <div class="alert alert-info" style="font-size: 0.85rem;">
-                <i class="bi bi-info-circle-fill me-2"></i>Data di bawah ini mencakup seluruh unit BSU secara *Real-Time*. Klik tombol <b>Sentil WA</b> untuk mengirim template pesan pembinaan ke pengurus BSU terkait.
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="m-0 fw-bold" style="color: var(--primary-dark);">Papan Peringkat & Evaluasi Cabang</h4>
+                    <span class="app-subtitle">Pemantauan Aktivitas Unit Secara Real-Time</span>
+                </div>
+                <button class="btn btn-outline-primary" onclick="updateMonitorBSU()"><i class="bi bi-arrow-clockwise me-2"></i>Refresh Kinerja</button>
             </div>
+            
+            <div class="alert mb-4" style="background: rgba(234, 88, 12, 0.05); border: 1px solid rgba(234, 88, 12, 0.2); border-radius: 12px; font-size: 0.9rem;">
+                <i class="bi bi-traffic-light-fill me-2 text-warning fs-5"></i> <strong>Indikator Keaktifan:</strong> 
+                <span class="badge bg-success bg-opacity-25 text-success border border-success mx-1">Aktif</span> (Terdapat transaksi &lt; 30 hari), 
+                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning mx-1">Peringatan</span> (Vakum 1-3 bulan), 
+                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger mx-1">Kritis</span> (Vakum &gt; 3 bulan).
+            </div>
+
             <div class="table-responsive">
-                <table class="table table-hover align-middle">
+                <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th>Peringkat & Nama BSU</th>
-                            <th>Status (Terakhir Aktif)</th>
-                            <th class="text-center">Total Nasabah</th>
-                            <th class="text-end">Volume Masuk (Kg)</th>
+                            <th class="text-center">Peringkat</th>
+                            <th>Identitas BSU</th>
+                            <th class="text-center">Status (Traffic Light)</th>
+                            <th class="text-end">Total Volume Masuk</th>
+                            <th class="text-end">Frekuensi Mutasi</th>
+                            <th>Tgl Terakhir Aktif</th>
                             <th class="text-center">Aksi Binaan</th>
                         </tr>
                     </thead>
-                    <tbody id="tabel-monitor-bsu"></tbody>
+                    <tbody id="tabel-kinerja-bsu"></tbody>
                 </table>
             </div>
         </div>
@@ -1113,42 +1153,6 @@
             </div>
         </div>
     </div>
-    
-    <div id="kinerja" class="tab-content" style="display:none;">
-        <div class="card p-4 p-md-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="m-0 fw-bold" style="color: var(--primary-dark);">Papan Peringkat & Evaluasi Cabang</h4>
-                    <span class="app-subtitle">Pemantauan Aktivitas Unit Secara Real-Time</span>
-                </div>
-                <button class="btn btn-outline-primary" onclick="updateMonitorBSU()"><i class="bi bi-arrow-clockwise me-2"></i>Refresh Kinerja</button>
-            </div>
-            
-            <div class="alert mb-4" style="background: rgba(234, 88, 12, 0.05); border: 1px solid rgba(234, 88, 12, 0.2); border-radius: 12px; font-size: 0.9rem;">
-                <i class="bi bi-traffic-light-fill me-2 text-warning fs-5"></i> <strong>Indikator Keaktifan:</strong> 
-                <span class="badge bg-success bg-opacity-25 text-success border border-success mx-1">Aktif</span> (Terdapat transaksi &lt; 30 hari), 
-                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning mx-1">Peringatan</span> (Vakum 1-3 bulan), 
-                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger mx-1">Kritis</span> (Vakum &gt; 3 bulan).
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="text-center">Peringkat</th>
-                            <th>Identitas BSU</th>
-                            <th class="text-center">Status (Traffic Light)</th>
-                            <th class="text-end">Total Volume Masuk</th>
-                            <th class="text-end">Frekuensi Mutasi</th>
-                            <th>Tgl Terakhir Aktif</th>
-                            <th class="text-center">Aksi Binaan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-kinerja-bsu"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>   
 
     <div id="laporan" class="tab-content" style="display:none;">
         <div class="card p-4 p-md-5">
@@ -1349,6 +1353,11 @@
             dataNasabah = [...masterNasabah]; 
             dataTransaksi = [...masterTransaksi];
 
+            // Muat Filter Pantau BSU
+            if(CURRENT_ROLE === 'BSI') {
+                updateDropdownFilterUnit();
+            }
+
             dataTransaksi.forEach(t => {
                 if (typeof t.tgl === 'string' && t.tgl.includes('T') && t.tgl.includes('Z')) {
                     let pisah = t.tgl.split('T');
@@ -1412,6 +1421,57 @@
         pesan += `Salam,\n*Admin DLH* ♻️`;
 
         window.open(`https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`, '_blank');
+    }
+
+    // ========================================================
+    // LOGIKA FILTER PANTAU BSU
+    // ========================================================
+    function updateDropdownFilterUnit() {
+        let sel = document.getElementById('filterUnitBSI');
+        if(!sel) return;
+        sel.innerHTML = '<option value="SEMUA">-- Tampilkan Semua BSU (Mode Induk) --</option>';
+        
+        masterNasabah.forEach(n => {
+            sel.innerHTML += `<option value="${n.nama}">${n.nama} (${n.id})</option>`;
+        });
+    }
+
+    function terapkanFilterUnitPantau() {
+        let namaDipilih = document.getElementById('filterUnitBSI').value;
+        
+        if (namaDipilih === "SEMUA") {
+            dataNasabah = [...masterNasabah];      
+            dataTransaksi = [...masterTransaksi];
+            
+            document.getElementById('lbl-judul-trx').innerText = "Total Transaksi";
+            document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Mutasi Operasional BSI';
+            document.getElementById('lbl-judul-mitra').innerText = "Mitra BSU Aktif";
+            document.getElementById('lbl-sub-mitra').innerHTML = '<i class="bi bi-shield-check me-2"></i> Jaringan Unit Binaan';
+            document.getElementById('lbl-judul-saldo').innerText = "Liabilitas Saldo BSU";
+            document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-bank me-2"></i> Total Hutang Mengendap';
+        } else {
+            dataNasabah = masterNasabah.filter(n => String(n.nama) === String(namaDipilih));
+            dataTransaksi = masterTransaksi.filter(t => String(t.nama) === String(namaDipilih));
+            
+            document.getElementById('lbl-judul-trx').innerText = "Transaksi Unit";
+            document.getElementById('lbl-sub-trx').innerHTML = '<i class="bi bi-activity me-2"></i> Aktivitas BSU Terpilih';
+            document.getElementById('lbl-judul-mitra').innerText = "Profil Unit";
+            document.getElementById('lbl-sub-mitra').innerHTML = '<i class="bi bi-person-lines-fill me-2"></i> Detail BSU';
+            document.getElementById('lbl-judul-saldo').innerText = "Kewajiban Saldo";
+            document.getElementById('lbl-sub-saldo').innerHTML = '<i class="bi bi-wallet2 me-2"></i> Saldo Hak BSU Terpilih';
+        }
+        
+        updateTabelNasabah(); 
+        updateDropdownNasabah('pilihNasabah'); 
+        if(document.getElementById('pilihNasabahSaldo')) updateDropdownNasabah('pilihNasabahSaldo');
+        updateDashboard();
+        updateGrafikVisual();
+        updateBukuBesar(); 
+        updateLaporan();
+        updateMonitorBSU();
+
+        // Pindah ke tab dashboard untuk memperlihatkan hasilnya
+        showTab('dashboard', document.querySelector('.dashboard-tab'));
     }
 
     // ========================================================
