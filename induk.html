@@ -261,6 +261,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                     <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
+                    <li class="nav-link nav-btn" onclick="showTab('monitor', this)"><i class="bi bi-activity me-2"></i>Pantau BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-truck-flatbed me-2"></i>Penerimaan BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-bank me-2"></i>Rekening BSU</li>
@@ -1611,7 +1612,7 @@
         let nama = document.getElementById('pilihNasabah').value; let selSampah = document.getElementById('pilihSampah');
         if (!nama || selSampah.value === "") return alert("Harap lengkapi form!");
         let jenisSampah = selSampah.options[selSampah.selectedIndex].text; let harga = parseInt(selSampah.value); let berat = parseFloat(document.getElementById('beratSampah').value);
-        let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + tgl.getMinutes().toString().padStart(2, '0');
+        let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         let jenisBersih = jenisSampah.split(' (')[0]; 
         let formData = new URLSearchParams();
         formData.append('action', 'tambahTransaksi'); 
