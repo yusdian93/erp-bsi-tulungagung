@@ -1588,120 +1588,126 @@
     function muatDashboardPantauBSU() {
         let idDipilih = document.getElementById('filterUnitBSI').value;
         let areaHasil = document.getElementById('area-hasil-pantau');
+        let judulArea = document.getElementById('judul-pantau-bsu');
         
         if (idDipilih === "") {
             areaHasil.style.display = 'none';
             return;
         }
 
+        // 1. Tampilkan area hasil dan ubah ke mode Loading (Mencegah layar beku)
         areaHasil.style.display = 'block';
-
-        // Cari data BSU yang dipilih
-        let bsuTerpilih = masterNasabah.find(n => String(n.id) === String(idDipilih));
-        let namaBsu = bsuTerpilih ? bsuTerpilih.nama : idDipilih;
-
-        document.getElementById('judul-pantau-bsu').innerText = "BANK SAMPAH UNIT " + namaBsu.toUpperCase();
-
-        // 1. Ambil transaksi mentah murni milik nasabahnya BSU ini 
-        let trxBsuIni = masterTransaksi.filter(t => String(t.nama).trim() === String(namaBsu));
+        judulArea.innerHTML = `<span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Sedang Menarik Data...`;
         
-        // 2. Kalkulasi Metrik Dasbor BSU
-        document.getElementById('pantau-nasabah').innerText = "Simulasi"; 
-        document.getElementById('pantau-transaksi').innerText = trxBsuIni.length;
+        document.getElementById('pantau-nasabah').innerText = "Memuat..."; 
+        document.getElementById('pantau-transaksi').innerText = "Memuat...";
+        document.getElementById('pantau-rupiah').innerText = "Memuat...";
+        document.getElementById('pantau-sampah').innerText = "Memuat...";
+        document.getElementById('pantau-komposisi-sampah').innerHTML = `<div class="col-12 text-center py-5 text-muted"><span class="spinner-border spinner-border-sm text-muted me-2" role="status"></span>Menganalisis komposisi material...</div>`;
 
-        let totalRupiah = 0;
-        let totalBerat = 0;
-        let komposisiData = {};
+        // 2. Gunakan setTimeout agar browser tidak "hang" saat memproses data besar
+        setTimeout(() => {
+            // Cari data BSU yang dipilih
+            let bsuTerpilih = masterNasabah.find(n => String(n.id) === String(idDipilih));
+            let namaBsu = bsuTerpilih ? bsuTerpilih.nama : idDipilih;
 
-        // OPTIMASI 1: Pembuatan Kamus Kategori (Hash Map) untuk akses O(1)
-        let kamusKategori = {};
-        dataKategori.forEach(k => {
-            kamusKategori[k.nama_kategori] = k.jenis_material;
-        });
-
-        trxBsuIni.forEach(t => {
-            totalRupiah += t.total; 
-            if (t.jenis !== 'Penarikan Tunai') {
-                totalBerat += t.berat;
-                
-                // Mengambil nilai dari kamus secara instan
-                let jenisKategori = kamusKategori[t.jenis] ? kamusKategori[t.jenis] : 'Lainnya';
-                let namaMaterialSpesifik = t.jenis;
-
-                if(!komposisiData[jenisKategori]) {
-                    komposisiData[jenisKategori] = { total: 0, rincian: {} };
-                }
-                komposisiData[jenisKategori].total += t.berat;
-                if(!komposisiData[jenisKategori].rincian[namaMaterialSpesifik]) {
-                    komposisiData[jenisKategori].rincian[namaMaterialSpesifik] = 0;
-                }
-                komposisiData[jenisKategori].rincian[namaMaterialSpesifik] += t.berat;
-            }
-        });
-
-        document.getElementById('pantau-rupiah').innerText = 'Rp ' + totalRupiah.toLocaleString('id-ID');
-        document.getElementById('pantau-sampah').innerText = totalBerat.toFixed(1) + ' Kg';
-
-        // 3. Render Infografis Komposisi
-        let areaKomposisi = document.getElementById('pantau-komposisi-sampah');
-        areaKomposisi.innerHTML = '';
-        
-        let warnaArray = ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6'];
-
-        if(Object.keys(komposisiData).length === 0) {
-            areaKomposisi.innerHTML = `<div class="col-12 text-center py-4" style="color: #64748b;">Belum ada volume material masuk untuk dianalisis.</div>`;
-        } else {
-            let sortedKomposisi = Object.entries(komposisiData).sort((a, b) => b[1].total - a[1].total);
+            // Filter transaksi spesifik BSU
+            let trxBsuIni = masterTransaksi.filter(t => String(t.nama).trim() === String(namaBsu));
             
-            // OPTIMASI 2: Menggunakan DocumentFragment / Buffer HTML
-            let htmlBuffer = '';
+            // Kalkulasi
+            let totalRupiah = 0;
+            let totalBerat = 0;
+            let komposisiData = {};
 
-            sortedKomposisi.forEach(([jenisBesar, dataBesar], index) => {
-                let persentaseUtama = totalBerat > 0 ? ((dataBesar.total / totalBerat) * 100).toFixed(1) : 0;
-                let warna = warnaArray[index % warnaArray.length];
-                let rincianHtml = '';
-                let sortedRincian = Object.entries(dataBesar.rincian).sort((a, b) => b[1] - a[1]);
-                
-                sortedRincian.forEach(([namaSub, beratSub]) => {
-                    let persenSub = dataBesar.total > 0 ? ((beratSub / dataBesar.total) * 100).toFixed(1) : 0;
-                    rincianHtml += `
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.82rem;">
-                                <span style="color: #cbd5e1;"><i class="bi bi-arrow-return-right me-1" style="color: ${warna}; opacity: 0.8;"></i> ${namaSub}</span>
-                                <span style="color: #94a3b8; font-weight: 600;">${beratSub.toFixed(1)} Kg <small style="opacity: 0.7; font-weight: 400;">(${persenSub}%)</small></span>
+            // Kamus data untuk mempercepat pencarian (O(1) lookup)
+            let kamusKategori = {};
+            dataKategori.forEach(k => { kamusKategori[k.nama_kategori] = k.jenis_material; });
+
+            trxBsuIni.forEach(t => {
+                totalRupiah += t.total; 
+                if (t.jenis !== 'Penarikan Tunai') {
+                    totalBerat += t.berat;
+                    
+                    let jenisKategori = kamusKategori[t.jenis] ? kamusKategori[t.jenis] : 'Lainnya';
+                    let namaMaterialSpesifik = t.jenis;
+
+                    if(!komposisiData[jenisKategori]) {
+                        komposisiData[jenisKategori] = { total: 0, rincian: {} };
+                    }
+                    komposisiData[jenisKategori].total += t.berat;
+                    
+                    if(!komposisiData[jenisKategori].rincian[namaMaterialSpesifik]) {
+                        komposisiData[jenisKategori].rincian[namaMaterialSpesifik] = 0;
+                    }
+                    komposisiData[jenisKategori].rincian[namaMaterialSpesifik] += t.berat;
+                }
+            });
+
+            // 3. Tampilkan hasil kalkulasi ke Dasbor BSU
+            judulArea.innerText = "BANK SAMPAH UNIT " + namaBsu.toUpperCase();
+            document.getElementById('pantau-nasabah').innerText = "Simulasi"; // Bisa disesuaikan jika data nasabah ditarik per BSU
+            document.getElementById('pantau-transaksi').innerText = trxBsuIni.length.toLocaleString('id-ID');
+            document.getElementById('pantau-rupiah').innerText = 'Rp ' + totalRupiah.toLocaleString('id-ID');
+            document.getElementById('pantau-sampah').innerText = totalBerat.toFixed(1) + ' Kg';
+
+            // 4. Render Infografis Komposisi dengan String Builder (Cepat, tanpa DOM thrashing)
+            let warnaArray = ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6'];
+            let areaKomposisi = document.getElementById('pantau-komposisi-sampah');
+            
+            if(Object.keys(komposisiData).length === 0) {
+                areaKomposisi.innerHTML = `<div class="col-12 text-center py-4" style="color: #64748b;">Belum ada volume material masuk untuk dianalisis.</div>`;
+            } else {
+                let sortedKomposisi = Object.entries(komposisiData).sort((a, b) => b[1].total - a[1].total);
+                let htmlBuffer = ''; // Penampung HTML sementara agar tidak berat
+
+                sortedKomposisi.forEach(([jenisBesar, dataBesar], index) => {
+                    let persentaseUtama = totalBerat > 0 ? ((dataBesar.total / totalBerat) * 100).toFixed(1) : 0;
+                    let warna = warnaArray[index % warnaArray.length];
+                    let rincianHtml = '';
+                    let sortedRincian = Object.entries(dataBesar.rincian).sort((a, b) => b[1] - a[1]);
+                    
+                    sortedRincian.forEach(([namaSub, beratSub]) => {
+                        let persenSub = dataBesar.total > 0 ? ((beratSub / dataBesar.total) * 100).toFixed(1) : 0;
+                        rincianHtml += `
+                            <div class="mt-3">
+                                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.82rem;">
+                                    <span style="color: #cbd5e1;"><i class="bi bi-arrow-return-right me-1" style="color: ${warna}; opacity: 0.8;"></i> ${namaSub}</span>
+                                    <span style="color: #94a3b8; font-weight: 600;">${beratSub.toFixed(1)} Kg <small style="opacity: 0.7; font-weight: 400;">(${persenSub}%)</small></span>
+                                </div>
+                                <div class="progress" style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;">
+                                    <div class="progress-bar" style="width: ${persenSub}%; background-color: ${warna}; opacity: 0.7; border-radius: 2px; transition: width 0.8s ease-out;"></div>
+                                </div>
                             </div>
-                            <div class="progress" style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;">
-                                <div class="progress-bar" style="width: ${persenSub}%; background-color: ${warna}; opacity: 0.7; border-radius: 2px; transition: width 0.8s ease-out;"></div>
+                        `;
+                    });
+
+                    htmlBuffer += `
+                        <div class="col-12 col-md-6 col-xl-4 d-flex">
+                            <div class="composition-item w-100 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-end mb-2">
+                                    <div class="fw-bold" style="color: #e2e8f0; font-size: 1.05rem; letter-spacing: 0.5px;">${jenisBesar}</div>
+                                    <div class="text-end">
+                                        <span style="color: ${warna}; font-weight: 800; font-size: 1.25rem;">${dataBesar.total.toFixed(1)} Kg</span>
+                                        <span style="color: #94a3b8; font-size: 0.85rem; margin-left: 5px;">(${persentaseUtama}%)</span>
+                                    </div>
+                                </div>
+                                <div class="progress-container-bsu mb-2">
+                                    <div class="progress-bar-ai" style="width: ${persentaseUtama}%; background: linear-gradient(90deg, transparent, ${warna});"></div>
+                                </div>
+                                
+                                <div class="mt-auto pt-3" style="border-top: 1px dashed rgba(255,255,255,0.15);">
+                                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Breakdown Material:</div>
+                                    ${rincianHtml}
+                                </div>
                             </div>
                         </div>
                     `;
                 });
-
-                htmlBuffer += `
-                    <div class="col-12 col-md-6 col-xl-4 d-flex">
-                        <div class="composition-item w-100 d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-end mb-2">
-                                <div class="fw-bold" style="color: #e2e8f0; font-size: 1.05rem; letter-spacing: 0.5px;">${jenisBesar}</div>
-                                <div class="text-end">
-                                    <span style="color: ${warna}; font-weight: 800; font-size: 1.25rem;">${dataBesar.total.toFixed(1)} Kg</span>
-                                    <span style="color: #94a3b8; font-size: 0.85rem; margin-left: 5px;">(${persentaseUtama}%)</span>
-                                </div>
-                            </div>
-                            <div class="progress-container-bsu mb-2">
-                                <div class="progress-bar-ai" style="width: ${persentaseUtama}%; background: linear-gradient(90deg, transparent, ${warna});"></div>
-                            </div>
-                            
-                            <div class="mt-auto pt-3" style="border-top: 1px dashed rgba(255,255,255,0.15);">
-                                <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Breakdown Material:</div>
-                                ${rincianHtml}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            // Terapkan ke DOM satu kali saja
-            areaKomposisi.innerHTML = htmlBuffer;
-        }
+                
+                // Pasang HTML secara serentak ke layar (Optimal)
+                areaKomposisi.innerHTML = htmlBuffer;
+            }
+        }, 150); // Jeda 150 milidetik agar tampilan loading sempat tergambar oleh browser
     }
 
 
