@@ -82,7 +82,7 @@
                 <label style="font-weight: 700; color: #0F172A; font-size: 0.85rem; margin-bottom: 8px;">ID Pengguna / No. Registrasi BSU</label>
                 <div class="input-group">
                     <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
-                    <input type="text" id="username" class="form-control border-start-0 ps-0" placeholder="Cth: admin atau NSB-123..." required>
+                    <input type="text" id="username" class="form-control border-start-0 ps-0" placeholder="Cth: admin atau BSU-123..." required>
                 </div>
             </div>
 
@@ -106,53 +106,41 @@
     </div>
 
     <script>
-        // URL Script Google Sheets
+        // PASTIKAN URL INI SAMA DENGAN HASIL DEPLOY APPS SCRIPT ANDA
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxyobiaV3dZFb7D8uEKFJYdFEe5ujxKtLGX-4UMnPpfE3IZOW64HjCMVh-83-6yLLVgag/exec';
 
-// Fungsi untuk mengaktifkan tombol intip sandi
         function lihatSandi(inputId, iconId) {
             let input = document.getElementById(inputId);
             let icon = document.getElementById(iconId);
             if (input.type === "password") {
                 input.type = "text";
                 icon.classList.remove("bi-eye-slash-fill");
-                icon.classList.add("bi-eye-fill"); // Ikon mata terbuka
+                icon.classList.add("bi-eye-fill"); 
             } else {
                 input.type = "password";
                 icon.classList.remove("bi-eye-fill");
-                icon.classList.add("bi-eye-slash-fill"); // Ikon mata tercoret
+                icon.classList.add("bi-eye-slash-fill"); 
             }
         }        
 
-
-
-
-function prosesLogin(event) {
-            // Perintah ini WAJIB ada untuk mencegah halaman me-refresh (mental)
+        function prosesLogin(event) {
             event.preventDefault();
             
             let user = document.getElementById('username').value.trim();
             let pass = document.getElementById('password').value.trim();
             let btnSubmit = document.getElementById('btnSubmit');
 
-            // Ubah efek visual tombol menjadi "Loading"
             let originalText = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memeriksa Database...';
 
-            // Menarik data dari Google Sheets (termasuk data Sandi Admin)
             fetch(scriptURL + "?role=BSI&id_unit=") 
                 .then(response => response.json())
                 .then(data => {
-                    
-                    // ==========================================
-                    // CEK 1: APAKAH INI ADMIN PUSAT (BSI) ?
-                    // ==========================================
-                    // Jika di Google Sheets kosong, gunakan 'admin' sebagai cadangan
+                    // CEK 1: ADMIN PUSAT (BSI)
                     let idAdminAsli = data.admin_user ? String(data.admin_user).trim() : 'admin';
                     let passAdminAsli = data.admin_pass ? String(data.admin_pass).trim() : 'admin123';
 
-                    // toLowerCase() membuat login kebal terhadap salah ketik huruf besar/kecil di ID
                     if (user.toLowerCase() === idAdminAsli.toLowerCase()) {
                         if (pass === passAdminAsli) {
                             localStorage.setItem('ROLE_PENGGUNA', 'BSI');
@@ -161,14 +149,12 @@ function prosesLogin(event) {
                         } else {
                             alert('Akses Ditolak: Kata Sandi Admin Pusat salah!');
                         }
-                        return; // Hentikan script jika masuk sebagai admin
+                        return; 
                     }
 
-                    // ==========================================
-                    // CEK 2: APAKAH INI PENGURUS UNIT (BSU) ?
-                    // ==========================================
-                    let dataNasabah = data.nasabah || [];
-                    let bsuDitemukan = dataNasabah.find(n => String(n.id).trim().toLowerCase() === user.toLowerCase());
+                    // CEK 2: PENGURUS UNIT (BSU)
+                    let dataBSU = data.nasabah || [];
+                    let bsuDitemukan = dataBSU.find(n => String(n.id).trim().toLowerCase() === user.toLowerCase());
 
                     if (bsuDitemukan) {
                         if (String(bsuDitemukan.password).trim() === pass) {
@@ -180,16 +166,14 @@ function prosesLogin(event) {
                             alert('Akses Ditolak: Kata Sandi untuk BSU tersebut salah!');
                         }
                     } else {
-                        // Jika bukan admin dan bukan BSU
                         alert('Akses Ditolak: ID Pengguna tidak terdaftar dalam sistem!');
                     }
                 })
                 .catch(error => {
                     console.error("Terjadi Kesalahan:", error);
-                    alert('Gagal terhubung ke Server Database. Pastikan Anda sudah mendeploy versi baru di Apps Script.');
+                    alert('Gagal terhubung ke Server Database. Pastikan Apps Script sudah di-deploy.');
                 })
                 .finally(() => {
-                    // Mengembalikan tombol kembali seperti semula
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = originalText;
                 });
