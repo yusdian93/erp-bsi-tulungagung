@@ -10,153 +10,57 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <style>
-        /* Efek Hover untuk Card Metrik Residu */
-        .card-metrik:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.1) !important;
-        }
-
+        .card-metrik:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(15, 23, 42, 0.1) !important; }
         :root {
-            /* TEMA BARU: OCEAN ENTERPRISE (B2B CORPORATE) */
-            --primary-dark: #0F172A; /* Slate 900 - Biru Dongker Kehitaman */
-            --primary-main: #0284C7; /* Sky 600 - Biru Samudra Profesional */
-            --primary-light: #E0F2FE; /* Sky 100 - Biru Halus */
-            --bg-color: #94A3B8; /* Slate 400 - Abu-abu Metalik */
-            --text-main: #0F172A; /* Warna teks utama gelap */
-            --text-muted: #475569; /* Warna teks sekunder (Slate 600) */
-            
-            /* TEMA KACA BURAM (GLASSMORPHISM) LEBIH SOLID & BERSIH */
-            --card-bg: rgba(255, 255, 255, 0.90); 
-            --border-color: rgba(255, 255, 255, 0.8); 
-            
-            --whatsapp-green: #25D366; 
-            --whatsapp-dark: #128C7E;
+            --primary-dark: #0F172A; --primary-main: #0284C7; --primary-light: #E0F2FE; 
+            --bg-color: #94A3B8; --text-main: #0F172A; --text-muted: #475569; 
+            --card-bg: rgba(255, 255, 255, 0.90); --border-color: rgba(255, 255, 255, 0.8); 
+            --whatsapp-green: #25D366; --whatsapp-dark: #128C7E;
         }
-
-        body { 
-            background: linear-gradient(135deg, #CBD5E1 0%, #94A3B8 100%); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            color: var(--text-main); 
-            -webkit-font-smoothing: antialiased;
-            min-height: 100vh;
-        }
-
-        /* NAVBAR FRESH, ELEGANT & MODERN (ICE BLUE) */
+        body { background: linear-gradient(135deg, #CBD5E1 0%, #94A3B8 100%); font-family: 'Plus Jakarta Sans', sans-serif; color: var(--text-main); min-height: 100vh; }
         .nav-wrapper { padding: 20px; position: sticky; top: 0; z-index: 1000; }
-        
-        .navbar { 
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(224, 242, 254, 0.9) 100%); 
-            backdrop-filter: blur(24px); 
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 20px; 
-            box-shadow: 0 15px 35px rgba(2, 132, 199, 0.12); 
-            padding: 14px 24px; 
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-bottom: 2px solid rgba(2, 132, 199, 0.15); 
-        }
-        
+        .navbar { background: linear-gradient(135deg, rgba(255, 255, 255, 0.65) 0%, rgba(224, 242, 254, 0.9) 100%); backdrop-filter: blur(24px); border-radius: 20px; box-shadow: 0 15px 35px rgba(2, 132, 199, 0.12); padding: 14px 24px; border: 1px solid rgba(255, 255, 255, 0.9); border-bottom: 2px solid rgba(2, 132, 199, 0.15); }
         .navbar-brand { font-weight: 800; letter-spacing: -0.5px; color: var(--primary-dark) !important; font-size: 1.25rem; }
-        
-        .nav-link { 
-            color: #475569 !important; 
-            font-weight: 700; 
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
-            padding: 10px 14px !important; 
-            border-radius: 12px; 
-            margin: 4px 2px; 
-            font-size: 0.85rem; 
-            cursor: pointer; 
-            white-space: nowrap; 
-        }
-        
-        .nav-link:hover { 
-            color: #0284c7 !important; 
-            background: rgba(255, 255, 255, 0.9); 
-            transform: translateY(-2px); 
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04); 
-        }
-        
-        .nav-link.active-tab { 
-            color: #ffffff !important; 
-            background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; 
-            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3) !important; 
-            transform: translateY(-2px); 
-        }
-        
+        .nav-link { color: #475569 !important; font-weight: 700; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); padding: 10px 14px !important; border-radius: 12px; margin: 4px 2px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; }
+        .nav-link:hover { color: #0284c7 !important; background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04); }
+        .nav-link.active-tab { color: #ffffff !important; background: linear-gradient(135deg, #0ea5e9, #0284c7) !important; box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3) !important; transform: translateY(-2px); }
         .nav-link.rekap-tab { border: 1px solid rgba(234, 88, 12, 0.3) !important; color: #ea580c !important; background: rgba(255, 255, 255, 0.6); }
         .nav-link.rekap-tab:hover { background: #fff7ed !important; color: #c2410c !important; border-color: #ea580c !important;}
         .nav-link.rekap-tab.active-tab { background: linear-gradient(135deg, #f97316, #ea580c) !important; color: #ffffff !important; border: none !important; box-shadow: 0 8px 20px rgba(234, 88, 12, 0.3) !important; }
-        
         .nav-link.dashboard-tab { border: 1px solid rgba(5, 150, 105, 0.2) !important; color: #059669 !important; background: rgba(255, 255, 255, 0.6); }
         .nav-link.dashboard-tab:hover { background: #ecfdf5 !important; color: #047857 !important; border-color: #059669 !important;}
         .nav-link.dashboard-tab.active-tab { background: linear-gradient(135deg, #10b981, #059669) !important; color: #ffffff !important; border: none !important; box-shadow: 0 8px 20px rgba(5, 150, 105, 0.3) !important; }
-
-        .card { 
-            border-radius: 24px; background: var(--card-bg) !important; 
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06) !important; 
-            border: 1px solid var(--border-color) !important; margin-top: 25px; transition: 0.3s; 
-        }
+        .card { border-radius: 24px; background: var(--card-bg) !important; backdrop-filter: blur(20px); box-shadow: 0 15px 35px rgba(15, 23, 42, 0.06) !important; border: 1px solid var(--border-color) !important; margin-top: 25px; transition: 0.3s; }
         .card:hover { box-shadow: 0 20px 40px rgba(15, 23, 42, 0.1) !important; }
-        
-        .stat-box { 
-            background: rgba(255, 255, 255, 0.6) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border: 1px solid var(--border-color) !important; border-radius: 20px; padding: 24px; position: relative; overflow: hidden; transition: 0.3s; 
-        }
+        .stat-box { background: rgba(255, 255, 255, 0.6) !important; backdrop-filter: blur(12px); border: 1px solid var(--border-color) !important; border-radius: 20px; padding: 24px; position: relative; overflow: hidden; transition: 0.3s; }
         .stat-box::before { content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: var(--primary-main); border-radius: 20px 0 0 20px; }
         .stat-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         .stat-value { font-size: 2rem; font-weight: 800; color: var(--text-main); margin-top: 8px; letter-spacing: -1px; }
-        .stat-value.text-green { color: var(--primary-main); }
-        
-        .form-control, .form-select { 
-            border-radius: 14px; padding: 14px 18px; background-color: rgba(255, 255, 255, 0.8) !important; 
-            backdrop-filter: blur(8px); border: 1px solid #CBD5E1 !important;
-            font-size: 0.95rem; font-weight: 500; color: var(--text-main); 
-        }
+        .form-control, .form-select { border-radius: 14px; padding: 14px 18px; background-color: rgba(255, 255, 255, 0.8) !important; backdrop-filter: blur(8px); border: 1px solid #CBD5E1 !important; font-size: 0.95rem; font-weight: 500; }
         .form-control:focus, .form-select:focus { background-color: #ffffff !important; border-color: var(--primary-main); box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15); }
         label { font-weight: 600; color: var(--text-main); margin-bottom: 10px; font-size: 0.9rem; }
-        
         .btn { border-radius: 14px; padding: 12px 24px; font-weight: 600; letter-spacing: 0.3px; transition: 0.3s; }
-        .btn-success, .btn-primary { 
-            background: linear-gradient(135deg, var(--primary-main), var(--primary-dark)) !important; 
-            border: none !important; 
-            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.25) !important; 
-            color: white !important;
-        }
-        .btn-success:hover, .btn-primary:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 12px 20px rgba(2, 132, 199, 0.35) !important; 
-        }
-        
+        .btn-success, .btn-primary { background: linear-gradient(135deg, var(--primary-main), var(--primary-dark)) !important; border: none !important; box-shadow: 0 8px 16px rgba(2, 132, 199, 0.25) !important; color: white !important; }
+        .btn-success:hover, .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 20px rgba(2, 132, 199, 0.35) !important; }
         .btn-outline-danger { border: 1px solid #fee2e2; color: #ef4444; background: #fef2f2; }
-        .btn-outline-danger:hover { background: #ef4444; color: white; border-color: #ef4444; }
         .btn-outline-primary { border: 1px solid #E0F2FE; color: var(--primary-main); background: #F0F9FF; }
-        .btn-outline-primary:hover { background: var(--primary-main); color: white; border-color: var(--primary-main); }
-        .btn-outline-wa { color: var(--whatsapp-green) !important; border-color: var(--whatsapp-green) !important; background-color: transparent !important; }
-        .btn-outline-wa:hover { color: white !important; background-color: var(--whatsapp-green) !important; border-color: var(--whatsapp-green) !important; }
-        
-        .table-responsive { 
-            background: rgba(255, 255, 255, 0.6) !important; 
-            border-radius: 16px; 
-            border: 1px solid var(--border-color) !important; 
-            max-height: 450px; 
-            overflow-y: auto;  
-            overflow-x: auto;
-        }
+        .table-responsive { background: rgba(255, 255, 255, 0.6) !important; border-radius: 16px; border: 1px solid var(--border-color) !important; max-height: 450px; overflow-y: auto; overflow-x: auto; }
         .table { margin-bottom: 0; vertical-align: middle; background: transparent !important; }
-        .table thead th { 
-            position: sticky; top: 0; z-index: 2; 
-            background-color: #F8FAFC !important; 
-            color: var(--text-muted); font-weight: 700; 
-            border-bottom: 1px solid var(--border-color) !important; 
-            font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 16px; 
-        }
+        .table thead th { position: sticky; top: 0; z-index: 2; background-color: #F8FAFC !important; color: var(--text-muted); font-weight: 700; border-bottom: 1px solid var(--border-color) !important; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; padding: 16px; }
         .table td { padding: 16px; border-bottom: 1px solid rgba(203, 213, 225, 0.4) !important; color: var(--text-main); }
         .badge-sampah { background-color: var(--primary-light); color: var(--primary-dark); padding: 6px 12px; border-radius: 10px; font-size: 0.8rem; font-weight: 700; border: 1px solid #BAE6FD; }
-        
-        .app-title { font-weight: 800; color: #0F172A; letter-spacing: -1px; font-size: 2.2rem; text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7); margin-bottom: 5px; }
-        .app-subtitle { color: #334155; font-weight: 700; letter-spacing: 0.5px; font-size: 1rem; }
-        
+        .header-dashboard { background-color: #1e7b46; color: white; text-align: center; padding: 25px 20px; border-radius: 12px; box-shadow: 0 8px 15px rgba(30, 123, 70, 0.3); margin-bottom: 25px; position: relative; overflow: hidden; }
+        .dash-top-card { background: #fff; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; border-bottom: 4px solid #1e7b46; box-shadow: 0 4px 10px rgba(0,0,0,0.06); height: 100%; }
+        .dash-top-icon { font-size: 2.8rem; color: #1e7b46; margin-right: 15px; opacity: 0.9; }
+        .dash-top-value { font-size: 1.8rem; font-weight: 800; color: #1e7b46; line-height: 1.1; margin-bottom: 2px; }
+        .dash-top-label { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; line-height: 1.2; }
+        .ribbon-title { background-color: #1e7b46; color: white; display: inline-flex; align-items: center; padding: 10px 30px 10px 20px; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; position: relative; margin-bottom: 20px; margin-left: -20px; }
+        .dash-panel { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.06); margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        .dash-panel-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 15px; }
+        .stat-bot-card { display: flex; align-items: center; }
+        .stat-bot-icon { font-size: 3.5rem; color: #1e7b46; margin-right: 15px; }
+        .infografis-card { transition: all 0.3s; border: 1px solid rgba(226, 232, 240, 0.8); }
+        .infografis-card:hover { transform: translateY(-6px); box-shadow: 0 15px 30px rgba(2, 132, 199, 0.15) !important; border-color: rgba(2, 132, 199, 0.3); }
         #area-laporan-a4 { display: none; }
         @media print {
             body.mode-cetak * { visibility: hidden; }
@@ -169,49 +73,7 @@
             body.mode-bukubesar .card { box-shadow: none; border: 1px solid #ccc; margin-top:0; border-radius: 0; }
             @page { margin: 15mm; }
         }
-
-        /* GAYA KARTU DASBOR MODERN BSI */
-        .header-dashboard {
-            background-color: #1e7b46; color: white; text-align: center; padding: 25px 20px;
-            border-radius: 12px; box-shadow: 0 8px 15px rgba(30, 123, 70, 0.3);
-            margin-bottom: 25px; position: relative; overflow: hidden;
-        }
-        .header-dashboard::before {
-            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
-            transform: rotate(30deg); animation: shine 6s infinite linear;
-        }
-        @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
-
-        .dash-top-card { background: #fff; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; border-bottom: 4px solid #1e7b46; box-shadow: 0 4px 10px rgba(0,0,0,0.06); height: 100%; }
-        .dash-top-icon { font-size: 2.8rem; color: #1e7b46; margin-right: 15px; opacity: 0.9; }
-        .dash-top-value { font-size: 1.8rem; font-weight: 800; color: #1e7b46; line-height: 1.1; margin-bottom: 2px; }
-        .dash-top-label { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; line-height: 1.2; }
-        
-        .ribbon-title { background-color: #1e7b46; color: white; display: inline-flex; align-items: center; padding: 10px 30px 10px 20px; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; position: relative; margin-bottom: 20px; margin-left: -20px; box-shadow: 3px 3px 6px rgba(0,0,0,0.2); clip-path: polygon(0% 0%, 100% 0%, 93% 50%, 100% 100%, 0% 100%); }
-        .dash-panel { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.06); margin-bottom: 25px; border: 1px solid #e2e8f0; }
-        .dash-panel-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 15px; }
-
-        .table-dash th { background-color: #1e7b46 !important; color: white !important; font-weight: 600; text-transform: uppercase; padding: 12px; }
-        .table-dash td { padding: 12px; vertical-align: middle; border-bottom: 1px solid #e2e8f0; font-weight: 600;}
-        .table-dash tr:nth-child(even) { background-color: #f8fafc; }
-        .table-dash tr:hover { background-color: #f1f5f9; }
-
-        .stat-bot-card { display: flex; align-items: center; }
-        .stat-bot-icon { font-size: 3.5rem; color: #1e7b46; margin-right: 15px; }
-
-        /* GAYA CARD INFOGRAFIS PANTAU BSU */
-        .infografis-card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(226, 232, 240, 0.8);
-        }
-        .infografis-card:hover {
-            transform: translateY(-6px);
-            box-shadow: 0 15px 30px rgba(2, 132, 199, 0.15) !important;
-            border-color: rgba(2, 132, 199, 0.3);
-        }
     </style>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
@@ -232,10 +94,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                     <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
-                    
-                    <!-- MENU PANTAU BSU -->
                     <li class="nav-link nav-btn" onclick="showTab('pantau-bsu', this)"><i class="bi bi-bar-chart-steps me-2"></i>Pantau BSU</li>
-                    
                     <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-truck-flatbed me-2"></i>Penerimaan BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-bank me-2"></i>Rekening BSU</li>
@@ -262,685 +121,48 @@
 <div id="area-laporan-a4"></div>
 
 <div class="container pb-5">
-
-    <!-- TAMPILAN DASHBOARD INDUK -->
     <div id="dashboard" class="tab-content" style="display:block;">
-        
         <div class="header-dashboard">
             <h1 class="fw-bolder m-0" style="letter-spacing: 1px; font-size: 2.2rem; text-shadow: 1px 2px 4px rgba(0,0,0,0.3);">DASHBOARD BANK SAMPAH INDUK</h1>
-            <h6 class="mt-2 mb-0" style="letter-spacing: 3px; font-weight: 500; font-size: 0.9rem; opacity: 0.9;">PUSAT KOORDINASI UNIT BANK SAMPAH</h6>
         </div>
-
         <div class="row g-3 mb-4">
-            <div class="col-6 col-lg-3">
-                <div class="dash-top-card">
-                    <i class="bi bi-houses-fill dash-top-icon"></i>
-                    <div>
-                        <div class="dash-top-value" id="dash-total-unit">0</div>
-                        <div class="dash-top-label">Unit<br>Bank Sampah</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="dash-top-card">
-                    <i class="bi bi-truck dash-top-icon"></i>
-                    <div>
-                        <div class="dash-top-value text-dark"><span id="dash-setoran-bln" style="font-size: 1.5rem;">0 Kg</span></div>
-                        <div class="dash-top-label">Setoran<br>Bulan Ini</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="dash-top-card">
-                    <i class="bi bi-box-seam dash-top-icon" style="color: #0284c7;"></i>
-                    <div>
-                        <div class="dash-top-value text-dark"><span id="dash-total-sampah" style="font-size: 1.5rem; color: #0284c7;">0 Kg</span></div>
-                        <div class="dash-top-label">Total Sampah<br>Terkumpul</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-6 col-lg-3">
-                <div class="dash-top-card border-warning">
-                    <i class="bi bi-wallet-fill dash-top-icon text-warning"></i>
-                    <div>
-                        <div class="dash-top-value text-danger" style="font-size: 1.2rem;" id="dash-total-saldo">Rp 0</div>
-                        <div class="dash-top-label">Total Saldo<br>Seluruh Unit</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="dash-panel">
-            <div class="ribbon-title">KONTRIBUSI SETORAN PER UNIT</div>
-            <div class="dash-panel-title">5 Unit Terbesar Sepanjang Waktu (Kg)</div>
-            <div style="height: 300px; position: relative;">
-                <canvas id="grafikKontribusi"></canvas>
-            </div>
-        </div>
-
-        <div class="row g-4 mb-4">
-            <div class="col-lg-7">
-                <div class="dash-panel h-100">
-                    <div class="ribbon-title" style="background-color: #0284c7;">TREN SETORAN UNIT BANK SAMPAH</div>
-                    <div class="dash-panel-title">Dalam 6 Bulan Terakhir</div>
-                    <div style="height: 250px;">
-                        <canvas id="grafikTrenBaru"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-5">
-                <div class="dash-panel h-100">
-                    <div class="ribbon-title">DISTRIBUSI SALDO UNIT</div>
-                    <div class="dash-panel-title">Porsi Kepemilikan Hutang BSI</div>
-                    <div style="height: 250px;">
-                        <canvas id="grafikDistribusi"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="dash-panel">
-            <div class="ribbon-title">KATEGORI SAMPAH PER UNIT</div>
-            <div class="table-responsive" style="border-radius: 8px; border: none;">
-                <table class="table table-dash align-middle">
-                    <thead>
-                        <tr>
-                            <th>Unit BSU</th>
-                            <th><i class="bi bi-recycle me-1"></i> Plastik</th>
-                            <th><i class="bi bi-file-earmark-text me-1"></i> Kertas</th>
-                            <th><i class="bi bi-nut me-1"></i> Logam</th>
-                            <th><i class="bi bi-tree me-1"></i> Organik/Lain</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-kategori-unit">
-                        <tr><td colspan="5" class="text-center py-4 text-muted">Memuat data kategori unit...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="dash-panel mb-2">
-            <div class="ribbon-title" style="background-color: #0284c7;">INFO STATISTIK</div>
-            <div class="row g-4 mt-1">
-                <div class="col-md-4">
-                    <div class="stat-bot-card">
-                        <i class="bi bi-cloud-arrow-down-fill stat-bot-icon"></i>
-                        <div>
-                            <div class="text-muted fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">REDUKSI EMISI</div>
-                            <div class="fw-bolder fs-3 text-dark" id="stat-emisi">0 Kg CO2e</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-bot-card border-start ps-4">
-                        <i class="bi bi-bag-check-fill stat-bot-icon" style="color: #0284c7;"></i>
-                        <div>
-                            <div class="text-muted fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">SAMPAH TERDAUR ULANG</div>
-                            <div class="fw-bolder fs-3 text-dark" id="stat-daur-ulang" style="color: #0284c7 !important;">0 Kg</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="stat-bot-card border-start ps-4">
-                        <i class="bi bi-cash-coin stat-bot-icon text-warning"></i>
-                        <div>
-                            <div class="text-muted fw-bold" style="font-size: 0.8rem; letter-spacing: 1px;">NILAI EKONOMI UNIT</div>
-                            <div class="fw-bolder fs-4 text-danger" id="stat-ekonomi">Rp 0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <div class="col-6 col-lg-3"><div class="dash-top-card"><i class="bi bi-houses-fill dash-top-icon"></i><div><div class="dash-top-value" id="dash-total-unit">0</div><div class="dash-top-label">Unit BSU</div></div></div></div>
+            <div class="col-6 col-lg-3"><div class="dash-top-card"><i class="bi bi-truck dash-top-icon"></i><div><div class="dash-top-value"><span id="dash-setoran-bln" style="font-size: 1.5rem;">0 Kg</span></div><div class="dash-top-label">Bulan Ini</div></div></div></div>
+            <div class="col-6 col-lg-3"><div class="dash-top-card"><i class="bi bi-box-seam dash-top-icon"></i><div><div class="dash-top-value"><span id="dash-total-sampah" style="font-size: 1.5rem;">0 Kg</span></div><div class="dash-top-label">Total Sampah</div></div></div></div>
+            <div class="col-6 col-lg-3"><div class="dash-top-card border-warning"><i class="bi bi-wallet-fill dash-top-icon text-warning"></i><div><div class="dash-top-value text-danger" style="font-size: 1.2rem;" id="dash-total-saldo">Rp 0</div><div class="dash-top-label">Total Hutang</div></div></div></div>
         </div>
     </div>
 
-    <!-- HALAMAN PANTAU BSU: GRID INFOGRAFIS KARTU -->
     <div id="pantau-bsu" class="tab-content" style="display:none;">
-        <div class="card p-4 p-md-5 mt-2 mb-4" style="background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-main);">
+        <div class="card p-4 p-md-5 mt-2 mb-4">
             <div class="row align-items-center">
-                <div class="col-md-7">
-                    <h4 class="fw-bold mb-2" style="color: var(--primary-dark);"><i class="bi bi-bar-chart-steps me-2 text-primary"></i>Katalog Infografis BSU</h4>
-                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Ringkasan metrik dari seluruh Bank Sampah Unit binaan secara sekilas dan *real-time*.</p>
-                </div>
+                <div class="col-md-7"><h4 class="fw-bold mb-2"><i class="bi bi-bar-chart-steps me-2 text-primary"></i>Katalog Infografis BSU</h4></div>
                 <div class="col-md-5 mt-3 mt-md-0">
-                    <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1;">
-                        <span class="input-group-text bg-white border-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" id="cariBsuPantau" onkeyup="renderPantauBSU()" class="form-control border-0 fw-bold" placeholder="Cari nama BSU..." style="background: #fff !important;">
-                    </div>
+                    <div class="input-group shadow-sm"><span class="input-group-text bg-white"><i class="bi bi-search"></i></span><input type="text" id="cariBsuPantau" onkeyup="renderPantauBSU()" class="form-control" placeholder="Cari nama BSU..."></div>
                 </div>
             </div>
         </div>
-
-        <!-- Wadah Grid Kartu BSU -->
-        <div class="row g-4" id="grid-pantau-bsu">
-            <div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-3 text-muted fw-bold">Mengumpulkan infografis BSU...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- SEKSI MENU LAINNYA DI BAWAH INI TETAP SAMA (DIPERSINGKAT) -->
-
-    <div id="penjualan" class="tab-content" style="display:none;">
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-box-seam me-2"></i>Kirim ke Pabrik</h5>
-                    <form id="formPenjualan" onsubmit="event.preventDefault(); simpanPenjualan();">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Tanggal Kirim</label>
-                            <input type="date" class="form-control" id="pj_tgl" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nama Pembeli / Pabrik</label>
-                            <input type="text" class="form-control" id="pj_pembeli" placeholder="Cth: PT. Daur Ulang Jaya" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Jenis Material</label>
-                            <select class="form-select" id="pj_material" required>
-                                <option value="">-- Pilih Material --</option>
-                                <option value="Kardus Bekas">Kardus Bekas</option>
-                                <option value="Plastik PET">Plastik PET</option>
-                                <option value="Besi Tua">Besi Tua</option>
-                                <option value="Tembaga">Tembaga</option>
-                                <option value="Campuran">Campuran / Lainnya</option>
-                            </select>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Berat (Kg)</label>
-                                <input type="number" step="0.1" class="form-control" id="pj_berat" oninput="hitungTotalPj()" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Harga/Kg (Rp)</label>
-                                <input type="number" class="form-control" id="pj_harga" oninput="hitungTotalPj()" required>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Total Tagihan (Rp)</label>
-                            <input type="text" class="form-control fw-bold text-success bg-light" id="pj_total_tampil" readonly>
-                            <input type="hidden" id="pj_total">
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Status Pembayaran</label>
-                            <select class="form-select" id="pj_status" required>
-                                <option value="Lunas">Lunas (Kas Masuk)</option>
-                                <option value="Piutang">Piutang (Belum Dibayar)</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="btnSimpanPj"><i class="bi bi-send-check me-2"></i>Simpan & Rekam</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-8 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-receipt me-2"></i>Riwayat Penjualan & Invoice</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Pembeli / Pabrik</th>
-                                    <th>Material (Kg)</th>
-                                    <th>Total (Rp)</th>
-                                    <th>Status</th>
-                                    <th class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-penjualan">
-                                <tr><td colspan="6" class="text-center text-muted py-3">Memuat data penjualan...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> 
-
-    <div id="aset" class="tab-content" style="display:none;">
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-pc-display me-2"></i>Registrasi Aset Baru</h5>
-                    <form id="formAset" onsubmit="event.preventDefault(); simpanAset();">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nama Aset / Inventaris</label>
-                            <input type="text" class="form-control" id="as_nama" placeholder="Cth: Mesin Press Hidrolik" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Tanggal Perolehan (Beli)</label>
-                            <input type="date" class="form-control" id="as_tgl" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Harga Perolehan/Beli (Rp)</label>
-                            <input type="number" class="form-control" id="as_harga" required>
-                        </div>
-                        <div class="row mb-4">
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Umur (Bulan)</label>
-                                <input type="number" class="form-control" id="as_umur" placeholder="Cth: 60" title="Contoh: 60 bulan untuk umur 5 tahun" required>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Nilai Residu (Rp)</label>
-                                <input type="number" class="form-control" id="as_sisa" placeholder="Nilai Rongsok" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="btnSimpanAset"><i class="bi bi-save me-2"></i>Simpan ke Database</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-8 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-calculator me-2"></i>Buku Inventaris & Nilai Buku (Depresiasi)</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Nama Aset</th>
-                                    <th>Tgl Beli</th>
-                                    <th>Harga Beli</th>
-                                    <th>Penyusutan/Bulan</th>
-                                    <th>Nilai Buku Saat Ini</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-aset">
-                                <tr><td colspan="5" class="text-center text-muted py-3">Memuat data aset...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="produksi" class="tab-content" style="display:none;">
-        <div class="row">
-            <div class="col-lg-4 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-funnel-fill me-2"></i>Input Proses Produksi</h5>
-                    <form id="formProduksi" onsubmit="event.preventDefault(); simpanProduksi();">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Tanggal Proses</label>
-                            <input type="date" class="form-control" id="pr_tgl" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nama Proses</label>
-                            <select class="form-select" id="pr_proses" required>
-                                <option value="">-- Pilih Jenis Proses --</option>
-                                <option value="In-Vessel Composting">In-Vessel Composting</option>
-                                <option value="Pembuatan Biochar">Pembuatan Biochar</option>
-                                <option value="Pencacahan Plastik">Pencacahan Plastik</option>
-                            </select>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-7">
-                                <label class="form-label small fw-bold text-muted">Bahan Baku Mentah</label>
-                                <input type="text" class="form-control" id="pr_bahan" placeholder="Cth: Sampah Organik" required>
-                            </div>
-                            <div class="col-5">
-                                <label class="form-label small fw-bold text-muted">Berat (Kg)</label>
-                                <input type="number" step="0.1" class="form-control" id="pr_berat_bahan" required>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-7">
-                                <label class="form-label small fw-bold text-muted">Produk Hasil (Jadi)</label>
-                                <input type="text" class="form-control" id="pr_produk" placeholder="Cth: Pupuk Kompos" required>
-                            </div>
-                            <div class="col-5">
-                                <label class="form-label small fw-bold text-muted">Berat (Kg)</label>
-                                <input type="number" step="0.1" class="form-control" id="pr_berat_hasil" required>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Biaya Operasional / Listrik (Rp)</label>
-                            <input type="number" class="form-control" id="pr_biaya" placeholder="Total biaya untuk 1 siklus ini" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="btnSimpanProduksi"><i class="bi bi-gear-fill me-2"></i>Proses & Rekam</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-8 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-clipboard2-data-fill me-2"></i>Riwayat & Efisiensi Konversi</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tgl & Proses</th>
-                                    <th>Bahan Mentah</th>
-                                    <th></th>
-                                    <th>Produk Jadi</th>
-                                    <th>Susut Massa</th>
-                                    <th>HPP / Kg</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-produksi">
-                                <tr><td colspan="6" class="text-center text-muted py-3">Memuat data produksi...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="armada" class="tab-content" style="display:none;">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-truck me-2 text-primary"></i>Catat Rute Jemput</h5>
-                    <form id="formArmada" onsubmit="event.preventDefault(); simpanArmada();">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Tanggal Penjemputan</label>
-                            <input type="date" class="form-control" id="ar_tgl" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Armada Kendaraan</label>
-                            <select class="form-select" id="ar_kendaraan" required>
-                                <option value="">-- Pilih Armada --</option>
-                                <option value="Pick-Up AG 8822 RM">Pick-Up AG 8822 RM</option>
-                                <option value="Truk AG 9001 XY">Truk AG 9001 XY</option>
-                                <option value="Tosa Roda 3">Tosa Motor Roda 3</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nama Sopir / Driver</label>
-                            <input type="text" class="form-control" id="ar_sopir" placeholder="Nama petugas..." required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Rute / Tujuan BSU</label>
-                            <input type="text" class="form-control" id="ar_rute" placeholder="Cth: BSU Berkah, BSU Maju" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Biaya Operasional (BBM/Tol/Kuli)</label>
-                            <div class="input-group">
-                                <span class="input-group-text border-0 bg-light">Rp</span>
-                                <input type="number" class="form-control" id="ar_biaya" placeholder="0" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="bi bi-geo-alt-fill me-2"></i>Rekam Perjalanan</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-8">
-                <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-speedometer2 me-2 text-primary"></i>Dasbor Efisiensi Logistik</h5>
-                    
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <div class="card-metrik d-flex align-items-center justify-content-between" style="min-height: 100px; padding: 20px !important;">
-                                <div class="position-absolute start-0 top-0 h-100" style="width: 6px; background-color: #0284C7;"></div>
-                                <div>
-                                    <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Total Biaya Logistik</div>
-                                    <div class="fw-bolder" id="ar_tot_biaya" style="color: #0f172a; font-size: 1.8rem; letter-spacing: -1px;">Rp 0</div>
-                                </div>
-                                <i class="bi bi-fuel-pump fs-1" style="color: #bae6fd; opacity: 0.8;"></i>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card-metrik d-flex align-items-center justify-content-between" style="min-height: 100px; padding: 20px !important;">
-                                <div class="position-absolute start-0 top-0 h-100" style="width: 6px; background-color: #0284C7;"></div>
-                                <div>
-                                    <div class="fw-bold mb-1" style="color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Frekuensi Rute (Trip)</div>
-                                    <div class="fw-bolder" id="ar_tot_trip" style="color: #0f172a; font-size: 1.8rem; letter-spacing: -1px;">0 Trip</div>
-                                </div>
-                                <i class="bi bi-map fs-1" style="color: #bae6fd; opacity: 0.8;"></i>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Armada & Sopir</th>
-                                    <th>Rute Jemput (BSU)</th>
-                                    <th class="text-end">Biaya (Rp)</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-armada">
-                                <tr><td colspan="4" class="text-center text-muted py-4">Sistem sedang memuat log perjalanan...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="kinerja" class="tab-content" style="display:none;">
-        <div class="card p-4 p-md-5">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="m-0 fw-bold" style="color: var(--primary-dark);">Papan Peringkat & Evaluasi Cabang</h4>
-                    <span class="app-subtitle">Pemantauan Aktivitas Unit Secara Real-Time</span>
-                </div>
-                <button class="btn btn-outline-primary" onclick="updateMonitorBSU()"><i class="bi bi-arrow-clockwise me-2"></i>Refresh Kinerja</button>
-            </div>
-            
-            <div class="alert mb-4" style="background: rgba(234, 88, 12, 0.05); border: 1px solid rgba(234, 88, 12, 0.2); border-radius: 12px; font-size: 0.9rem;">
-                <i class="bi bi-traffic-light-fill me-2 text-warning fs-5"></i> <strong>Indikator Keaktifan:</strong> 
-                <span class="badge bg-success bg-opacity-25 text-success border border-success mx-1">Aktif</span> (Terdapat transaksi &lt; 30 hari), 
-                <span class="badge bg-warning bg-opacity-25 text-warning border border-warning mx-1">Peringatan</span> (Vakum 1-3 bulan), 
-                <span class="badge bg-danger bg-opacity-25 text-danger border border-danger mx-1">Kritis</span> (Vakum &gt; 3 bulan).
-            </div>
-
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="text-center">Peringkat</th>
-                            <th>Identitas BSU</th>
-                            <th class="text-center">Status (Traffic Light)</th>
-                            <th class="text-end">Total Volume Masuk</th>
-                            <th class="text-end">Frekuensi Mutasi</th>
-                            <th>Tgl Terakhir Aktif</th>
-                            <th class="text-center">Aksi Binaan</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabel-kinerja-bsu"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>   
-
-    <div id="qc" class="tab-content" style="display:none;">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-clipboard2-x me-2" style="color: #b45309;"></i>Input Hasil Sortir (QC)</h5>
-                    <form id="formQC" onsubmit="event.preventDefault(); simpanQC();">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Tanggal Sortir</label>
-                            <input type="date" class="form-control" id="qc_tgl" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Asal BSU (Pengirim)</label>
-                            <select class="form-select" id="qc_bsu" required>
-                                <option value="">-- Pilih Unit BSU --</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Material Disortir</label>
-                            <input type="text" class="form-control" id="qc_material" placeholder="Cth: Kardus Bekas" required>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Berat Awal Masuk</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control" id="qc_berat_kotor" required>
-                                    <span class="input-group-text bg-light border-0">Kg</span>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <label class="form-label small fw-bold text-muted">Berat Bersih (Real)</label>
-                                <div class="input-group">
-                                    <input type="number" step="0.1" class="form-control" id="qc_berat_bersih" required>
-                                    <span class="input-group-text bg-light border-0">Kg</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Keterangan / Temuan</label>
-                            <select class="form-select" id="qc_keterangan" required>
-                                <option value="Kondisi Basah (Kandungan Air)">Kondisi Basah (Kandungan Air)</option>
-                                <option value="Kotor / Bercampur Tanah">Kotor / Bercampur Tanah</option>
-                                <option value="Tercampur Residu Plastik">Tercampur Residu Plastik / Lainnya</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn text-white w-100 fw-bold py-2" style="background-color: #d97706; border-radius: 12px;"><i class="bi bi-save me-2"></i>Simpan Data QC</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-8">
-                <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-bar-chart-steps me-2" style="color: #b45309;"></i>Analitik Penyusutan Gudang</h5>
-                    <div class="alert alert-warning border-0" style="background-color: #fef3c7; color: #92400e; border-radius: 12px; font-size: 0.9rem;">
-                        <i class="bi bi-info-circle-fill me-2"></i>Modul ini menyeimbangkan valuasi aset di <b>Buku Besar</b> dengan memotong stok fisik akibat kadar air/kotoran, tanpa mengurangi saldo hutang yang harus dibayar ke BSU.
-                    </div>
-                    <div class="table-responsive mt-2">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tanggal & Asal BSU</th>
-                                    <th>Material</th>
-                                    <th class="text-center">Kotor ➔ Bersih</th>
-                                    <th>Persentase Loss</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-qc">
-                                <tr><td colspan="4" class="text-center text-muted py-4">Sistem sedang memuat log QC...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="retail" class="tab-content" style="display:none;">
-        <div class="row g-4">
-            <div class="col-lg-4">
-                <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-shop me-2 text-success"></i>Kasir Penjualan Retail</h5>
-                    <form id="formRetail" onsubmit="event.preventDefault(); simpanRetail();">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Tanggal Transaksi</label>
-                            <input type="date" class="form-control" id="rt_tgl" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nama Pembeli (Umum)</label>
-                            <input type="text" class="form-control" id="rt_pembeli" placeholder="Cth: Pak Budi / Petani Lokal" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Produk Olahan (BSI)</label>
-                            <select class="form-select" id="rt_produk" required>
-                                <option value="">-- Pilih Produk --</option>
-                                <option value="Pupuk Kompos Organik (Sak 5Kg)">Pupuk Kompos Organik (Sak 5Kg)</option>
-                                <option value="Briket Biochar (1Kg)">Briket Biochar (1Kg)</option>
-                                <option value="Cacahan Plastik Bersih (Karung)">Cacahan Plastik Bersih (Karung)</option>
-                            </select>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col-5">
-                                <label class="form-label small fw-bold text-muted">Qty (Jumlah)</label>
-                                <input type="number" class="form-control" id="rt_qty" value="1" required>
-                            </div>
-                            <div class="col-7">
-                                <label class="form-label small fw-bold text-muted">Harga Satuan (Rp)</label>
-                                <input type="number" class="form-control" id="rt_harga" required>
-                            </div>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Total Pembayaran Tunai (Rp)</label>
-                            <input type="text" class="form-control fw-bold text-success bg-light" id="rt_total_tampil" readonly placeholder="Otomatis dihitung...">
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 fw-bold py-2" style="border-radius: 12px;"><i class="bi bi-cart-check me-2"></i>Proses Pembayaran</button>
-                    </form>
-                </div>
-            </div>
-
-            <div class="col-lg-8">
-                <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-receipt-cutoff me-2 text-success"></i>Riwayat Pendapatan Retail (Kas Masuk)</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Pembeli Umum</th>
-                                    <th>Produk & Qty</th>
-                                    <th class="text-end">Total (Rp)</th>
-                                    <th class="text-center">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-retail">
-                                <tr><td colspan="5" class="text-center text-muted py-4">Sistem sedang memuat log transaksi eceran...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row g-4" id="grid-pantau-bsu"></div>
     </div>
 
     <div id="nasabah" class="tab-content" style="display:none;">
         <div class="row">
             <div class="col-lg-4 mb-4">
-                <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-building-add me-2"></i>Registrasi BSU Mitra</h5>
+                <div class="card p-4 h-100">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-building-add me-2"></i>Registrasi BSU Mitra</h5>
                     <form id="formNasabah" onsubmit="simpanNasabah(event)">
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nomor Registrasi (Otomatis)</label>
-                            <input type="text" id="idNasabah" class="form-control bg-light text-muted" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">Nama Bank Sampah Unit (BSU)</label>
-                            <input type="text" id="namaNasabah" class="form-control" placeholder="Contoh: BSU Berkah Makmur" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label small fw-bold text-muted">No. WhatsApp / HP Pengurus</label>
-                            <input type="number" id="hpNasabah" class="form-control" placeholder="Contoh: 08123456789" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Kata Sandi (Password) Akses BSU</label>
-                            <input type="text" id="passNasabah" class="form-control" placeholder="Buat sandi, contoh: PKK-123" required>
-                        </div>
+                        <div class="mb-3"><label class="form-label small fw-bold text-muted">ID BSU (Otomatis)</label><input type="text" id="idNasabah" class="form-control bg-light" readonly></div>
+                        <div class="mb-3"><label class="form-label small fw-bold text-muted">Nama BSU</label><input type="text" id="namaNasabah" class="form-control" placeholder="Cth: BSU Berkah" required></div>
+                        <div class="mb-3"><label class="form-label small fw-bold text-muted">No WhatsApp</label><input type="number" id="hpNasabah" class="form-control" placeholder="Cth: 08123456789" required></div>
+                        <div class="mb-4"><label class="form-label small fw-bold text-muted">Kata Sandi BSU</label><input type="text" id="passNasabah" class="form-control" placeholder="Cth: BSU-123" required></div>
                         <button type="submit" class="btn btn-primary w-100 fw-bold py-2"><i class="bi bi-save me-2"></i>Daftarkan BSU</button>
                     </form>
                 </div>
             </div>
-
             <div class="col-lg-8 mb-4">
-                <div class="card p-4" style="border-radius: 12px; border: 1px solid #e2e8f0;">
-                    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-                        <h5 class="fw-bold m-0" style="color: var(--primary-dark);"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU Binaan DLH</h5>
-                    </div>
-                    
-                    <div class="table-responsive" style="max-height: 400px; overflow-y: auto; border-radius: 12px;">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light" style="position: sticky; top: 0; z-index: 10;">
-                                <tr>
-                                    <th>No. Reg</th>
-                                    <th>Nama BSU</th>
-                                    <th>Kontak Pengurus</th>
-                                    <th>Kata Sandi</th> 
-                                    <th>Total Saldo Rupiah</th>
-                                    <th class="text-center">Aksi BSU</th> 
-                                </tr>
-                            </thead>
-                            <tbody id="tabel-nasabah">
-                                <tr><td colspan="6" class="text-center text-muted py-3">Memuat data mitra BSU...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="card p-4">
+                    <h5 class="fw-bold m-0 mb-4"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU Binaan DLH</h5>
+                    <div class="table-responsive"><table class="table table-hover align-middle"><thead class="table-light"><tr><th>No. Reg</th><th>Nama BSU</th><th>Kontak</th><th>Kata Sandi</th><th>Total Saldo</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-nasabah"></tbody></table></div>
                 </div>
             </div>
         </div>
@@ -950,377 +172,27 @@
         <div class="row justify-content-center">
             <div class="col-lg-8">
                 <div class="card p-4 p-md-5">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-tag me-2 text-success"></i>Tambah Kategori Material Baru</h5>
+                    <h5 class="fw-bold mb-4"><i class="bi bi-tag me-2 text-success"></i>Tambah Kategori Material</h5>
                     <form id="formKategori" onsubmit="simpanKategori(event)">
-                        <div class="mb-4">
-                            <label>Pilih Jenis Material</label>
-                            <select id="jenisKategori" class="form-select" required>
-                                <option value="" disabled selected>-- Klik Pilih Jenis Material --</option>
-                                <option value="Plastik">Plastik</option>
-                                <option value="Botol Kaca">Botol Kaca</option>
-                                <option value="Besi">Besi</option>
-                                <option value="Kertas">Kertas</option>
-                                <option value="Logam">Logam</option>
-                                <option value="Elektronik">Elektronik</option>
-                                <option value="Minyak">Minyak</option>
-                            </select>
-                        </div>
-                        <div class="mb-4">
-                            <label>Nama Material (Contoh: Plastik PET Bersih)</label>
-                            <input type="text" id="namaKategori" class="form-control" required>
-                        </div>
-                        <div class="mb-4">
-                            <label>Harga per Kg (Rp)</label>
-                            <input type="number" id="hargaKategori" class="form-control" placeholder="Contoh: 3000" required>
-                        </div>
+                        <div class="mb-4"><label>Jenis Material</label><select id="jenisKategori" class="form-select" required><option value="" disabled selected>-- Pilih Jenis --</option><option value="Plastik">Plastik</option><option value="Botol Kaca">Botol Kaca</option><option value="Besi">Besi</option><option value="Kertas">Kertas</option><option value="Logam">Logam</option><option value="Elektronik">Elektronik</option><option value="Minyak">Minyak</option></select></div>
+                        <div class="mb-4"><label>Nama Material</label><input type="text" id="namaKategori" class="form-control" required></div>
+                        <div class="mb-4"><label>Harga per Kg (Rp)</label><input type="number" id="hargaKategori" class="form-control" required></div>
                         <button type="submit" class="btn btn-success w-100 py-3"><i class="bi bi-save me-2"></i>Simpan Kategori</button>
                     </form>
-                    <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-list-ul me-2 text-success"></i>Daftar Kategori Persediaan</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead><tr><th>Jenis Material</th><th>Nama Material</th><th>Harga / Kg</th><th class="text-center">Manajemen</th></tr></thead>
-                            <tbody id="tabel-daftar-kategori"></tbody>
-                        </table>
-                    </div>
+                    <hr class="my-5">
+                    <h5 class="fw-bold mb-4"><i class="bi bi-list-ul me-2 text-success"></i>Daftar Kategori Persediaan</h5>
+                    <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Jenis</th><th>Nama Material</th><th>Harga/Kg</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-daftar-kategori"></tbody></table></div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div id="broadcast-harga" class="tab-content" style="display:none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card p-4 p-md-5">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-megaphone-fill me-2 text-success"></i>Broadcast Informasi Harga Rosok</h5>
-                    <div class="mb-4">
-                        <label>Catatan Tambahan / Salam Penutup (Opsional)</label>
-                        <textarea id="catatanHarga" class="form-control" rows="3" placeholder="Contoh: Harga di atas merupakan fluktuasi acuan minggu ini. Yuk kumpulkan, pilah, dan setorkan sampah anorganikmu!"></textarea>
-                    </div>
-                    <button class="btn btn-success w-100 py-3 mb-5" onclick="buatBroadcastHarga()"><i class="bi bi-gear-wide-connected me-2"></i>Generate Pesan & Tampilkan Kontak</button>
-                    <div id="areaBroadcastHarga" style="display:none;">
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Pratinjau Pesan WhatsApp:</h6>
-                        <div class="p-3 mb-4" style="background: rgba(255,255,255,0.4); border: 1px dashed #cbd5e1; border-radius: 12px; font-size: 0.9rem; white-space: pre-wrap;" id="previewPesanHarga"></div>
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Kirim ke Nasabah (<span id="totalKirimHarga">0</span> Kontak):</h6>
-                        <div class="alert alert-warning" style="font-size: 0.85rem;">
-                            <i class="bi bi-info-circle me-2"></i>Klik tombol kirim satu per satu untuk mengirimkan rincian daftar harga rosok ke WhatsApp masing-masing nasabah secara personal.
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover"><tbody id="tabel-kirim-broadcast-harga"></tbody></table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="setor" class="tab-content" style="display:none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card p-4 p-md-5">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-truck-flatbed me-2 text-success"></i>Penerimaan Material dari BSU</h5>
-                    <form id="formSetor" onsubmit="simpanSetoran(event)">
-                        <div class="mb-4">
-                            <label>Identitas Bank Sampah Unit (Pengirim)</label>
-                            <select id="pilihNasabah" class="form-select" required></select>
-                        </div>
-                        <div class="mb-4">
-                            <label>Pilih Jenis Material</label>
-                            <select id="pilihJenisMaterialSetor" class="form-select" onchange="filterDropdownKategori()" required>
-                                <option value="" disabled selected>-- Klik Pilih Jenis Material --</option>
-                                <option value="Plastik">Plastik</option>
-                                <option value="Botol Kaca">Botol Kaca</option>
-                                <option value="Besi">Besi</option>
-                                <option value="Kertas">Kertas</option>
-                                <option value="Logam">Logam</option>
-                                <option value="Elektronik">Elektronik</option>
-                                <option value="Minyak">Minyak</option>
-                            </select>
-                        </div>
-                        <div class="mb-4">
-                            <label>Nama Material</label>
-                            <select id="pilihSampah" class="form-select" required>
-                                <option value="" disabled selected>-- Pilih Jenis Material di atas terlebih dahulu --</option>
-                            </select>
-                        </div>
-                        <div class="mb-5">
-                            <label>Volume Timbangan Bersih (Gunakan "." (titik) sebagai pengganti Koma)</label>
-                            <div class="input-group">
-                                <input type="number" step="any" min="0" id="beratSampah" class="form-control" placeholder="Contoh: 15.5" required>
-                                <span class="input-group-text bg-white fw-bold" style="border-color: var(--border-color); color: var(--text-muted);">Kg</span>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success w-100 py-3"><i class="bi bi-check-circle me-2"></i>Konfirmasi Penerimaan</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="ceksaldo" class="tab-content" style="display:none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card p-4 p-md-5">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-bank me-2 text-success"></i>Buku Rekening Cabang BSU</h5>
-                    <div class="mb-4">
-                        <label>Cari Identitas Bank Sampah Unit</label>
-                        <select id="pilihNasabahSaldo" class="form-select" onchange="tampilkanDetailSaldo()"><option value="" disabled selected>-- Pilih Data BSU --</option></select>
-                    </div>
-                    <div id="areaDetailSaldo" style="display:none;">
-                        <div class="row g-3 mb-4 mt-2">
-                            <div class="col-6">
-                                <div class="stat-box text-center" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
-                                    <div class="stat-title text-success">Total Saldo Rupiah</div>
-                                    <div class="stat-value text-success" id="detail-total-rp">Rp 0</div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="stat-box text-center">
-                                    <div class="stat-title">Volume Sampah (Kg)</div>
-                                    <div class="stat-value" id="detail-total-kg" style="color: var(--primary-dark);">0 Kg</div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mb-3 mt-5 flex-wrap gap-2">
-                            <h6 class="fw-bold m-0" style="color: var(--primary-dark);"><i class="bi bi-list-check me-2 text-success"></i>Log Riwayat Transaksi BSU</h6>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-outline-danger px-3" onclick="cetakPdfSaldo()"><i class="bi bi-file-earmark-pdf me-1"></i> Cetak PDF</button>
-                                <button class="btn btn-sm btn-success px-3" onclick="kirimWaSaldo()"><i class="bi bi-whatsapp me-1"></i> Kirim WA</button>
-                            </div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover mb-0">
-                                <thead><tr><th>Waktu Transaksi</th><th>Kategori Aktivitas</th><th class="text-center">Berat</th><th class="text-end">Nominal Mutasi</th></tr></thead>
-                                <tbody id="tabel-riwayat-saldo"></tbody>
-                            </table>
-                        </div>
-                        <div class="mt-4 p-4" style="background: rgba(225, 29, 72, 0.05); border: 1px dashed #fda4af; border-radius: 16px;">
-                            <h6 class="fw-bold mb-3" style="color: #be123c;"><i class="bi bi-cash-stack me-2"></i>Pencairan Saldo BSU</h6>
-                            <form id="formTarikSaldo" onsubmit="tarikSaldo(event)" class="d-flex gap-3 align-items-end flex-wrap">
-                                <div class="flex-grow-1">
-                                    <label style="color: #be123c;">Nominal Pencairan (Rp)</label>
-                                    <input type="number" id="nominalTarik" class="form-control" min="500" required placeholder="Contoh: 1500000" style="border-color: #fda4af;">
-                                </div>
-                                <button type="submit" class="btn btn-danger px-4" style="background: #e11d48; border: none;"><i class="bi bi-wallet2 me-2"></i>Cairkan Dana</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="bukubesar" class="tab-content" style="display:none;">
-        <div class="card p-4 p-md-5">
-            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-                <div>
-                    <h4 class="m-0 fw-bold" style="color: var(--primary-main);">Jurnal Umum Akuntansi</h4>
-                    <span class="app-subtitle">Pencatatan Otomatis Standar Administrasi BLUD</span>
-                </div>
-                <button class="btn btn-outline-primary px-4" onclick="cetakBukuBesar()"><i class="bi bi-printer me-2"></i> Cetak Dokumen A4</button>
-            </div>
-            <div class="alert mb-5" style="background: rgba(2, 132, 199, 0.05); border: 1px solid rgba(2, 132, 199, 0.2); color: var(--text-main); border-radius: 16px;">
-                <i class="bi bi-info-circle-fill me-2" style="color: var(--primary-main);"></i><strong>Logika Sistem B2B:</strong><br>
-                1. <strong>Penerimaan BSU:</strong> Diklasifikasikan ke akun Beban Pembelian (Debit) dan Hutang Saldo Mitra BSU (Kredit).<br>
-                2. <strong>Pencairan Tunai BSU:</strong> Diklasifikasikan ke akun Hutang Saldo Mitra BSU (Debit) dan Kas Bank Sampah (Kredit).
-            </div>
-            <h6 class="fw-bold mb-3" style="color: var(--primary-main);"><i class="bi bi-journal-check me-2"></i>Buku Jurnal Riwayat Transaksi</h6>
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead><tr><th>Waktu & No. Ref</th><th>Keterangan Transaksi</th><th>Kode & Nama Akun</th><th class="text-end">Debit (Rp)</th><th class="text-end">Kredit (Rp)</th></tr></thead>
-                    <tbody id="tabel-jurnal-umum"></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="jadwal" class="tab-content" style="display:none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-8">
-                <div class="card p-4 p-md-5">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-megaphone me-2 text-success"></i>Pengumuman Jadwal Setoran</h5>
-                    <div class="mb-4">
-                        <label>Tanggal Pelaksanaan</label>
-                        <input type="date" id="tglJadwal" class="form-control">
-                    </div>
-                    <div class="mb-4">
-                        <label>Pesan Tambahan (Opsional)</label>
-                        <textarea id="pesanTambahan" class="form-control" rows="3" placeholder="Contoh: Jangan lupa bawa karung sendiri ya, atau material sudah dipilah dari rumah."></textarea>
-                    </div>
-                    <button class="btn btn-success w-100 py-3 mb-5" onclick="buatBroadcast()"><i class="bi bi-magic me-2"></i>Buat Pesan & Tampilkan Kontak</button>
-                    <div id="areaBroadcast" style="display:none;">
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Pratinjau Pesan:</h6>
-                        <div class="p-3 mb-4" style="background: rgba(255,255,255,0.4); border: 1px dashed #cbd5e1; border-radius: 12px; font-size: 0.9rem; white-space: pre-wrap;" id="previewPesan"></div>
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Kirim ke Nasabah (<span id="totalKirim">0</span> Kontak):</h6>
-                        <div class="alert alert-warning" style="font-size: 0.85rem;"><i class="bi bi-info-circle me-2"></i>Karena aturan anti-spam WhatsApp, klik tombol kirim satu per satu untuk setiap nasabah.</div>
-                        <div class="table-responsive">
-                            <table class="table table-hover"><tbody id="tabel-kirim-broadcast"></tbody></table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div id="laporan" class="tab-content" style="display:none;">
-        <div class="card p-4 p-md-5">
-            <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
-                <div>
-                    <h4 class="m-0 fw-bold" style="color: var(--primary-main);">Laporan Neraca & Rekapitulasi</h4>
-                    <span class="app-subtitle">Ringkasan Eksekutif Aset dan Kewajiban Berjalan</span>
-                </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-success px-4" onclick="eksporExcel()"><i class="bi bi-file-earmark-spreadsheet me-2"></i> Ekspor Excel</button>
-                    <button class="btn btn-danger px-4" style="background: #e11d48; border: none; box-shadow: 0 8px 16px rgba(225, 29, 72, 0.2);" onclick="cetakLaporanA4()"><i class="bi bi-file-earmark-pdf me-2"></i> Ekspor PDF</button>
-                </div>
-            </div>
-            
-            <div class="row mt-2 g-3 mb-5">
-                <div class="col-12 col-md-4">
-                    <div class="stat-card-modern bg-atm-navy" style="min-height: 140px; padding: 20px; border-radius: 16px;">
-                        <i class="bi bi-wallet2 stat-card-icon-bg" style="font-size: 5rem; right: -10px; bottom: -10px;"></i>
-                        <div class="d-flex justify-content-between align-items-start w-100 mb-3">
-                            <i class="bi bi-sim-fill" style="color: #FBBF24; font-size: 2rem; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.6)); transform: rotate(90deg);"></i>
-                            <i class="bi bi-wifi" style="color: rgba(255,255,255,0.5); font-size: 1.3rem; transform: rotate(90deg);"></i>
-                        </div>
-                        <div>
-                            <div class="stat-card-title-modern text-silver mb-1" style="font-size: 0.65rem;">ARUS KAS (CASH FLOW) BSI</div>
-                            <div class="stat-card-value-modern" id="lap-kas" style="color: #F8FAFC; font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px; font-size: 1.5rem;">Rp 0</div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-end mt-3">
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); text-transform: uppercase;">Valid Thru <br><span style="color: white; font-weight: bold; font-size: 0.8rem; font-family: 'Courier New', Courier, monospace;">12/99</span></div>
-                            <div style="font-weight: 900; font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.8); letter-spacing: 1px;">BSI-PAY</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-                    <div class="stat-card-modern bg-atm-orange" style="min-height: 140px; padding: 20px; border-radius: 16px;">
-                        <i class="bi bi-cash-coin stat-card-icon-bg" style="font-size: 5rem; right: -10px; bottom: -10px;"></i>
-                        <div class="d-flex justify-content-between align-items-start w-100 mb-3">
-                            <i class="bi bi-sim-fill" style="color: #FDBA74; font-size: 2rem; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.6)); transform: rotate(90deg);"></i>
-                            <i class="bi bi-wifi" style="color: rgba(255,255,255,0.5); font-size: 1.3rem; transform: rotate(90deg);"></i>
-                        </div>
-                        <div>
-                            <div class="stat-card-title-modern text-gold mb-1" style="font-size: 0.65rem;">HUTANG MITRA BSU</div>
-                            <div class="stat-card-value-modern" id="lap-rupiah" style="color: #FFEDD5; font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px; font-size: 1.5rem;">Rp 0</div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-end mt-3">
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); text-transform: uppercase;">Valid Thru <br><span style="color: white; font-weight: bold; font-size: 0.8rem; font-family: 'Courier New', Courier, monospace;">12/99</span></div>
-                            <div style="font-weight: 900; font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.8); letter-spacing: 1px;">DEBT-CARD</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-4">
-                    <div class="stat-card-modern bg-atm-black" style="min-height: 140px; padding: 20px; border-radius: 16px;">
-                        <i class="bi bi-box-seam stat-card-icon-bg" style="font-size: 5rem; right: -10px; bottom: -10px;"></i>
-                        <div class="d-flex justify-content-between align-items-start w-100 mb-3">
-                            <i class="bi bi-sim-fill" style="color: #FBBF24; font-size: 2rem; filter: drop-shadow(0px 1px 2px rgba(0,0,0,0.6)); transform: rotate(90deg);"></i>
-                            <i class="bi bi-wifi" style="color: rgba(255,255,255,0.5); font-size: 1.3rem; transform: rotate(90deg);"></i>
-                        </div>
-                        <div>
-                            <div class="stat-card-title-modern text-silver mb-1" style="font-size: 0.65rem;">SISA STOK GUDANG</div>
-                            <div class="stat-card-value-modern" style="color: #F8FAFC; font-family: 'Courier New', Courier, monospace; letter-spacing: 0.5px; font-size: 1.5rem;"><span id="lap-sampah">0</span> Kg</div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-end mt-3">
-                            <div style="font-size: 0.6rem; color: rgba(255,255,255,0.6); text-transform: uppercase;">Valid Thru <br><span style="color: white; font-weight: bold; font-size: 0.8rem; font-family: 'Courier New', Courier, monospace;">12/99</span></div>
-                            <div style="font-weight: 900; font-style: italic; font-size: 1rem; color: rgba(255,255,255,0.8); letter-spacing: 1px;">INVENTORY</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4 mb-4">
-                <div class="col-12 col-lg-6">
-                    <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                        <h6 class="fw-bold mb-4" style="color: var(--primary-dark); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="bi bi-pie-chart-fill me-2 text-success"></i>Komposisi Valuasi Persediaan
-                        </h6>
-                        <div style="height: 250px; position: relative;">
-                            <canvas id="grafikValuasiPersediaan"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-12 col-lg-6">
-                    <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                        <h6 class="fw-bold mb-4" style="color: var(--primary-dark); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
-                            <i class="bi bi-bar-chart-line-fill me-2 text-warning"></i>Distribusi Hutang BSU (Top 7)
-                        </h6>
-                        <div style="height: 250px; position: relative;">
-                            <canvas id="grafikHutangBSU"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4">
-                <div class="col-12 col-lg-6">
-                    <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-box-seam me-2"></i>Matriks Inventaris Gudang</h6>
-                        <div class="table-responsive" style="max-height: 300px;">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light" style="position: sticky; top: 0;"><tr><th>Kategori Material</th><th>Volume</th><th class="text-end">Valuasi (Rp)</th></tr></thead>
-                                <tbody id="tabel-rekap-sampah"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-lg-6">
-                    <div class="card p-4 h-100 shadow-sm border-0 bg-white" style="border-radius: 16px;">
-                        <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-journal-text me-2"></i>Buku Besar Pembantu (Hutang)</h6>
-                        <div class="table-responsive" style="max-height: 300px;">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light" style="position: sticky; top: 0;"><tr><th>Kreditur (Mitra BSU)</th><th>Volume</th><th class="text-end">Saldo Hutang (Rp)</th></tr></thead>
-                                <tbody id="tabel-rekap-nasabah"></tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div> 
-    </div> 
-
-    <div id="pengaturan" class="tab-content" style="display:none;">
-        <div class="row justify-content-center">
-            <div class="col-lg-6">
-                <div class="card p-4 p-md-5 mt-5">
-                    <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-shield-lock-fill me-2 text-primary"></i>Ubah Akses Portal BSI Pusat</h5>
-                    <div class="alert alert-info" style="font-size: 0.85rem; border-radius: 12px;">
-                        <i class="bi bi-info-circle-fill me-2"></i>Formulir ini digunakan untuk memperbarui ID Pengguna dan Kata Sandi utama Anda. Data akan langsung disinkronkan ke server.
-                    </div>
-                    <form id="formPengaturanAdmin" onsubmit="ubahSandiAdmin(event)">
-                        <div class="mb-3 mt-4">
-                            <label class="form-label small fw-bold text-muted">ID Pengguna (Username) Baru</label>
-                            <input type="text" id="adminIdBaru" class="form-control" placeholder="Contoh: admin_dlh" required>
-                        </div>
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted">Kata Sandi Baru</label>
-                            <div class="input-group">
-                                <input type="password" id="adminPassBaru" class="form-control border-end-0" placeholder="Ketik kata sandi baru..." required>
-                                <span class="input-group-text bg-white border-start-0 text-muted" onclick="lihatSandi('adminPassBaru', 'iconMataAdmin')" style="cursor: pointer; border-radius: 0 12px 12px 0;">
-                                    <i class="bi bi-eye-slash-fill" id="iconMataAdmin"></i>
-                                </span>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-primary w-100 fw-bold py-3" id="btnSimpanAdmin">
-                            <i class="bi bi-save me-2"></i>Simpan Perubahan
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
 </div>
 
 <script>
     // =========================================================
-    // 1. URL GOOGLE APPS SCRIPT
+    // PASTIKAN URL INI ADALAH URL DARI HASIL "NEW DEPLOYMENT"
     // =========================================================
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbxyobiaV3dZFb7D8uEKFJYdFEe5ujxKtLGX-4UMnPpfE3IZOW64HjCMVh-83-6yLLVgag/exec';
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbyqGlxUj0YKqOCu6ITNgyKEaDJjjmrJrYZ9V8MnV7LCWRE8OQA-Ou9FMO8YSyNxzAr2Yw/exec';
     
     const CURRENT_ROLE = 'BSI'; 
     const CURRENT_UNIT_ID = ''; 
@@ -1330,555 +202,48 @@
         window.location.href = 'index.html';
     }
 
-    let dataNasabah = []; let dataTransaksi = []; let dataKategori = []; let dataUnit = []; let dataPenjualan = []; let dataAset = []; let dataProduksi = []; let dataArmada = []; let dataQC = []; let dataRetail = []; let dataResidu = [];
+    let dataNasabah = []; let dataTransaksi = []; let dataKategori = []; let dataUnit = []; 
     let masterNasabah = []; let masterTransaksi = [];
     
-    // =========================================================
-    // 2. PROSES MUAT DATABASE PUSAT
-    // =========================================================
+    // FUNGSI MUAT DATA
     function loadDataDatabase() {
-        let btnRefresh = document.getElementById('dash-transaksi');
-        if(btnRefresh) btnRefresh.innerText = "Memuat...";
-        
         let urlDenganParameter = scriptURL + "?role=" + CURRENT_ROLE + "&id_unit=" + CURRENT_UNIT_ID;
         
         fetch(urlDenganParameter)
         .then(response => response.json())
         .then(data => {
-            let mentahNasabah = data.nasabah || []; 
-            let mentahTransaksi = data.transaksi || []; 
-
-            // === FILTER GLOBAL KETAT: HANYA BSU ===
-            masterNasabah = mentahNasabah.filter(n => {
-                let id = String(n.id || '').toUpperCase();
-                let nama = String(n.nama || '').toUpperCase();
-                return id.includes('BSU') || nama.includes('BSU') || nama.includes('BANK SAMPAH');
-            });
-
+            masterNasabah = (data.nasabah || []).filter(n => String(n.id || '').toUpperCase().includes('BSU') || String(n.nama || '').toUpperCase().includes('BSU'));
             let listNamaBSU = masterNasabah.map(n => String(n.nama).trim().toUpperCase());
-
-            masterTransaksi = mentahTransaksi.filter(t => {
+            masterTransaksi = (data.transaksi || []).filter(t => {
                 let namaTrx = String(t.nama || '').trim().toUpperCase();
-                return namaTrx.includes('BSU') || namaTrx.includes('BANK SAMPAH') || listNamaBSU.includes(namaTrx);
+                return namaTrx.includes('BSU') || listNamaBSU.includes(namaTrx);
             });
-            // ======================================
-
             dataKategori = data.kategori || [];
-            dataUnit = data.unit || []; 
-            dataPenjualan = data.penjualan || []; 
-            updateTabelPenjualan();
-            dataAset = data.aset || []; 
-            updateTabelAset();
-            dataProduksi = data.produksi || []; 
-            updateTabelProduksi();
-            dataResidu = data.residu || []; 
-            updateTabelResidu();
-
             dataNasabah = [...masterNasabah]; 
             dataTransaksi = [...masterTransaksi];
 
-            dataTransaksi.forEach(t => {
-                if (typeof t.tgl === 'string' && t.tgl.includes('T') && t.tgl.includes('Z')) {
-                    let pisah = t.tgl.split('T');
-                    let tanggalArr = pisah[0].split('-');
-                    let jamArr = pisah[1].split('.')[0];
-                    t.tgl = `${tanggalArr[2]}-${tanggalArr[1]}-${tanggalArr[0]} ${jamArr}`;
-                }
-            });
- 
             updateTabelNasabah(); 
-            updateTabelKategori(); 
-            updateDropdownKategori();             
-            updateDropdownNasabah('pilihNasabah'); 
-            if(document.getElementById('pilihNasabahSaldo')) updateDropdownNasabah('pilihNasabahSaldo');
-            
-            // FUNGSI UPDATE DASHBOARD INDUK TEMA GAMBAR BSI
+            updateTabelKategori();             
             updateDashboardInduk(); 
-            updateGrafikVisualInduk();
-            
-            updateBukuBesar(); 
-            updateLaporan(); 
-            updateMonitorBSU();
-            
-            // JIKA TAB PANTAU BSU SEDANG TERBUKA, RENDER INFOGRAFISNYA
             if(document.getElementById('pantau-bsu').style.display === 'block') renderPantauBSU();
-            if(document.getElementById('areaDetailSaldo').style.display === 'block') tampilkanDetailSaldo();
         })
-        .catch(error => { 
-            alert("Gagal terhubung ke server. Pastikan koneksi internet aktif."); 
-        });
+        .catch(error => console.error("Gagal terhubung ke server:", error));
     }
     loadDataDatabase();
-
-    // ========================================================
-    // TABEL INFOGRAFIS PANTAU BSU
-    // ========================================================
-    function renderPantauBSU() {
-        let container = document.getElementById('grid-pantau-bsu');
-        container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-muted fw-bold">Mengumpulkan infografis BSU...</p></div>';
-
-        // Gunakan timeout agar UI tidak membeku saat kalkulasi massal
-        setTimeout(() => {
-            let stats = {};
-            
-            // Siapkan kerangka data tiap BSU
-            masterNasabah.forEach(n => {
-                let nm = String(n.nama).trim().toUpperCase();
-                stats[nm] = { 
-                    id: n.id, nama: n.nama, hp: n.hp, 
-                    saldo: 0, sampah: 0, trx: 0, 
-                    plastik: 0, kertas: 0, logam: 0, organik: 0 
-                };
-            });
-
-            // Kamus kategori untuk performa pencarian yang lebih cepat
-            let kamusKategori = {};
-            dataKategori.forEach(k => { kamusKategori[k.nama_kategori] = k.jenis_material; });
-
-            // Agregasi seluruh data transaksi hanya dalam sekali proses (O(n))
-            masterTransaksi.forEach(t => {
-                let nm = String(t.nama).trim().toUpperCase();
-                
-                // Tangkap BSU baru yang ada di transaksi tapi belum ada di master nasabah
-                if(!stats[nm]) {
-                    stats[nm] = { id: 'Tidak Ada ID', nama: nm, hp: '', saldo: 0, sampah: 0, trx: 0, plastik: 0, kertas: 0, logam: 0, organik: 0 };
-                }
-                
-                if(t.jenis !== 'Penarikan Tunai') {
-                    let brt = parseFloat(t.berat || 0);
-                    stats[nm].sampah += brt;
-                    stats[nm].trx += 1;
-                    stats[nm].saldo += parseFloat(t.total || 0);
-                    
-                    let jenKat = kamusKategori[t.jenis] ? kamusKategori[t.jenis].toLowerCase() : 'lainnya';
-                    
-                    if(jenKat.includes('plastik') || jenKat.includes('botol')) stats[nm].plastik += brt;
-                    else if(jenKat.includes('kertas') || jenKat.includes('kardus')) stats[nm].kertas += brt;
-                    else if(jenKat.includes('logam') || jenKat.includes('besi') || jenKat.includes('tembaga')) stats[nm].logam += brt;
-                    else stats[nm].organik += brt;
-                } else {
-                    stats[nm].saldo += parseFloat(t.total || 0);
-                }
-            });
-
-            let htmlBuffer = '';
-            let searchKeyword = document.getElementById('cariBsuPantau').value.toLowerCase();
-
-            // Render ke UI
-            Object.values(stats).sort((a,b) => b.sampah - a.sampah).forEach(s => {
-                // Filter pencarian
-                if(searchKeyword && !s.nama.toLowerCase().includes(searchKeyword)) return;
-                // Sembunyikan BSU siluman yang tidak ada aktivitas sama sekali
-                if(s.sampah === 0 && s.saldo === 0 && s.trx === 0 && s.id === 'Tidak Ada ID') return; 
-
-                let totalKategori = s.plastik + s.kertas + s.logam + s.organik;
-                let pctPlastik = totalKategori ? (s.plastik / totalKategori * 100) : 0;
-                let pctKertas = totalKategori ? (s.kertas / totalKategori * 100) : 0;
-                let pctLogam = totalKategori ? (s.logam / totalKategori * 100) : 0;
-                let pctOrganik = totalKategori ? (s.organik / totalKategori * 100) : 0;
-
-                // Estimasi/Simulasi jumlah nasabah berdasarkan frekuensi transaksi BSU tersebut
-                let nasabahSimulasi = s.trx === 0 ? 0 : Math.floor(s.trx * 1.5) + 5;
-
-                let noWa = s.hp ? String(s.hp).trim() : '';
-                if (noWa.startsWith('8')) noWa = '62' + noWa;
-                else if (noWa.startsWith('0')) noWa = '62' + noWa.substring(1);
-
-                htmlBuffer += `
-                    <div class="col-md-6 col-xl-4">
-                        <div class="infografis-card card h-100 shadow-sm border-0" style="border-radius: 16px; background: #fff; overflow:hidden; margin-top: 0;">
-                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #f1f5f9);">
-                                <div>
-                                    <h6 class="fw-bold m-0" style="color: #0f172a;"><i class="bi bi-shop me-2 text-primary"></i>${s.nama}</h6>
-                                    <small class="text-muted">ID: ${s.id}</small>
-                                </div>
-                                <button class="btn btn-sm btn-light border" onclick="window.open('https://wa.me/${noWa}', '_blank')" title="Hubungi BSU"><i class="bi bi-whatsapp text-success"></i></button>
-                            </div>
-                            <div class="p-3">
-                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" style="border-style: dashed !important;">
-                                    <span class="text-muted small fw-bold">👥 Nasabah Aktif</span>
-                                    <span class="fw-bold text-dark">${nasabahSimulasi} <small class="text-muted fw-normal">Warga</small></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" style="border-style: dashed !important;">
-                                    <span class="text-muted small fw-bold">📦 Sampah Terkumpul</span>
-                                    <span class="fw-bold text-success">${s.sampah.toFixed(1)} <small class="text-muted fw-normal">Kg</small></span>
-                                </div>
-                                <div class="d-flex justify-content-between mb-3 pb-2 border-bottom" style="border-style: dashed !important;">
-                                    <span class="text-muted small fw-bold">💰 Saldo BSU</span>
-                                    <span class="fw-bold text-danger">Rp ${s.saldo.toLocaleString('id-ID')}</span>
-                                </div>
-                                
-                                <div class="mt-2 bg-light p-2 rounded">
-                                    <div class="d-flex justify-content-between mb-2" style="font-size: 0.7rem; font-weight: 600;">
-                                        <span class="text-muted">Komposisi:</span>
-                                        <span class="text-primary">${s.trx} Trx</span>
-                                    </div>
-                                    <div class="progress" style="height: 10px; border-radius: 5px;">
-                                        <div class="progress-bar bg-info" style="width: ${pctPlastik}%" title="Plastik: ${s.plastik.toFixed(1)} Kg"></div>
-                                        <div class="progress-bar bg-warning" style="width: ${pctKertas}%" title="Kertas: ${s.kertas.toFixed(1)} Kg"></div>
-                                        <div class="progress-bar bg-secondary" style="width: ${pctLogam}%" title="Logam: ${s.logam.toFixed(1)} Kg"></div>
-                                        <div class="progress-bar bg-success" style="width: ${pctOrganik}%" title="Lainnya: ${s.organik.toFixed(1)} Kg"></div>
-                                    </div>
-                                    <div class="d-flex justify-content-between mt-2" style="font-size: 0.65rem; color: #64748b; font-weight: 600;">
-                                        <span><i class="bi bi-circle-fill text-info me-1"></i>Plas</span>
-                                        <span><i class="bi bi-circle-fill text-warning me-1"></i>Krt</span>
-                                        <span><i class="bi bi-circle-fill text-secondary me-1"></i>Log</span>
-                                        <span><i class="bi bi-circle-fill text-success me-1"></i>Lain</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-
-            if(htmlBuffer === '') htmlBuffer = '<div class="col-12 text-center text-muted py-4">Tidak ada data BSU yang ditemukan.</div>';
-            container.innerHTML = htmlBuffer;
-
-        }, 150);
-    }
-
-    // ========================================================
-    // UPDATE DASHBOARD INDUK (SEPERTI REFERENSI GAMBAR BSI)
-    // ========================================================
-    function updateDashboardInduk() {
-        document.getElementById('dash-total-unit').innerText = masterNasabah.length;
-        
-        let totalSampah = 0;
-        let setoranBlnIni = 0;
-        let totalSaldo = 0;
-        let ekonomiMuter = 0;
-
-        let skrg = new Date();
-        let blnSkrg = skrg.getMonth();
-        let thnSkrg = skrg.getFullYear();
-
-        masterTransaksi.forEach(t => {
-            if(t.jenis !== 'Penarikan Tunai') {
-                let brt = parseFloat(t.berat || 0);
-                totalSampah += brt;
-                totalSaldo += t.total;
-                ekonomiMuter += t.total;
-                
-                let pDate = String(t.tgl).split(' ')[0].split('-');
-                if(pDate.length === 3) {
-                    if((parseInt(pDate[1])-1) === blnSkrg && parseInt(pDate[2]) === thnSkrg) {
-                        setoranBlnIni += brt;
-                    }
-                }
-            } else {
-                totalSaldo += t.total; 
-                ekonomiMuter += Math.abs(t.total);
-            }
-        });
-
-        document.getElementById('dash-setoran-bln').innerText = setoranBlnIni.toLocaleString('id-ID') + ' Kg';
-        document.getElementById('dash-total-sampah').innerText = totalSampah.toLocaleString('id-ID') + ' Kg';
-        document.getElementById('dash-total-saldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
-
-        let reduksiEmisi = totalSampah * 0.75; 
-        let daurUlang = totalSampah * 0.95; 
-        
-        document.getElementById('stat-emisi').innerText = reduksiEmisi.toLocaleString('id-ID') + ' Kg CO2e';
-        document.getElementById('stat-daur-ulang').innerText = daurUlang.toLocaleString('id-ID') + ' Kg';
-        document.getElementById('stat-ekonomi').innerText = 'Rp ' + ekonomiMuter.toLocaleString('id-ID');
-
-        updateTabelKategoriUnitInduk();
-    }
-
-    // TABEL KATEGORI PER UNIT (DI DASHBOARD INDUK)
-    function updateTabelKategoriUnitInduk() {
-        let tbody = document.getElementById('tabel-kategori-unit');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        let trxMasuk = masterTransaksi.filter(t => t.jenis !== 'Penarikan Tunai');
-        if(trxMasuk.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted">Belum ada data setoran.</td></tr>`;
-            return;
-        }
-
-        let rekapBsu = {};
-        trxMasuk.forEach(t => {
-            let nm = t.nama.trim();
-            let jen = String(t.jenis).toLowerCase();
-            let brt = parseFloat(t.berat || 0);
-
-            if(!rekapBsu[nm]) rekapBsu[nm] = { plastik:0, kertas:0, logam:0, organik:0, total:0 };
-            
-            rekapBsu[nm].total += brt;
-            
-            if(jen.includes('plastik') || jen.includes('botol') || jen.includes('pet')) {
-                rekapBsu[nm].plastik += brt;
-            } else if(jen.includes('kertas') || jen.includes('kardus') || jen.includes('duplex')) {
-                rekapBsu[nm].kertas += brt;
-            } else if(jen.includes('logam') || jen.includes('besi') || jen.includes('tembaga') || jen.includes('alumunium') || jen.includes('kaleng')) {
-                rekapBsu[nm].logam += brt;
-            } else {
-                rekapBsu[nm].organik += brt;
-            }
-        });
-
-        let arrBsu = Object.keys(rekapBsu).map(k => ({nama: k, data: rekapBsu[k]}));
-        arrBsu.sort((a,b) => b.data.total - a.data.total);
-        
-        arrBsu.slice(0, 5).forEach(b => {
-            tbody.innerHTML += `
-            <tr>
-                <td class="fw-bold" style="color: var(--primary-main);">${b.nama}</td>
-                <td><span class="badge bg-info text-dark" style="background-color: #e0f2fe !important;">${b.data.plastik.toLocaleString('id-ID')} kg</span></td>
-                <td><span class="badge bg-warning text-dark" style="background-color: #fef3c7 !important;">${b.data.kertas.toLocaleString('id-ID')} kg</span></td>
-                <td><span class="badge bg-secondary text-dark" style="background-color: #e2e8f0 !important;">${b.data.logam.toLocaleString('id-ID')} kg</span></td>
-                <td><span class="badge bg-success text-dark" style="background-color: #dcfce7 !important;">${b.data.organik.toLocaleString('id-ID')} kg</span></td>
-            </tr>`;
-        });
-    }
-
-    let chartKontribusi = null;
-    let chartTrenBaru = null;
-    let chartDistribusi = null;
-
-    function updateGrafikVisualInduk() {
-        if (typeof Chart === 'undefined') return;
-
-        Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
-        Chart.defaults.color = '#475569';
-        
-        let trxMasuk = masterTransaksi.filter(t => t.jenis !== 'Penarikan Tunai');
-
-        let rekapUnitKg = {};
-        trxMasuk.forEach(t => {
-            let nm = t.nama.trim();
-            rekapUnitKg[nm] = (rekapUnitKg[nm] || 0) + parseFloat(t.berat || 0);
-        });
-
-        let topUnits = Object.keys(rekapUnitKg).map(k => ({nama: k, kg: rekapUnitKg[k]})).sort((a,b) => b.kg - a.kg).slice(0, 5);
-        
-        let ctxKontribusi = document.getElementById('grafikKontribusi');
-        if(ctxKontribusi) {
-            if(chartKontribusi) chartKontribusi.destroy();
-            chartKontribusi = new Chart(ctxKontribusi, {
-                type: 'bar',
-                data: {
-                    labels: topUnits.map(u => u.nama),
-                    datasets: [{
-                        label: 'Total Setoran (Kg)',
-                        data: topUnits.map(u => u.kg),
-                        backgroundColor: ['#2e7d32', '#0284c7', '#f57c00', '#1565c0', '#fbc02d'],
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: {display: false}, ticks: {font: {weight: 'bold'}} },
-                        y: { grid: {color: '#f1f5f9'}, border: {dash: [5,5]} }
-                    }
-                }
-            });
-        }
-
-        let bulanNama = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
-        let rekapBulan = {};
-        
-        let skrg = new Date();
-        let blnSkrg = skrg.getMonth();
-        let thnSkrg = skrg.getFullYear();
-
-        let labelsBulan = [];
-        for(let i = 5; i >= 0; i--) {
-            let b = blnSkrg - i;
-            let t = thnSkrg;
-            if(b < 0) { b += 12; t -= 1; }
-            let key = `${t}-${String(b+1).padStart(2,'0')}`;
-            rekapBulan[key] = { label: bulanNama[b], kg: 0 };
-            labelsBulan.push(key);
-        }
-
-        trxMasuk.forEach(t => {
-            let pDate = String(t.tgl).split(' ')[0].split('-'); 
-            if(pDate.length === 3) {
-                let key = `${pDate[2]}-${pDate[1]}`;
-                if(rekapBulan[key] !== undefined) {
-                    rekapBulan[key].kg += parseFloat(t.berat || 0);
-                }
-            }
-        });
-
-        let dataTren = labelsBulan.map(k => rekapBulan[k].kg);
-        let labelTren = labelsBulan.map(k => rekapBulan[k].label);
-
-        let ctxTren = document.getElementById('grafikTrenBaru');
-        if(ctxTren) {
-            if(chartTrenBaru) chartTrenBaru.destroy();
-            chartTrenBaru = new Chart(ctxTren, {
-                type: 'line',
-                data: {
-                    labels: labelTren,
-                    datasets: [{
-                        label: 'Setoran (Kg)',
-                        data: dataTren,
-                        borderColor: '#2e7d32',
-                        backgroundColor: 'rgba(46, 125, 50, 0.1)',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#fff',
-                        pointBorderColor: '#2e7d32',
-                        pointBorderWidth: 2,
-                        pointRadius: 5,
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { grid: {display: false}, ticks: {font: {weight: 'bold'}} },
-                        y: { grid: {color: '#f1f5f9'}, border: {dash: [5,5]}, beginAtZero: true }
-                    }
-                }
-            });
-        }
-
-        let rekapSaldoUnit = {};
-        masterTransaksi.forEach(t => {
-            let nm = t.nama.trim();
-            rekapSaldoUnit[nm] = (rekapSaldoUnit[nm] || 0) + t.total;
-        });
-
-        let arrSaldo = Object.keys(rekapSaldoUnit).map(k => ({nama: k, saldo: rekapSaldoUnit[k]})).filter(s => s.saldo > 0);
-        arrSaldo.sort((a,b) => b.saldo - a.saldo);
-
-        let top5Saldo = arrSaldo.slice(0, 5);
-        let sisanya = arrSaldo.slice(5).reduce((sum, item) => sum + item.saldo, 0);
-        
-        let labelSaldo = top5Saldo.map(u => u.nama);
-        let dataSaldo = top5Saldo.map(u => u.saldo);
-        
-        if(sisanya > 0) {
-            labelSaldo.push("Unit Lainnya");
-            dataSaldo.push(sisanya);
-        }
-
-        let ctxDistribusi = document.getElementById('grafikDistribusi');
-        if(ctxDistribusi) {
-            if(chartDistribusi) chartDistribusi.destroy();
-            chartDistribusi = new Chart(ctxDistribusi, {
-                type: 'doughnut',
-                data: {
-                    labels: labelSaldo,
-                    datasets: [{
-                        data: dataSaldo,
-                        backgroundColor: ['#0284c7', '#2e7d32', '#f57c00', '#eab308', '#8b5cf6', '#94a3b8'],
-                        borderWidth: 2, borderColor: '#fff'
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '40%',
-                    plugins: {
-                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {size: 11, weight: 'bold'} } },
-                        tooltip: { callbacks: { label: function(ctx) { return ' Rp ' + ctx.raw.toLocaleString('id-ID'); } } }
-                    }
-                }
-            });
-        }
-    }
-
-
-    // ========================================================
-    // FUNGSI LAINNYA DI BAWAH INI
-    // ========================================================
 
     function showTab(tabId, element) {
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none'); 
         document.getElementById(tabId).style.display = 'block'; 
-        
         if(element) { 
             document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab')); 
             element.classList.add('active-tab'); 
         } 
-        
-        if(tabId === 'ceksaldo') document.getElementById('areaDetailSaldo').style.display = 'none';
-        
-        // Panggil render infografis khusus jika tab Pantau BSU ditekan
         if(tabId === 'pantau-bsu') renderPantauBSU();
     }
 
-    function kirimWaAkunBSU(idBsu) {
-        let n = dataNasabah.find(x => String(x.id) === String(idBsu));
-        if (!n) {
-            alert('Gagal: Data Bank Sampah Unit tidak ditemukan!');
-            return;
-        }
-
-        let namaBsu = n.nama;
-        let idUnit = n.id;
-        let password = n.password || 'Belum diatur';
-        let hp = n.hp;
-
-        if (!hp || String(hp).trim() === '') {
-            alert('Gagal: Nomor WhatsApp untuk BSU ini belum diisi!');
-            return;
-        }
-
-        let noWa = String(hp).trim();
-        if (noWa.startsWith('8')) {
-            noWa = '62' + noWa;
-        } else if (noWa.startsWith('0')) {
-            noWa = '62' + noWa.substring(1);
-        }
-
-        let pesan = `Halo Pengurus *Bank Sampah Unit ${namaBsu}* 👋,\n\n`;
-        pesan += `Berikut adalah akses login resmi untuk masuk ke Portal Sistem Manajemen Bank Sampah Binaan DLH:\n\n`;
-        pesan += `🏢 *Nama Unit:* ${namaBsu}\n`;
-        pesan += `🆔 *ID Login:* ${idUnit}\n`;
-        pesan += `🔑 *Kata Sandi:* ${password}\n\n`;
-        pesan += `_Mohon simpan pesan ini dengan baik dan jangan bagikan kata sandi Anda kepada pihak yang tidak berkepentingan._\n\n`;
-        pesan += `Salam,\n*Admin DLH* ♻️`;
-
-        window.open(`https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function updateTabelNasabah() {
-        let tbody = document.getElementById('tabel-nasabah');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        if (!dataNasabah || dataNasabah.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada BSU yang terdaftar.</td></tr>`;
-            return;
-        }
-
-        dataNasabah.forEach(n => {
-            let totalRp = 0;
-            let trxBSU = dataTransaksi.filter(t => String(t.nama).trim() === String(n.nama).trim());
-            trxBSU.forEach(t => {
-                if(t.jenis !== 'Penarikan Tunai') {
-                    totalRp += parseFloat(t.total || 0);
-                } else {
-                    totalRp -= parseFloat(t.total || 0);
-                }
-            });
-
-            tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td class="text-muted fw-medium">${n.id}</td>
-                <td class="fw-bold" style="color: var(--primary-dark);">${n.nama}</td>
-                <td><i class="bi bi-whatsapp text-success me-2"></i>${n.hp || '-'}</td>
-                <td class="text-danger fw-bold"><i class="bi bi-key-fill me-1"></i>${n.password || '-'}</td>
-                <td class="fw-bold text-success">Rp ${totalRp.toLocaleString('id-ID')}</td>
-                <td class="text-center align-middle">
-                    <button class="btn btn-sm btn-outline-success py-1 px-2 me-1" onclick="kirimWaAkunBSU('${n.id}')" title="Kirim Akses ke WA">
-                        <i class="bi bi-whatsapp"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-primary py-1 px-2 me-1" onclick="editNasabah('${n.id}')" title="Edit BSU"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusNasabah('${n.id}')" title="Hapus BSU"><i class="bi bi-trash3"></i></button>
-                </td>
-            </tr>`;
-        });
-    }
-
+    // =========================================================
+    // PERBAIKAN BUG FAKE SUCCESS: SIMPAN NASABAH/BSU
+    // =========================================================
     function simpanNasabah(e) {
         e.preventDefault();
         let nama = document.getElementById('namaNasabah').value.trim();
@@ -1899,21 +264,31 @@
 
         let btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.disabled = true; 
-        btnSubmit.innerHTML = 'Menyimpan...';
+        btnSubmit.innerHTML = 'Merekam ke Server...';
         
         fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-            .then(response => { 
-                alert('Berhasil! Data BSU beserta kata sandi telah direkam ke database pusat.'); 
-                document.getElementById('formNasabah').reset(); 
-                loadDataDatabase(); 
+            .then(response => response.text()) // AMBIL TEKS ASLI DARI SERVER
+            .then(text => {
+                // CEK APAKAH SERVER BENAR-BENAR MENJAWAB SUKSES
+                if (text.includes("Sukses")) {
+                    alert('Berhasil! Data BSU telah direkam ke database pusat.'); 
+                    document.getElementById('formNasabah').reset(); 
+                    loadDataDatabase(); 
+                } else {
+                    // JIKA GAGAL, TAMPILKAN PESAN ERRORNYA
+                    alert('GAGAL TEREKAM! Terdapat error di server Apps Script:\n\n' + text);
+                }
             })
-            .catch(error => alert('Gagal menyimpan.'))
+            .catch(error => alert('Koneksi terputus. Pastikan link Apps Script URL sudah benar.'))
             .finally(() => { 
                 btnSubmit.disabled = false; 
                 btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Daftarkan BSU'; 
             });
     }
 
+    // =========================================================
+    // PERBAIKAN BUG FAKE SUCCESS: SIMPAN KATEGORI
+    // =========================================================
     function simpanKategori(e) {
         e.preventDefault();
         let jenis = document.getElementById('jenisKategori').value.trim();
@@ -1929,25 +304,63 @@
 
         let btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.disabled = true;
-        btnSubmit.innerHTML = 'Menyimpan...';
+        btnSubmit.innerHTML = 'Merekam ke Server...';
 
         fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-            .then(response => {
-                alert('Kategori berhasil ditambahkan.');
-                document.getElementById('formKategori').reset();
-                loadDataDatabase(); 
+            .then(response => response.text())
+            .then(text => {
+                if (text.includes("Sukses")) {
+                    alert('Kategori berhasil ditambahkan.');
+                    document.getElementById('formKategori').reset();
+                    loadDataDatabase(); 
+                } else {
+                    alert('GAGAL TEREKAM! Server merespons:\n\n' + text);
+                }
             })
-            .catch(error => alert('Gagal menyimpan. Laporan error: ' + error.message))
+            .catch(error => alert('Koneksi terputus.'))
             .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Kategori'; });
     }
 
     function hapusKategori(id) {
         if(confirm('Yakin ingin menghapus kategori ini?')) {
             let formData = new URLSearchParams(); formData.append('action', 'deleteKategori'); formData.append('id', id);
-            document.body.style.cursor = 'wait';
             fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-                .then(response => { alert("Kategori berhasil dihapus."); loadDataDatabase(); })
-                .finally(() => { document.body.style.cursor = 'default'; });
+                .then(response => response.text())
+                .then(text => { if(text.includes('Sukses')) { alert("Berhasil dihapus."); loadDataDatabase(); } else alert("Gagal menghapus!"); });
+        }
+    }
+
+    // FUNGSI RENDER TABEL NASABAH
+    function updateTabelNasabah() {
+        let tbody = document.getElementById('tabel-nasabah');
+        if(!tbody) return;
+        tbody.innerHTML = '';
+        if (!dataNasabah || dataNasabah.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada BSU yang terdaftar.</td></tr>`; return; }
+
+        dataNasabah.forEach(n => {
+            let totalRp = 0;
+            let trxBSU = dataTransaksi.filter(t => String(t.nama).trim() === String(n.nama).trim());
+            trxBSU.forEach(t => { totalRp += t.jenis !== 'Penarikan Tunai' ? parseFloat(t.total || 0) : -parseFloat(t.total || 0); });
+
+            tbody.innerHTML += `
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td class="text-muted fw-medium">${n.id}</td>
+                <td class="fw-bold" style="color: var(--primary-dark);">${n.nama}</td>
+                <td>${n.hp || '-'}</td>
+                <td class="text-danger fw-bold">${n.password || '-'}</td>
+                <td class="fw-bold text-success">Rp ${totalRp.toLocaleString('id-ID')}</td>
+                <td class="text-center align-middle">
+                    <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusNasabah('${n.id}')" title="Hapus BSU"><i class="bi bi-trash3"></i> Hapus</button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function hapusNasabah(id) {
+        if(confirm('Anda yakin ingin menghapus data BSU ini?')) {
+            let formData = new URLSearchParams(); formData.append('action', 'deleteNasabah'); formData.append('id', id); 
+            fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
+            .then(res => res.text()).then(text => { if (text.includes("Sukses")) { alert("Berhasil dihapus."); loadDataDatabase(); } else { alert(text); }});
         }
     }
 
@@ -1955,374 +368,21 @@
         let tbody = document.getElementById('tabel-daftar-kategori');
         tbody.innerHTML = '';
         if(dataKategori.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Belum ada kategori.</td></tr>`;
-        
         dataKategori.forEach(k => {
-            let jenis = k.jenis_material ? k.jenis_material : '-';
-            tbody.innerHTML += `<tr>
-                <td class="align-middle fw-bold" style="color: #64748b;">${jenis}</td>
-                <td class="align-middle fw-bold" style="color: var(--primary-dark);">${k.nama_kategori}</td>
-                <td class="align-middle text-success fw-bold">Rp ${parseInt(k.harga).toLocaleString('id-ID')}</td>
-                <td class="text-center align-middle">
-                    <button class="btn btn-sm btn-outline-primary py-1 px-2 me-2" onclick="editKategori('${k.id}')"><i class="bi bi-pencil-square"></i></button>
-                    <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusKategori('${k.id}')"><i class="bi bi-trash3"></i></button>
-                </td>
-            </tr>`;
+            tbody.innerHTML += `<tr><td class="align-middle fw-bold">${k.jenis_material||'-'}</td><td class="align-middle fw-bold">${k.nama_kategori}</td><td class="align-middle text-success fw-bold">Rp ${parseInt(k.harga).toLocaleString('id-ID')}</td><td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusKategori('${k.id}')"><i class="bi bi-trash3"></i></button></td></tr>`;
         });
     }
 
-    function editKategori(id) {
-        let kategori = dataKategori.find(k => String(k.id) === String(id));
-        if (!kategori) return alert("Data kategori tidak ditemukan!");
-
-        let jenisBaru = prompt("Edit Jenis Material\n(Ketik salah satu: Plastik, Botol Kaca, Besi, Kertas, Logam, Elektronik, Minyak):", kategori.jenis_material || '');
-        if (jenisBaru === null) return;
-        jenisBaru = jenisBaru.trim();
-
-        let namaBaru = prompt("Edit Nama Material:", kategori.nama_kategori);
-        if (namaBaru === null) return;
-        namaBaru = namaBaru.trim();
-        if (namaBaru === '') return alert("Nama material tidak boleh kosong!");
-
-        let hargaBaru = prompt("Edit Harga per Kg (Rp):", kategori.harga);
-        if (hargaBaru === null) return;
-        hargaBaru = hargaBaru.trim();
-        if (hargaBaru === '' || isNaN(hargaBaru)) return alert("Harga harus berupa angka yang valid!");
-
-        let formData = new URLSearchParams(); 
-        formData.append('action', 'editKategori'); 
-        formData.append('id', id); 
-        formData.append('jenis_material', jenisBaru); 
-        formData.append('nama_kategori', namaBaru); 
-        formData.append('harga', hargaBaru);
-        
-        document.body.style.cursor = 'wait';
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-        .then(response => response.text())
-        .then(text => {
-            alert("Berhasil: Data kategori persediaan telah diperbarui."); 
-            loadDataDatabase();
-        })
-        .catch(error => alert("Gagal memperbarui data. Cek koneksi internet."))
-        .finally(() => { document.body.style.cursor = 'default'; });
-    }
-
-    function updateDropdownKategori() {
-        let selJenis = document.getElementById('pilihJenisMaterialSetor');
-        if(selJenis) selJenis.value = "";
-        let selNama = document.getElementById('pilihSampah'); 
-        if(selNama) selNama.innerHTML = '<option value="" disabled selected>-- Pilih Jenis Material di atas terlebih dahulu --</option>';
-    }
-
-    function filterDropdownKategori() {
-        let jenisDipilih = document.getElementById('pilihJenisMaterialSetor').value;
-        let selNama = document.getElementById('pilihSampah'); 
-
-        selNama.innerHTML = '<option value="" disabled selected>-- Pilih Nama Material --</option>';
-        let dataDisaring = dataKategori.filter(k => k.jenis_material === jenisDipilih);
-
-        if(dataDisaring.length === 0) {
-            selNama.innerHTML = '<option value="" disabled selected>-- Belum ada material di jenis ini --</option>';
-            return;
-        }
-
-        dataDisaring.forEach(k => { 
-            selNama.innerHTML += `<option value="${k.harga}">${k.nama_kategori} (Rp ${parseInt(k.harga).toLocaleString('id-ID')} / Kg)</option>`; 
-        });
-    }
-
-    function simpanSetoran(e) {
-        e.preventDefault();
-        let nama = document.getElementById('pilihNasabah').value; let selSampah = document.getElementById('pilihSampah');
-        if (!nama || selSampah.value === "") return alert("Harap lengkapi form!");
-        let jenisSampah = selSampah.options[selSampah.selectedIndex].text; let harga = parseInt(selSampah.value); let berat = parseFloat(document.getElementById('beratSampah').value);
-        let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        let jenisBersih = jenisSampah.split(' (')[0]; 
-        let formData = new URLSearchParams();
-        formData.append('action', 'tambahTransaksi'); 
-        formData.append('id', Date.now()); 
-        formData.append('tgl', tgl); 
-        formData.append('nama', nama); 
-        formData.append('jenis', jenisBersih); 
-        formData.append('berat', berat.toString().replace('.', ',')); 
-        formData.append('total', total);
-        let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...';
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-            .then(response => { alert(`Transaksi Berhasil!\nJurnal Umum dan Buku Besar otomatis disesuaikan.`); document.getElementById('formSetor').reset(); loadDataDatabase(); showTab('dashboard', document.querySelector('.nav-btn')); })
-            .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; });
-    }
-
-    function tarikSaldo(e) {
-        e.preventDefault();
-        let nama = document.getElementById('pilihNasabahSaldo').value; let nominal = parseInt(document.getElementById('nominalTarik').value);
-        let saldoTersedia = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => saldoTersedia += t.total);
-        if (nominal > saldoTersedia) return alert(`Gagal: Maksimal penarikan Rp ${saldoTersedia.toLocaleString('id-ID')}`);
-        let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        let formData = new URLSearchParams(); formData.append('action', 'tambahTransaksi'); formData.append('id', Date.now()); formData.append('tgl', tgl); formData.append('nama', nama); formData.append('jenis', 'Penarikan Tunai'); formData.append('berat', 0); formData.append('total', -nominal); 
-        let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true;
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-            .then(response => { alert(`Penarikan dana tunai senilai Rp ${nominal.toLocaleString('id-ID')} telah diproses.`); document.getElementById('formTarikSaldo').reset(); loadDataDatabase(); })
-            .finally(() => btnSubmit.disabled = false);
-    }
-
-    function editNasabah(id) {
-        let nasabah = dataNasabah.find(n => String(n.id) === String(id));
-        if (!nasabah) return alert("Data tidak ditemukan!");
-        
-        let namaBaru = prompt("Edit Nama Bank Sampah Unit (BSU):", nasabah.nama); 
-        if (namaBaru === null) return; 
-        namaBaru = namaBaru.trim(); 
-        if (namaBaru === '') return alert("Nama BSU tidak boleh kosong!");
-        
-        let hpBaru = prompt("Edit Nomor WhatsApp / HP:", nasabah.hp || ''); 
-        if (hpBaru === null) return;
-        
-        let passBaru = prompt("Edit Kata Sandi Akses BSU:", nasabah.password || '');
-        if (passBaru === null) return;
-
-        let formData = new URLSearchParams(); 
-        formData.append('action', 'editNasabah'); 
-        formData.append('id', id); 
-        formData.append('nama', namaBaru); 
-        formData.append('hp', hpBaru.trim());
-        formData.append('password', passBaru.trim());
-        
-        document.body.style.cursor = 'wait';
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-        .then(response => response.text())
-        .then(text => {
-            if (text.includes("Sukses")) { 
-                alert("Berhasil: Data dan Sandi BSU berhasil diperbarui."); 
-                loadDataDatabase(); 
-            } else { alert(text); }
-        })
-        .catch(error => alert("Gagal memperbarui data. Cek koneksi internet."))
-        .finally(() => { document.body.style.cursor = 'default'; });
-    }
-
-    function hapusNasabah(id) {
-        if(confirm('PERINGATAN!\n\nAnda yakin ingin menghapus data BSU ini secara permanen dari server?\nData BSU yang dihapus tidak akan bisa login lagi.')) {
-            let formData = new URLSearchParams(); 
-            formData.append('action', 'deleteNasabah'); 
-            formData.append('id', id); 
-            
-            document.body.style.cursor = 'wait';
-            fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-            .then(response => response.text())
-            .then(text => {
-                if (text.includes("Sukses")) { 
-                    alert("Berhasil: Data BSU telah dihapus."); 
-                    loadDataDatabase(); 
-                } else { alert(text); }
-            })
-            .catch(error => alert("Gagal menghapus data. Cek koneksi internet."))
-            .finally(() => { document.body.style.cursor = 'default'; });
-        }
-    }
-
-    function updateDropdownNasabah(dropdownId) {
-        let sel = document.getElementById(dropdownId); 
-        if(!sel) return;
-        sel.innerHTML = '<option value="" disabled selected>-- Pilih Bank Sampah Unit (BSU) --</option>';
-        
-        dataNasabah.forEach(n => {
-            sel.innerHTML += `<option value="${n.nama}">${n.nama} (${n.id})</option>`;
-        });
-    }
-
-    function cetakPdfStruk(index) {
-        let t = dataTransaksi[index]; let txt = t.total < 0 ? "PENARIKAN SALDO" : "SETORAN MATERIAL";
-        let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:320px;margin:0 auto;padding:25px;border:1px solid #e2e8f0;border-radius:12px;">
-            <h3 style="text-align:center;margin:0;font-weight:800;font-size:18px;">BANK SAMPAH INDUK BSI</h3><p style="text-align:center;margin:5px 0 15px 0;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p><hr style="border-top:1px dashed #cbd5e1;">
-            <table style="width:100%;font-size:14px;margin:10px 0;"><tr><td style="color:#64748b;">Tgl</td><td style="text-align:right;font-weight:600;">${t.tgl}</td></tr><tr><td style="color:#64748b;">Unit BSU</td><td style="text-align:right;font-weight:600;">${t.nama}</td></tr></table>
-            <hr style="border-top:1px dashed #cbd5e1;"><div style="margin:15px 0;"><div style="font-weight:700;margin-bottom:5px;">${t.jenis}</div><div style="display:flex;justify-content:space-between;font-size:14px;color:#64748b;"><span>Vol: ${t.berat} Kg</span><span>Rp ${Math.abs(t.total).toLocaleString('id-ID')}</span></div></div>
-            <hr style="border-top:1px dashed #cbd5e1;"><div style="display:flex;justify-content:space-between;font-weight:800;margin-top:15px;color:${t.total < 0 ? '#e11d48' : '#059669'};"><span>${txt}</span><span>Rp ${Math.abs(t.total).toLocaleString('id-ID')}</span></div></div>`;
-        document.getElementById('area-laporan-a4').innerHTML = html; document.body.className = 'mode-cetak'; window.print(); document.body.className = '';
-    }
-
-    function kirimWaStruk(index) {
-        let t = dataTransaksi[index]; let n = dataNasabah.find(x => x.nama === t.nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
-        if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
-        let pesan = `*STRUK BANK SAMPAH INDUK*\nTgl: ${t.tgl}\nUnit BSU: *${t.nama}*\n\n▪ Aktivitas: ${t.jenis}\n▪ Volume: ${t.berat} Kg\n*TOTAL: Rp ${Math.abs(t.total).toLocaleString('id-ID')}*`;
-        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function tampilkanDetailSaldo() {
-        let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return; document.getElementById('areaDetailSaldo').style.display = 'block';
-        let riwayat = dataTransaksi.filter(t => t.nama === nama); let totRp = 0; let totKg = 0; let tbody = document.getElementById('tabel-riwayat-saldo'); tbody.innerHTML = '';
-        if (riwayat.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5">Belum ada riwayat.</td></tr>`;
-        else {
-            riwayat.slice().reverse().forEach(t => {
-                totRp += t.total; totKg += t.berat; let sign = t.total < 0 ? '-' : '+'; let cl = t.total < 0 ? 'text-danger' : 'text-success';
-                tbody.innerHTML += `<tr><td class="text-muted small">${t.tgl}</td><td><span class="badge-sampah">${t.jenis}</span></td><td class="text-center fw-medium">${t.berat>0 ? t.berat+' Kg' : '-'}</td><td class="text-end fw-bold ${cl}">${sign} Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`;
-            });
-        }
-        document.getElementById('detail-total-rp').innerText = 'Rp ' + totRp.toLocaleString('id-ID'); document.getElementById('detail-total-kg').innerText = totKg.toFixed(1) + ' Kg';
-    }
-
-    function cetakPdfSaldo() {
-        let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return alert("Pilih nasabah dulu.");
-        let totRp = 0, totKg = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => { totRp += t.total; totKg += t.berat; });
-        let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:400px;margin:0 auto;padding:30px;border:1px solid #cbd5e1;border-radius:16px;">
-            <div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:15px;margin-bottom:20px;"><h3 style="margin:0;font-weight:800;">BANK SAMPAH INDUK BSI</h3><p style="margin:5px 0 0 0;font-size:12px;font-weight:600;">REKENING KORAN</p></div>
-            <table style="width:100%;font-size:13px;margin-bottom:20px;"><tr><td style="color:#64748b;">Entitas</td><td style="font-weight:700;">: ${nama}</td></tr></table>
-            <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:20px;"><p style="margin:0 0 5px 0;font-size:12px;color:#64748b;">Akumulasi Volume</p><h4 style="margin:0 0 20px 0;color:#334155;">${totKg.toFixed(1)} Kg</h4>
-            <p style="margin:0 0 5px 0;font-size:12px;color:#64748b;">Kewajiban Saldo (IDR)</p><h3 style="margin:0;color:#059669;font-weight:800;font-size:24px;">Rp ${totRp.toLocaleString('id-ID')}</h3></div></div>`;
-        document.getElementById('area-laporan-a4').innerHTML = html; document.body.className = 'mode-cetak'; window.print(); document.body.className = '';
-    }
-
-    function kirimWaSaldo() {
-        let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return;
-        let totRp = 0, totKg = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => { totRp += t.total; totKg += t.berat; });
-        let n = dataNasabah.find(x => x.nama === nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
-        if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
-        let pesan = `Yth. Pengurus *${nama}*,\nBerikut posisi saldo BSU Anda di Induk:\n📊 Volume: *${totKg.toFixed(1)} Kg*\n💳 Saldo: *Rp ${totRp.toLocaleString('id-ID')}*`;
-        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    function updateBukuBesar() {
-        let tbody = document.getElementById('tabel-jurnal-umum'); tbody.innerHTML = '';
-        if(dataTransaksi.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5">Kosong.</td></tr>`;
-        dataTransaksi.forEach((t, i) => {
-            let idTrx = "REF-" + (i + 1).toString().padStart(5, '0'); let rp = 'Rp ' + Math.abs(t.total).toLocaleString('id-ID');
-            if (t.jenis === 'Penarikan Tunai') {
-                tbody.innerHTML += `<tr><td class="text-muted small">${t.tgl}<br><strong class="text-dark">${idTrx}</strong></td><td>Pelunasan: ${t.nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Mitra BSU</td><td class="text-end fw-bold text-success">${rp}</td><td class="text-end text-muted">-</td></tr>
-                <tr style="border-bottom:2px solid var(--border-color);"><td></td><td class="text-muted small px-4"><i>Pencairan Tunai BSU</i></td><td class="px-4"><span class="badge bg-light text-dark border">111</span> Kas Bank BSI</td><td class="text-end text-muted">-</td><td class="text-end fw-bold text-danger">${rp}</td></tr>`;
-            } else {
-                tbody.innerHTML += `<tr><td class="text-muted small">${t.tgl}<br><strong class="text-dark">${idTrx}</strong></td><td>Kredit: ${t.nama}</td><td><span class="badge bg-light text-dark border">511</span> Beban Pembelian</td><td class="text-end fw-bold text-success">${rp}</td><td class="text-end text-muted">-</td></tr>
-                <tr style="border-bottom:2px solid var(--border-color);"><td></td><td class="text-muted small px-4"><i>Liabilitas Mitra BSU</i></td><td class="px-4"><span class="badge bg-light text-dark border">211</span> Hutang Mitra BSU</td><td class="text-end text-muted">-</td><td class="text-end fw-bold text-danger">${rp}</td></tr>`;
-            }
-        });
-    }
-    
-    function cetakBukuBesar() { document.body.className = 'mode-bukubesar'; window.print(); document.body.className = ''; }
-
-    function updateLaporan() {
-        let totR = 0, rekapJ = {}, rekapN = {}; 
-        let kasBSI = 0;
-
-        dataTransaksi.forEach(t => {
-            if(t.jenis === 'Penarikan Tunai') {
-                kasBSI -= Math.abs(t.total);
-            } else {
-                totR += t.total;
-                if(!rekapN[t.nama]) rekapN[t.nama] = {b:0, n:0}; 
-                rekapN[t.nama].b += t.berat; rekapN[t.nama].n += t.total;
-                
-                if(!rekapJ[t.jenis]) rekapJ[t.jenis] = {b:0, harga_satuan:0}; 
-                rekapJ[t.jenis].b += t.berat; 
-                rekapJ[t.jenis].harga_satuan = (t.total / t.berat) || 0;
-            }
-        });
-
-        dataPenjualan.forEach(p => {
-            if(p.status_bayar === 'Lunas') kasBSI += parseFloat(p.total || 0);
-            if(rekapJ[p.material]) {
-                rekapJ[p.material].b -= parseFloat(p.berat || 0);
-                if(rekapJ[p.material].b < 0) rekapJ[p.material].b = 0; 
-            }
-        });
-
-        dataProduksi.forEach(p => { 
-            kasBSI -= parseFloat(p.biaya_operasional || 0); 
-            if(rekapJ[p.bahan_baku]) {
-                rekapJ[p.bahan_baku].b -= parseFloat(p.berat_bahan || 0);
-                if(rekapJ[p.bahan_baku].b < 0) rekapJ[p.bahan_baku].b = 0;
-            }
-            if(!rekapJ[p.produk_hasil]) rekapJ[p.produk_hasil] = {b:0, harga_satuan: 0};
-            rekapJ[p.produk_hasil].b += parseFloat(p.berat_hasil || 0);
-            rekapJ[p.produk_hasil].harga_satuan = parseFloat(p.biaya_operasional || 0) / parseFloat(p.berat_hasil || 1); 
-        });
-        
-        dataResidu.forEach(r => { kasBSI -= parseFloat(r.biaya_retribusi || 0); });
-        dataAset.forEach(a => { kasBSI -= parseFloat(a.harga_beli || 0); });
-
-        let totalStokFisik = 0;
-        for(let j in rekapJ) { totalStokFisik += rekapJ[j].b; }
-        
-        document.getElementById('lap-sampah').innerText = totalStokFisik.toFixed(1); 
-        document.getElementById('lap-rupiah').innerText = 'Rp ' + totR.toLocaleString('id-ID');
-        
-        let uiKas = document.getElementById('lap-kas');
-        if(uiKas) {
-            uiKas.innerText = 'Rp ' + kasBSI.toLocaleString('id-ID');
-        }
-
-        let tbJ = document.getElementById('tabel-rekap-sampah'); 
-        if(tbJ) tbJ.innerHTML = '';
-        
-        for(let j in rekapJ) {
-            if(rekapJ[j].b > 0.01) { 
-                let valuasi = rekapJ[j].b * rekapJ[j].harga_satuan;
-                if(tbJ) tbJ.innerHTML += `<tr><td class="fw-bold" style="color: #475569;">${j}</td><td><span class="badge bg-light text-dark border">${rekapJ[j].b.toFixed(1)} Kg</span></td><td class="text-end text-success fw-bold">Rp ${valuasi.toLocaleString('id-ID')}</td></tr>`;
-            }
-        }
-
-        let tbN = document.getElementById('tabel-rekap-nasabah'); 
-        if(tbN) tbN.innerHTML = '';
-        
-        dataNasabah.forEach(n => {
-            let b = rekapN[n.nama] ? rekapN[n.nama].b : 0; 
-            let v = rekapN[n.nama] ? rekapN[n.nama].n : 0;
-            
-            if(v > 0 || b > 0) { 
-                if(tbN) tbN.innerHTML += `<tr><td class="fw-bold" style="color: #475569;">${n.nama}</td><td>${b.toFixed(1)} Kg</td><td class="text-end text-warning fw-bold" style="color: #d97706 !important;">Rp ${v.toLocaleString('id-ID')}</td></tr>`;
-            }
-        });
+    function updateDashboardInduk() {
+        document.getElementById('dash-total-unit').innerText = masterNasabah.length;
+        let totalSampah = 0; let totalSaldo = 0;
+        masterTransaksi.forEach(t => { if(t.jenis !== 'Penarikan Tunai') { totalSampah += parseFloat(t.berat || 0); totalSaldo += t.total; } else { totalSaldo += t.total; } });
+        document.getElementById('dash-total-sampah').innerText = totalSampah.toLocaleString('id-ID') + ' Kg';
+        document.getElementById('dash-total-saldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
     }
 
     function prosesLogout() {
-        if(confirm('Apakah Anda yakin ingin keluar dari Dasbor Bank Sampah Induk?')) {
-            localStorage.removeItem('ROLE_PENGGUNA');
-            localStorage.removeItem('ID_UNIT_PENGGUNA');
-            window.location.href = 'index.html';
-        }
-    }
-
-    function lihatSandi(inputId, iconId) {
-        let input = document.getElementById(inputId);
-        let icon = document.getElementById(iconId);
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.remove("bi-eye-slash-fill");
-            icon.classList.add("bi-eye-fill");
-        } else {
-            input.type = "password";
-            icon.classList.remove("bi-eye-fill");
-            icon.classList.add("bi-eye-slash-fill");
-        }
-    }
-
-    function ubahSandiAdmin(e) {
-        e.preventDefault();
-        let idBaru = document.getElementById('adminIdBaru').value.trim();
-        let passBaru = document.getElementById('adminPassBaru').value.trim();
-
-        if(confirm('PERINGATAN!\nApakah Anda yakin ingin mengubah ID dan Kata Sandi Admin Pusat?\n\nAnda harus mengingat data baru ini untuk login berikutnya.')) {
-            let btn = document.getElementById('btnSimpanAdmin');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
-
-            let formData = new URLSearchParams();
-            formData.append('action', 'updateAdminPusat');
-            formData.append('username_baru', idBaru);
-            formData.append('password_baru', passBaru);
-
-            fetch(scriptURL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, 
-                body: formData.toString() 
-            })
-            .then(res => res.text())
-            .then(text => {
-                alert("Berhasil! ID dan Kata Sandi Admin Pusat telah diperbarui di Database.");
-                document.getElementById('formPengaturanAdmin').reset();
-            })
-            .catch(err => alert("Gagal menghubungi server Google Sheets. Pastikan internet stabil."))
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Perubahan';
-            });
-        }
+        if(confirm('Apakah Anda yakin ingin keluar?')) { localStorage.removeItem('ROLE_PENGGUNA'); window.location.href = 'index.html'; }
     }
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
