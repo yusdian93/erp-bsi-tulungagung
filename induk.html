@@ -91,7 +91,7 @@
                 </div>
             </div>
         </div>
-        </div>
+    </div>
 
     <div id="menu-pantau" class="halaman-menu">
         <div class="d-flex justify-content-between align-items-center mb-4">
@@ -100,7 +100,7 @@
                 <p class="text-muted">Command center pemantauan aktivitas reduksi sampah</p>
             </div>
             <div class="w-25">
-                <button class="btn btn-primary w-100 shadow-sm" onclick="renderPantauBSU()"><i class="bi bi-arrow-clockwise"></i> Refresh Data</button>
+                <button class="btn btn-primary w-100 shadow-sm" onclick="muatDataDariSheets()"><i class="bi bi-arrow-clockwise"></i> Refresh Data</button>
             </div>
         </div>
 
@@ -172,38 +172,79 @@
         <h3 class="fw-bold mb-4 text-dark">Manajemen Kategori Harga</h3>
         <div class="card p-4">
             <table class="table table-hover">
-                <thead class="table-light"><tr><th>Jenis Material</th><th>Nama Kategori</th><th>Harga Perkilo</th><th>Aksi</th></tr></thead>
+                <thead class="table-light"><tr><th>Jenis Material</th><th>Nama Kategori</th><th>Harga Perkilo</th></tr></thead>
                 <tbody id="tabelKategori"></tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // Array Global (Diisi oleh fetch Data_BSU & Trx_BSU dari Apps Script)
+        // =====================================================================
+        // 1. LINK GOOGLE APPS SCRIPT ANDA (PENTING: GANTI DENGAN LINK ANDA!)
+        // =====================================================================
+        const API_URL = "https://script.google.com/macros/s/AKfycbyqGlxUj0YKqOCu6ITNgyKEaDJjjmrJrYZ9V8MnV7LCWRE8OQA-Ou9FMO8YSyNxzAr2Yw/exec"; 
+
+        // Array Global 
         let masterNasabah = []; 
         let masterTransaksi = [];
         let dataKategori = [];
         let chartKomposisiInstance = null;
 
-        // 1. FUNGSI NAVIGASI PINDAH HALAMAN
+        // =====================================================================
+        // 2. MESIN PENARIK DATA DARI GOOGLE SHEETS (YANG SEBELUMNYA HILANG)
+        // =====================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            muatDataDariSheets(); // Panggil fungsi narik data saat web dibuka
+        });
+
+        function muatDataDariSheets() {
+            // Jika API URL belum diubah, beri peringatan
+            if(API_URL === "ISI_DENGAN_URL_WEB_APP_ANDA_DISINI") {
+                alert("Peringatan: URL API_URL belum diisi dengan link Google Script Anda. Data tidak akan muncul.");
+                return;
+            }
+
+            // Ganti teks tombol dashboard jadi "Loading..."
+            document.getElementById('dash-total-unit').innerText = "Loading...";
+
+            fetch(`${API_URL}?role=BSI`)
+                .then(response => response.json())
+                .then(data => {
+                    masterNasabah = data.nasabah || [];
+                    masterTransaksi = data.transaksi || [];
+                    dataKategori = data.kategori || [];
+
+                    // Update tampilan setelah data masuk
+                    updateDashboardInduk();
+                    renderTabelKategori();
+                    
+                    // Jika halaman pantau sedang terbuka, update pantauannya juga
+                    if (document.getElementById('menu-pantau').classList.contains('aktif')) {
+                        renderPantauBSU();
+                    }
+                })
+                .catch(error => {
+                    console.error("Gagal menarik data:", error);
+                    document.getElementById('dash-total-unit').innerText = "Error";
+                    alert("Koneksi gagal! Pastikan link Web App Apps Script benar dan statusnya 'Anyone' (Siapa Saja).");
+                });
+        }
+
+        // =====================================================================
+        // FUNGSI-FUNGSI TAMPILAN
+        // =====================================================================
         function bukaMenu(idMenu) {
-            // Sembunyikan semua konten
             document.querySelectorAll('.halaman-menu').forEach(el => el.classList.remove('aktif'));
-            // Tampilkan konten tujuan
             document.getElementById(idMenu).classList.add('aktif');
 
-            // Hapus warna biru dari semua link navbar
             document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('aktif'));
-            // Warnai biru link yang sedang diklik
             event.currentTarget.classList.add('aktif');
 
-            // TRIGGER OTOMATIS: Jika halaman pantau diklik, buat grafik
             if(idMenu === 'menu-pantau') {
                 renderPantauBSU();
             }
         }
 
-        // 2. FUNGSI LAMA: Kalkulasi Dashboard Depan
         function updateDashboardInduk() {
             if(!document.getElementById('dash-total-unit')) return;
             document.getElementById('dash-total-unit').innerText = masterNasabah.length;
@@ -221,7 +262,22 @@
             document.getElementById('dash-total-saldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
         }
 
-        // 3. FUNGSI LOGOUT (Lama)
+        function renderTabelKategori() {
+            let tbody = document.getElementById('tabelKategori');
+            tbody.innerHTML = '';
+            if(dataKategori.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="text-center">Kategori belum tersedia</td></tr>';
+                return;
+            }
+            dataKategori.forEach(k => {
+                tbody.innerHTML += `<tr>
+                    <td>${k.jenis_material || '-'}</td>
+                    <td>${k.nama_kategori || '-'}</td>
+                    <td class="text-success fw-bold">Rp ${(parseInt(k.harga)||0).toLocaleString('id-ID')}</td>
+                </tr>`;
+            });
+        }
+
         function prosesLogout() {
             if(confirm('Apakah Anda yakin ingin keluar dari Akses Induk?')) { 
                 localStorage.removeItem('ROLE_PENGGUNA');
@@ -229,38 +285,25 @@
             }
         }
 
-        // ==============================================================
-        // 4. FUNGSI PENGGERAK MENU PANTAU BSU
-        // ==============================================================
         function renderPantauBSU() {
             let rekapBSU = {};
             let totalSampahGlobal = 0;
             let totalSaldoGlobal = 0;
             let totalTrxGlobal = masterTransaksi.length;
 
-            // Daftarkan semua BSU ke dalam keranjang kalkulasi
             masterNasabah.forEach(bsu => {
-                // bsu.id atau bsu.nama disesuaikan dengan header array Anda
-                rekapBSU[bsu.id] = {
-                    nama: bsu.nama,
-                    jmlTransaksi: 0,
-                    sampahKg: 0,
-                    saldoRp: 0
-                };
+                rekapBSU[bsu.id] = { nama: bsu.nama, jmlTransaksi: 0, sampahKg: 0, saldoRp: 0 };
             });
 
-            // Menyedot data dan mendistribusikan per BSU
             masterTransaksi.forEach(trx => {
-                let idUnit = trx.id_unit; // Sesuai kolom database Anda
+                let idUnit = trx.id_unit; 
                 let berat = parseFloat(trx.berat) || 0;
                 let nominal = parseFloat(trx.total) || 0;
 
-                // Hitung kumulatif Kabupaten
                 if(trx.jenis !== 'Penarikan Tunai') totalSampahGlobal += berat;
                 if(trx.jenis === 'Penyetoran') totalSaldoGlobal += nominal;
                 if(trx.jenis === 'Penarikan Tunai') totalSaldoGlobal -= nominal;
 
-                // Hitung per BSU Desa
                 if(rekapBSU[idUnit]) {
                     rekapBSU[idUnit].jmlTransaksi += 1;
                     if(trx.jenis !== 'Penarikan Tunai') rekapBSU[idUnit].sampahKg += berat;
@@ -269,13 +312,11 @@
                 }
             });
 
-            // Tulis ulang ke kartu indikator Pantau
             document.getElementById('pantau-total-bsu').innerText = masterNasabah.length + " Unit";
             document.getElementById('pantau-total-trx').innerText = totalTrxGlobal;
             document.getElementById('pantau-total-sampah-kg').innerText = totalSampahGlobal.toLocaleString('id-ID') + " Kg";
             document.getElementById('pantau-total-saldo-rp').innerText = "Rp " + totalSaldoGlobal.toLocaleString('id-ID');
 
-            // Cetak Baris Tabel Ranking
             let tbody = document.getElementById('tabelDataPantauBSU');
             tbody.innerHTML = '';
             for (let id in rekapBSU) {
@@ -290,17 +331,13 @@
                 `;
             }
 
-            // Panggil pembuatan grafik
             renderGrafikKomposisi();
         }
 
         function renderGrafikKomposisi() {
             const ctx = document.getElementById('chartKomposisi').getContext('2d');
-            
-            // Hancurkan grafik sebelumnya jika ada agar tidak tumpang tindih
             if (chartKomposisiInstance) { chartKomposisiInstance.destroy(); }
             
-            // Data bisa Anda ubah menjadi dinamis dari masterTransaksi di masa mendatang
             chartKomposisiInstance = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
@@ -311,14 +348,10 @@
                         borderWidth: 0
                     }]
                 },
-                options: { 
-                    responsive: true, 
-                    plugins: { legend: { position: 'bottom' } },
-                    cutout: '75%' // Membuat donat lebih tipis dan elegan
-                }
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } }, cutout: '75%' }
             });
         }
     </script>
     
-    </body>
+</body>
 </html>
