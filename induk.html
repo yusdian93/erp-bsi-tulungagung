@@ -255,7 +255,7 @@
         .ai-glow-card { background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98)); border: 1px solid rgba(16, 185, 129, 0.4); animation: glowing-ai 4s infinite alternate; border-radius: 24px; padding: 30px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .composition-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
         .progress-container-bsu { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; overflow: hidden; margin-top: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
-        .progress-bar-ai { height: 100%; border-radius: 10px; position: relative; overflow: hidden; transition: width 1.5s cubic-bezier(0.1, 0.8, 0.2, 1); }
+        .progress-bar-ai { height: 100%; border-radius: 10px; position: relative; overflow: hidden; transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -1009,7 +1009,7 @@
         </div>
     </div>
 
-    <div id="nasabah" class="tab-content" style="display:none;">
+    <div id="nasabah" class="tab-content" style="display:block;">
         <div class="row">
             <div class="col-lg-4 mb-4">
                 <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
@@ -1531,6 +1531,44 @@
     loadDataDatabase();
 
     // ========================================================
+    // FUNGSI KIRIM WA AKSES LOGIN MITRA BSU
+    // ========================================================
+    function kirimWaAkunBSU(idBsu) {
+        let n = dataNasabah.find(x => String(x.id) === String(idBsu));
+        if (!n) {
+            alert('Gagal: Data Bank Sampah Unit tidak ditemukan!');
+            return;
+        }
+
+        let namaBsu = n.nama;
+        let idUnit = n.id;
+        let password = n.password || 'Belum diatur';
+        let hp = n.hp;
+
+        if (!hp || String(hp).trim() === '') {
+            alert('Gagal: Nomor WhatsApp untuk BSU ini belum diisi!');
+            return;
+        }
+
+        let noWa = String(hp).trim();
+        if (noWa.startsWith('8')) {
+            noWa = '62' + noWa;
+        } else if (noWa.startsWith('0')) {
+            noWa = '62' + noWa.substring(1);
+        }
+
+        let pesan = `Halo Pengurus *Bank Sampah Unit ${namaBsu}* 👋,\n\n`;
+        pesan += `Berikut adalah akses login resmi untuk masuk ke Portal Sistem Manajemen Bank Sampah Binaan DLH:\n\n`;
+        pesan += `🏢 *Nama Unit:* ${namaBsu}\n`;
+        pesan += `🆔 *ID Login:* ${idUnit}\n`;
+        pesan += `🔑 *Kata Sandi:* ${password}\n\n`;
+        pesan += `_Mohon simpan pesan ini dengan baik dan jangan bagikan kata sandi Anda kepada pihak yang tidak berkepentingan._\n\n`;
+        pesan += `Salam,\n*Admin DLH* ♻️`;
+
+        window.open(`https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`, '_blank');
+    }
+
+    // ========================================================
     // LOGIKA FILTER PANTAU BSU
     // ========================================================
     function updateDropdownFilterUnitPantau() {
@@ -1565,14 +1603,9 @@
         document.getElementById('judul-pantau-bsu').innerText = "BANK SAMPAH UNIT " + namaBsu.toUpperCase();
 
         // 1. Ambil transaksi mentah murni milik nasabahnya BSU ini 
-        // Karena BSI hanya punya rekap gelondongan, kita simulasikan metrik dari data transaksi BSI (tapi dalam dunia nyata harusnya ambil filter `id_unit` milik BSU itu sendiri).
-        
-        // Simulasikan Transaksi milik BSU tersebut 
-        // (Di sistem ini t.nama di masterTransaksi berisi nama BSU itu sendiri)
         let trxBsuIni = masterTransaksi.filter(t => String(t.nama).trim() === String(namaBsu));
         
         // 2. Kalkulasi Metrik Dasbor BSU
-        // Total Nasabah disimulasikan 0 karena database BSI tidak memegang daftar perorangan BSU
         document.getElementById('pantau-nasabah').innerText = "Simulasi"; 
         document.getElementById('pantau-transaksi').innerText = trxBsuIni.length;
 
@@ -1580,13 +1613,19 @@
         let totalBerat = 0;
         let komposisiData = {};
 
+        // OPTIMASI 1: Pembuatan Kamus Kategori (Hash Map) untuk akses O(1)
+        let kamusKategori = {};
+        dataKategori.forEach(k => {
+            kamusKategori[k.nama_kategori] = k.jenis_material;
+        });
+
         trxBsuIni.forEach(t => {
             totalRupiah += t.total; 
             if (t.jenis !== 'Penarikan Tunai') {
                 totalBerat += t.berat;
                 
-                let materialMaster = dataKategori.find(k => k.nama_kategori === t.jenis);
-                let jenisKategori = materialMaster && materialMaster.jenis_material ? materialMaster.jenis_material : 'Lainnya';
+                // Mengambil nilai dari kamus secara instan
+                let jenisKategori = kamusKategori[t.jenis] ? kamusKategori[t.jenis] : 'Lainnya';
                 let namaMaterialSpesifik = t.jenis;
 
                 if(!komposisiData[jenisKategori]) {
@@ -1606,6 +1645,7 @@
         // 3. Render Infografis Komposisi
         let areaKomposisi = document.getElementById('pantau-komposisi-sampah');
         areaKomposisi.innerHTML = '';
+        
         let warnaArray = ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6'];
 
         if(Object.keys(komposisiData).length === 0) {
@@ -1613,6 +1653,9 @@
         } else {
             let sortedKomposisi = Object.entries(komposisiData).sort((a, b) => b[1].total - a[1].total);
             
+            // OPTIMASI 2: Menggunakan DocumentFragment / Buffer HTML
+            let htmlBuffer = '';
+
             sortedKomposisi.forEach(([jenisBesar, dataBesar], index) => {
                 let persentaseUtama = totalBerat > 0 ? ((dataBesar.total / totalBerat) * 100).toFixed(1) : 0;
                 let warna = warnaArray[index % warnaArray.length];
@@ -1628,13 +1671,13 @@
                                 <span style="color: #94a3b8; font-weight: 600;">${beratSub.toFixed(1)} Kg <small style="opacity: 0.7; font-weight: 400;">(${persenSub}%)</small></span>
                             </div>
                             <div class="progress" style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;">
-                                <div class="progress-bar" style="width: ${persenSub}%; background-color: ${warna}; opacity: 0.7; border-radius: 2px; transition: width 1.5s ease-out;"></div>
+                                <div class="progress-bar" style="width: ${persenSub}%; background-color: ${warna}; opacity: 0.7; border-radius: 2px; transition: width 0.8s ease-out;"></div>
                             </div>
                         </div>
                     `;
                 });
 
-                areaKomposisi.innerHTML += `
+                htmlBuffer += `
                     <div class="col-12 col-md-6 col-xl-4 d-flex">
                         <div class="composition-item w-100 d-flex flex-column">
                             <div class="d-flex justify-content-between align-items-end mb-2">
@@ -1656,6 +1699,8 @@
                     </div>
                 `;
             });
+            // Terapkan ke DOM satu kali saja
+            areaKomposisi.innerHTML = htmlBuffer;
         }
     }
 
@@ -2254,6 +2299,349 @@
     }
     
     function cetakBukuBesar() { document.body.className = 'mode-bukubesar'; window.print(); document.body.className = ''; }
+
+    let chartValuasi = null;
+    let chartHutang = null;
+
+    function updateLaporan() {
+        let totR = 0, rekapJ = {}, rekapN = {}; 
+        let kasBSI = 0;
+
+        dataTransaksi.forEach(t => {
+            if(t.jenis === 'Penarikan Tunai') {
+                kasBSI -= Math.abs(t.total);
+            } else {
+                totR += t.total;
+                if(!rekapN[t.nama]) rekapN[t.nama] = {b:0, n:0}; 
+                rekapN[t.nama].b += t.berat; rekapN[t.nama].n += t.total;
+                
+                if(!rekapJ[t.jenis]) rekapJ[t.jenis] = {b:0, harga_satuan:0}; 
+                rekapJ[t.jenis].b += t.berat; 
+                rekapJ[t.jenis].harga_satuan = (t.total / t.berat) || 0;
+            }
+        });
+
+        dataPenjualan.forEach(p => {
+            if(p.status_bayar === 'Lunas') kasBSI += parseFloat(p.total || 0);
+            if(rekapJ[p.material]) {
+                rekapJ[p.material].b -= parseFloat(p.berat || 0);
+                if(rekapJ[p.material].b < 0) rekapJ[p.material].b = 0; 
+            }
+        });
+
+        dataProduksi.forEach(p => { 
+            kasBSI -= parseFloat(p.biaya_operasional || 0); 
+            if(rekapJ[p.bahan_baku]) {
+                rekapJ[p.bahan_baku].b -= parseFloat(p.berat_bahan || 0);
+                if(rekapJ[p.bahan_baku].b < 0) rekapJ[p.bahan_baku].b = 0;
+            }
+            if(!rekapJ[p.produk_hasil]) rekapJ[p.produk_hasil] = {b:0, harga_satuan: 0};
+            rekapJ[p.produk_hasil].b += parseFloat(p.berat_hasil || 0);
+            rekapJ[p.produk_hasil].harga_satuan = parseFloat(p.biaya_operasional || 0) / parseFloat(p.berat_hasil || 1); 
+        });
+        
+        dataResidu.forEach(r => { kasBSI -= parseFloat(r.biaya_retribusi || 0); });
+        dataAset.forEach(a => { kasBSI -= parseFloat(a.harga_beli || 0); });
+
+        let totalStokFisik = 0;
+        for(let j in rekapJ) { totalStokFisik += rekapJ[j].b; }
+        
+        document.getElementById('lap-sampah').innerText = totalStokFisik.toFixed(1); 
+        document.getElementById('lap-rupiah').innerText = 'Rp ' + totR.toLocaleString('id-ID');
+        
+        let uiKas = document.getElementById('lap-kas');
+        if(uiKas) {
+            uiKas.innerText = 'Rp ' + kasBSI.toLocaleString('id-ID');
+        }
+
+        let tbJ = document.getElementById('tabel-rekap-sampah'); 
+        if(tbJ) tbJ.innerHTML = '';
+        let labelValuasi = []; let dataValuasi = [];
+        
+        for(let j in rekapJ) {
+            if(rekapJ[j].b > 0.01) { 
+                let valuasi = rekapJ[j].b * rekapJ[j].harga_satuan;
+                if(tbJ) tbJ.innerHTML += `<tr><td class="fw-bold" style="color: #475569;">${j}</td><td><span class="badge bg-light text-dark border">${rekapJ[j].b.toFixed(1)} Kg</span></td><td class="text-end text-success fw-bold">Rp ${valuasi.toLocaleString('id-ID')}</td></tr>`;
+                
+                labelValuasi.push(j);
+                dataValuasi.push(valuasi);
+            }
+        }
+
+        let tbN = document.getElementById('tabel-rekap-nasabah'); 
+        if(tbN) tbN.innerHTML = '';
+        let hutangArr = [];
+        
+        dataNasabah.forEach(n => {
+            let b = rekapN[n.nama] ? rekapN[n.nama].b : 0; 
+            let v = rekapN[n.nama] ? rekapN[n.nama].n : 0;
+            
+            if(v > 0 || b > 0) { 
+                if(tbN) tbN.innerHTML += `<tr><td class="fw-bold" style="color: #475569;">${n.nama}</td><td>${b.toFixed(1)} Kg</td><td class="text-end text-warning fw-bold" style="color: #d97706 !important;">Rp ${v.toLocaleString('id-ID')}</td></tr>`;
+            }
+            if(v > 0) hutangArr.push({nama: n.nama, hutang: v});
+        });
+
+        let ctxVal = document.getElementById('grafikValuasiPersediaan');
+        if(ctxVal) {
+            if(chartValuasi) chartValuasi.destroy();
+            chartValuasi = new Chart(ctxVal, {
+                type: 'doughnut',
+                data: {
+                    labels: labelValuasi,
+                    datasets: [{ 
+                        data: dataValuasi, 
+                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f472b6'],
+                        borderWidth: 2, borderColor: '#ffffff'
+                    }]
+                },
+                options: { 
+                    maintainAspectRatio: false, 
+                    cutout: '65%', 
+                    plugins: { 
+                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {family: "'Plus Jakarta Sans', sans-serif"} } },
+                        tooltip: { callbacks: { label: function(ctx) { return ' Rp ' + ctx.raw.toLocaleString('id-ID'); } } }
+                    } 
+                }
+            });
+        }
+
+        hutangArr.sort((a,b) => b.hutang - a.hutang); 
+        let topHutang = hutangArr.slice(0, 7); 
+        
+        let ctxHut = document.getElementById('grafikHutangBSU');
+        if(ctxHut) {
+            if(chartHutang) chartHutang.destroy();
+            chartHutang = new Chart(ctxHut, {
+                type: 'bar',
+                data: {
+                    labels: topHutang.map(h => h.nama),
+                    datasets: [{ 
+                        label: 'Total Hutang BSU', 
+                        data: topHutang.map(h => h.hutang), 
+                        backgroundColor: '#f59e0b', 
+                        borderRadius: 6,
+                        barThickness: 18
+                    }]
+                },
+                options: { 
+                    indexAxis: 'y', 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { display: false }, 
+                        tooltip: { callbacks: { label: function(ctx) { return ' Rp ' + ctx.raw.toLocaleString('id-ID'); } } }
+                    },
+                    scales: { 
+                        x: { display: false, grid: {display: false} }, 
+                        y: { border: {display: false}, grid: {display: false}, ticks: {font: {family: "'Plus Jakarta Sans', sans-serif", weight: '600'}} } 
+                    }
+                }
+            });
+        }
+    }
+
+    function updateMonitorBSU() {
+        let tbody = document.getElementById('tabel-kinerja-bsu');
+        if(!tbody) return; 
+        tbody.innerHTML = '';
+        
+        let rekapUnit = [];
+        let sekarang = new Date().getTime();
+        
+        if (!dataUnit || dataUnit.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger fw-bold">Belum ada unit BSU yang didaftarkan di sistem.</td></tr>`;
+            return;
+        }
+        
+        dataUnit.forEach(u => {
+            let idUnitSkrg = String(u.id_unit).trim();
+            let trxUnit = masterTransaksi.filter(t => String(t.id_unit).trim() === idUnitSkrg);
+            
+            let totalBerat = 0;
+            let msTerakhir = 0;
+            let teksTglTerakhir = '<i class="text-muted">Belum ada</i>';
+            
+            trxUnit.forEach(t => {
+                totalBerat += parseFloat(t.berat || 0);
+                
+                if(t.tgl) {
+                    let parts = String(t.tgl).split(' ');
+                    if(parts.length > 0) {
+                        let tglParts = parts[0].split('-');
+                        if(tglParts.length === 3) {
+                            let d = new Date(`${tglParts[2]}-${tglParts[1]}-${tglParts[0]}T00:00:00`);
+                            if(d.getTime() > msTerakhir) { 
+                                msTerakhir = d.getTime(); 
+                                teksTglTerakhir = parts[0]; 
+                            }
+                        }
+                    }
+                }
+            });
+            
+            rekapUnit.push({ 
+                id: idUnitSkrg, 
+                nama: u.nama_unit, 
+                frekuensi: trxUnit.length, 
+                berat: totalBerat, 
+                ms_terakhir: msTerakhir,
+                tgl_terakhir_str: teksTglTerakhir
+            });
+        });
+        
+        rekapUnit.sort((a, b) => b.berat - a.berat);
+        
+        rekapUnit.forEach((r, index) => {
+            let selisihHari = r.ms_terakhir === 0 ? 999 : Math.floor((sekarang - r.ms_terakhir) / (1000 * 60 * 60 * 24));
+            let statusHtml = ''; let pesanWa = '';
+            
+            if (r.ms_terakhir === 0 || selisihHari > 90) {
+                statusHtml = `<span class="badge bg-danger"><i class="bi bi-circle-fill me-1"></i>Kritis</span>`;
+                pesanWa = `Halo Pengurus ${r.nama}, kami dari DLH memantau belum ada pergerakan transaksi lagi. Adakah kendala operasional yang bisa kami bantu?`;
+            } else if (selisihHari > 30) {
+                statusHtml = `<span class="badge" style="background-color: #fcd34d; color: #92400e;"><i class="bi bi-circle-fill me-1"></i>Peringatan</span>`;
+                pesanWa = `Halo Pengurus ${r.nama}, transaksi terakhir sudah lewat 1 bulan. Mari tingkatkan lagi sosialisasi ke warga!`;
+            } else {
+                statusHtml = `<span class="badge" style="background-color: #86efac; color: #14532d;"><i class="bi bi-circle-fill me-1"></i>Aktif</span>`;
+                pesanWa = `Halo Pengurus ${r.nama}, luar biasa! DLH sangat mengapresiasi kinerja BSU Anda bulan ini.`;
+            }
+            
+            let medali = index === 0 ? '🥇 1' : index === 1 ? '🥈 2' : index === 2 ? '🥉 3' : `${index + 1}`;
+            
+            tbody.innerHTML += `
+            <tr style="border-bottom: 1px solid #e2e8f0;">
+                <td class="text-center fw-bold fs-5">${medali}</td>
+                <td class="fw-bold" style="color: var(--primary-dark);">${r.nama} <br><small class="text-muted fw-normal">${r.id}</small></td>
+                <td class="text-center">${statusHtml}</td>
+                <td class="text-center fw-bold text-success">${r.berat.toFixed(1)} Kg</td>
+                <td class="text-center fw-bold text-muted">${r.frekuensi}x Mutasi</td>
+                <td class="text-center fw-medium text-muted">${r.tgl_terakhir_str}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary py-1 px-3" style="border-radius: 8px;" onclick="window.open('https://wa.me/?text='+encodeURIComponent('${pesanWa}'), '_blank')">
+                        <i class="bi bi-whatsapp"></i> Sentil
+                    </button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    function eksporExcel() {
+        let csv = "data:text/csv;charset=utf-8,Tanggal;Nasabah;Aktivitas;Volume(Kg);Nilai(Rp)\n";
+        dataTransaksi.forEach(r => csv += `${r.tgl};${r.nama};${r.jenis};${r.berat};${r.total}\n`);
+        let link = document.createElement("a"); link.setAttribute("href", encodeURI(csv));
+        link.setAttribute("download", "Laporan.csv"); document.body.appendChild(link); link.click(); link.remove();
+    }
+
+    function cetakLaporanA4() {
+        let lapSampah = document.getElementById('lap-sampah').innerText;
+        let lapRupiah = document.getElementById('lap-rupiah').innerText;
+        let tabelSampah = document.getElementById('tabel-rekap-sampah').innerHTML;
+        let tabelNasabah = document.getElementById('tabel-rekap-nasabah').innerHTML;
+
+        let html = `
+        <div style="font-family:'Plus Jakarta Sans',sans-serif; padding: 20px;">
+            <h2 style="text-align:center; margin-bottom: 5px; font-weight: 800;">Laporan Finansial & Persediaan Konsolidasi</h2>
+            <h3 style="text-align:center; margin-top: 0; color: #064E3B; font-weight: 700;">BANK SAMPAH INDUK KAB. TULUNGAGUNG</h3>
+            <p style="text-align:center; font-size: 12px; color: #64748b; margin-bottom: 30px;">Dicetak pada: ${new Date().toLocaleDateString('id-ID')} pukul ${new Date().toLocaleTimeString('id-ID')}</p>
+
+            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+                <div style="border: 1px solid #cbd5e1; padding: 15px; width: 48%; border-radius: 12px;">
+                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px; font-weight: 600;">Aset Fisik (Volume Masuk)</div>
+                    <div style="font-size: 24px; font-weight: 800; color: #059669;">${lapSampah} Kg</div>
+                </div>
+                <div style="border: 1px solid #cbd5e1; padding: 15px; width: 48%; border-radius: 12px;">
+                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px; font-weight: 600;">Liabilitas (Hutang Warga)</div>
+                    <div style="font-size: 24px; font-weight: 800; color: #059669;">${lapRupiah}</div>
+                </div>
+            </div>
+
+            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #0f172a; font-weight: 700;">1. Matriks Inventaris Persediaan</h4>
+            <table class="table table-bordered" style="width: 100%; margin-bottom: 30px; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f8fafc;">
+                        <th>Kategori Material Persediaan</th>
+                        <th>Akumulasi Volume</th>
+                        <th class="text-end">Total Valuasi Aset (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>${tabelSampah}</tbody>
+            </table>
+
+            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #0f172a; font-weight: 700;">2. Buku Besar Pembantu (Rincian Hutang)</h4>
+            <table class="table table-bordered" style="width: 100%; font-size: 14px;">
+                <thead>
+                    <tr style="background-color: #f8fafc;">
+                        <th>Identitas Kreditur (Nasabah)</th>
+                        <th>Total Volume Disetor</th>
+                        <th class="text-end">Sisa Saldo Mengendap (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>${tabelNasabah}</tbody>
+            </table>
+        </div>`;
+        
+        document.getElementById('area-laporan-a4').innerHTML = html; 
+        document.body.className = 'mode-cetak'; 
+        window.print(); 
+        document.body.className = '';
+    }
+
+    let pesanBroadcastGlobal = "";
+    function buatBroadcast() {
+        let tglInput = document.getElementById('tglJadwal').value; let pesanTamb = document.getElementById('pesanTambahan').value;
+        if(!tglInput) return alert("Harap isi Tanggal Pelaksanaan terlebih dahulu!");
+        let tglObj = new Date(tglInput); let opsiTgl = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; let tglFormat = tglObj.toLocaleDateString('id-ID', opsiTgl);
+        pesanBroadcastGlobal = `*PENGUMUMAN BANK SAMPAH*\n\nHalo Bapak/Ibu Warga,\nKami menginformasikan bahwa jadwal penyetoran Bank Sampah akan dilaksanakan pada:\n\n📅 *Tanggal:* ${tglFormat}\n\n`;
+        if (pesanTamb.trim() !== "") { pesanBroadcastGlobal += `📝 *Catatan:* ${pesanTamb}\n\n`; }
+        pesanBroadcastGlobal += `Mari kita jaga kebersihan lingkungan dan tingkatkan tabungan sampah kita. Terima kasih! ♻️`;
+        document.getElementById('previewPesan').innerText = pesanBroadcastGlobal; document.getElementById('areaBroadcast').style.display = 'block'; document.getElementById('totalKirim').innerText = dataNasabah.length;
+        let tbody = document.getElementById('tabel-kirim-broadcast'); tbody.innerHTML = '';
+        if(dataNasabah.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada data nasabah terdaftar.</td></tr>`; return; }
+        dataNasabah.forEach((n, i) => {
+            let hp = n.hp ? String(n.hp).trim() : ''; let valid = true; if(hp === '') valid = false;
+            if (hp.startsWith('8')) hp = '62' + hp; else if (hp.startsWith('0')) hp = '62' + hp.substring(1);
+            let btnHtml = valid ? `<button class="btn btn-sm btn-success" onclick="eksekusiWa('${hp}', ${i})"><i class="bi bi-whatsapp me-1"></i> Kirim</button>` : `<span class="badge bg-danger">No. HP Kosong</span>`;
+            tbody.innerHTML += `<tr><td class="align-middle fw-bold">${n.nama}</td><td class="align-middle text-muted">${n.hp || '-'}</td><td class="text-end align-middle" id="status-kirim-${i}">${btnHtml}</td></tr>`;
+        });
+    }
+
+    function eksekusiWa(hp, idBaris) {
+        document.getElementById(`status-kirim-${idBaris}`).innerHTML = `<span class="badge bg-secondary"><i class="bi bi-check2-all me-1"></i> Terbuka</span>`;
+        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesanBroadcastGlobal)}`, '_blank');
+    }
+
+    let pesanBroadcastHargaGlobal = "";
+    function buatBroadcastHarga() {
+        let catatan = document.getElementById('catatanHarga').value.trim();
+        pesanBroadcastHargaGlobal = `*UPDATE HARGA ACUAN MATERIAL* ♻️\n*BANK SAMPAH GANG DAWET*\n\nHalo Bapak/Ibu Nasabah,\nBerikut adalah rincian daftar harga beli terbaru untuk setiap material sampah anorganik terhitung hari ini:\n\n`;
+        if(dataKategori.length === 0) { pesanBroadcastHargaGlobal += `_(Belum ada data kategori material di database)_\n\n`; } else {
+            dataKategori.forEach(k => { pesanBroadcastHargaGlobal += `▪️ *${k.nama_kategori}:* Rp ${parseInt(k.harga).toLocaleString('id-ID')} / Kg\n`; }); pesanBroadcastHargaGlobal += `\n`;
+        }
+        if (catatan !== "") { pesanBroadcastHargaGlobal += `📝 *Catatan Admin:* ${catatan}\n\n`; }
+        pesanBroadcastHargaGlobal += `"Dengan Memilah Sampah, Kita Ubah yang Terbuang Menjadi Bernilai" 💚`;
+        document.getElementById('previewPesanHarga').innerText = pesanBroadcastHargaGlobal; document.getElementById('areaBroadcastHarga').style.display = 'block'; document.getElementById('totalKirimHarga').innerText = dataNasabah.length;
+        let tbody = document.getElementById('tabel-kirim-broadcast-harga'); tbody.innerHTML = '';
+        if(dataNasabah.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada data nasabah terdaftar.</td></tr>`; return; }
+        dataNasabah.forEach((n, i) => {
+            let hp = n.hp ? String(n.hp).trim() : ''; let valid = true; if(hp === '') valid = false;
+            if (hp.startsWith('8')) hp = '62' + hp; else if (hp.startsWith('0')) hp = '62' + hp.substring(1);
+            let btnHtml = valid ? `<button class="btn btn-sm btn-success" onclick="eksekusiWaHarga('${hp}', ${i})"><i class="bi bi-whatsapp me-1"></i> Kirim</button>` : `<span class="badge bg-danger">No. HP Kosong</span>`;
+            tbody.innerHTML += `<tr><td class="align-middle fw-bold">${n.nama}</td><td class="align-middle text-muted">${n.hp || '-'}</td><td class="text-end align-middle" id="status-kirim-harga-${i}">${btnHtml}</td></tr>`;
+        });
+    }
+
+    function eksekusiWaHarga(hp, idBaris) {
+        document.getElementById(`status-kirim-harga-${idBaris}`).innerHTML = `<span class="badge bg-secondary"><i class="bi bi-check2-all me-1"></i> Terbuka</span>`;
+        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesanBroadcastHargaGlobal)}`, '_blank');
+    }
+
+    function hitungTotalPj() {
+        let b = parseFloat(document.getElementById('pj_berat').value) || 0;
+        let h = parseFloat(document.getElementById('pj_harga').value) || 0;
+        let t = b * h;
+        document.getElementById('pj_total').value = t;
+        document.getElementById('pj_total_tampil').value = 'Rp ' + t.toLocaleString('id-ID');
+    }
 
     function simpanPenjualan() {
         let btn = document.getElementById('btnSimpanPj');
