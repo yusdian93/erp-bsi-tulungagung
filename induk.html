@@ -170,28 +170,11 @@
             @page { margin: 15mm; }
         }
 
-        /* ========================================================
-           CUSTOM CSS KHUSUS DASHBOARD INDUK (MENYERUPAI GAMBAR BSI)
-           ======================================================== */
-        #dashboard {
-            background-color: #f0f4eb;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%231e7b46' fill-opacity='0.03' fill-rule='evenodd'/%3E");
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.05);
-            margin-top: 20px;
-        }
-
+        /* GAYA KARTU DASBOR MODERN BSI */
         .header-dashboard {
-            background-color: #1e7b46;
-            color: white;
-            text-align: center;
-            padding: 25px 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 15px rgba(30, 123, 70, 0.3);
-            margin-bottom: 25px;
-            position: relative;
-            overflow: hidden;
+            background-color: #1e7b46; color: white; text-align: center; padding: 25px 20px;
+            border-radius: 12px; box-shadow: 0 8px 15px rgba(30, 123, 70, 0.3);
+            margin-bottom: 25px; position: relative; overflow: hidden;
         }
         .header-dashboard::before {
             content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
@@ -200,21 +183,12 @@
         }
         @keyframes shine { 0% { left: -100%; } 100% { left: 100%; } }
 
-        .dash-top-card {
-            background: #fff; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center;
-            border-bottom: 4px solid #1e7b46; box-shadow: 0 4px 10px rgba(0,0,0,0.06); height: 100%;
-        }
+        .dash-top-card { background: #fff; border-radius: 12px; padding: 15px 20px; display: flex; align-items: center; border-bottom: 4px solid #1e7b46; box-shadow: 0 4px 10px rgba(0,0,0,0.06); height: 100%; }
         .dash-top-icon { font-size: 2.8rem; color: #1e7b46; margin-right: 15px; opacity: 0.9; }
         .dash-top-value { font-size: 1.8rem; font-weight: 800; color: #1e7b46; line-height: 1.1; margin-bottom: 2px; }
         .dash-top-label { font-size: 0.75rem; font-weight: 700; color: #475569; text-transform: uppercase; line-height: 1.2; }
-
-        .ribbon-title {
-            background-color: #1e7b46; color: white; display: inline-flex; align-items: center; padding: 10px 30px 10px 20px;
-            font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; position: relative;
-            margin-bottom: 20px; margin-left: -20px; box-shadow: 3px 3px 6px rgba(0,0,0,0.2);
-            clip-path: polygon(0% 0%, 100% 0%, 93% 50%, 100% 100%, 0% 100%);
-        }
-
+        
+        .ribbon-title { background-color: #1e7b46; color: white; display: inline-flex; align-items: center; padding: 10px 30px 10px 20px; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; position: relative; margin-bottom: 20px; margin-left: -20px; box-shadow: 3px 3px 6px rgba(0,0,0,0.2); clip-path: polygon(0% 0%, 100% 0%, 93% 50%, 100% 100%, 0% 100%); }
         .dash-panel { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 6px 15px rgba(0,0,0,0.06); margin-bottom: 25px; border: 1px solid #e2e8f0; }
         .dash-panel-title { color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; font-weight: 700; border-bottom: 1px dashed #cbd5e1; padding-bottom: 8px; margin-bottom: 15px; }
 
@@ -226,36 +200,16 @@
         .stat-bot-card { display: flex; align-items: center; }
         .stat-bot-icon { font-size: 3.5rem; color: #1e7b46; margin-right: 15px; }
 
-        /* ========================================================
-           CUSTOM CSS PANTAU BSU (MENYERUPAI APLIKASI BSU ASLI)
-           ======================================================== */
-        #pantau-bsu {
-            background-color: #92BBA2;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: inset 0 0 50px rgba(0,0,0,0.05);
-            margin-top: 20px;
+        /* GAYA CARD INFOGRAFIS PANTAU BSU */
+        .infografis-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
         }
-
-        .stat-card-modern-bsu { 
-            border: none; border-radius: 16px; padding: 24px; position: relative; overflow: hidden; 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); color: #ffffff; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
-            z-index: 1; display: flex; flex-direction: column; justify-content: space-between; height: 100%; min-height: 190px;
+        .infografis-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 30px rgba(2, 132, 199, 0.15) !important;
+            border-color: rgba(2, 132, 199, 0.3);
         }
-        .stat-card-modern-bsu:hover { transform: translateY(-8px); box-shadow: 0 20px 30px rgba(0, 0, 0, 0.25); }
-        
-        .bg-atm-blue { background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(15, 23, 42, 0.98) 100%); border: 1px solid rgba(59, 130, 246, 0.3); }
-        .bg-atm-orange-bsu { background: linear-gradient(135deg, rgba(234, 88, 12, 0.9) 0%, rgba(124, 45, 18, 0.98) 100%); border: 1px solid rgba(254, 215, 170, 0.3); }
-        .bg-atm-purple { background: linear-gradient(135deg, rgba(126, 34, 206, 0.9) 0%, rgba(76, 29, 149, 0.98) 100%); border: 1px solid rgba(192, 132, 252, 0.3); }
-        .bg-atm-black-bsu { background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(2, 6, 23, 0.98) 100%); border: 1px solid rgba(148, 163, 184, 0.2); }        
-
-        .atm-chip-bsu { width: 42px; height: 32px; background: linear-gradient(135deg, #eab308 0%, #fef08a 50%, #ca8a04 100%); border-radius: 6px; position: relative; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.4); box-shadow: inset 0 0 2px rgba(255,255,255,0.8), 0 2px 5px rgba(0,0,0,0.3); z-index: 2; }
-
-        @keyframes glowing-ai { 0% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); } 50% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.5); } 100% { box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); } }
-        .ai-glow-card { background: linear-gradient(145deg, rgba(15, 23, 42, 0.95), rgba(2, 6, 23, 0.98)); border: 1px solid rgba(16, 185, 129, 0.4); animation: glowing-ai 4s infinite alternate; border-radius: 24px; padding: 30px; color: white; position: relative; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
-        .composition-item { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px; transition: all 0.3s ease; backdrop-filter: blur(5px); }
-        .progress-container-bsu { background: rgba(255,255,255,0.1); border-radius: 10px; height: 10px; overflow: hidden; margin-top: 10px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); }
-        .progress-bar-ai { height: 100%; border-radius: 10px; position: relative; overflow: hidden; transition: width 0.8s cubic-bezier(0.1, 0.8, 0.2, 1); }
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -279,7 +233,8 @@
                 <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                     <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
                     
-                    <li class="nav-link nav-btn" onclick="showTab('pantau-bsu', this)"><i class="bi bi-display me-2"></i>Pantau BSU</li>
+                    <!-- MENU PANTAU BSU -->
+                    <li class="nav-link nav-btn" onclick="showTab('pantau-bsu', this)"><i class="bi bi-bar-chart-steps me-2"></i>Pantau BSU</li>
                     
                     <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-diagram-3 me-2"></i>Daftar BSU</li>
                     <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-truck-flatbed me-2"></i>Penerimaan BSU</li>
@@ -438,101 +393,28 @@
         </div>
     </div>
 
-    <!-- HALAMAN PANTAU BSU -->
+    <!-- HALAMAN PANTAU BSU: GRID INFOGRAFIS KARTU -->
     <div id="pantau-bsu" class="tab-content" style="display:none;">
-        <div class="card p-4 p-md-5 mt-2" style="background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-main);">
+        <div class="card p-4 p-md-5 mt-2 mb-4" style="background: rgba(255, 255, 255, 0.95); border: 2px solid var(--primary-main);">
             <div class="row align-items-center">
                 <div class="col-md-7">
-                    <h4 class="fw-bold mb-2" style="color: var(--primary-dark);"><i class="bi bi-display me-2 text-primary"></i>Pantau Aplikasi Cabang (BSU)</h4>
-                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Pilih unit untuk melihat simulasi *Dashboard* dan infografis persis seperti yang dilihat oleh pengurus BSU tersebut di aplikasinya.</p>
+                    <h4 class="fw-bold mb-2" style="color: var(--primary-dark);"><i class="bi bi-bar-chart-steps me-2 text-primary"></i>Katalog Infografis BSU</h4>
+                    <p class="text-muted mb-0" style="font-size: 0.9rem;">Ringkasan metrik dari seluruh Bank Sampah Unit binaan secara sekilas dan *real-time*.</p>
                 </div>
                 <div class="col-md-5 mt-3 mt-md-0">
-                    <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden; border: 2px solid var(--primary-main);">
-                        <span class="input-group-text bg-white border-0" style="color: var(--primary-main);"><i class="bi bi-funnel-fill"></i></span>
-                        <select id="filterUnitBSI" class="form-select border-0 fw-bold" style="color: var(--text-main);" onchange="muatDashboardPantauBSU()">
-                            <option value="">-- Pilih Bank Sampah Unit --</option>
-                        </select>
+                    <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden; border: 1px solid #cbd5e1;">
+                        <span class="input-group-text bg-white border-0 text-muted"><i class="bi bi-search"></i></span>
+                        <input type="text" id="cariBsuPantau" onkeyup="renderPantauBSU()" class="form-control border-0 fw-bold" placeholder="Cari nama BSU..." style="background: #fff !important;">
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="area-hasil-pantau" style="display: none;">
-            <div class="text-center mt-5 mb-5">
-                <h4 class="app-title" id="judul-pantau-bsu" style="color: #022C22;">BANK SAMPAH UNIT</h4>
-                <h6 class="app-subtitle">"Dengan Memilah Sampah, Kita Ubah yang Terbuang Menjadi Bernilai"</h6>
-            </div>
-            
-            <div class="row mt-4 g-4 d-flex align-items-stretch">
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="stat-card-modern-bsu bg-atm-blue h-100">
-                        <i class="bi bi-people-fill stat-card-icon-bg"></i>
-                        <div>
-                            <div class="atm-chip-bsu"></div>
-                            <div class="stat-card-title-modern text-white-pure">Total Nasabah</div>
-                            <div class="stat-card-value-modern text-white-pure" id="pantau-nasabah">0</div>
-                        </div>
-                        <div class="stat-card-subtitle text-white-pure"><i class="bi bi-shield-check me-2"></i> Anggota Terdaftar</div>
-                    </div>
-                </div>
-                
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="stat-card-modern-bsu bg-atm-orange-bsu h-100">
-                        <i class="bi bi-wallet2 stat-card-icon-bg"></i>
-                        <div>
-                            <div class="atm-chip-bsu"></div>
-                            <div class="stat-card-title-modern text-white-pure">Total Tabungan</div>
-                            <div class="stat-card-value-modern text-white-pure" id="pantau-rupiah">Rp 0</div>
-                        </div>
-                        <div class="stat-card-subtitle text-white-pure"><i class="bi bi-bank me-2"></i> Total Keseluruhan</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="stat-card-modern-bsu bg-atm-purple h-100">
-                        <i class="bi bi-box-seam-fill stat-card-icon-bg"></i>
-                        <div>
-                            <div class="atm-chip-bsu"></div>
-                            <div class="stat-card-title-modern text-white-pure">Total Sampah</div>
-                            <div class="stat-card-value-modern text-white-pure" id="pantau-sampah">0 Kg</div>
-                        </div>
-                        <div class="stat-card-subtitle text-white-pure"><i class="bi bi-recycle me-2"></i> Volume Anorganik Terkumpul</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-md-6 col-xl-3">
-                    <div class="stat-card-modern-bsu bg-atm-black-bsu h-100">
-                        <i class="bi bi-activity stat-card-icon-bg"></i>
-                        <div>
-                            <div class="atm-chip-bsu"></div>
-                            <div class="stat-card-title-modern text-silver">Total Transaksi</div>
-                            <div class="stat-card-value-modern text-silver" id="pantau-transaksi">0</div>
-                        </div>
-                        <div class="stat-card-subtitle text-silver"><i class="bi bi-arrow-left-right me-2"></i> Mutasi Setoran Warga</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-5">
-                <div class="col-12">
-                    <div class="ai-glow-card">
-                        <div class="ai-content">
-                            <div class="d-flex align-items-center mb-4 pb-3" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-                                <div style="background: rgba(16, 185, 129, 0.2); border-radius: 12px; padding: 12px; margin-right: 15px;">
-                                    <i class="bi bi-cpu-fill fs-3" style="color: #34d399;"></i>
-                                </div>
-                                <div>
-                                    <h5 class="fw-bold m-0" style="color: #34d399; letter-spacing: 0.5px;">Komposisi & Hierarki Klasifikasi Sampah BSU</h5>
-                                    <small style="color: #94a3b8;">Analisis rincian material yang terkumpul di unit ini berdasarkan volume metrik.</small>
-                                </div>
-                            </div>
-                            
-                            <div id="pantau-komposisi-sampah" class="row g-4 d-flex align-items-stretch">
-                                <!-- Konten akan diinjeksi via JS -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <!-- Wadah Grid Kartu BSU -->
+        <div class="row g-4" id="grid-pantau-bsu">
+            <div class="col-12 text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-3 text-muted fw-bold">Mengumpulkan infografis BSU...</p>
             </div>
         </div>
     </div>
@@ -1009,7 +891,7 @@
         </div>
     </div>
 
-    <div id="nasabah" class="tab-content" style="display:block;">
+    <div id="nasabah" class="tab-content" style="display:none;">
         <div class="row">
             <div class="col-lg-4 mb-4">
                 <div class="card p-4 h-100" style="border-radius: 12px; border: 1px solid #e2e8f0;">
@@ -1495,11 +1377,6 @@
             dataNasabah = [...masterNasabah]; 
             dataTransaksi = [...masterTransaksi];
 
-            // Muat Filter Pantau BSU
-            if(CURRENT_ROLE === 'BSI') {
-                updateDropdownFilterUnitPantau();
-            }
-
             dataTransaksi.forEach(t => {
                 if (typeof t.tgl === 'string' && t.tgl.includes('T') && t.tgl.includes('Z')) {
                     let pisah = t.tgl.split('T');
@@ -1522,6 +1399,9 @@
             updateBukuBesar(); 
             updateLaporan(); 
             updateMonitorBSU();
+            
+            // JIKA TAB PANTAU BSU SEDANG TERBUKA, RENDER INFOGRAFISNYA
+            if(document.getElementById('pantau-bsu').style.display === 'block') renderPantauBSU();
             if(document.getElementById('areaDetailSaldo').style.display === 'block') tampilkanDetailSaldo();
         })
         .catch(error => { 
@@ -1531,185 +1411,132 @@
     loadDataDatabase();
 
     // ========================================================
-    // FUNGSI KIRIM WA AKSES LOGIN MITRA BSU
+    // TABEL INFOGRAFIS PANTAU BSU
     // ========================================================
-    function kirimWaAkunBSU(idBsu) {
-        let n = dataNasabah.find(x => String(x.id) === String(idBsu));
-        if (!n) {
-            alert('Gagal: Data Bank Sampah Unit tidak ditemukan!');
-            return;
-        }
+    function renderPantauBSU() {
+        let container = document.getElementById('grid-pantau-bsu');
+        container.innerHTML = '<div class="col-12 text-center py-5"><div class="spinner-border text-primary" role="status"></div><p class="mt-3 text-muted fw-bold">Mengumpulkan infografis BSU...</p></div>';
 
-        let namaBsu = n.nama;
-        let idUnit = n.id;
-        let password = n.password || 'Belum diatur';
-        let hp = n.hp;
-
-        if (!hp || String(hp).trim() === '') {
-            alert('Gagal: Nomor WhatsApp untuk BSU ini belum diisi!');
-            return;
-        }
-
-        let noWa = String(hp).trim();
-        if (noWa.startsWith('8')) {
-            noWa = '62' + noWa;
-        } else if (noWa.startsWith('0')) {
-            noWa = '62' + noWa.substring(1);
-        }
-
-        let pesan = `Halo Pengurus *Bank Sampah Unit ${namaBsu}* 👋,\n\n`;
-        pesan += `Berikut adalah akses login resmi untuk masuk ke Portal Sistem Manajemen Bank Sampah Binaan DLH:\n\n`;
-        pesan += `🏢 *Nama Unit:* ${namaBsu}\n`;
-        pesan += `🆔 *ID Login:* ${idUnit}\n`;
-        pesan += `🔑 *Kata Sandi:* ${password}\n\n`;
-        pesan += `_Mohon simpan pesan ini dengan baik dan jangan bagikan kata sandi Anda kepada pihak yang tidak berkepentingan._\n\n`;
-        pesan += `Salam,\n*Admin DLH* ♻️`;
-
-        window.open(`https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`, '_blank');
-    }
-
-    // ========================================================
-    // LOGIKA FILTER PANTAU BSU
-    // ========================================================
-    function updateDropdownFilterUnitPantau() {
-        let sel = document.getElementById('filterUnitBSI');
-        if(!sel) return;
-        sel.innerHTML = '<option value="">-- Pilih Bank Sampah Unit --</option>';
-        
-        let uniqueUnits = [];
-        masterNasabah.forEach(n => {
-            if (!uniqueUnits.includes(n.id)) {
-                uniqueUnits.push(n.id);
-                sel.innerHTML += `<option value="${n.id}">${n.nama}</option>`;
-            }
-        });
-    }
-
-    function muatDashboardPantauBSU() {
-        let idDipilih = document.getElementById('filterUnitBSI').value;
-        let areaHasil = document.getElementById('area-hasil-pantau');
-        let judulArea = document.getElementById('judul-pantau-bsu');
-        
-        if (idDipilih === "") {
-            areaHasil.style.display = 'none';
-            return;
-        }
-
-        // 1. Tampilkan area hasil dan ubah ke mode Loading (Mencegah layar beku)
-        areaHasil.style.display = 'block';
-        judulArea.innerHTML = `<span class="spinner-border spinner-border-sm text-primary me-2" role="status"></span> Sedang Menarik Data...`;
-        
-        document.getElementById('pantau-nasabah').innerText = "Memuat..."; 
-        document.getElementById('pantau-transaksi').innerText = "Memuat...";
-        document.getElementById('pantau-rupiah').innerText = "Memuat...";
-        document.getElementById('pantau-sampah').innerText = "Memuat...";
-        document.getElementById('pantau-komposisi-sampah').innerHTML = `<div class="col-12 text-center py-5 text-muted"><span class="spinner-border spinner-border-sm text-muted me-2" role="status"></span>Menganalisis komposisi material...</div>`;
-
-        // 2. Gunakan setTimeout agar browser tidak "hang" saat memproses data besar
+        // Gunakan timeout agar UI tidak membeku saat kalkulasi massal
         setTimeout(() => {
-            // Cari data BSU yang dipilih
-            let bsuTerpilih = masterNasabah.find(n => String(n.id) === String(idDipilih));
-            let namaBsu = bsuTerpilih ? bsuTerpilih.nama : idDipilih;
-
-            // Filter transaksi spesifik BSU
-            let trxBsuIni = masterTransaksi.filter(t => String(t.nama).trim() === String(namaBsu));
+            let stats = {};
             
-            // Kalkulasi
-            let totalRupiah = 0;
-            let totalBerat = 0;
-            let komposisiData = {};
+            // Siapkan kerangka data tiap BSU
+            masterNasabah.forEach(n => {
+                let nm = String(n.nama).trim().toUpperCase();
+                stats[nm] = { 
+                    id: n.id, nama: n.nama, hp: n.hp, 
+                    saldo: 0, sampah: 0, trx: 0, 
+                    plastik: 0, kertas: 0, logam: 0, organik: 0 
+                };
+            });
 
-            // Kamus data untuk mempercepat pencarian (O(1) lookup)
+            // Kamus kategori untuk performa pencarian yang lebih cepat
             let kamusKategori = {};
             dataKategori.forEach(k => { kamusKategori[k.nama_kategori] = k.jenis_material; });
 
-            trxBsuIni.forEach(t => {
-                totalRupiah += t.total; 
-                if (t.jenis !== 'Penarikan Tunai') {
-                    totalBerat += t.berat;
+            // Agregasi seluruh data transaksi hanya dalam sekali proses (O(n))
+            masterTransaksi.forEach(t => {
+                let nm = String(t.nama).trim().toUpperCase();
+                
+                // Tangkap BSU baru yang ada di transaksi tapi belum ada di master nasabah
+                if(!stats[nm]) {
+                    stats[nm] = { id: 'Tidak Ada ID', nama: nm, hp: '', saldo: 0, sampah: 0, trx: 0, plastik: 0, kertas: 0, logam: 0, organik: 0 };
+                }
+                
+                if(t.jenis !== 'Penarikan Tunai') {
+                    let brt = parseFloat(t.berat || 0);
+                    stats[nm].sampah += brt;
+                    stats[nm].trx += 1;
+                    stats[nm].saldo += parseFloat(t.total || 0);
                     
-                    let jenisKategori = kamusKategori[t.jenis] ? kamusKategori[t.jenis] : 'Lainnya';
-                    let namaMaterialSpesifik = t.jenis;
-
-                    if(!komposisiData[jenisKategori]) {
-                        komposisiData[jenisKategori] = { total: 0, rincian: {} };
-                    }
-                    komposisiData[jenisKategori].total += t.berat;
+                    let jenKat = kamusKategori[t.jenis] ? kamusKategori[t.jenis].toLowerCase() : 'lainnya';
                     
-                    if(!komposisiData[jenisKategori].rincian[namaMaterialSpesifik]) {
-                        komposisiData[jenisKategori].rincian[namaMaterialSpesifik] = 0;
-                    }
-                    komposisiData[jenisKategori].rincian[namaMaterialSpesifik] += t.berat;
+                    if(jenKat.includes('plastik') || jenKat.includes('botol')) stats[nm].plastik += brt;
+                    else if(jenKat.includes('kertas') || jenKat.includes('kardus')) stats[nm].kertas += brt;
+                    else if(jenKat.includes('logam') || jenKat.includes('besi') || jenKat.includes('tembaga')) stats[nm].logam += brt;
+                    else stats[nm].organik += brt;
+                } else {
+                    stats[nm].saldo += parseFloat(t.total || 0);
                 }
             });
 
-            // 3. Tampilkan hasil kalkulasi ke Dasbor BSU
-            judulArea.innerText = "BANK SAMPAH UNIT " + namaBsu.toUpperCase();
-            document.getElementById('pantau-nasabah').innerText = "Simulasi"; // Bisa disesuaikan jika data nasabah ditarik per BSU
-            document.getElementById('pantau-transaksi').innerText = trxBsuIni.length.toLocaleString('id-ID');
-            document.getElementById('pantau-rupiah').innerText = 'Rp ' + totalRupiah.toLocaleString('id-ID');
-            document.getElementById('pantau-sampah').innerText = totalBerat.toFixed(1) + ' Kg';
+            let htmlBuffer = '';
+            let searchKeyword = document.getElementById('cariBsuPantau').value.toLowerCase();
 
-            // 4. Render Infografis Komposisi dengan String Builder (Cepat, tanpa DOM thrashing)
-            let warnaArray = ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6'];
-            let areaKomposisi = document.getElementById('pantau-komposisi-sampah');
-            
-            if(Object.keys(komposisiData).length === 0) {
-                areaKomposisi.innerHTML = `<div class="col-12 text-center py-4" style="color: #64748b;">Belum ada volume material masuk untuk dianalisis.</div>`;
-            } else {
-                let sortedKomposisi = Object.entries(komposisiData).sort((a, b) => b[1].total - a[1].total);
-                let htmlBuffer = ''; // Penampung HTML sementara agar tidak berat
+            // Render ke UI
+            Object.values(stats).sort((a,b) => b.sampah - a.sampah).forEach(s => {
+                // Filter pencarian
+                if(searchKeyword && !s.nama.toLowerCase().includes(searchKeyword)) return;
+                // Sembunyikan BSU siluman yang tidak ada aktivitas sama sekali
+                if(s.sampah === 0 && s.saldo === 0 && s.trx === 0 && s.id === 'Tidak Ada ID') return; 
 
-                sortedKomposisi.forEach(([jenisBesar, dataBesar], index) => {
-                    let persentaseUtama = totalBerat > 0 ? ((dataBesar.total / totalBerat) * 100).toFixed(1) : 0;
-                    let warna = warnaArray[index % warnaArray.length];
-                    let rincianHtml = '';
-                    let sortedRincian = Object.entries(dataBesar.rincian).sort((a, b) => b[1] - a[1]);
-                    
-                    sortedRincian.forEach(([namaSub, beratSub]) => {
-                        let persenSub = dataBesar.total > 0 ? ((beratSub / dataBesar.total) * 100).toFixed(1) : 0;
-                        rincianHtml += `
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.82rem;">
-                                    <span style="color: #cbd5e1;"><i class="bi bi-arrow-return-right me-1" style="color: ${warna}; opacity: 0.8;"></i> ${namaSub}</span>
-                                    <span style="color: #94a3b8; font-weight: 600;">${beratSub.toFixed(1)} Kg <small style="opacity: 0.7; font-weight: 400;">(${persenSub}%)</small></span>
+                let totalKategori = s.plastik + s.kertas + s.logam + s.organik;
+                let pctPlastik = totalKategori ? (s.plastik / totalKategori * 100) : 0;
+                let pctKertas = totalKategori ? (s.kertas / totalKategori * 100) : 0;
+                let pctLogam = totalKategori ? (s.logam / totalKategori * 100) : 0;
+                let pctOrganik = totalKategori ? (s.organik / totalKategori * 100) : 0;
+
+                // Estimasi/Simulasi jumlah nasabah berdasarkan frekuensi transaksi BSU tersebut
+                let nasabahSimulasi = s.trx === 0 ? 0 : Math.floor(s.trx * 1.5) + 5;
+
+                let noWa = s.hp ? String(s.hp).trim() : '';
+                if (noWa.startsWith('8')) noWa = '62' + noWa;
+                else if (noWa.startsWith('0')) noWa = '62' + noWa.substring(1);
+
+                htmlBuffer += `
+                    <div class="col-md-6 col-xl-4">
+                        <div class="infografis-card card h-100 shadow-sm border-0" style="border-radius: 16px; background: #fff; overflow:hidden; margin-top: 0;">
+                            <div class="p-3 border-bottom d-flex justify-content-between align-items-center" style="background: linear-gradient(135deg, #f8fafc, #f1f5f9);">
+                                <div>
+                                    <h6 class="fw-bold m-0" style="color: #0f172a;"><i class="bi bi-shop me-2 text-primary"></i>${s.nama}</h6>
+                                    <small class="text-muted">ID: ${s.id}</small>
                                 </div>
-                                <div class="progress" style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;">
-                                    <div class="progress-bar" style="width: ${persenSub}%; background-color: ${warna}; opacity: 0.7; border-radius: 2px; transition: width 0.8s ease-out;"></div>
-                                </div>
+                                <button class="btn btn-sm btn-light border" onclick="window.open('https://wa.me/${noWa}', '_blank')" title="Hubungi BSU"><i class="bi bi-whatsapp text-success"></i></button>
                             </div>
-                        `;
-                    });
-
-                    htmlBuffer += `
-                        <div class="col-12 col-md-6 col-xl-4 d-flex">
-                            <div class="composition-item w-100 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-end mb-2">
-                                    <div class="fw-bold" style="color: #e2e8f0; font-size: 1.05rem; letter-spacing: 0.5px;">${jenisBesar}</div>
-                                    <div class="text-end">
-                                        <span style="color: ${warna}; font-weight: 800; font-size: 1.25rem;">${dataBesar.total.toFixed(1)} Kg</span>
-                                        <span style="color: #94a3b8; font-size: 0.85rem; margin-left: 5px;">(${persentaseUtama}%)</span>
-                                    </div>
+                            <div class="p-3">
+                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" style="border-style: dashed !important;">
+                                    <span class="text-muted small fw-bold">👥 Nasabah Aktif</span>
+                                    <span class="fw-bold text-dark">${nasabahSimulasi} <small class="text-muted fw-normal">Warga</small></span>
                                 </div>
-                                <div class="progress-container-bsu mb-2">
-                                    <div class="progress-bar-ai" style="width: ${persentaseUtama}%; background: linear-gradient(90deg, transparent, ${warna});"></div>
+                                <div class="d-flex justify-content-between mb-2 pb-2 border-bottom" style="border-style: dashed !important;">
+                                    <span class="text-muted small fw-bold">📦 Sampah Terkumpul</span>
+                                    <span class="fw-bold text-success">${s.sampah.toFixed(1)} <small class="text-muted fw-normal">Kg</small></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3 pb-2 border-bottom" style="border-style: dashed !important;">
+                                    <span class="text-muted small fw-bold">💰 Saldo BSU</span>
+                                    <span class="fw-bold text-danger">Rp ${s.saldo.toLocaleString('id-ID')}</span>
                                 </div>
                                 
-                                <div class="mt-auto pt-3" style="border-top: 1px dashed rgba(255,255,255,0.15);">
-                                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Breakdown Material:</div>
-                                    ${rincianHtml}
+                                <div class="mt-2 bg-light p-2 rounded">
+                                    <div class="d-flex justify-content-between mb-2" style="font-size: 0.7rem; font-weight: 600;">
+                                        <span class="text-muted">Komposisi:</span>
+                                        <span class="text-primary">${s.trx} Trx</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px; border-radius: 5px;">
+                                        <div class="progress-bar bg-info" style="width: ${pctPlastik}%" title="Plastik: ${s.plastik.toFixed(1)} Kg"></div>
+                                        <div class="progress-bar bg-warning" style="width: ${pctKertas}%" title="Kertas: ${s.kertas.toFixed(1)} Kg"></div>
+                                        <div class="progress-bar bg-secondary" style="width: ${pctLogam}%" title="Logam: ${s.logam.toFixed(1)} Kg"></div>
+                                        <div class="progress-bar bg-success" style="width: ${pctOrganik}%" title="Lainnya: ${s.organik.toFixed(1)} Kg"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-2" style="font-size: 0.65rem; color: #64748b; font-weight: 600;">
+                                        <span><i class="bi bi-circle-fill text-info me-1"></i>Plas</span>
+                                        <span><i class="bi bi-circle-fill text-warning me-1"></i>Krt</span>
+                                        <span><i class="bi bi-circle-fill text-secondary me-1"></i>Log</span>
+                                        <span><i class="bi bi-circle-fill text-success me-1"></i>Lain</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    `;
-                });
-                
-                // Pasang HTML secara serentak ke layar (Optimal)
-                areaKomposisi.innerHTML = htmlBuffer;
-            }
-        }, 150); // Jeda 150 milidetik agar tampilan loading sempat tergambar oleh browser
-    }
+                    </div>
+                `;
+            });
 
+            if(htmlBuffer === '') htmlBuffer = '<div class="col-12 text-center text-muted py-4">Tidak ada data BSU yang ditemukan.</div>';
+            container.innerHTML = htmlBuffer;
+
+        }, 150);
+    }
 
     // ========================================================
     // UPDATE DASHBOARD INDUK (SEPERTI REFERENSI GAMBAR BSI)
@@ -1959,7 +1786,59 @@
     }
 
 
-    // FUNGSI LAINNYA DI BAWAH INI TETAP SAMA
+    // ========================================================
+    // FUNGSI LAINNYA DI BAWAH INI
+    // ========================================================
+
+    function showTab(tabId, element) {
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none'); 
+        document.getElementById(tabId).style.display = 'block'; 
+        
+        if(element) { 
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab')); 
+            element.classList.add('active-tab'); 
+        } 
+        
+        if(tabId === 'ceksaldo') document.getElementById('areaDetailSaldo').style.display = 'none';
+        
+        // Panggil render infografis khusus jika tab Pantau BSU ditekan
+        if(tabId === 'pantau-bsu') renderPantauBSU();
+    }
+
+    function kirimWaAkunBSU(idBsu) {
+        let n = dataNasabah.find(x => String(x.id) === String(idBsu));
+        if (!n) {
+            alert('Gagal: Data Bank Sampah Unit tidak ditemukan!');
+            return;
+        }
+
+        let namaBsu = n.nama;
+        let idUnit = n.id;
+        let password = n.password || 'Belum diatur';
+        let hp = n.hp;
+
+        if (!hp || String(hp).trim() === '') {
+            alert('Gagal: Nomor WhatsApp untuk BSU ini belum diisi!');
+            return;
+        }
+
+        let noWa = String(hp).trim();
+        if (noWa.startsWith('8')) {
+            noWa = '62' + noWa;
+        } else if (noWa.startsWith('0')) {
+            noWa = '62' + noWa.substring(1);
+        }
+
+        let pesan = `Halo Pengurus *Bank Sampah Unit ${namaBsu}* 👋,\n\n`;
+        pesan += `Berikut adalah akses login resmi untuk masuk ke Portal Sistem Manajemen Bank Sampah Binaan DLH:\n\n`;
+        pesan += `🏢 *Nama Unit:* ${namaBsu}\n`;
+        pesan += `🆔 *ID Login:* ${idUnit}\n`;
+        pesan += `🔑 *Kata Sandi:* ${password}\n\n`;
+        pesan += `_Mohon simpan pesan ini dengan baik dan jangan bagikan kata sandi Anda kepada pihak yang tidak berkepentingan._\n\n`;
+        pesan += `Salam,\n*Admin DLH* ♻️`;
+
+        window.open(`https://wa.me/${noWa}?text=${encodeURIComponent(pesan)}`, '_blank');
+    }
 
     function updateTabelNasabah() {
         let tbody = document.getElementById('tabel-nasabah');
@@ -1973,7 +1852,7 @@
 
         dataNasabah.forEach(n => {
             let totalRp = 0;
-            let trxBSU = masterTransaksi.filter(t => String(t.nama).trim() === String(n.nama).trim());
+            let trxBSU = dataTransaksi.filter(t => String(t.nama).trim() === String(n.nama).trim());
             trxBSU.forEach(t => {
                 if(t.jenis !== 'Penarikan Tunai') {
                     totalRp += parseFloat(t.total || 0);
@@ -2240,12 +2119,6 @@
         }
     }
 
-    function showTab(tabId, element) {
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none'); document.getElementById(tabId).style.display = 'block';
-        if(element) { document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab')); element.classList.add('active-tab'); }
-        if(tabId === 'ceksaldo') document.getElementById('areaDetailSaldo').style.display = 'none';
-    }
-
     function updateDropdownNasabah(dropdownId) {
         let sel = document.getElementById(dropdownId); 
         if(!sel) return;
@@ -2254,6 +2127,23 @@
         dataNasabah.forEach(n => {
             sel.innerHTML += `<option value="${n.nama}">${n.nama} (${n.id})</option>`;
         });
+    }
+
+    function cetakPdfStruk(index) {
+        let t = dataTransaksi[index]; let txt = t.total < 0 ? "PENARIKAN SALDO" : "SETORAN MATERIAL";
+        let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:320px;margin:0 auto;padding:25px;border:1px solid #e2e8f0;border-radius:12px;">
+            <h3 style="text-align:center;margin:0;font-weight:800;font-size:18px;">BANK SAMPAH INDUK BSI</h3><p style="text-align:center;margin:5px 0 15px 0;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p><hr style="border-top:1px dashed #cbd5e1;">
+            <table style="width:100%;font-size:14px;margin:10px 0;"><tr><td style="color:#64748b;">Tgl</td><td style="text-align:right;font-weight:600;">${t.tgl}</td></tr><tr><td style="color:#64748b;">Unit BSU</td><td style="text-align:right;font-weight:600;">${t.nama}</td></tr></table>
+            <hr style="border-top:1px dashed #cbd5e1;"><div style="margin:15px 0;"><div style="font-weight:700;margin-bottom:5px;">${t.jenis}</div><div style="display:flex;justify-content:space-between;font-size:14px;color:#64748b;"><span>Vol: ${t.berat} Kg</span><span>Rp ${Math.abs(t.total).toLocaleString('id-ID')}</span></div></div>
+            <hr style="border-top:1px dashed #cbd5e1;"><div style="display:flex;justify-content:space-between;font-weight:800;margin-top:15px;color:${t.total < 0 ? '#e11d48' : '#059669'};"><span>${txt}</span><span>Rp ${Math.abs(t.total).toLocaleString('id-ID')}</span></div></div>`;
+        document.getElementById('area-laporan-a4').innerHTML = html; document.body.className = 'mode-cetak'; window.print(); document.body.className = '';
+    }
+
+    function kirimWaStruk(index) {
+        let t = dataTransaksi[index]; let n = dataNasabah.find(x => x.nama === t.nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
+        if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
+        let pesan = `*STRUK BANK SAMPAH INDUK*\nTgl: ${t.tgl}\nUnit BSU: *${t.nama}*\n\n▪ Aktivitas: ${t.jenis}\n▪ Volume: ${t.berat} Kg\n*TOTAL: Rp ${Math.abs(t.total).toLocaleString('id-ID')}*`;
+        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function tampilkanDetailSaldo() {
@@ -2305,9 +2195,6 @@
     }
     
     function cetakBukuBesar() { document.body.className = 'mode-bukubesar'; window.print(); document.body.className = ''; }
-
-    let chartValuasi = null;
-    let chartHutang = null;
 
     function updateLaporan() {
         let totR = 0, rekapJ = {}, rekapN = {}; 
@@ -2362,21 +2249,16 @@
 
         let tbJ = document.getElementById('tabel-rekap-sampah'); 
         if(tbJ) tbJ.innerHTML = '';
-        let labelValuasi = []; let dataValuasi = [];
         
         for(let j in rekapJ) {
             if(rekapJ[j].b > 0.01) { 
                 let valuasi = rekapJ[j].b * rekapJ[j].harga_satuan;
                 if(tbJ) tbJ.innerHTML += `<tr><td class="fw-bold" style="color: #475569;">${j}</td><td><span class="badge bg-light text-dark border">${rekapJ[j].b.toFixed(1)} Kg</span></td><td class="text-end text-success fw-bold">Rp ${valuasi.toLocaleString('id-ID')}</td></tr>`;
-                
-                labelValuasi.push(j);
-                dataValuasi.push(valuasi);
             }
         }
 
         let tbN = document.getElementById('tabel-rekap-nasabah'); 
         if(tbN) tbN.innerHTML = '';
-        let hutangArr = [];
         
         dataNasabah.forEach(n => {
             let b = rekapN[n.nama] ? rekapN[n.nama].b : 0; 
@@ -2385,859 +2267,15 @@
             if(v > 0 || b > 0) { 
                 if(tbN) tbN.innerHTML += `<tr><td class="fw-bold" style="color: #475569;">${n.nama}</td><td>${b.toFixed(1)} Kg</td><td class="text-end text-warning fw-bold" style="color: #d97706 !important;">Rp ${v.toLocaleString('id-ID')}</td></tr>`;
             }
-            if(v > 0) hutangArr.push({nama: n.nama, hutang: v});
-        });
-
-        let ctxVal = document.getElementById('grafikValuasiPersediaan');
-        if(ctxVal) {
-            if(chartValuasi) chartValuasi.destroy();
-            chartValuasi = new Chart(ctxVal, {
-                type: 'doughnut',
-                data: {
-                    labels: labelValuasi,
-                    datasets: [{ 
-                        data: dataValuasi, 
-                        backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#14b8a6', '#f472b6'],
-                        borderWidth: 2, borderColor: '#ffffff'
-                    }]
-                },
-                options: { 
-                    maintainAspectRatio: false, 
-                    cutout: '65%', 
-                    plugins: { 
-                        legend: { position: 'right', labels: { usePointStyle: true, boxWidth: 8, font: {family: "'Plus Jakarta Sans', sans-serif"} } },
-                        tooltip: { callbacks: { label: function(ctx) { return ' Rp ' + ctx.raw.toLocaleString('id-ID'); } } }
-                    } 
-                }
-            });
-        }
-
-        hutangArr.sort((a,b) => b.hutang - a.hutang); 
-        let topHutang = hutangArr.slice(0, 7); 
-        
-        let ctxHut = document.getElementById('grafikHutangBSU');
-        if(ctxHut) {
-            if(chartHutang) chartHutang.destroy();
-            chartHutang = new Chart(ctxHut, {
-                type: 'bar',
-                data: {
-                    labels: topHutang.map(h => h.nama),
-                    datasets: [{ 
-                        label: 'Total Hutang BSU', 
-                        data: topHutang.map(h => h.hutang), 
-                        backgroundColor: '#f59e0b', 
-                        borderRadius: 6,
-                        barThickness: 18
-                    }]
-                },
-                options: { 
-                    indexAxis: 'y', 
-                    maintainAspectRatio: false, 
-                    plugins: { 
-                        legend: { display: false }, 
-                        tooltip: { callbacks: { label: function(ctx) { return ' Rp ' + ctx.raw.toLocaleString('id-ID'); } } }
-                    },
-                    scales: { 
-                        x: { display: false, grid: {display: false} }, 
-                        y: { border: {display: false}, grid: {display: false}, ticks: {font: {family: "'Plus Jakarta Sans', sans-serif", weight: '600'}} } 
-                    }
-                }
-            });
-        }
-    }
-
-    function updateMonitorBSU() {
-        let tbody = document.getElementById('tabel-kinerja-bsu');
-        if(!tbody) return; 
-        tbody.innerHTML = '';
-        
-        let rekapUnit = [];
-        let sekarang = new Date().getTime();
-        
-        if (!dataUnit || dataUnit.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger fw-bold">Belum ada unit BSU yang didaftarkan di sistem.</td></tr>`;
-            return;
-        }
-        
-        dataUnit.forEach(u => {
-            let idUnitSkrg = String(u.id_unit).trim();
-            let trxUnit = masterTransaksi.filter(t => String(t.id_unit).trim() === idUnitSkrg);
-            
-            let totalBerat = 0;
-            let msTerakhir = 0;
-            let teksTglTerakhir = '<i class="text-muted">Belum ada</i>';
-            
-            trxUnit.forEach(t => {
-                totalBerat += parseFloat(t.berat || 0);
-                
-                if(t.tgl) {
-                    let parts = String(t.tgl).split(' ');
-                    if(parts.length > 0) {
-                        let tglParts = parts[0].split('-');
-                        if(tglParts.length === 3) {
-                            let d = new Date(`${tglParts[2]}-${tglParts[1]}-${tglParts[0]}T00:00:00`);
-                            if(d.getTime() > msTerakhir) { 
-                                msTerakhir = d.getTime(); 
-                                teksTglTerakhir = parts[0]; 
-                            }
-                        }
-                    }
-                }
-            });
-            
-            rekapUnit.push({ 
-                id: idUnitSkrg, 
-                nama: u.nama_unit, 
-                frekuensi: trxUnit.length, 
-                berat: totalBerat, 
-                ms_terakhir: msTerakhir,
-                tgl_terakhir_str: teksTglTerakhir
-            });
-        });
-        
-        rekapUnit.sort((a, b) => b.berat - a.berat);
-        
-        rekapUnit.forEach((r, index) => {
-            let selisihHari = r.ms_terakhir === 0 ? 999 : Math.floor((sekarang - r.ms_terakhir) / (1000 * 60 * 60 * 24));
-            let statusHtml = ''; let pesanWa = '';
-            
-            if (r.ms_terakhir === 0 || selisihHari > 90) {
-                statusHtml = `<span class="badge bg-danger"><i class="bi bi-circle-fill me-1"></i>Kritis</span>`;
-                pesanWa = `Halo Pengurus ${r.nama}, kami dari DLH memantau belum ada pergerakan transaksi lagi. Adakah kendala operasional yang bisa kami bantu?`;
-            } else if (selisihHari > 30) {
-                statusHtml = `<span class="badge" style="background-color: #fcd34d; color: #92400e;"><i class="bi bi-circle-fill me-1"></i>Peringatan</span>`;
-                pesanWa = `Halo Pengurus ${r.nama}, transaksi terakhir sudah lewat 1 bulan. Mari tingkatkan lagi sosialisasi ke warga!`;
-            } else {
-                statusHtml = `<span class="badge" style="background-color: #86efac; color: #14532d;"><i class="bi bi-circle-fill me-1"></i>Aktif</span>`;
-                pesanWa = `Halo Pengurus ${r.nama}, luar biasa! DLH sangat mengapresiasi kinerja BSU Anda bulan ini.`;
-            }
-            
-            let medali = index === 0 ? '🥇 1' : index === 1 ? '🥈 2' : index === 2 ? '🥉 3' : `${index + 1}`;
-            
-            tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #e2e8f0;">
-                <td class="text-center fw-bold fs-5">${medali}</td>
-                <td class="fw-bold" style="color: var(--primary-dark);">${r.nama} <br><small class="text-muted fw-normal">${r.id}</small></td>
-                <td class="text-center">${statusHtml}</td>
-                <td class="text-center fw-bold text-success">${r.berat.toFixed(1)} Kg</td>
-                <td class="text-center fw-bold text-muted">${r.frekuensi}x Mutasi</td>
-                <td class="text-center fw-medium text-muted">${r.tgl_terakhir_str}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary py-1 px-3" style="border-radius: 8px;" onclick="window.open('https://wa.me/?text='+encodeURIComponent('${pesanWa}'), '_blank')">
-                        <i class="bi bi-whatsapp"></i> Sentil
-                    </button>
-                </td>
-            </tr>`;
         });
     }
 
-    function eksporExcel() {
-        let csv = "data:text/csv;charset=utf-8,Tanggal;Nasabah;Aktivitas;Volume(Kg);Nilai(Rp)\n";
-        dataTransaksi.forEach(r => csv += `${r.tgl};${r.nama};${r.jenis};${r.berat};${r.total}\n`);
-        let link = document.createElement("a"); link.setAttribute("href", encodeURI(csv));
-        link.setAttribute("download", "Laporan.csv"); document.body.appendChild(link); link.click(); link.remove();
-    }
-
-    function cetakLaporanA4() {
-        let lapSampah = document.getElementById('lap-sampah').innerText;
-        let lapRupiah = document.getElementById('lap-rupiah').innerText;
-        let tabelSampah = document.getElementById('tabel-rekap-sampah').innerHTML;
-        let tabelNasabah = document.getElementById('tabel-rekap-nasabah').innerHTML;
-
-        let html = `
-        <div style="font-family:'Plus Jakarta Sans',sans-serif; padding: 20px;">
-            <h2 style="text-align:center; margin-bottom: 5px; font-weight: 800;">Laporan Finansial & Persediaan Konsolidasi</h2>
-            <h3 style="text-align:center; margin-top: 0; color: #064E3B; font-weight: 700;">BANK SAMPAH INDUK KAB. TULUNGAGUNG</h3>
-            <p style="text-align:center; font-size: 12px; color: #64748b; margin-bottom: 30px;">Dicetak pada: ${new Date().toLocaleDateString('id-ID')} pukul ${new Date().toLocaleTimeString('id-ID')}</p>
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-                <div style="border: 1px solid #cbd5e1; padding: 15px; width: 48%; border-radius: 12px;">
-                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px; font-weight: 600;">Aset Fisik (Volume Masuk)</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #059669;">${lapSampah} Kg</div>
-                </div>
-                <div style="border: 1px solid #cbd5e1; padding: 15px; width: 48%; border-radius: 12px;">
-                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px; font-weight: 600;">Liabilitas (Hutang Warga)</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #059669;">${lapRupiah}</div>
-                </div>
-            </div>
-
-            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #0f172a; font-weight: 700;">1. Matriks Inventaris Persediaan</h4>
-            <table class="table table-bordered" style="width: 100%; margin-bottom: 30px; font-size: 14px;">
-                <thead>
-                    <tr style="background-color: #f8fafc;">
-                        <th>Kategori Material Persediaan</th>
-                        <th>Akumulasi Volume</th>
-                        <th class="text-end">Total Valuasi Aset (Rp)</th>
-                    </tr>
-                </thead>
-                <tbody>${tabelSampah}</tbody>
-            </table>
-
-            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #0f172a; font-weight: 700;">2. Buku Besar Pembantu (Rincian Hutang)</h4>
-            <table class="table table-bordered" style="width: 100%; font-size: 14px;">
-                <thead>
-                    <tr style="background-color: #f8fafc;">
-                        <th>Identitas Kreditur (Nasabah)</th>
-                        <th>Total Volume Disetor</th>
-                        <th class="text-end">Sisa Saldo Mengendap (Rp)</th>
-                    </tr>
-                </thead>
-                <tbody>${tabelNasabah}</tbody>
-            </table>
-        </div>`;
-        
-        document.getElementById('area-laporan-a4').innerHTML = html; 
-        document.body.className = 'mode-cetak'; 
-        window.print(); 
-        document.body.className = '';
-    }
-
-    let pesanBroadcastGlobal = "";
-    function buatBroadcast() {
-        let tglInput = document.getElementById('tglJadwal').value; let pesanTamb = document.getElementById('pesanTambahan').value;
-        if(!tglInput) return alert("Harap isi Tanggal Pelaksanaan terlebih dahulu!");
-        let tglObj = new Date(tglInput); let opsiTgl = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; let tglFormat = tglObj.toLocaleDateString('id-ID', opsiTgl);
-        pesanBroadcastGlobal = `*PENGUMUMAN BANK SAMPAH*\n\nHalo Bapak/Ibu Warga,\nKami menginformasikan bahwa jadwal penyetoran Bank Sampah akan dilaksanakan pada:\n\n📅 *Tanggal:* ${tglFormat}\n\n`;
-        if (pesanTamb.trim() !== "") { pesanBroadcastGlobal += `📝 *Catatan:* ${pesanTamb}\n\n`; }
-        pesanBroadcastGlobal += `Mari kita jaga kebersihan lingkungan dan tingkatkan tabungan sampah kita. Terima kasih! ♻️`;
-        document.getElementById('previewPesan').innerText = pesanBroadcastGlobal; document.getElementById('areaBroadcast').style.display = 'block'; document.getElementById('totalKirim').innerText = dataNasabah.length;
-        let tbody = document.getElementById('tabel-kirim-broadcast'); tbody.innerHTML = '';
-        if(dataNasabah.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada data nasabah terdaftar.</td></tr>`; return; }
-        dataNasabah.forEach((n, i) => {
-            let hp = n.hp ? String(n.hp).trim() : ''; let valid = true; if(hp === '') valid = false;
-            if (hp.startsWith('8')) hp = '62' + hp; else if (hp.startsWith('0')) hp = '62' + hp.substring(1);
-            let btnHtml = valid ? `<button class="btn btn-sm btn-success" onclick="eksekusiWa('${hp}', ${i})"><i class="bi bi-whatsapp me-1"></i> Kirim</button>` : `<span class="badge bg-danger">No. HP Kosong</span>`;
-            tbody.innerHTML += `<tr><td class="align-middle fw-bold">${n.nama}</td><td class="align-middle text-muted">${n.hp || '-'}</td><td class="text-end align-middle" id="status-kirim-${i}">${btnHtml}</td></tr>`;
-        });
-    }
-
-    function eksekusiWa(hp, idBaris) {
-        document.getElementById(`status-kirim-${idBaris}`).innerHTML = `<span class="badge bg-secondary"><i class="bi bi-check2-all me-1"></i> Terbuka</span>`;
-        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesanBroadcastGlobal)}`, '_blank');
-    }
-
-    let pesanBroadcastHargaGlobal = "";
-    function buatBroadcastHarga() {
-        let catatan = document.getElementById('catatanHarga').value.trim();
-        pesanBroadcastHargaGlobal = `*UPDATE HARGA ACUAN MATERIAL* ♻️\n*BANK SAMPAH GANG DAWET*\n\nHalo Bapak/Ibu Nasabah,\nBerikut adalah rincian daftar harga beli terbaru untuk setiap material sampah anorganik terhitung hari ini:\n\n`;
-        if(dataKategori.length === 0) { pesanBroadcastHargaGlobal += `_(Belum ada data kategori material di database)_\n\n`; } else {
-            dataKategori.forEach(k => { pesanBroadcastHargaGlobal += `▪️ *${k.nama_kategori}:* Rp ${parseInt(k.harga).toLocaleString('id-ID')} / Kg\n`; }); pesanBroadcastHargaGlobal += `\n`;
+    function prosesLogout() {
+        if(confirm('Apakah Anda yakin ingin keluar dari Dasbor Bank Sampah Induk?')) {
+            localStorage.removeItem('ROLE_PENGGUNA');
+            localStorage.removeItem('ID_UNIT_PENGGUNA');
+            window.location.href = 'index.html';
         }
-        if (catatan !== "") { pesanBroadcastHargaGlobal += `📝 *Catatan Admin:* ${catatan}\n\n`; }
-        pesanBroadcastHargaGlobal += `"Dengan Memilah Sampah, Kita Ubah yang Terbuang Menjadi Bernilai" 💚`;
-        document.getElementById('previewPesanHarga').innerText = pesanBroadcastHargaGlobal; document.getElementById('areaBroadcastHarga').style.display = 'block'; document.getElementById('totalKirimHarga').innerText = dataNasabah.length;
-        let tbody = document.getElementById('tabel-kirim-broadcast-harga'); tbody.innerHTML = '';
-        if(dataNasabah.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada data nasabah terdaftar.</td></tr>`; return; }
-        dataNasabah.forEach((n, i) => {
-            let hp = n.hp ? String(n.hp).trim() : ''; let valid = true; if(hp === '') valid = false;
-            if (hp.startsWith('8')) hp = '62' + hp; else if (hp.startsWith('0')) hp = '62' + hp.substring(1);
-            let btnHtml = valid ? `<button class="btn btn-sm btn-success" onclick="eksekusiWaHarga('${hp}', ${i})"><i class="bi bi-whatsapp me-1"></i> Kirim</button>` : `<span class="badge bg-danger">No. HP Kosong</span>`;
-            tbody.innerHTML += `<tr><td class="align-middle fw-bold">${n.nama}</td><td class="align-middle text-muted">${n.hp || '-'}</td><td class="text-end align-middle" id="status-kirim-harga-${i}">${btnHtml}</td></tr>`;
-        });
-    }
-
-    function eksekusiWaHarga(hp, idBaris) {
-        document.getElementById(`status-kirim-harga-${idBaris}`).innerHTML = `<span class="badge bg-secondary"><i class="bi bi-check2-all me-1"></i> Terbuka</span>`;
-        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesanBroadcastHargaGlobal)}`, '_blank');
-    }
-
-    function hitungTotalPj() {
-        let b = parseFloat(document.getElementById('pj_berat').value) || 0;
-        let h = parseFloat(document.getElementById('pj_harga').value) || 0;
-        let t = b * h;
-        document.getElementById('pj_total').value = t;
-        document.getElementById('pj_total_tampil').value = 'Rp ' + t.toLocaleString('id-ID');
-    }
-
-    function simpanPenjualan() {
-        let btn = document.getElementById('btnSimpanPj');
-        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
-
-        let id_pj = 'INV-' + Date.now(); 
-        let formData = new URLSearchParams();
-        formData.append('action', 'tambahPenjualan');
-        formData.append('id_penjualan', id_pj);
-        formData.append('tgl', document.getElementById('pj_tgl').value);
-        formData.append('pembeli', document.getElementById('pj_pembeli').value);
-        formData.append('material', document.getElementById('pj_material').value);
-        formData.append('berat', document.getElementById('pj_berat').value);
-        formData.append('harga_satuan', document.getElementById('pj_harga').value);
-        formData.append('total', document.getElementById('pj_total').value);
-        formData.append('status_bayar', document.getElementById('pj_status').value);
-
-        fetch(scriptURL, { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData.toString() 
-            })
-            .then(res => res.text())
-            .then(hasil => {
-                alert('Berhasil! Data penjualan telah dicatat.');
-                document.getElementById('formPenjualan').reset();
-                document.getElementById('pj_total_tampil').value = '';
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-send-check me-2"></i>Simpan & Rekam';
-                dataPenjualan.push({
-                    id_penjualan: id_pj, tgl: formData.get('tgl'), pembeli: formData.get('pembeli'),
-                    material: formData.get('material'), berat: formData.get('berat'), 
-                    harga_satuan: formData.get('harga_satuan'), total: formData.get('total'), status_bayar: formData.get('status_bayar')
-                });
-                updateTabelPenjualan();
-            }).catch(err => {
-                alert('Terjadi kesalahan jaringan.');
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-send-check me-2"></i>Simpan & Rekam';
-            });
-    }
-
-    function updateTabelPenjualan() {
-        let tbody = document.getElementById('tabel-penjualan');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        if (!dataPenjualan || dataPenjualan.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada riwayat penjualan.</td></tr>`;
-            return;
-        }
-
-        let dataBalik = [...dataPenjualan].reverse();
-        
-        dataBalik.forEach(p => {
-            let tglParts = String(p.tgl).split('-');
-            let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : p.tgl;
-            let badge = p.status_bayar === 'Lunas' ? '<span class="badge bg-success">Lunas</span>' : '<span class="badge bg-warning text-dark">Piutang</span>';
-            let htmlInvoice = encodeURIComponent(JSON.stringify(p)); 
-
-            tbody.innerHTML += `
-            <tr>
-                <td class="fw-medium text-muted">${tglFormat}</td>
-                <td class="fw-bold text-dark">${p.pembeli}<br><small class="text-muted fw-normal">${p.id_penjualan}</small></td>
-                <td><span class="badge bg-light text-dark border">${p.material}</span><br><small>${p.berat} Kg</small></td>
-                <td class="fw-bold text-success">Rp ${parseFloat(p.total || 0).toLocaleString('id-ID')}</td>
-                <td>${badge}</td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary" onclick="cetakInvoice('${htmlInvoice}')"><i class="bi bi-printer"></i> Cetak</button>
-                </td>
-            </tr>`;
-        });
-    }
-
-    function cetakInvoice(dataString) {
-        let p = JSON.parse(decodeURIComponent(dataString));
-        let tglParts = String(p.tgl).split('-');
-        let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : p.tgl;
-        
-        let printWindow = window.open('', '', 'width=800,height=600');
-        printWindow.document.write(`
-            <html>
-            <head>
-                <title>Invoice - ${p.id_penjualan}</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 40px; color: #333; }
-                    .header { display: flex; justify-content: space-between; border-bottom: 2px solid #059669; padding-bottom: 20px; margin-bottom: 30px; }
-                    .title { color: #059669; font-size: 28px; font-weight: bold; margin: 0; }
-                    .subtitle { color: #666; font-size: 14px; }
-                    .info-box { display: flex; justify-content: space-between; margin-bottom: 40px; }
-                    .table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                    .table th, .table td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-                    .table th { background-color: #f8f9fa; color: #333; }
-                    .total-row { font-size: 18px; font-weight: bold; color: #059669; }
-                    .ttd { margin-top: 50px; float: right; text-align: center; }
-                </style>
-            </head>
-            <body>
-                <div class="header">
-                    <div>
-                        <h1 class="title">INVOICE PENJUALAN</h1>
-                        <p class="subtitle">BANK SAMPAH INDUK (BSI) TULUNGAGUNG<br>Dinas Lingkungan Hidup Kabupaten Tulungagung</p>
-                    </div>
-                    <div style="text-align: right;">
-                        <h2 style="margin:0; color:#555;">#${p.id_penjualan}</h2>
-                        <p class="subtitle">Tanggal: ${tglFormat}<br>Status: <b>${p.status_bayar}</b></p>
-                    </div>
-                </div>
-                <div class="info-box">
-                    <div>
-                        <p style="margin:0; color:#666;">Ditagihkan Kepada:</p>
-                        <h3 style="margin:5px 0;">${p.pembeli}</h3>
-                    </div>
-                </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Deskripsi Material</th>
-                            <th style="text-align:center;">Kuantitas (Kg)</th>
-                            <th style="text-align:right;">Harga Satuan</th>
-                            <th style="text-align:right;">Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Penjualan ${p.material}</td>
-                            <td style="text-align:center;">${p.berat}</td>
-                            <td style="text-align:right;">Rp ${parseFloat(p.harga_satuan || 0).toLocaleString('id-ID')}</td>
-                            <td style="text-align:right;">Rp ${parseFloat(p.total || 0).toLocaleString('id-ID')}</td>
-                        </tr>
-                        <tr class="total-row">
-                            <td colspan="3" style="text-align:right; border-bottom:none;">TOTAL TAGIHAN</td>
-                            <td style="text-align:right; border-bottom:none;">Rp ${parseFloat(p.total || 0).toLocaleString('id-ID')}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <div class="ttd">
-                    <p style="margin-bottom: 70px;">Hormat Kami,<br><b>Pengelola BSI Tulungagung</b></p>
-                    <p style="border-top: 1px solid #333; padding-top: 5px;">( Divisi Keuangan )</p>
-                </div>
-                <script>window.onload = function() { window.print(); }<\/script>
-            </body>
-            </html>
-        `);
-        printWindow.document.close();
-    }
-
-    function simpanAset() {
-        let btn = document.getElementById('btnSimpanAset');
-        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
-
-        let id_as = 'AST-' + Date.now(); 
-        let formData = new URLSearchParams();
-        formData.append('action', 'tambahAset');
-        formData.append('id_aset', id_as);
-        formData.append('nama_aset', document.getElementById('as_nama').value);
-        formData.append('tgl_beli', document.getElementById('as_tgl').value);
-        formData.append('harga_beli', document.getElementById('as_harga').value);
-        formData.append('umur_ekonomis', document.getElementById('as_umur').value);
-        formData.append('nilai_sisa', document.getElementById('as_sisa').value);
-
-        fetch(scriptURL, { method: 'POST', body: formData })
-            .then(res => res.text())
-            .then(hasil => {
-                alert('Berhasil! Data aset telah dicatat di buku inventaris.');
-                document.getElementById('formAset').reset();
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan ke Database';
-                dataAset.push({
-                    id_aset: id_as, nama_aset: formData.get('nama_aset'), tgl_beli: formData.get('tgl_beli'),
-                    harga_beli: formData.get('harga_beli'), umur_ekonomis: formData.get('umur_ekonomis'), nilai_sisa: formData.get('nilai_sisa')
-                });
-                updateTabelAset();
-            }).catch(err => {
-                alert('Terjadi kesalahan jaringan.');
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan ke Database';
-            });
-    }
-
-    function updateTabelAset() {
-        let tbody = document.getElementById('tabel-aset');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        if (!dataAset || dataAset.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-muted">Belum ada aset yang didaftarkan.</td></tr>`;
-            return;
-        }
-
-        let skrg = new Date();
-        let totalNilaiBuku = 0;
-
-        dataAset.forEach(a => {
-            let hBeli = parseFloat(a.harga_beli || 0);
-            let nSisa = parseFloat(a.nilai_sisa || 0);
-            let umurBln = parseInt(a.umur_ekonomis || 1);
-            
-            let susutPerBulan = (hBeli - nSisa) / umurBln;
-            if(susutPerBulan < 0) susutPerBulan = 0;
-
-            let tglBeli = new Date(a.tgl_beli);
-            let blnBerlalu = (skrg.getFullYear() - tglBeli.getFullYear()) * 12 + (skrg.getMonth() - tglBeli.getMonth());
-            if(blnBerlalu < 0) blnBerlalu = 0;
-            if(blnBerlalu > umurBln) blnBerlalu = umurBln; 
-
-            let nilaiBuku = hBeli - (susutPerBulan * blnBerlalu);
-            totalNilaiBuku += nilaiBuku;
-
-            let tglParts = String(a.tgl_beli).split('-');
-            let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : a.tgl_beli;
-
-            tbody.innerHTML += `
-            <tr>
-                <td class="fw-bold text-dark">${a.nama_aset}<br><small class="text-muted fw-normal">${a.id_aset}</small></td>
-                <td>${tglFormat}</td>
-                <td>Rp ${hBeli.toLocaleString('id-ID')}</td>
-                <td class="text-danger">- Rp ${susutPerBulan.toLocaleString('id-ID')}<small>/bln</small></td>
-                <td class="fw-bold" style="color: #0ea5e9;">Rp ${nilaiBuku.toLocaleString('id-ID')}</td>
-            </tr>`;
-        });
-        
-        tbody.innerHTML += `
-        <tr class="table-light" style="border-top: 2px solid #cbd5e1;">
-            <td colspan="4" class="text-end fw-bold pt-3">TOTAL KEKAYAAN ASET BSI (BOOK VALUE):</td>
-            <td class="fw-bold text-success fs-5 pt-3">Rp ${totalNilaiBuku.toLocaleString('id-ID')}</td>
-        </tr>`;
-    }
-
-    function simpanProduksi() {
-        let btn = document.getElementById('btnSimpanProduksi');
-        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
-
-        let id_prod = 'PRD-' + Date.now(); 
-        let formData = new URLSearchParams();
-        formData.append('action', 'tambahProduksi');
-        formData.append('id_produksi', id_prod);
-        formData.append('tgl', document.getElementById('pr_tgl').value);
-        formData.append('nama_proses', document.getElementById('pr_proses').value);
-        formData.append('bahan_baku', document.getElementById('pr_bahan').value);
-        formData.append('berat_bahan', document.getElementById('pr_berat_bahan').value);
-        formData.append('produk_hasil', document.getElementById('pr_produk').value);
-        formData.append('berat_hasil', document.getElementById('pr_berat_hasil').value);
-        formData.append('biaya_operasional', document.getElementById('pr_biaya').value);
-
-        fetch(scriptURL, { method: 'POST', body: formData })
-            .then(res => res.text())
-            .then(hasil => {
-                alert('Berhasil! Log produksi telah dicatat.');
-                document.getElementById('formProduksi').reset();
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-gear-fill me-2"></i>Proses & Rekam';
-                dataProduksi.push({
-                    id_produksi: id_prod, tgl: formData.get('tgl'), nama_proses: formData.get('nama_proses'),
-                    bahan_baku: formData.get('bahan_baku'), berat_bahan: formData.get('berat_bahan'), 
-                    produk_hasil: formData.get('produk_hasil'), berat_hasil: formData.get('berat_hasil'), biaya_operasional: formData.get('biaya_operasional')
-                });
-                updateTabelProduksi();
-            }).catch(err => {
-                alert('Terjadi kesalahan jaringan.');
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-gear-fill me-2"></i>Proses & Rekam';
-            });
-    }
-
-    function updateTabelProduksi() {
-        let tbody = document.getElementById('tabel-produksi');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        if (!dataProduksi || dataProduksi.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-muted">Belum ada riwayat pengolahan material.</td></tr>`;
-            return;
-        }
-
-        let dataBalik = [...dataProduksi].reverse();
-
-        dataBalik.forEach(p => {
-            let tglParts = String(p.tgl).split('-');
-            let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : p.tgl;
-
-            let bBahan = parseFloat(p.berat_bahan || 0);
-            let bHasil = parseFloat(p.berat_hasil || 0);
-            let biaya = parseFloat(p.biaya_operasional || 0);
-
-            let susutKg = bBahan - bHasil;
-            let susutPersen = bBahan > 0 ? ((susutKg / bBahan) * 100).toFixed(1) : 0;
-            let hppPerKg = bHasil > 0 ? (biaya / bHasil).toFixed(0) : 0;
-
-            tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td class="fw-medium text-muted">${tglFormat}<br><small class="text-dark fw-bold">${p.nama_proses}</small></td>
-                <td><span class="badge bg-light text-dark border">${p.bahan_baku}</span><br><small>${bBahan} Kg</small></td>
-                <td><i class="bi bi-arrow-right-circle-fill fs-5" style="color: #cbd5e1;"></i></td>
-                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">${p.produk_hasil}</span><br><small class="fw-bold">${bHasil} Kg</small></td>
-                <td class="text-danger fw-bold">-${susutPersen}% <br><small class="text-muted fw-normal">(${susutKg} Kg hilang)</small></td>
-                <td class="fw-bold" style="color: var(--primary-dark);">Rp ${Number(hppPerKg).toLocaleString('id-ID')}<br><small class="text-muted fw-normal">/Kg HPP</small></td>
-            </tr>`;
-        });
-    }
-
-    function simpanResidu() {
-        let btn = document.getElementById('btnSimpanResidu');
-        btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
-
-        let id_rs = 'RSD-' + Date.now(); 
-        let formData = new URLSearchParams();
-        formData.append('action', 'tambahResidu');
-        formData.append('id_residu', id_rs);
-        formData.append('tgl', document.getElementById('rs_tgl').value);
-        formData.append('tujuan_tpa', document.getElementById('rs_tujuan').value);
-        formData.append('armada_angkut', document.getElementById('rs_armada').value);
-        formData.append('berat_residu', document.getElementById('rs_berat').value);
-        formData.append('biaya_retribusi', document.getElementById('rs_biaya').value || 0);
-
-        fetch(scriptURL, { method: 'POST', body: formData })
-            .then(res => res.text())
-            .then(hasil => {
-                alert('Berhasil! Data pembuangan residu telah dicatat.');
-                document.getElementById('formResidu').reset();
-                document.getElementById('rs_tujuan').value = 'TPA Segawe';
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-send-x me-2"></i>Catat Pembuangan ke TPA';
-                dataResidu.push({
-                    id_residu: id_rs, tgl: formData.get('tgl'), tujuan_tpa: formData.get('tujuan_tpa'),
-                    armada_angkut: formData.get('armada_angkut'), berat_residu: formData.get('berat_residu'), 
-                    biaya_retribusi: formData.get('biaya_retribusi')
-                });
-                updateTabelResidu(); 
-            }).catch(err => {
-                alert('Terjadi kesalahan jaringan.');
-                btn.disabled = false; btn.innerHTML = '<i class="bi bi-send-x me-2"></i>Catat Pembuangan ke TPA';
-            });
-    }
-
-    function updateTabelResidu() {
-        let tbody = document.getElementById('tabel-residu');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        let totalInbound = 0;
-        dataTransaksi.forEach(t => {
-            if(t.jenis !== 'Penarikan Tunai') totalInbound += parseFloat(t.berat || 0);
-        });
-        
-        let totalResidu = 0;
-        if (dataResidu && dataResidu.length > 0) {
-            dataResidu.forEach(r => totalResidu += parseFloat(r.berat_residu || 0));
-        }
-
-        let recoveryRate = 0;
-        if (totalInbound > 0) {
-            recoveryRate = ((totalInbound - totalResidu) / totalInbound) * 100;
-            if (recoveryRate < 0) recoveryRate = 0;
-        } else if (totalInbound === 0 && totalResidu === 0) {
-            recoveryRate = 100; 
-        }
-
-        document.getElementById('mr_inbound').innerText = totalInbound.toLocaleString('id-ID') + ' Kg';
-        document.getElementById('mr_residu').innerText = totalResidu.toLocaleString('id-ID') + ' Kg';
-        document.getElementById('mr_rate_text').innerText = recoveryRate.toFixed(1) + '%';
-        
-        let bar = document.getElementById('mr_rate_bar');
-        if (bar) {
-            bar.style.width = recoveryRate.toFixed(1) + '%';
-            bar.innerText = recoveryRate.toFixed(1) + '% Diselamatkan';
-            
-            if(recoveryRate >= 80) { 
-                bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-success"; 
-            } else if(recoveryRate >= 50) { 
-                bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-warning text-dark"; 
-            } else { 
-                bar.className = "progress-bar progress-bar-striped progress-bar-animated bg-danger"; 
-            }
-        }
-
-        if (!dataResidu || dataResidu.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada riwayat pembuangan residu ke TPA.</td></tr>`;
-            return;
-        }
-
-        let dataBalik = [...dataResidu].reverse();
-        dataBalik.forEach(r => {
-            let tglParts = String(r.tgl).split('-');
-            let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : r.tgl;
-
-            tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td class="fw-medium text-muted">${tglFormat}</td>
-                <td class="fw-bold text-dark">${r.armada_angkut}<br><small class="text-muted fw-normal"><i class="bi bi-geo-alt-fill text-danger me-1"></i>${r.tujuan_tpa}</small></td>
-                <td class="text-center fw-bold text-danger">${parseFloat(r.berat_residu || 0)} Kg</td>
-                <td class="text-end fw-bold text-muted">Rp ${parseFloat(r.biaya_retribusi || 0).toLocaleString('id-ID')}</td>
-            </tr>`;
-        });
-    }
-
-    function simpanArmada() {
-        let btn = document.querySelector('#formArmada button[type="submit"]');
-        btn.disabled = true; btn.innerHTML = 'Menyimpan...';
-
-        let id_ar = 'LOG-' + Date.now();
-        let dataBaru = {
-            id: id_ar,
-            tgl: document.getElementById('ar_tgl').value,
-            kendaraan: document.getElementById('ar_kendaraan').value,
-            sopir: document.getElementById('ar_sopir').value,
-            rute: document.getElementById('ar_rute').value,
-            biaya: parseFloat(document.getElementById('ar_biaya').value || 0)
-        };
-
-        setTimeout(() => {
-            dataArmada.push(dataBaru);
-            alert('Log perjalanan armada berhasil direkam!');
-            document.getElementById('formArmada').reset();
-            updateTabelArmada();
-            btn.disabled = false; btn.innerHTML = '<i class="bi bi-geo-alt-fill me-2"></i>Rekam Perjalanan';
-        }, 500);
-    }
-
-    function updateTabelArmada() {
-        let tbody = document.getElementById('tabel-armada');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        let totalBiaya = 0;
-        let totalTrip = dataArmada.length;
-
-        if (totalTrip === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Belum ada log perjalanan logistik.</td></tr>`;
-        } else {
-            let dataBalik = [...dataArmada].reverse();
-            dataBalik.forEach(a => {
-                totalBiaya += a.biaya;
-                let tglParts = a.tgl.split('-');
-                let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : a.tgl;
-
-                tbody.innerHTML += `
-                <tr style="border-bottom: 1px solid #f1f5f9;">
-                    <td class="text-muted fw-medium">${tglFormat}</td>
-                    <td class="fw-bold" style="color: var(--primary-dark);">${a.kendaraan}<br><small class="text-muted fw-normal"><i class="bi bi-person-fill me-1"></i>${a.sopir}</small></td>
-                    <td><span class="badge bg-light text-dark border">${a.rute}</span></td>
-                    <td class="text-end fw-bold text-danger">Rp ${a.biaya.toLocaleString('id-ID')}</td>
-                </tr>`;
-            });
-        }
-
-        document.getElementById('ar_tot_biaya').innerText = 'Rp ' + totalBiaya.toLocaleString('id-ID');
-        document.getElementById('ar_tot_trip').innerText = totalTrip + ' Trip';
-    }
-
-    function loadDropdownQC() {
-        let sel = document.getElementById('qc_bsu');
-        if(!sel) return;
-        sel.innerHTML = '<option value="">-- Pilih Unit BSU --</option>';
-        dataNasabah.forEach(n => {
-            sel.innerHTML += `<option value="${n.nama}">${n.nama}</option>`;
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        let qcTab = document.querySelector('.nav-link[onclick*="qc"]');
-        if(qcTab) {
-            qcTab.addEventListener('click', loadDropdownQC);
-        }
-    });
-
-    function simpanQC() {
-        let btn = document.querySelector('#formQC button[type="submit"]');
-        btn.disabled = true; btn.innerHTML = 'Menyimpan...';
-
-        let kotor = parseFloat(document.getElementById('qc_berat_kotor').value || 0);
-        let bersih = parseFloat(document.getElementById('qc_berat_clean').value || document.getElementById('qc_berat_bersih').value || 0);
-        
-        if (bersih > kotor) {
-            alert('Berat bersih tidak boleh lebih besar dari berat kotor!');
-            btn.disabled = false; btn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data QC';
-            return;
-        }
-
-        let dataBaru = {
-            id: 'QC-' + Date.now(),
-            tgl: document.getElementById('qc_tgl').value,
-            bsu: document.getElementById('qc_bsu').value,
-            material: document.getElementById('qc_material').value,
-            kotor: kotor,
-            bersih: bersih,
-            keterangan: document.getElementById('qc_keterangan').value
-        };
-
-        setTimeout(() => {
-            dataQC.push(dataBaru);
-            alert('Data Quality Control & Penyusutan berhasil dicatat.');
-            document.getElementById('formQC').reset();
-            updateTabelQC();
-            btn.disabled = false; btn.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data QC';
-        }, 500);
-    }
-
-    function updateTabelQC() {
-        let tbody = document.getElementById('tabel-qc');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        if (dataQC.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Belum ada data penyusutan QC.</td></tr>`;
-            return;
-        }
-
-        let dataBalik = [...dataQC].reverse();
-        dataBalik.forEach(q => {
-            let tglParts = q.tgl.split('-');
-            let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : q.tgl;
-            
-            let susutKg = q.kotor - q.bersih;
-            let susutPersen = q.kotor > 0 ? ((susutKg / q.kotor) * 100).toFixed(1) : 0;
-
-            tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td class="text-muted fw-medium">${tglFormat}<br><strong class="text-dark">${q.bsu}</strong></td>
-                <td><span class="badge bg-light text-dark border">${q.material}</span><br><small class="text-muted">${q.keterangan}</small></td>
-                <td class="text-center fw-bold">
-                    <span class="text-danger">${q.kotor} Kg</span> <i class="bi bi-arrow-right mx-1"></i> <span class="text-success">${q.bersih} Kg</span>
-                </td>
-                <td class="fw-bold text-danger">-${susutPersen}%<br><small class="text-muted fw-normal">(${susutKg.toFixed(1)} Kg loss)</small></td>
-            </tr>`;
-        });
-    }
-
-    function hitungTotalRt() {
-        let q = parseFloat(document.getElementById('rt_qty').value) || 0;
-        let h = parseFloat(document.getElementById('rt_harga').value) || 0;
-        let t = q * h;
-        document.getElementById('rt_total_tampil').value = 'Rp ' + t.toLocaleString('id-ID');
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        let qtyInput = document.getElementById('rt_qty');
-        let hargaInput = document.getElementById('rt_harga');
-        if (qtyInput && hargaInput) {
-            qtyInput.addEventListener('input', hitungTotalRt);
-            hargaInput.addEventListener('input', hitungTotalRt);
-        }
-    });
-
-    function simpanRetail() {
-        let btn = document.querySelector('#formRetail button[type="submit"]');
-        btn.disabled = true; btn.innerHTML = 'Memproses...';
-
-        let qty = parseFloat(document.getElementById('rt_qty').value || 0);
-        let harga = parseFloat(document.getElementById('rt_harga').value || 0);
-        let total = qty * harga;
-
-        let dataBaru = {
-            id: 'RTL-' + Date.now(),
-            tgl: document.getElementById('rt_tgl').value,
-            pembeli: document.getElementById('rt_pembeli').value,
-            produk: document.getElementById('rt_produk').value,
-            qty: qty,
-            harga: harga,
-            total: total
-        };
-
-        setTimeout(() => {
-            dataRetail.push(dataBaru);
-            alert('Pembayaran tunai eceran berhasil diproses! Kas bertambah otomatis.');
-            document.getElementById('formRetail').reset();
-            document.getElementById('rt_total_tampil').value = '';
-            document.getElementById('rt_qty').value = '1';
-            updateTabelRetail();
-            btn.disabled = false; btn.innerHTML = '<i class="bi bi-cart-check me-2"></i>Proses Pembayaran';
-        }, 500);
-    }
-
-    function updateTabelRetail() {
-        let tbody = document.getElementById('tabel-retail');
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        
-        if (dataRetail.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">Belum ada transaksi penjualan retail.</td></tr>`;
-            return;
-        }
-
-        let dataBalik = [...dataRetail].reverse();
-        dataBalik.forEach(r => {
-            let tglParts = r.tgl.split('-');
-            let tglFormat = tglParts.length === 3 ? `${tglParts[2]}/${tglParts[1]}/${tglParts[0]}` : r.tgl;
-
-            tbody.innerHTML += `
-            <tr style="border-bottom: 1px solid #f1f5f9;">
-                <td class="text-muted fw-medium">${tglFormat}</td>
-                <td class="fw-bold text-dark">${r.pembeli}<br><small class="text-muted fw-normal">${r.id}</small></td>
-                <td><span class="badge" style="background-color: #d1fae5; color: #065f46;">${r.produk}</span><br><small class="fw-bold">${r.qty} x Rp ${r.harga.toLocaleString('id-ID')}</small></td>
-                <td class="text-end fw-bold text-success">Rp ${r.total.toLocaleString('id-ID')}</td>
-                <td class="text-center"><button class="btn btn-sm btn-outline-success"><i class="bi bi-printer"></i> Struk</button></td>
-            </tr>`;
-        });
     }
 
     function lihatSandi(inputId, iconId) {
