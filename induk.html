@@ -1,495 +1,986 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Bank Sampah Pro - Admin Induk</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
-    <!-- LIBRARY GRAFIK (CHART.JS) -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal Utama - Bank Sampah Induk</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <style>
+    :root {
+      --primary: #10b981; --primary-dark: #059669; --primary-light: #d1fae5;
+      --secondary: #3b82f6; --accent: #f59e0b; --danger: #ef4444;
+      --bg-body: #f8fafc; --bg-card: #ffffff;
+      --text-main: #0f172a; --text-muted: #64748b; --border: #e2e8f0;
+      --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
+    }
 
-    <style>
-        :root {
-            --primary-dark: #0F172A; --primary-main: #0284C7; --primary-light: #E0F2FE; 
-            --bg-color: #94A3B8; --text-main: #0F172A; --text-muted: #475569; 
-            --card-bg: rgba(255, 255, 255, 0.95); 
-        }
-        body { 
-            background: linear-gradient(135deg, #CBD5E1 0%, #94A3B8 100%);
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            min-height: 100vh;
-        }
-        
-        /* Desain Card Modern */
-        .card, .card-metrik, .card-pantau { 
-            border: none; 
-            border-radius: 14px; 
-            background: var(--card-bg); 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
-            transition: 0.3s; 
-        }
-        .card-metrik:hover, .card-pantau:hover { 
-            transform: translateY(-4px); 
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15) !important; 
-        }
-        
-        /* Navigasi / Tab Menu */
-        .nav-link { color: var(--text-muted); font-weight: 600; cursor: pointer; border-radius: 8px; margin-right: 5px; }
-        .nav-link:hover { background-color: rgba(2, 132, 199, 0.05); color: var(--primary-main); }
-        .nav-link.aktif { color: white !important; background-color: var(--primary-main) !important; }
-        
-        /* Kontrol Tampilan Halaman */
-        .halaman-menu { display: none; }
-        .halaman-menu.aktif { display: block; animation: fadeIn 0.4s ease-in-out; }
-        
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .icon-box { width: 48px; height: 48px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
-        
-        /* Loading overlay spinner */
-        #loading-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(255,255,255,0.8); z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-    </style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg-body); margin: 0; padding: 24px; color: var(--text-main); line-height: 1.5; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    
+    .nav-bar { display: flex; gap: 8px; background: var(--bg-card); padding: 10px; border-radius: 16px; margin-bottom: 24px; box-shadow: var(--shadow-sm); flex-wrap: wrap; align-items: center; border: 1px solid var(--border);}
+    .nav-btn { padding: 12px 20px; cursor: pointer; border: none; background: transparent; border-radius: 10px; font-weight: 600; color: var(--text-muted); transition: all 0.3s ease; font-size: 13.5px; font-family: inherit;}
+    .nav-btn:hover { background: #f1f5f9; color: var(--text-main); }
+    .nav-btn.active { background: var(--primary-light); color: var(--primary-dark); }
+    .content-section { display: none; }
+    .content-section.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+
+    .header { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); color: white; text-align: left; padding: 36px 40px; border-radius: 20px; margin-bottom: 24px; box-shadow: 0 12px 24px -8px rgba(16, 185, 129, 0.4); display: flex; justify-content: space-between; align-items: center;}
+    .header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    .header p { margin: 6px 0 0 0; font-size: 14px; opacity: 0.9; font-weight: 500;}
+
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px; }
+    .card { background: var(--bg-card); padding: 24px; border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: all 0.3s ease; position: relative; overflow: hidden;}
+    .card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--primary-light);}
+    .card::before { content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--primary); }
+    .card h3 { margin: 0 0 8px; font-size: 13px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
+    .card p { margin: 0; font-size: 34px; font-weight: 800; color: var(--text-main); letter-spacing: -1px;}
+    .card-orange::before { background: var(--accent); } 
+    .card-orange p { color: var(--accent); }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;}
+    .panel { background: var(--bg-card); padding: 24px; border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);}
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid #f1f5f9; }
+    .panel-header h2 { margin: 0; font-size: 15px; color: var(--text-main); font-weight: 800; letter-spacing: 0.3px; text-transform: uppercase;}
+    
+    .table-container { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); background: white; box-shadow: var(--shadow-sm); }
+    table { width: 100%; border-collapse: collapse; font-family: inherit; background: white;}
+    th, td { padding: 16px 20px; text-align: left; font-size: 13.5px; border-bottom: 1px solid #f1f5f9; vertical-align: middle;}
+    th { background-color: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 11px; letter-spacing: 0.8px; white-space: nowrap;}
+    td { font-weight: 500; color: #475569; }
+    tr:hover td { background-color: #f8fafc; }
+    tr:last-child td { border-bottom: none; }
+    .text-center { text-align: center !important; }
+    .text-right { text-align: right !important; }
+    
+    .form-group { margin-bottom: 20px; text-align: left; }
+    .form-group label { display: block; font-weight: 700; margin-bottom: 8px; font-size: 13px; color: var(--text-main);}
+    .form-control { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 10px; box-sizing: border-box; font-size: 14px; font-family: inherit; font-weight: 500; background: #f8fafc; color: var(--text-main); transition: all 0.2s;}
+    .form-control:focus { outline: none; border-color: var(--primary); background: #ffffff; box-shadow: 0 0 0 4px var(--primary-light); }
+    
+    .btn-submit { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; border: none; padding: 14px 20px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 700; font-size: 15px; font-family: inherit; transition: all 0.3s; letter-spacing: 0.3px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);}
+    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);}
+    .btn-sync { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; font-family: inherit; transition: 0.2s; box-shadow: var(--shadow-sm);}
+    .btn-sync:hover { background-color: #f1f5f9; border-color: #cbd5e1;}
+    .btn-danger { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 12px; font-family: inherit; transition: 0.2s;}
+    .btn-danger:hover { background-color: var(--danger); color: white; }
+    
+    .badge-material { background: var(--bg-body); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px;}
+    .badge-wa { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; border: 1px solid #bfdbfe; transition: 0.2s; white-space: nowrap;}
+    .badge-wa:hover { background: #dbeafe; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);}
+
+    .rank-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-radius: 12px; border: 1px solid var(--border); background: var(--bg-card); margin-bottom: 12px; transition: all 0.2s;}
+    .rank-item:hover { transform: translateX(6px); box-shadow: var(--shadow-md); border-color: #cbd5e1;}
+    .rank-num { font-size: 18px; font-weight: 900; margin-right: 16px; width: 30px; text-align: center;}
+    .rank-name { font-weight: 700; color: var(--text-main); font-size: 14px; flex-grow: 1;}
+    .rank-val { font-weight: 800; font-size: 15px; }
+
+    /* --- CSS KOMPOSISI & HIERARKI MATERIAL (DARK MODE) --- */
+    .komposisi-panel {
+        background: #0f172a;
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: var(--shadow-md);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .komposisi-header { margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
+    .komposisi-header h2 { color: #10b981; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.3px;}
+    .komposisi-header p { color: #94a3b8; margin: 4px 0 0 0; font-size: 12px; font-weight: 500;}
+    .komposisi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .komp-card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; transition: 0.3s ease;}
+    .komp-card:hover { transform: translateY(-3px); border-color: #475569;}
+    .komp-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; }
+    .komp-title { color: #f8fafc; font-size: 15px; font-weight: 700; margin: 0; }
+    .komp-value { font-size: 18px; font-weight: 800; }
+    .komp-pct { font-size: 12px; color: #64748b; font-weight: 600; margin-left: 4px; }
+    .prog-bg { background: #334155; height: 8px; border-radius: 6px; margin-bottom: 20px; overflow: hidden; }
+    .prog-bar { height: 100%; border-radius: 6px; transition: width 1s ease-in-out;}
+    .bd-label { font-size: 10px; color: #64748b; letter-spacing: 0.5px; margin-bottom: 12px; text-transform: uppercase; font-weight: 700;}
+    .bd-item { margin-bottom: 12px; }
+    .bd-info { display: flex; justify-content: space-between; font-size: 12px; color: #cbd5e1; margin-bottom: 6px; font-weight: 500;}
+    .bd-name::before { content: '↪'; margin-right: 6px; color: #64748b; }
+    .bd-prog-bg { background: #334155; height: 4px; border-radius: 2px; overflow: hidden;}
+    
+    .color-kertas { color: #10b981; } .bg-kertas { background: #10b981; }
+    .color-plastik { color: #3b82f6; } .bg-plastik { background: #3b82f6; }
+    .color-besi { color: #f59e0b; } .bg-besi { background: #f59e0b; }
+    .color-kaca { color: #ec4899; } .bg-kaca { background: #ec4899; }
+    .color-logam { color: #8b5cf6; } .bg-logam { background: #8b5cf6; }
+    .color-minyak { color: #f97316; } .bg-minyak { background: #f97316; }
+    .color-elektro { color: #06b6d4; } .bg-elektro { background: #06b6d4; }
+    .color-lainnya { color: #94a3b8; } .bg-lainnya { background: #94a3b8; }
+  </style>
 </head>
-<body class="p-4">
+<body>
 
-    <!-- LOADING SCREEN -->
-    <div id="loading-screen">
-        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
-        <h5 class="fw-bold text-dark mt-3">Sinkronisasi Data Google Sheets...</h5>
+  <div class="container">
+    <div class="header">
+        <div>
+            <h1>Dashboard Bank Sampah Induk</h1>
+            <p>Dinas Lingkungan Hidup Kab. Tulungagung</p>
+        </div>
+        <div style="text-align: right;">
+            <button class="btn-sync" onclick="sinkronKeSheets()" id="btnSync">
+                <span style="font-size: 16px; margin-right: 6px;">☁️</span> Export Google Sheets
+            </button>
+        </div>
     </div>
 
-    <div class="container-fluid">
-        <!-- MENU NAVIGASI UTAMA -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4 p-3">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-primary" href="#"><i class="bi bi-recycle"></i> BANK SAMPAH INDUK</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                        <li class="nav-item">
-                            <a class="nav-link aktif" id="nav-dashboard" onclick="bukaMenu('menu-dashboard')"><i class="bi bi-speedometer2"></i> Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="nav-pantau" onclick="bukaMenu('menu-pantau')"><i class="bi bi-display"></i> Pantau BSU</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="nav-kategori" onclick="bukaMenu('menu-kategori')"><i class="bi bi-tags"></i> Kategori Material</a>
-                        </li>
-                    </ul>
-                    <button class="btn btn-outline-danger fw-bold" onclick="prosesLogout()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
-                </div>
-            </div>
-        </nav>
+    <!-- MENU NAVIGASI -->
+    <div class="nav-bar">
+      <button class="nav-btn active" onclick="pindahTab('dash', this)">📊 Statistik</button>
+      <button class="nav-btn" onclick="pindahTab('datasu', this)">🏢 Data BSU</button>
+      <button class="nav-btn" onclick="pindahTab('keuangan', this)">💰 Keuangan</button>
+      <button class="nav-btn" onclick="pindahTab('harga', this)">🏷️ Master Harga</button>
+      <button class="nav-btn" onclick="pindahTab('transaksi', this)">📝 Transaksi</button>
+      <button class="nav-btn" onclick="pindahTab('monitoring', this)">🔍 Monitoring BSU</button>
+      <button class="nav-btn" onclick="pindahTab('daftar', this)">➕ Registrasi BSU</button>
+      <button class="nav-btn" style="color: #ef4444; margin-left: auto;" onclick="logoutPusat()">🚪 Keluar</button>
+    </div>
 
-        <!-- ======================================================= -->
-        <!-- MENU 1: DASHBOARD UTAMA INDUK                           -->
-        <!-- ======================================================= -->
-        <div id="menu-dashboard" class="halaman-menu aktif">
-            <h3 class="fw-bold mb-4 text-dark"><i class="bi bi-grid-1x2-fill"></i> Ringkasan Eksekutif</h3>
-            <div class="row g-3 mb-4">
-                <div class="col-md-4">
-                    <div class="card card-metrik p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted fw-semibold">Total Unit BSU Bergabung</h6>
-                                <h2 class="fw-bold text-primary mb-0" id="dash-total-unit">0</h2>
-                            </div>
-                            <div class="icon-box bg-primary text-white"><i class="bi bi-buildings"></i></div>
-                        </div>
-                    </div>
+    <!-- KONTEN DASHBOARD UMUM -->
+    <div id="dash" class="content-section active">
+      <div id="loading" style="text-align:center; padding:60px; font-weight:700; color:var(--text-muted); font-size: 16px;">
+          ⏳ Menarik Data Real-time... Mohon Tunggu.
+      </div>
+      
+      <div id="dashboardContent" style="display:none;">
+        <div class="cards">
+          <div class="card"><h3>Bank Sampah Unit</h3><p id="valUnit">0</p></div>
+          <div class="card"><h3>Setoran Bulan Ini (KG)</h3><p id="valBulanIni">0</p></div>
+          <div class="card"><h3>Total Sampah Masuk BSI (KG)</h3><p id="valTotalSampah">0</p></div>
+          <div class="card card-orange"><h3>Kewajiban Saldo (Rp)</h3><p id="valSaldo">Rp 0</p></div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>📈 EVALUASI PERTUMBUHAN SETORAN</h2>
+                    <select id="filterRangeTren" class="form-control" style="width: auto; padding: 6px 12px; font-size: 12.5px; margin: 0; font-weight: 700; background: var(--bg-body);" onchange="renderVisualisasiTren(this.value)">
+                        <option value="hari">Per Hari</option>
+                        <option value="minggu">Per Minggu</option>
+                        <option value="bulan" selected>Per Bulan</option>
+                        <option value="tahun">Per Tahun</option>
+                    </select>
                 </div>
-                <div class="col-md-4">
-                    <div class="card card-metrik p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted fw-semibold">Total Reduksi Sampah</h6>
-                                <h2 class="fw-bold text-success mb-0" id="dash-total-sampah">0 Kg</h2>
-                            </div>
-                            <div class="icon-box bg-success text-white"><i class="bi bi-recycle"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card card-metrik p-4">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="text-muted fw-semibold">Omset Perputaran Dana</h6>
-                                <h2 class="fw-bold text-warning mb-0" id="dash-total-saldo">Rp 0</h2>
-                            </div>
-                            <div class="icon-box bg-warning text-dark"><i class="bi bi-wallet2"></i></div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Menambah sedikit tinggi canvas untuk menampung label teks di atas batang -->
+                <canvas id="lineChart" height="180"></canvas>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>📊 KONTRIBUSI SETORAN PER BSU</h2></div>
+                <canvas id="barChart" height="180"></canvas>
             </div>
         </div>
 
-        <!-- ======================================================= -->
-        <!-- MENU 2: PANTAU BSU KABUPATEN (BARU & REALTIME)          -->
-        <!-- ======================================================= -->
-        <div id="menu-pantau" class="halaman-menu">
-            <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- PANEL KOMPOSISI -->
+        <div class="komposisi-panel">
+            <div class="komposisi-header">
+                <div style="background: #1e293b; padding: 8px; border-radius: 8px; border: 1px solid #334155; font-size: 18px;">🎛️</div>
                 <div>
-                    <h3 class="fw-bold text-dark mb-0"><i class="bi bi-display-fill"></i> Monitor Performa BSU Wilayah</h3>
-                    <p class="text-muted mb-0">Visualisasi data reduksi sampah dan tabungan unit desa/kelurahan</p>
-                </div>
-                <div>
-                    <button class="btn btn-primary shadow-sm fw-semibold" onclick="muatDataDariSheets()"><i class="bi bi-arrow-clockwise"></i> Segarkan Data</button>
+                    <h2>Komposisi & Hierarki Klasifikasi Sampah</h2>
+                    <p>Analisis kecerdasan data (*Data Intelligence*) rincian material berdasarkan volume metrik.</p>
                 </div>
             </div>
-
-            <!-- METRIK STATUS KABUPATEN -->
-            <div class="row g-3 mb-4">
-                <div class="col-md-3">
-                    <div class="card card-pantau p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><p class="text-muted mb-1 small fw-bold">BSU TERDAFTAR</p><h4 class="fw-bold mb-0" id="pantau-total-bsu">0 Unit</h4></div>
-                            <div class="icon-box bg-primary text-white"><i class="bi bi-shop"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-pantau p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><p class="text-muted mb-1 small fw-bold">TOTAL TRANSAKSI</p><h4 class="fw-bold mb-0" id="pantau-total-trx">0</h4></div>
-                            <div class="icon-box bg-info text-white"><i class="bi bi-arrow-left-right"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-pantau p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><p class="text-muted mb-1 small fw-bold">SAMPAH TERKUMPUL</p><h4 class="fw-bold mb-0 text-success" id="pantau-total-sampah-kg">0 Kg</h4></div>
-                            <div class="icon-box bg-success text-white"><i class="bi bi-box-seam"></i></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="card card-pantau p-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div><p class="text-muted mb-1 small fw-bold">SALDO AKUMULATIF</p><h4 class="fw-bold mb-0 text-danger" id="pantau-total-saldo-rp">Rp 0</h4></div>
-                            <div class="icon-box bg-danger text-white"><i class="bi bi-cash-stack"></i></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row g-4 mb-4">
-                <!-- TABEL RANKING PERFORMA BSU DESA -->
-                <div class="col-md-8">
-                    <div class="card card-pantau p-4 h-100 shadow-sm">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="fw-bold mb-0 text-dark">Peringkat & Ringkasan Capaian BSU</h5>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Nama Bank Sampah Unit (BSU)</th>
-                                        <th class="text-center">Aktivitas</th>
-                                        <th class="text-end">Massa Sampah (Kg)</th>
-                                        <th class="text-end">Nilai Ekonomi</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelDataPantauBSU">
-                                    <!-- Terisi otomatis melalui kalkulasi js -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                <!-- GRAFIK DONUT KOMPOSISI MATERIAL -->
-                <div class="col-md-4">
-                    <div class="card card-pantau p-4 h-100 shadow-sm text-center">
-                        <h5 class="fw-bold mb-4 text-start text-dark">Proporsi Jenis Material</h5>
-                        <div style="position: relative; margin: auto; width: 100%;">
-                            <canvas id="chartKomposisi"></canvas>
-                        </div>
-                    </div>
-                </div>
+            <div id="hierarkiKomposisiContainer" class="komposisi-grid">
+                <div style="color: #64748b; font-size: 13px;">Memuat analisis data cerdas...</div>
             </div>
         </div>
 
-        <!-- ======================================================= -->
-        <!-- MENU 3: KATEGORI MATERIAL                               -->
-        <!-- ======================================================= -->
-        <div id="menu-kategori" class="halaman-menu">
-            <h3 class="fw-bold mb-4 text-dark"><i class="bi bi-tags-fill"></i> Manajemen Kategori & Harga Jual</h3>
-            <div class="card p-4 shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th>Jenis Material</th>
-                                <th>Nama Kategori</th>
-                                <th class="text-end">Harga Perkilo</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelKategori">
-                            <!-- Terisi otomatis via Apps Script -->
-                        </tbody>
+      </div>
+    </div>
+
+    <!-- KONTEN DATA UNIT BSU -->
+    <div id="datasu" class="content-section">
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>🏆 TOP 5 BSU (VOLUME SAMPAH)</h2></div>
+                <div id="rankingVolume">Memuat peringkat...</div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>💎 TOP 5 BSU (NILAI TABUNGAN)</h2></div>
+                <div id="rankingSaldo">Memuat peringkat...</div>
+            </div>
+        </div>
+
+        <!-- TABEL PROFIL BANK SAMPAH UNIT -->
+        <div class="panel">
+            <div class="panel-header"><h2>🏢 PROFIL BANK SAMPAH UNIT</h2></div>
+            <div class="table-container" style="overflow-x: auto; max-height: 500px;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID REGISTER</th>
+                            <th>NAMA BSU</th>
+                            <th>KETUA</th>
+                            <th class="text-center">JML PENGURUS</th>
+                            <th class="text-center">JML NASABAH</th>
+                            <th>KONTAK WA</th>
+                            <th>KECAMATAN</th>
+                            <th>DESA</th>
+                            <th>ALAMAT</th>
+                            <th class="text-center">KOORDINAT</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelDirektoriBsu">
+                        <tr><td colspan="10" class="text-center">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- KONTEN KEUANGAN -->
+    <div id="keuangan" class="content-section">
+        <div class="cards" style="grid-template-columns: 1fr;">
+            <div class="card card-orange" style="text-align: center; border-left: none; border-top: 6px solid var(--accent); background: linear-gradient(to bottom, #ffffff, #fffbeb);">
+                <h3>NILAI EKONOMI TOTAL (TOTAL KESELURUHAN SALDO BSU)</h3>
+                <p id="valKeuanganTotal" style="font-size: 46px; margin-top: 10px; letter-spacing: -1.5px;">Rp 0</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>💰 SALDO PER BSU</h2></div>
+                <div class="table-container" style="overflow-y: auto; max-height: 400px;">
+                    <table>
+                        <thead><tr><th>NAMA BSU</th><th class="text-right">TOTAL SALDO (Rp)</th></tr></thead>
+                        <tbody id="tabelKeuanganSaldo"><tr><td colspan="2" class="text-center">Memuat data...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>🍩 DISTRIBUSI TABUNGAN</h2></div>
+                <div style="display: flex; justify-content: center; align-items: center; height: 350px;">
+                    <canvas id="keuanganPieChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HARGA SAMPAH MASTER -->
+    <div id="harga" class="content-section">
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>🏷️ DAFTAR HARGA MATERIAL</h2></div>
+                <div class="table-container" style="overflow-y: auto; max-height: 500px;">
+                    <table><thead><tr><th>JENIS MATERIAL</th><th>KATEGORI PRODUK</th><th class="text-right">HARGA / KG</th><th class="text-center">AKSI</th></tr></thead><tbody id="tabelMasterHarga"><tr><td colspan="4" class="text-center">Memuat data...</td></tr></tbody></table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>➕ TAMBAH HARGA BARU</h2></div>
+                <form id="formHarga" style="margin-top:10px;">
+                    <div class="form-group">
+                        <label>Jenis Material Utama</label>
+                        <select id="jenisMaterial" class="form-control" required>
+                            <option value="" disabled selected>-- Pilih Kategori --</option>
+                            <option value="Plastik">Plastik</option><option value="Kertas">Kertas</option><option value="Besi">Besi</option><option value="Logam">Logam</option><option value="Elektronik">Elektronik</option><option value="Minyak">Minyak</option><option value="Botol Kaca">Botol Kaca</option><option value="Lainnya">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Kategori Produk</label><input type="text" id="namaKategoriMaterial" class="form-control" placeholder="Contoh: Botol Bodong Bersih" required></div>
+                    <div class="form-group"><label>Harga Beli per KG (Rp)</label><input type="number" id="hargaMaterial" class="form-control" placeholder="Contoh: 2500" required></div>
+                    <button type="button" class="btn-submit" id="btnSimpanHarga" onclick="simpanHarga()">SIMPAN HARGA</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRANSAKSI -->
+    <div id="transaksi" class="content-section">
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>📝 CATAT TRANSAKSI UNIT (BSU)</h2></div>
+                <form id="formTransaksi" style="margin-top:10px;">
+                    <div class="form-group"><label>Pilih Unit BSU</label><select id="trxBsu" class="form-control" required><option value="">Memuat BSU...</option></select></div>
+                    <div class="form-group"><label>Jenis Aktivitas</label><select id="trxJenis" class="form-control" onchange="ubahFormTransaksi()" required><option value="setor">Setoran Sampah (Saldo Masuk)</option><option value="tarik">Penarikan Saldo (Saldo Keluar)</option></select></div>
+                    <div id="areaSetor">
+                        <div class="form-group"><label>Jenis Material Utama</label><select id="trxJenisMaterialUtama" class="form-control" onchange="filterProdukTransaksi()" required><option value="" disabled selected>-- Pilih Jenis Material --</option><option value="Plastik">Plastik</option><option value="Kertas">Kertas</option><option value="Logam">Logam</option><option value="Besi">Besi</option><option value="Minyak">Minyak</option><option value="Elektronik">Elektronik</option><option value="Botol Kaca">Botol Kaca</option><option value="Lainnya">Lainnya</option></select></div>
+                        <div class="form-group"><label>Kategori Produk</label><select id="trxMaterial" class="form-control" required><option value="" disabled selected>-- Pilih Jenis Material Dulu --</option></select></div>
+                        <div class="form-group"><label>Berat (KG)</label><input type="number" id="trxBerat" class="form-control" step="any" placeholder="Contoh: 5.5"></div>
+                    </div>
+                    <div id="areaTarik" style="display: none;"><div class="form-group"><label>Nominal Penarikan (Rp)</label><input type="number" id="trxNominal" class="form-control" placeholder="Contoh: 50000"></div></div>
+                    <button type="button" class="btn-submit" id="btnSimpanTrx" onclick="simpanTransaksi()">PROSES TRANSAKSI</button>
+                </form>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>📄 LAPORAN TRANSAKSI BULANAN</h2></div>
+                <div class="form-group"><label>Filter Bulan</label><select id="filterBulanLaporan" class="form-control" onchange="renderLaporanBulanan()"><option value="semua">Semua Waktu</option></select></div>
+                <div class="table-container" style="overflow-y: auto; max-height: 350px;">
+                    <table><thead><tr><th>NAMA BSU</th><th class="text-right">TOTAL MASUK</th><th class="text-right">TOTAL KELUAR</th></tr></thead><tbody id="tabelLaporanBulanan"><tr><td colspan="3" class="text-center">Memuat laporan...</td></tr></tbody></table>
+                </div>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>📥 CATATAN SETORAN SAMPAH</h2></div>
+                <div class="table-container" style="overflow-y: auto; max-height: 400px;">
+                    <table>
+                        <thead><tr><th>TGL</th><th>UNIT BSU</th><th class="text-center">JENIS MATERIAL</th><th>KATEGORI PRODUK</th><th class="text-right">BERAT (KG)</th><th class="text-right">NOMINAL</th></tr></thead>
+                        <tbody id="tabelSetoran"><tr><td colspan="6" class="text-center">Memuat data...</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>📤 CATATAN PENARIKAN SALDO</h2></div>
+                <div class="table-container" style="overflow-y: auto; max-height: 400px;">
+                    <table><thead><tr><th>TGL</th><th>UNIT BSU</th><th class="text-right">NOMINAL DITARIK</th></tr></thead><tbody id="tabelPenarikan"><tr><td colspan="3" class="text-center">Memuat data...</td></tr></tbody></table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KONTEN MONITORING SPESIFIK BSU -->
+    <div id="monitoring" class="content-section">
+        <div class="panel" style="margin-bottom: 24px; border: 1px solid var(--primary); background: var(--primary-light);">
+            <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
+                <h2 style="color: var(--primary-dark);">🔍 PILIH BANK SAMPAH UNIT UNTUK DIMONITOR</h2>
+                <select id="selectMonitoringBsu" class="form-control" style="max-width: 400px; border-color: var(--primary); font-weight: 700;" onchange="prosesMonitoringBSU(this.value)">
+                    <option value="" disabled selected>-- Memuat Daftar BSU... --</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="monitoringArea" style="display:none; animation: slideUp 0.4s ease;">
+            <div class="cards">
+                <div class="card"><h3>Total Nasabah BSU</h3><p id="monNasabah">0</p></div>
+                <div class="card"><h3>Total Sampah (KG)</h3><p id="monTotalSampah" class="text-success">0</p></div>
+                <div class="card"><h3>Rata-rata/Bulan (KG)</h3><p id="monRataSampah">0</p></div>
+                <div class="card card-orange"><h3>Saldo Saat Ini (Rp)</h3><p id="monSaldo">Rp 0</p></div>
+            </div>
+
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header"><h2>🍩 KOMPOSISI JENIS SAMPAH</h2></div>
+                    <div style="display: flex; justify-content: center; align-items: center; height: 300px;" id="monChartContainer">
+                        <canvas id="monKomposisiChart"></canvas>
+                    </div>
+                </div>
+                <div class="panel">
+                    <div class="panel-header"><h2>📥 RIWAYAT SETORAN (MASUK)</h2></div>
+                    <div class="table-container" style="height: 300px; overflow-y: auto;">
+                        <table>
+                            <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>TANGGAL</th><th>MATERIAL</th><th class="text-right">BERAT (KG)</th></tr></thead>
+                            <tbody id="monTabelSetoran"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="panel">
+                <div class="panel-header"><h2>📤 RIWAYAT PENARIKAN (KELUAR)</h2></div>
+                <div class="table-container" style="max-height: 300px; overflow-y: auto;">
+                    <table>
+                        <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>TANGGAL</th><th class="text-right">NOMINAL DITARIK (Rp)</th></tr></thead>
+                        <tbody id="monTabelPenarikan"></tbody>
                     </table>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ======================================================= -->
-    <!-- LOGIKA PEMROSES DATA UTAMA (JAVASCRIPT)                 -->
-    <!-- ======================================================= -->
-    <script>
-        // MASUKKAN URL WEB APP APPS SCRIPT ANDA DI SINI
-        const API_URL = "https://script.google.com/macros/s/AKfycbzHVQ5F0CjFtSKkAVOSmCbRxvRWgmFZyyphWXInAB7mDACAvThU8wOGpa6FJVH4QPkZNA/exec";
+    <!-- REGISTRASI -->
+    <div id="daftar" class="content-section">
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>📋 DAFTAR BSU TERDAFTAR</h2></div>
+                <div class="table-container" style="overflow-y: auto; max-height: 600px;">
+                    <table><thead><tr><th>NAMA BSU</th><th>KETUA</th><th>KECAMATAN</th><th>DESA</th><th class="text-center">KATA SANDI</th></tr></thead><tbody id="tabelDaftarBsuRegistrasi"><tr><td colspan="5" class="text-center">Memuat data...</td></tr></tbody></table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header" style="justify-content:center; border-bottom: 2px dashed var(--border); padding-bottom: 20px;"><h2 style="font-size: 18px; color: var(--primary-dark);">FORMULIR REGISTRASI BSU BARU</h2></div>
+                <form id="formRegistrasiBSU" style="margin-top:20px;">
+                <div class="form-group"><label>No. Register BSU / ID</label><input type="text" id="idBsu" class="form-control" style="font-weight:800; color:var(--primary-dark); background-color: var(--primary-light); font-family: monospace; font-size: 16px; border-color: transparent;" readonly></div>
+                <div class="form-group"><label>Nama Bank Sampah Unit</label><input type="text" id="namaBsu" class="form-control" placeholder="Contoh: BSU Berkah Makmur" required></div>
+                
+                <div class="grid-2" style="margin-bottom: 0;">
+                    <div class="form-group"><label>Kecamatan</label><input type="text" id="kecBsu" class="form-control" placeholder="Contoh: Kedungwaru" required></div>
+                    <div class="form-group"><label>Desa / Kelurahan</label><input type="text" id="desaBsu" class="form-control" placeholder="Contoh: Bangoan" required></div>
+                </div>
+                
+                <div class="form-group"><label>Alamat Lengkap</label><input type="text" id="alamatBsu" class="form-control" placeholder="Contoh: Jl. Diponegoro RT 01 / RW 02" required></div>
+                <div class="form-group"><label>Titik Koordinat (Google Maps)</label><input type="text" id="koordinatBsu" class="form-control" placeholder="Contoh: -8.0655, 111.9011"></div>
+                
+                <div class="form-group"><label>Nama Ketua Pengurus</label><input type="text" id="ketuaBsu" class="form-control" placeholder="Nama lengkap ketua" required></div>
+                
+                <div class="grid-2" style="margin-bottom: 0;">
+                    <div class="form-group"><label>Jumlah Pengurus</label><input type="number" id="pengurusBsu" class="form-control" placeholder="Contoh: 3" required></div>
+                    <div class="form-group"><label>Jumlah Nasabah</label><input type="number" id="nasabahBsu" class="form-control" placeholder="Contoh: 50" required></div>
+                </div>
 
-        // Variabel Database di Sisi Browser
-        let masterNasabah = []; 
-        let masterTransaksi = [];
-        let dataKategori = [];
-        let chartKomposisiInstance = null;
+                <div class="form-group"><label>Nomor WhatsApp Aktif</label><input type="tel" id="hpBsu" class="form-control" placeholder="0812xxxxxx" required></div>
+                <div class="form-group"><label>Kata Sandi Akses Unit</label><input type="text" id="passBsu" class="form-control" placeholder="Buat sandi minimal 6 karakter" required></div>
+                
+                <button type="button" class="btn-submit" id="btnSimpanBSU" onclick="simpanBSU()" style="margin-top: 10px;">SIMPAN & TAMBAHKAN BSU</button>
+                </form>
+            </div>
+        </div>
+    </div>
 
-        // Ambil Data Saat Aplikasi Pertama Kali Dibuka
-        window.addEventListener('DOMContentLoaded', () => {
-            if (localStorage.getItem('ROLE_PENGGUNA') !== 'BSI') {
-                alert('Akses ilegal! Anda harus login terlebih dahulu.');
-                window.location.href = 'index.html';
-                return;
-            }
-            muatDataDariSheets();
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbzHVQ5F0CjFtSKkAVOSmCbRxvRWgmFZyyphWXInAB7mDACAvThU8wOGpa6FJVH4QPkZNA/exec";
+    
+    let globalDataDashboard = null;
+    let globalTransaksi = [];
+    let globalNasabah = []; 
+    let globalKategori = [];
+
+    let lineChartInstance = null; 
+    let barChartInstance = null; 
+    let keuanganPieChartInstance = null;
+    let monKomposisiChartInstance = null;
+    
+    const modernColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+
+    function uraikanTanggalInput(dateStr) {
+        if (!dateStr) return new Date();
+        let str = String(dateStr);
+        if (str.includes('/')) { let cleanStr = str.split(' ')[0]; let parts = cleanStr.split('/'); if(parts.length >= 3) return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0])); }
+        let d = new Date(dateStr); return isNaN(d.getTime()) ? new Date() : d;
+    }
+
+    function formatTglTabel(strTgl) {
+        if(!strTgl) return '-';
+        if(String(strTgl).includes('T') || String(strTgl).includes('Z')) {
+            let d = new Date(strTgl);
+            if(!isNaN(d)) return d.toLocaleDateString('id-ID') + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        }
+        return strTgl;
+    }
+
+    function logoutPusat() { if(confirm("Keluar dari Dashboard Bank Sampah Induk?")) { localStorage.removeItem('ROLE_PENGGUNA'); window.location.href = 'index.html'; } }
+
+    function pindahTab(id, btn) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+      if(id === 'daftar' && document.getElementById('idBsu').value === '') document.getElementById('idBsu').value = 'BSU-' + Math.floor(10000 + Math.random()*90000);
+    }
+
+    function ubahFormTransaksi() {
+        let jenis = document.getElementById('trxJenis').value;
+        document.getElementById('areaSetor').style.display = jenis === 'setor' ? 'block' : 'none';
+        document.getElementById('areaTarik').style.display = jenis === 'setor' ? 'none' : 'block';
+    }
+
+    function filterProdukTransaksi() {
+        let jenisTerpilih = document.getElementById('trxJenisMaterialUtama').value;
+        let selMat = document.getElementById('trxMaterial');
+        selMat.innerHTML = '<option value="" disabled selected>-- Pilih Kategori Produk --</option>';
+        let filtered = globalKategori.filter(k => k.jenis_material === jenisTerpilih);
+        if(filtered.length === 0) return selMat.innerHTML = '<option value="" disabled selected>-- Belum ada produk --</option>';
+        filtered.forEach(k => { selMat.innerHTML += `<option value="${k.harga}|${k.nama_kategori}">${k.nama_kategori} (Rp ${parseInt(k.harga).toLocaleString('id-ID')}/kg)</option>`; });
+    }
+
+    function loadDataPusat() {
+        let ts = new Date().getTime(); 
+        fetch(API_URL + "?action=getDashboardInduk&_t=" + ts).then(r => r.json()).then(res => {
+            document.getElementById('loading').style.display = 'none'; document.getElementById('dashboardContent').style.display = 'block';
+            let d = res.data; globalDataDashboard = d; 
+            document.getElementById('valUnit').innerText = d.ringkasan.unit;
+            document.getElementById('valBulanIni').innerText = d.ringkasan.setoran_bulan.toFixed(1);
+            document.getElementById('valTotalSampah').innerText = d.ringkasan.total_sampah.toFixed(1);
+            document.getElementById('valSaldo').innerText = 'Rp ' + d.ringkasan.total_saldo.toLocaleString('id-ID');
+            document.getElementById('valKeuanganTotal').innerText = 'Rp ' + d.ringkasan.total_saldo.toLocaleString('id-ID');
+            let tbKeuanganSaldo = '';
+            if(d.saldo.length > 0) d.saldo.forEach(s => { tbKeuanganSaldo += `<tr><td style="font-weight:800; color:var(--text-main);">${s[0]}</td><td class="text-success text-right">Rp ${s[1].toLocaleString('id-ID')}</td></tr>`; });
+            else tbKeuanganSaldo = `<tr><td colspan="2" class="text-center">Belum ada data saldo.</td></tr>`;
+            document.getElementById('tabelKeuanganSaldo').innerHTML = tbKeuanganSaldo;
+
+            Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif"; Chart.defaults.font.size = 12; Chart.defaults.color = "#64748b";
+            let barBgColors = d.kontribusi.map((_, i) => modernColors[i % modernColors.length]);
+
+            if(barChartInstance) barChartInstance.destroy();
+            barChartInstance = new Chart(document.getElementById('barChart'), { type: 'bar', data: { labels: d.kontribusi.map(x => x[0]), datasets: [{ label: 'Total Volume (KG)', data: d.kontribusi.map(x => x[1]), backgroundColor: barBgColors, borderRadius: 6 }] }, options: { plugins: { legend: { display: false } }, scales: { y: { grid: { borderDash: [4, 4] } }, x: { grid: { display: false } } } } });
+
+            if(keuanganPieChartInstance) keuanganPieChartInstance.destroy();
+            keuanganPieChartInstance = new Chart(document.getElementById('keuanganPieChart'), { type: 'doughnut', data: { labels: d.saldo.map(x => x[0]), datasets: [{ data: d.saldo.map(x => x[1]), backgroundColor: modernColors, borderWidth: 0, hoverOffset: 4 }] }, options: { cutout: '65%', plugins: { legend: { position: 'bottom', labels: {boxWidth:12, padding: 20, font:{size:12, weight:'600'}} } } } });
+            
+            loadDataTambahan();
+        });
+    }
+
+    function loadDataTambahan() {
+        let ts = new Date().getTime();
+        fetch(API_URL + "?role=BSI&_t=" + ts).then(r => r.json()).then(res => {
+            globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
+            try { renderVisualisasiTren(document.getElementById('filterRangeTren').value); } catch(e){}
+            try { renderHierarkiKomposisi(); } catch(e){} 
+            try { renderDataBSU(); } catch(e){}
+            try { renderTabelHarga(); } catch(e){}
+            try { renderDropdownTrx(); } catch(e){}
+            try { renderTabelTransaksi(); } catch(e){}
+            try { renderLaporanBulanan(); } catch(e){}
+            try { renderTabelRegistrasiBsu(); } catch(e){}
+            try { populateDropdownMonitoring(); } catch(e){}
+        });
+    }
+
+    // FUNGSI GRAFIK PERTUMBUHAN (MoM)
+    function renderVisualisasiTren(range) {
+        let rekapTren = {}; 
+        let dataTransaksiSetoran = globalTransaksi ? globalTransaksi.filter(t => t.total > 0) : [];
+        const nBulan = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Ags", "Sep", "Okt", "Nov", "Des"];
+        
+        dataTransaksiSetoran.forEach(t => {
+            let d = uraikanTanggalInput(t.tgl); 
+            let sortingKey = ""; let formatLabel = "";
+            if (range === 'hari') { sortingKey = d.getFullYear() + "-" + (d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getDate().toString().padStart(2,'0'); formatLabel = d.getDate().toString().padStart(2,'0') + " " + nBulan[d.getMonth()]; } 
+            else if (range === 'minggu') { let s = new Date(d.getFullYear(), 0, 1); let selisihHari = Math.floor((d - s) / 86400000); let nomorMinggu = Math.ceil((d.getDay() + 1 + selisihHari) / 7); sortingKey = d.getFullYear() + "-W" + nomorMinggu.toString().padStart(2,'0'); formatLabel = "Mgg " + nomorMinggu + " (" + d.getFullYear() + ")"; } 
+            else if (range === 'bulan') { sortingKey = d.getFullYear() + "-" + (d.getMonth()+1).toString().padStart(2,'0'); formatLabel = nBulan[d.getMonth()] + " " + d.getFullYear(); } 
+            else if (range === 'tahun') { sortingKey = d.getFullYear().toString(); formatLabel = d.getFullYear().toString(); }
+            
+            if(!rekapTren[sortingKey]) rekapTren[sortingKey] = { label: formatLabel, val: 0 };
+            rekapTren[sortingKey].val += (parseFloat(t.berat) || 0);
         });
 
-        // Fungsi Ambil Data Realtime Dari Google Sheets
-        function muatDataDariSheets() {
-            if(API_URL === "ISI_DENGAN_URL_WEB_APP_ANDA_DISINI") {
-                alert("Peringatan: API_URL belum Anda ganti dengan link Apps Script Anda!");
-                return;
-            }
-
-            document.getElementById('loading-screen').style.display = 'flex';
-            
-            fetch(`${API_URL}?role=BSI`)
-                .then(response => response.json())
-                .then(data => {
-                    // Filter aman untuk memastikan hanya memproses BSU
-                    masterNasabah = (data.nasabah || []).filter(n => String(n.id || '').toUpperCase().includes('BSU') || String(n.nama || '').toUpperCase().includes('BSU'));
-                    let listNamaBSU = masterNasabah.map(n => String(n.nama).trim().toUpperCase());
-                    
-                    masterTransaksi = (data.transaksi || []).filter(t => {
-                        let namaTrx = String(t.nama || '').trim().toUpperCase();
-                        return namaTrx.includes('BSU') || listNamaBSU.includes(namaTrx);
-                    });
-
-                    dataKategori = data.kategori || [];
-
-                    // Jalankan Render ke Masing-Masing Komponen Tampilan
-                    updateDashboardInduk();
-                    renderTabelKategori();
-                    
-                    if (document.getElementById('menu-pantau').classList.contains('aktif')) {
-                        renderPantauBSU();
-                    }
-                })
-                .catch(err => {
-                    console.error("Gagal sinkronisasi data:", err);
-                    alert("Koneksi gagal! Pastikan link Web App Apps Script benar.");
-                })
-                .finally(() => {
-                    document.getElementById('loading-screen').style.display = 'none';
-                });
-        }
-
-        // Kontrol Perpindahan Menu Navigasi (SPA)
-        function bukaMenu(idMenu) {
-            document.querySelectorAll('.halaman-menu').forEach(el => el.classList.remove('aktif'));
-            document.getElementById(idMenu).classList.add('aktif');
-
-            document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('aktif'));
-            document.getElementById('nav-' + idMenu.replace('menu-', '')).classList.add('aktif');
-
-            if (idMenu === 'menu-pantau') {
-                renderPantauBSU();
-            }
-        }
-
-        // Mengisi Data Dashboard Utama
-        function updateDashboardInduk() {
-            document.getElementById('dash-total-unit').innerText = masterNasabah.length + " Unit";
-            
-            let totalSampah = 0; 
-            let totalSaldo = 0;
-            
-            masterTransaksi.forEach(t => { 
-                let berat = parseFloat(t.berat) || 0;
-                let total = parseFloat(t.total) || 0; // Nilainya sudah negatif dari server jika penarikan
-                
-                if (t.jenis !== 'Penarikan Tunai') { 
-                    totalSampah += berat; 
-                } 
-                totalSaldo += total; // Tinggal ditambahkan semua
-            });
-            document.getElementById('dash-total-sampah').innerText = totalSampah.toLocaleString('id-ID') + ' Kg';
-            document.getElementById('dash-total-saldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
-        }
-
-        // Mengisi Tabel Kategori Material
-        function renderTabelKategori() {
-            let tbody = document.getElementById('tabelKategori');
-            tbody.innerHTML = '';
-            if (dataKategori.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-4">Belum ada data kategori.</td></tr>`;
-                return;
-            }
-            dataKategori.forEach(k => {
-                tbody.innerHTML += `
-                    <tr>
-                        <td class="fw-bold">${k.jenis_material || '-'}</td>
-                        <td>${k.nama_kategori || '-'}</td>
-                        <td class="text-end text-success fw-bold">Rp ${(parseInt(k.harga) || 0).toLocaleString('id-ID')}</td>
-                    </tr>`;
-            });
-        }
-
-        // =========================================================================
-        // KALKULASI PINTAR UNTUK PANTAU BSU (DIPERBAIKI)
-        // =========================================================================
-        function renderPantauBSU() {
-            let rekapBSU = {};
-            let totalSampahGlobal = 0;
-            let totalSaldoGlobal = 0;
-
-            // 1. Siapkan Wadah Data Berdasarkan NAMA BSU
-            masterNasabah.forEach(bsu => {
-                let namaKunci = String(bsu.nama).trim().toUpperCase();
-                rekapBSU[namaKunci] = {
-                    nama_asli: bsu.nama,
-                    jmlTransaksi: 0,
-                    sampahKg: 0,
-                    saldoRp: 0
-                };
-            });
-
-            // 2. Cocokkan Transaksi ke Wadah berdasarkan NAMA BSU
-            masterTransaksi.forEach(trx => {
-                let namaTrxKey = String(trx.nama || '').trim().toUpperCase();
-                let berat = parseFloat(trx.berat) || 0;
-                let nominal = parseFloat(trx.total) || 0; 
-
-                // Hitung Global
-                if (trx.jenis !== 'Penarikan Tunai') {
-                    totalSampahGlobal += berat;
-                }
-                totalSaldoGlobal += nominal;
-
-                // Hitung per BSU Desa 
-                if(rekapBSU[namaTrxKey]) {
-                    rekapBSU[namaTrxKey].jmlTransaksi += 1;
-                    if(trx.jenis !== 'Penarikan Tunai') {
-                        rekapBSU[namaTrxKey].sampahKg += berat;
-                    }
-                    rekapBSU[namaTrxKey].saldoRp += nominal;
-                }
-            });
-
-            // 3. Pasang angka hasil rekap ke panel indikator atas
-            document.getElementById('pantau-total-bsu').innerText = masterNasabah.length + " Unit";
-            document.getElementById('pantau-total-trx').innerText = masterTransaksi.length + " Kali";
-            document.getElementById('pantau-total-sampah-kg').innerText = totalSampahGlobal.toLocaleString('id-ID') + " Kg";
-            document.getElementById('pantau-total-saldo-rp').innerText = "Rp " + totalSaldoGlobal.toLocaleString('id-ID');
-
-            // 4. Cetak ke baris tabel peringkat BSU
-            let tbody = document.getElementById('tabelDataPantauBSU');
-            tbody.innerHTML = '';
-            
-            // Konversi ke array untuk di-ranking berdasarkan sampah
-            let arrayBSU = Object.values(rekapBSU);
-            arrayBSU.sort((a, b) => b.sampahKg - a.sampahKg);
-
-            if(arrayBSU.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">Tidak ada aktivitas unit BSU terpantau.</td></tr>`;
+        let sortedKeys = Object.keys(rekapTren).sort(); 
+        let listLabels = sortedKeys.map(k => rekapTren[k].label); 
+        let listValues = sortedKeys.map(k => rekapTren[k].val);
+        
+        let listPct = [];
+        let listColors = [];
+        
+        for (let i = 0; i < listValues.length; i++) {
+            if (i === 0) {
+                listPct.push(null); 
+                listColors.push('#3b82f6'); 
             } else {
-                arrayBSU.forEach((b, index) => {
-                    let medali = '';
-                    if(index === 0 && b.sampahKg > 0) medali = '🥇 ';
-                    else if(index === 1 && b.sampahKg > 0) medali = '🥈 ';
-                    else if(index === 2 && b.sampahKg > 0) medali = '🥉 ';
-                    
-                    tbody.innerHTML += `
-                        <tr>
-                            <td class="fw-bold">${medali}${b.nama_asli}</td>
-                            <td class="text-center"><span class="badge bg-secondary p-2">${b.jmlTransaksi} trx</span></td>
-                            <td class="text-end fw-semibold">${b.sampahKg.toLocaleString('id-ID')} Kg</td>
-                            <td class="text-end text-success fw-bold">Rp ${b.saldoRp.toLocaleString('id-ID')}</td>
-                        </tr>
-                    `;
-                });
+                let prev = listValues[i-1];
+                let curr = listValues[i];
+                if (prev === 0) {
+                    listPct.push(curr > 0 ? 100 : 0);
+                    listColors.push(curr > 0 ? '#10b981' : '#94a3b8');
+                } else {
+                    let pct = ((curr - prev) / prev) * 100;
+                    listPct.push(pct);
+                    listColors.push(pct > 0 ? '#10b981' : (pct < 0 ? '#ef4444' : '#94a3b8'));
+                }
             }
-
-            // Jalankan grafik lingkaran komposisi material
-            renderGrafikKomposisi();
         }
 
-        // Gambar Grafik Donut Menggunakan Chart.js
-        function renderGrafikKomposisi() {
-            const ctx = document.getElementById('chartKomposisi').getContext('2d');
-            
-            if (chartKomposisiInstance) { 
-                chartKomposisiInstance.destroy(); 
-            }
-            
-            let materialCounts = { 'Plastik': 0, 'Kertas': 0, 'Logam': 0, 'Lainnya': 0 };
-            let hasData = false;
-            
-            masterTransaksi.forEach(t => {
-                let mat = t.jenis_material || t.jenis;
-                if(mat && t.jenis !== 'Penarikan Tunai') {
-                    let key = 'Lainnya';
-                    let matUpper = mat.toUpperCase();
-                    if(matUpper.includes('PLASTIK')) key = 'Plastik';
-                    else if(matUpper.includes('KERTAS') || matUpper.includes('KARDUS')) key = 'Kertas';
-                    else if(matUpper.includes('LOGAM') || matUpper.includes('BESI') || matUpper.includes('KACA')) key = 'Logam';
+        let ctx = document.getElementById('lineChart').getContext('2d'); 
+        
+        const topLabelsPlugin = {
+            id: 'topLabels',
+            afterDatasetsDraw(chart, args, pluginOptions) {
+                const { ctx } = chart;
+                chart.data.datasets.forEach((dataset, i) => {
+                    const meta = chart.getDatasetMeta(i);
+                    meta.data.forEach((bar, index) => {
+                        const dataVal = dataset.data[index].toFixed(1);
+                        const pctVal = dataset.pctChange[index];
+                        
+                        let textTop = dataVal + ' Kg';
+                        let textBot = '';
+                        let colorBot = '#94a3b8';
 
-                    materialCounts[key] += parseFloat(t.berat || 0);
-                    hasData = true;
+                        if (pctVal !== null) {
+                            if (pctVal > 0) { textBot = '▲ +' + pctVal.toFixed(1) + '%'; colorBot = '#10b981'; }
+                            else if (pctVal < 0) { textBot = '▼ ' + pctVal.toFixed(1) + '%'; colorBot = '#ef4444'; }
+                            else { textBot = '- 0%'; }
+                        } else {
+                            textBot = 'Awal';
+                        }
+
+                        ctx.save();
+                        ctx.textAlign = 'center';
+                        ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
+                        ctx.fillStyle = '#64748b';
+                        ctx.fillText(textTop, bar.x, bar.y - 18);
+                        ctx.font = '800 11px "Plus Jakarta Sans", sans-serif';
+                        ctx.fillStyle = colorBot;
+                        ctx.fillText(textBot, bar.x, bar.y - 6);
+                        ctx.restore();
+                    });
+                });
+            }
+        };
+
+        if (lineChartInstance) lineChartInstance.destroy();
+        lineChartInstance = new Chart(ctx, { 
+            type: 'bar', 
+            data: { 
+                labels: listLabels, 
+                datasets: [{ 
+                    label: 'Volume Setoran', 
+                    data: listValues, 
+                    backgroundColor: listColors, 
+                    borderRadius: 6,
+                    pctChange: listPct 
+                }] 
+            }, 
+            options: { 
+                responsive: true, 
+                layout: { padding: { top: 35 } },
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = 'Volume: ';
+                                if (context.parsed.y !== null) { label += context.parsed.y.toFixed(1) + ' Kg'; }
+                                let pct = context.dataset.pctChange[context.dataIndex];
+                                if (pct !== null) { label += ' (' + (pct > 0 ? '+' : '') + pct.toFixed(1) + '%)'; }
+                                return label;
+                            }
+                        }
+                    }
+                }, 
+                scales: { 
+                    x: { grid: { display: false } }, 
+                    y: { beginAtZero: true, grid: { borderDash: [4, 4] }, suggestedMax: Math.max(...(listValues.length ? listValues : [0])) * 1.25 }
+                } 
+            },
+            plugins: [topLabelsPlugin]
+        });
+    }
+
+    function renderHierarkiKomposisi() {
+        let rekap = {};
+        let totalSemuaBerat = 0;
+
+        if (globalTransaksi && globalTransaksi.length > 0) {
+            globalTransaksi.forEach(t => {
+                if (t.total > 0) {
+                    let cat = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null;
+                    let jenisUtama = (cat && cat.jenis_material) ? String(cat.jenis_material) : 'Lainnya';
+                    let subKategori = String(t.jenis || 'Tidak Diketahui');
+                    let berat = parseFloat(t.berat) || 0;
+
+                    if (!rekap[jenisUtama]) { rekap[jenisUtama] = { totalBerat: 0, sub: {} }; }
+                    rekap[jenisUtama].totalBerat += berat;
+                    if (!rekap[jenisUtama].sub[subKategori]) { rekap[jenisUtama].sub[subKategori] = 0; }
+                    rekap[jenisUtama].sub[subKategori] += berat;
+                    totalSemuaBerat += berat;
                 }
             });
+        }
 
-            // Jika masih kosong 100%, berikan data kosong untuk donat abu-abu
-            let dataGrafik = Object.values(materialCounts);
-            if(!hasData) dataGrafik = [0.1, 0.1, 0.1, 0.1];
+        let container = document.getElementById('hierarkiKomposisiContainer');
+        if (!container) return;
 
-            chartKomposisiInstance = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Plastik', 'Kertas', 'Logam/Kaca', 'Lainnya/Organik'],
-                    datasets: [{
-                        data: dataGrafik,
-                        backgroundColor: hasData ? ['#3B82F6', '#F59E0B', '#64748B', '#10B981'] : ['#e2e8f0', '#e2e8f0', '#e2e8f0', '#e2e8f0'],
-                        borderWidth: 0
-                    }]
-                },
+        if (totalSemuaBerat === 0) {
+            container.innerHTML = '<div style="color: #64748b;">Belum ada data setoran material untuk dianalisis.</div>';
+            return;
+        }
+
+        const warnaMap = { 'Kertas': 'kertas', 'Plastik': 'plastik', 'Besi': 'besi', 'Botol Kaca': 'kaca', 'Logam': 'logam', 'Minyak': 'minyak', 'Elektronik': 'elektro', 'Lainnya': 'lainnya' };
+        let htmlCards = '';
+        let sortedUtama = Object.keys(rekap).sort((a, b) => rekap[b].totalBerat - rekap[a].totalBerat);
+
+        sortedUtama.forEach(utama => {
+            let dataUtama = rekap[utama];
+            let pctUtama = ((dataUtama.totalBerat / totalSemuaBerat) * 100).toFixed(1);
+            let warnaKelas = warnaMap[utama] || 'lainnya';
+
+            let subHtml = '<div class="bd-label">BREAKDOWN MATERIAL:</div>';
+            let sortedSub = Object.keys(dataUtama.sub).sort((a, b) => dataUtama.sub[b] - dataUtama.sub[a]);
+            
+            sortedSub.forEach(sub => {
+                let beratSub = dataUtama.sub[sub];
+                let pctSub = ((beratSub / dataUtama.totalBerat) * 100).toFixed(1);
+                subHtml += `<div class="bd-item"><div class="bd-info"><span class="bd-name">${sub}</span><span>${beratSub.toFixed(1)} Kg <span style="color:#64748b; font-size:10px;">(${pctSub}%)</span></span></div><div class="bd-prog-bg"><div class="prog-bar bg-${warnaKelas}" style="width: ${pctSub}%;"></div></div></div>`;
+            });
+
+            htmlCards += `<div class="komp-card"><div class="komp-head"><h3 class="komp-title">${utama}</h3><div><span class="komp-value color-${warnaKelas}">${dataUtama.totalBerat.toFixed(1)} Kg</span><span class="komp-pct">(${pctUtama}%)</span></div></div><div class="prog-bg"><div class="prog-bar bg-${warnaKelas}" style="width: ${pctUtama}%;"></div></div>${subHtml}</div>`;
+        });
+
+        container.innerHTML = htmlCards;
+    }
+
+    function renderTabelRegistrasiBsu() {
+        let tbody = '';
+        if(globalNasabah && globalNasabah.length > 0) {
+            [...globalNasabah].reverse().forEach(b => {
+                tbody += `<tr>
+                    <td style="font-weight:800; color:var(--text-main);">${b.nama || '-'}</td>
+                    <td style="font-weight:700;">${b.ketua || '-'}</td>
+                    <td>${b.kecamatan || '-'}</td>
+                    <td>${b.desa || '-'}</td>
+                    <td class="text-center"><span style="font-family:monospace; font-weight:800; font-size:14px; color:var(--accent); background: #fffbeb; padding:4px 10px; border-radius:8px;">${b.password || '-'}</span></td>
+                </tr>`;
+            });
+        } else tbody = `<tr><td colspan="5" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
+        let el = document.getElementById('tabelDaftarBsuRegistrasi'); if(el) el.innerHTML = tbody;
+    }
+
+    function renderDataBSU() {
+        let bsuStats = []; let tbHtml = '';
+        if(globalNasabah && globalNasabah.length > 0) {
+            globalNasabah.forEach(b => {
+                let noHpUrl = String(b.hp || '').replace(/^0+/, '');
+                
+                let btnPeta = '-';
+                if(b.koordinat && String(b.koordinat).length > 4) {
+                    btnPeta = `<a href="https://maps.google.com/?q=${encodeURIComponent(b.koordinat)}" target="_blank" style="color:var(--secondary); text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:4px 8px; border-radius:6px; font-size:11.5px;">📍 Lihat Peta</a>`;
+                }
+
+                tbHtml += `<tr>
+                    <td style="font-family:monospace; font-size:13px; font-weight:700; color:var(--text-muted);">${b.id}</td>
+                    <td style="font-weight:800; color:var(--text-main);">${b.nama}</td>
+                    <td style="font-weight:700;">${b.ketua}</td>
+                    <td class="text-center"><span class="badge-material">${b.jumlah_pengurus || "0"}</span></td>
+                    <td class="text-center"><span class="badge-material">${b.jumlah_nasabah || "0"}</span></td>
+                    <td><a href="https://wa.me/62${noHpUrl}" target="_blank" class="badge-wa">💬 ${b.hp}</a></td>
+                    <td>${b.kecamatan || "-"}</td>
+                    <td>${b.desa || "-"}</td>
+                    <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${b.alamat || ''}">${b.alamat || "-"}</div></td>
+                    <td class="text-center">${btnPeta}</td>
+                </tr>`;
+            });
+        } else tbHtml = `<tr><td colspan="10" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
+        let dirEl = document.getElementById('tabelDirektoriBsu'); if(dirEl) dirEl.innerHTML = tbHtml;
+
+        let volMap = {}; let saldoMap = {};
+        if(globalDataDashboard) { globalDataDashboard.kontribusi.forEach(k => volMap[k[0]] = k[1]); globalDataDashboard.saldo.forEach(s => saldoMap[s[0]] = s[1]); }
+        if(globalNasabah) globalNasabah.forEach(b => bsuStats.push({ nama: b.nama, vol: volMap[b.nama]||0, saldo: saldoMap[b.nama]||0 }));
+        
+        let rankVol = [...bsuStats].sort((a,b) => b.vol - a.vol).slice(0, 5); let htmlVol = '';
+        rankVol.forEach((r, i) => htmlVol += `<div class="rank-item" style="background:${i===0 ? 'var(--primary-light)' : '#ffffff'}; border-color:${i===0 ? '#a7f3d0' : 'var(--border)'};"><div class="rank-num" style="color:${i===0 ? 'var(--primary-dark)' : 'var(--text-muted)'};">#${i+1}</div><div class="rank-name">${r.nama}</div><div class="rank-val text-success">${r.vol.toFixed(1)} Kg</div></div>`);
+        let volEl = document.getElementById('rankingVolume'); if(volEl) volEl.innerHTML = htmlVol || '<p class="text-center" style="color:var(--text-muted);">Data tidak tersedia.</p>';
+
+        let rankSaldo = [...bsuStats].sort((a,b) => b.saldo - a.saldo).slice(0, 5); let htmlSaldo = '';
+        rankSaldo.forEach((r, i) => htmlSaldo += `<div class="rank-item" style="background:${i===0 ? '#fef3c7' : '#ffffff'}; border-color:${i===0 ? '#fde68a' : 'var(--border)'};"><div class="rank-num" style="color:${i===0 ? 'var(--accent)' : 'var(--text-muted)'};">#${i+1}</div><div class="rank-name">${r.nama}</div><div class="rank-val text-danger">Rp ${r.saldo.toLocaleString('id-ID')}</div></div>`);
+        let sldEl = document.getElementById('rankingSaldo'); if(sldEl) sldEl.innerHTML = htmlSaldo || '<p class="text-center" style="color:var(--text-muted);">Data tidak tersedia.</p>';
+    }
+
+    function renderTabelHarga() {
+        let tbody = '';
+        if(globalKategori && globalKategori.length > 0) { globalKategori.forEach(k => { tbody += `<tr><td><span class="badge-material">${k.jenis_material}</span></td><td style="font-weight:800; color:var(--text-main);">${k.nama_kategori}</td><td class="text-right text-success">Rp ${parseInt(k.harga).toLocaleString('id-ID')}</td><td class="text-center"><button class="btn-danger" onclick="hapusHarga('${k.id}')">Hapus</button></td></tr>`; }); }
+        else tbody = `<tr><td colspan="4" class="text-center">Belum ada data.</td></tr>`;
+        let el = document.getElementById('tabelMasterHarga'); if(el) el.innerHTML = tbody;
+    }
+
+    function renderDropdownTrx() {
+        let selBsu = document.getElementById('trxBsu'); if(selBsu) { selBsu.innerHTML = '<option value="" disabled selected>-- Pilih BSU --</option>'; if(globalNasabah) { globalNasabah.forEach(n => { selBsu.innerHTML += `<option value="${n.nama}">${n.nama}</option>`; }); } }
+        let elUtama = document.getElementById('trxJenisMaterialUtama'); if(elUtama) elUtama.value = "";
+        let selMat = document.getElementById('trxMaterial'); if(selMat) selMat.innerHTML = '<option value="" disabled selected>-- Pilih Jenis Material Dulu --</option>';
+    }
+
+    function renderTabelTransaksi() {
+        let tbSetor = ''; let tbTarik = '';
+        let trxSetor = globalTransaksi ? globalTransaksi.filter(t => t.total > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) : [];
+        let trxTarik = globalTransaksi ? globalTransaksi.filter(t => t.total < 0 || t.jenis === 'Penarikan Tunai') : [];
+
+        if(trxSetor.length > 0) { trxSetor.slice().reverse().forEach(t => { 
+            let tglIndah = formatTglTabel(t.tgl); let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; let jenisMatUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya';
+            tbSetor += `<tr><td style="font-size:12px; color:var(--text-muted); font-weight:600;">${tglIndah}</td><td style="font-weight:800; color:var(--text-main);">${t.nama}</td><td class="text-center"><span class="badge-material">${jenisMatUtama}</span></td><td style="font-weight:700; color:var(--text-main);">${t.jenis}</td><td class="text-right" style="font-weight:800;">${t.berat}</td><td class="text-success text-right">Rp ${parseInt(t.total).toLocaleString('id-ID')}</td></tr>`; });
+        } else tbSetor = `<tr><td colspan="6" class="text-center">Belum ada catatan setoran.</td></tr>`;
+
+        if(trxTarik.length > 0) { trxTarik.slice().reverse().forEach(t => { let tglIndah = formatTglTabel(t.tgl); tbTarik += `<tr><td style="font-size:12px; font-weight:600;">${tglIndah}</td><td style="font-weight:800; color:var(--text-main);">${t.nama}</td><td class="text-danger text-right">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`; });
+        } else tbTarik = `<tr><td colspan="3" class="text-center">Belum ada catatan penarikan.</td></tr>`;
+
+        let setEl = document.getElementById('tabelSetoran'); if(setEl) setEl.innerHTML = tbSetor;
+        let tarEl = document.getElementById('tabelPenarikan'); if(tarEl) tarEl.innerHTML = tbTarik;
+    }
+
+    function renderLaporanBulanan() {
+        let selBulan = document.getElementById('filterBulanLaporan'); if(!selBulan) return;
+        let filterVal = selBulan.value;
+        if(selBulan.options.length <= 1 && globalTransaksi && globalTransaksi.length > 0) {
+            let months = new Set(); globalTransaksi.forEach(t => { let d = new Date(t.tgl); if(!isNaN(d.getTime())) months.add((d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getFullYear()); }); Array.from(months).sort().forEach(m => { selBulan.innerHTML += `<option value="${m}">${m}</option>`; });
+        }
+        let rekap = {};
+        if(globalTransaksi) {
+            globalTransaksi.forEach(t => { let d = new Date(t.tgl); let mStr = !isNaN(d.getTime()) ? ((d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getFullYear()) : "Lainnya";
+                if(filterVal === 'semua' || filterVal === mStr) { if(!rekap[t.nama]) rekap[t.nama] = {masuk: 0, keluar: 0}; if(t.total > 0) rekap[t.nama].masuk += parseFloat(t.total); else rekap[t.nama].keluar += Math.abs(parseFloat(t.total)); } });
+        }
+        let tbLaporan = '';
+        if(Object.keys(rekap).length > 0) { Object.keys(rekap).forEach(bsu => { tbLaporan += `<tr><td style="font-weight:800; color:var(--text-main);">${bsu}</td><td class="text-success text-right">Rp ${rekap[bsu].masuk.toLocaleString('id-ID')}</td><td class="text-danger text-right">Rp ${rekap[bsu].keluar.toLocaleString('id-ID')}</td></tr>`; }); }
+        else tbLaporan = `<tr><td colspan="3" class="text-center">Tidak ada transaksi.</td></tr>`;
+        let lapEl = document.getElementById('tabelLaporanBulanan'); if(lapEl) lapEl.innerHTML = tbLaporan;
+    }
+
+    function simpanTransaksi() {
+        let bsu = document.getElementById('trxBsu').value; let jenisTrx = document.getElementById('trxJenis').value;
+        if(!bsu) return alert("Pilih BSU terlebih dahulu!");
+        let materialNama = "Penarikan Tunai"; let berat = 0; let total = 0;
+        if(jenisTrx === 'setor') {
+            let matData = document.getElementById('trxMaterial').value; berat = parseFloat(document.getElementById('trxBerat').value);
+            if(!matData || isNaN(berat) || berat <= 0) return alert("Pilih kategori produk dan pastikan berat diisi dengan benar!");
+            let arr = matData.split('|'); let hargaMat = parseFloat(arr[0]); materialNama = arr[1]; total = hargaMat * berat;
+        } else {
+            let nominal = parseFloat(document.getElementById('trxNominal').value); if(isNaN(nominal) || nominal <= 0) return alert("Nominal invalid!"); total = -Math.abs(nominal); 
+        }
+        let btn = document.getElementById('btnSimpanTrx'); btn.innerText = "MEMPROSES..."; btn.disabled = true;
+        let now = new Date(); let tglFormat = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        let fd = new URLSearchParams(); fd.append('action', 'tambahTransaksi'); fd.append('id', Date.now()); fd.append('tgl', tglFormat); fd.append('nama', bsu); fd.append('jenis', materialNama); fd.append('berat', berat); fd.append('total', total); fd.append('id_unit', ''); 
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r => r.text()).then(res => { if(res.includes("Sukses")) { alert("Transaksi Berhasil Dicatat!"); document.getElementById('formTransaksi').reset(); ubahFormTransaksi(); renderDropdownTrx(); loadDataPusat(); } }).finally(() => { btn.innerText = "PROSES TRANSAKSI"; btn.disabled = false; });
+    }
+
+    function simpanHarga() {
+        let jenis = document.getElementById('jenisMaterial').value; let nama = document.getElementById('namaKategoriMaterial').value; let harga = document.getElementById('hargaMaterial').value;
+        if(!jenis || !nama || !harga) return alert("Lengkapi isian!");
+        let btn = document.getElementById('btnSimpanHarga'); btn.innerText = "MENYIMPAN..."; btn.disabled = true;
+        let fd = new URLSearchParams(); fd.append('action', 'tambahKategori'); fd.append('id', 'KAT-'+Date.now()); fd.append('jenis_material', jenis); fd.append('nama_kategori', nama); fd.append('harga', harga);
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r=>r.text()).then(res=>{ if(res.includes("Sukses")) { alert("Harga disimpan!"); document.getElementById('formHarga').reset(); loadDataPusat(); } }).catch(err => alert("Gagal: " + err)).finally(()=>{ btn.innerText = "SIMPAN HARGA"; btn.disabled = false; });
+    }
+
+    function hapusHarga(id) {
+        if(!confirm("Yakin hapus harga?")) return;
+        let fd = new URLSearchParams(); fd.append('action', 'deleteKategori'); fd.append('id', id);
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r=>r.text()).then(res=>{ if(res.includes("Sukses")) loadDataPusat(); });
+    }
+
+    function simpanBSU() {
+        let id = document.getElementById('idBsu').value; 
+        let nama = document.getElementById('namaBsu').value; 
+        let ketua = document.getElementById('ketuaBsu').value; 
+        let hp = document.getElementById('hpBsu').value; 
+        let pass = document.getElementById('passBsu').value; 
+        
+        let kec = document.getElementById('kecBsu').value;
+        let desa = document.getElementById('desaBsu').value;
+        let alamat = document.getElementById('alamatBsu').value;
+        let koordinat = document.getElementById('koordinatBsu').value;
+        
+        let pengurus = document.getElementById('pengurusBsu').value;
+        let nasabah = document.getElementById('nasabahBsu').value;
+
+        if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !nasabah || !pengurus) return alert("Isi semua data wajib!");
+        
+        let btn = document.getElementById('btnSimpanBSU'); btn.innerText = "MEMPROSES..."; btn.disabled = true;
+        let fd = new URLSearchParams(); 
+        fd.append('action', 'tambahUnit'); 
+        fd.append('id', id); 
+        fd.append('nama', nama); 
+        fd.append('kecamatan', kec);
+        fd.append('desa', desa);
+        fd.append('alamat', alamat);
+        fd.append('koordinat', koordinat);
+        fd.append('ketua', ketua); 
+        fd.append('jumlah_pengurus', pengurus); 
+        fd.append('jumlah_nasabah', nasabah); 
+        fd.append('hp', hp); 
+        fd.append('password', pass);
+        
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r=>r.text()).then(res=>{ if(res.includes("Sukses")) { alert("BSU Didaftarkan!"); document.getElementById('formRegistrasiBSU').reset(); document.getElementById('idBsu').value = 'BSU-'+Math.floor(10000+Math.random()*90000); loadDataPusat(); } }).catch(err => alert("Gagal: " + err)).finally(()=>{ btn.innerText = "SIMPAN & TAMBAHKAN BSU"; btn.disabled = false; });
+    }
+
+    function sinkronKeSheets() {
+        if(!globalDataDashboard) return alert("Data belum termuat.");
+        let btn = document.getElementById('btnSync'); btn.innerText = "Mensinkronkan..."; btn.disabled = true;
+        let fd = new URLSearchParams(); fd.append('action', 'sinkronLaporanFisik'); fd.append('data_laporan', JSON.stringify(globalDataDashboard));
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r=>r.text()).then(res=>alert(res)).finally(()=>{ btn.innerText = "☁️ Export Google Sheets"; btn.disabled = false; });
+    }
+
+    // FUNGSI BARU UNTUK MONITORING BSU
+    function populateDropdownMonitoring() {
+        let sel = document.getElementById('selectMonitoringBsu');
+        if(!sel) return;
+        sel.innerHTML = '<option value="" disabled selected>-- Silakan Pilih Bank Sampah Unit --</option>';
+        if(globalNasabah && globalNasabah.length > 0) {
+            globalNasabah.forEach(b => {
+                sel.innerHTML += `<option value="${b.nama}">${b.nama} (ID: ${b.id})</option>`;
+            });
+        }
+    }
+
+    function prosesMonitoringBSU(namaBsu) {
+        document.getElementById('monitoringArea').style.display = 'block';
+        
+        // Dapatkan data profil BSU
+        let profilBsu = globalNasabah.find(b => b.nama === namaBsu);
+        document.getElementById('monNasabah').innerText = profilBsu ? (profilBsu.jumlah_nasabah || "0") : "0";
+
+        // Filter Transaksi khusus BSU ini
+        let trxBsu = globalTransaksi ? globalTransaksi.filter(t => t.nama === namaBsu) : [];
+        
+        let totalSampah = 0;
+        let totalSaldo = 0;
+        let setoranHtml = '';
+        let penarikanHtml = '';
+        let komposisi = {};
+        let bulanSet = new Set();
+
+        trxBsu.slice().reverse().forEach(t => {
+            let tglIndah = formatTglTabel(t.tgl);
+            totalSaldo += (parseFloat(t.total) || 0);
+
+            if (t.total > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) {
+                // SETORAN SAMPAH
+                let berat = parseFloat(t.berat) || 0;
+                totalSampah += berat;
+                
+                // Kumpulkan bulan unik untuk rata-rata (format YYYY-MM)
+                let d = uraikanTanggalInput(t.tgl);
+                bulanSet.add(d.getFullYear() + "-" + d.getMonth());
+
+                // Pengelompokan Data Donut Chart
+                let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; 
+                let jenisUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya';
+                komposisi[jenisUtama] = (komposisi[jenisUtama] || 0) + berat;
+
+                // Masukkan ke Tabel (Limit 50 data terbaru agar tidak berat)
+                if (setoranHtml.split('<tr>').length < 50) { 
+                    setoranHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td style="font-weight:700;">${t.jenis}</td><td class="text-right text-success fw-bold">${berat} Kg</td></tr>`;
+                }
+            } else if (t.total < 0 || t.jenis === 'Penarikan Tunai') {
+                // PENARIKAN SALDO
+                if (penarikanHtml.split('<tr>').length < 50) {
+                    penarikanHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td class="text-right text-danger fw-bold">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`;
+                }
+            }
+        });
+
+        // Update Text Dashboard Monitoring
+        document.getElementById('monTotalSampah').innerText = totalSampah.toFixed(1);
+        document.getElementById('monSaldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
+        
+        // Kalkulasi Rata-rata
+        let jmlBulan = bulanSet.size > 0 ? bulanSet.size : 1;
+        document.getElementById('monRataSampah').innerText = (totalSampah / jmlBulan).toFixed(1);
+
+        // Update Tabel
+        document.getElementById('monTabelSetoran').innerHTML = setoranHtml || '<tr><td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas setoran tercatat.</td></tr>';
+        document.getElementById('monTabelPenarikan').innerHTML = penarikanHtml || '<tr><td colspan="2" class="text-center text-muted py-4">Belum ada aktivitas penarikan saldo.</td></tr>';
+
+        // Render Donut Chart Komposisi
+        let ctx = document.getElementById('monKomposisiChart').getContext('2d');
+        if (monKomposisiChartInstance) monKomposisiChartInstance.destroy();
+        
+        if(Object.keys(komposisi).length > 0) {
+            document.getElementById('monChartContainer').innerHTML = '<canvas id="monKomposisiChart"></canvas>';
+            ctx = document.getElementById('monKomposisiChart').getContext('2d');
+            
+            monKomposisiChartInstance = new Chart(ctx, { 
+                type: 'doughnut', 
+                data: { 
+                    labels: Object.keys(komposisi), 
+                    datasets: [{ 
+                        data: Object.values(komposisi), 
+                        backgroundColor: modernColors, 
+                        borderWidth: 0, 
+                        hoverOffset: 6 
+                    }] 
+                }, 
                 options: { 
                     responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { position: 'bottom' } },
-                    cutout: '70%'
-                }
+                    maintainAspectRatio: false,
+                    cutout: '65%', 
+                    plugins: { 
+                        legend: { position: 'right', labels: { boxWidth: 12, padding: 15, font: { size: 12, family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } },
+                        tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + context.parsed.toFixed(1) + ' Kg'; } } }
+                    } 
+                } 
             });
+        } else {
+            document.getElementById('monChartContainer').innerHTML = '<p style="color:var(--text-muted);">Data visual tidak tersedia.</p>';
         }
+    }
 
-        // Proses Log Keluar Sesi
-        function prosesLogout() {
-            if(confirm('Apakah Anda yakin ingin keluar dari sistem?')) { 
-                localStorage.removeItem('ROLE_PENGGUNA');
-                window.location.href = 'index.html'; 
-            }
-        }
-    </script>
+    window.onload = function() { loadDataPusat(); };
+  </script>
 </body>
 </html>
