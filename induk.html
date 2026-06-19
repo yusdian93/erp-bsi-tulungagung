@@ -127,6 +127,7 @@
         </div>
     </div>
 
+    <!-- MENU NAVIGASI -->
     <div class="nav-bar">
       <button class="nav-btn active" onclick="pindahTab('dash', this)">📊 Statistik</button>
       <button class="nav-btn" onclick="pindahTab('datasu', this)">🏢 Data BSU</button>
@@ -138,6 +139,7 @@
       <button class="nav-btn" style="color: #ef4444; margin-left: auto;" onclick="logoutPusat()">🚪 Keluar</button>
     </div>
 
+    <!-- KONTEN DASHBOARD UMUM -->
     <div id="dash" class="content-section active">
       <div id="loading" style="text-align:center; padding:60px; font-weight:700; color:var(--text-muted); font-size: 16px;">
           ⏳ Menarik Data Real-time... Mohon Tunggu.
@@ -170,6 +172,7 @@
             </div>
         </div>
 
+        <!-- PANEL KOMPOSISI -->
         <div class="komposisi-panel">
             <div class="komposisi-header">
                 <div style="background: #1e293b; padding: 8px; border-radius: 8px; border: 1px solid #334155; font-size: 18px;">🎛️</div>
@@ -186,6 +189,7 @@
       </div>
     </div>
 
+    <!-- KONTEN DATA UNIT BSU -->
     <div id="datasu" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -224,6 +228,7 @@
         </div>
     </div>
 
+    <!-- KONTEN KEUANGAN -->
     <div id="keuangan" class="content-section">
         <div class="cards" style="grid-template-columns: 1fr;">
             <div class="card card-orange" style="text-align: center; border-left: none; border-top: 6px solid var(--accent); background: linear-gradient(to bottom, #ffffff, #fffbeb);">
@@ -251,6 +256,7 @@
         </div>
     </div>
 
+    <!-- HARGA SAMPAH MASTER -->
     <div id="harga" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -280,6 +286,7 @@
         </div>
     </div>
 
+    <!-- TRANSAKSI -->
     <div id="transaksi" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -323,6 +330,7 @@
         </div>
     </div>
 
+    <!-- KONTEN MONITORING SPESIFIK BSU -->
     <div id="monitoring" class="content-section">
         <div class="panel" style="margin-bottom: 24px; border: 1px solid var(--primary); background: var(--primary-light);">
             <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
@@ -371,27 +379,24 @@
         </div>
     </div>
 
+    <!-- REGISTRASI -->
     <div id="daftar" class="content-section">
         <div class="grid-2" style="grid-template-columns: 1fr; margin-bottom: 24px;">
             <div class="panel">
-                <div class="panel-header"><h2>📋 DAFTAR BSU TERDAFTAR (LENGKAP)</h2></div>
+                <div class="panel-header"><h2>📋 DAFTAR BSU TERDAFTAR</h2></div>
                 <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: 600px;">
-                    <table style="white-space: nowrap; min-width: 1000px;">
+                    <table style="white-space: nowrap; min-width: 600px;">
                         <thead>
                             <tr>
                                 <th>NAMA BSU</th>
                                 <th>KETUA</th>
-                                <th>ALAMAT</th>
-                                <th class="text-center">KOORDINAT</th>
-                                <th class="text-center">PENGURUS</th>
-                                <th class="text-center">NASABAH</th>
                                 <th>KONTAK HP/WA</th>
                                 <th class="text-center">KATA SANDI</th>
                                 <th class="text-center" style="position: sticky; right: 0; background: #f8fafc; z-index: 2; box-shadow: -2px 0 5px rgba(0,0,0,0.05);">AKSI</th>
                             </tr>
                         </thead>
                         <tbody id="tabelDaftarBsuRegistrasi">
-                            <tr><td colspan="9" class="text-center">Memuat data...</td></tr>
+                            <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -746,20 +751,11 @@
         if(globalNasabah && globalNasabah.length > 0) {
             [...globalNasabah].reverse().forEach(b => {
                 let noHpUrl = String(b.hp || '').replace(/^0+/, '');
-                
-                let btnPeta = '-';
-                if(b.koordinat && String(b.koordinat).length > 4) {
-                    btnPeta = `<a href="https://maps.google.com/?q=${encodeURIComponent(b.koordinat)}" target="_blank" style="color:var(--secondary); text-decoration:none; font-weight:700;">📍 Peta</a>`;
-                }
 
-                // Kolom Kecamatan dan Desa dihilangkan di sini
+                // Kolom Alamat, Koordinat, Pengurus, Nasabah dihilangkan dari tabel ini
                 tbody += `<tr>
                     <td style="font-weight:800; color:var(--text-main);">${b.nama || '-'}</td>
                     <td style="font-weight:700;">${b.ketua || '-'}</td>
-                    <td><div style="max-width:180px; overflow:hidden; text-overflow:ellipsis;" title="${b.alamat || ''}">${b.alamat || '-'}</div></td>
-                    <td class="text-center">${btnPeta}</td>
-                    <td class="text-center"><span class="badge-material">${b.jumlah_pengurus || '0'}</span></td>
-                    <td class="text-center"><span class="badge-material">${b.jumlah_nasabah || '0'}</span></td>
                     <td style="font-family:monospace; font-weight:600;">${b.hp || '-'}</td>
                     <td class="text-center"><span style="font-family:monospace; font-weight:800; font-size:14px; color:var(--accent); background: #fffbeb; padding:4px 10px; border-radius:8px;">${b.password || '-'}</span></td>
                     
@@ -773,8 +769,8 @@
                 </tr>`;
             });
         } else {
-            // Berubah menjadi 9 kolom
-            tbody = `<tr><td colspan="9" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
+            // Berubah menjadi 5 kolom
+            tbody = `<tr><td colspan="5" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
         }
         let el = document.getElementById('tabelDaftarBsuRegistrasi');
         if(el) el.innerHTML = tbody;
