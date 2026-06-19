@@ -83,14 +83,7 @@
     .rank-val { font-weight: 800; font-size: 15px; }
 
     /* --- CSS KOMPOSISI & HIERARKI MATERIAL (DARK MODE) --- */
-    .komposisi-panel {
-        background: #0f172a;
-        border-radius: 20px;
-        padding: 24px;
-        margin-bottom: 24px;
-        box-shadow: var(--shadow-md);
-        font-family: 'Plus Jakarta Sans', sans-serif;
-    }
+    .komposisi-panel { background: #0f172a; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-md); font-family: 'Plus Jakarta Sans', sans-serif;}
     .komposisi-header { margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
     .komposisi-header h2 { color: #10b981; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.3px;}
     .komposisi-header p { color: #94a3b8; margin: 4px 0 0 0; font-size: 12px; font-weight: 500;}
@@ -134,7 +127,6 @@
         </div>
     </div>
 
-    <!-- MENU NAVIGASI -->
     <div class="nav-bar">
       <button class="nav-btn active" onclick="pindahTab('dash', this)">📊 Statistik</button>
       <button class="nav-btn" onclick="pindahTab('datasu', this)">🏢 Data BSU</button>
@@ -146,7 +138,6 @@
       <button class="nav-btn" style="color: #ef4444; margin-left: auto;" onclick="logoutPusat()">🚪 Keluar</button>
     </div>
 
-    <!-- KONTEN DASHBOARD UMUM -->
     <div id="dash" class="content-section active">
       <div id="loading" style="text-align:center; padding:60px; font-weight:700; color:var(--text-muted); font-size: 16px;">
           ⏳ Menarik Data Real-time... Mohon Tunggu.
@@ -171,7 +162,6 @@
                         <option value="tahun">Per Tahun</option>
                     </select>
                 </div>
-                <!-- Menambah sedikit tinggi canvas untuk menampung label teks di atas batang -->
                 <canvas id="lineChart" height="180"></canvas>
             </div>
             <div class="panel">
@@ -180,7 +170,6 @@
             </div>
         </div>
 
-        <!-- PANEL KOMPOSISI -->
         <div class="komposisi-panel">
             <div class="komposisi-header">
                 <div style="background: #1e293b; padding: 8px; border-radius: 8px; border: 1px solid #334155; font-size: 18px;">🎛️</div>
@@ -197,7 +186,6 @@
       </div>
     </div>
 
-    <!-- KONTEN DATA UNIT BSU -->
     <div id="datasu" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -210,7 +198,6 @@
             </div>
         </div>
 
-        <!-- TABEL PROFIL BANK SAMPAH UNIT -->
         <div class="panel">
             <div class="panel-header"><h2>🏢 PROFIL BANK SAMPAH UNIT</h2></div>
             <div class="table-container" style="overflow-x: auto; max-height: 500px;">
@@ -237,7 +224,6 @@
         </div>
     </div>
 
-    <!-- KONTEN KEUANGAN -->
     <div id="keuangan" class="content-section">
         <div class="cards" style="grid-template-columns: 1fr;">
             <div class="card card-orange" style="text-align: center; border-left: none; border-top: 6px solid var(--accent); background: linear-gradient(to bottom, #ffffff, #fffbeb);">
@@ -265,7 +251,6 @@
         </div>
     </div>
 
-    <!-- HARGA SAMPAH MASTER -->
     <div id="harga" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -292,7 +277,6 @@
         </div>
     </div>
 
-    <!-- TRANSAKSI -->
     <div id="transaksi" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -336,7 +320,6 @@
         </div>
     </div>
 
-    <!-- KONTEN MONITORING SPESIFIK BSU -->
     <div id="monitoring" class="content-section">
         <div class="panel" style="margin-bottom: 24px; border: 1px solid var(--primary); background: var(--primary-light);">
             <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
@@ -385,7 +368,6 @@
         </div>
     </div>
 
-    <!-- REGISTRASI -->
     <div id="daftar" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -418,7 +400,10 @@
                 <div class="form-group"><label>Kontak WA (WhatsApp Aktif)</label><input type="tel" id="hpBsu" class="form-control" placeholder="0812xxxxxx" required></div>
                 <div class="form-group"><label>Kata Sandi Akses Unit</label><input type="text" id="passBsu" class="form-control" placeholder="Buat sandi minimal 6 karakter" required></div>
                 
-                <button type="button" class="btn-submit" id="btnSimpanBSU" onclick="simpanBSU()" style="margin-top: 10px;">SIMPAN & TAMBAHKAN BSU</button>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <button type="button" class="btn-submit" id="btnSimpanBSU" onclick="simpanBSU()">SIMPAN & TAMBAHKAN BSU</button>
+                    <button type="button" id="btnBatalEdit" class="btn-danger" style="display: none; width: 100%; padding: 14px; font-size: 15px;" onclick="batalEditBsu()">BATAL EDIT</button>
+                </div>
                 </form>
             </div>
         </div>
@@ -526,7 +511,6 @@
         });
     }
 
-    // FUNGSI GRAFIK PERTUMBUHAN (MoM)
     function renderVisualisasiTren(range) {
         let rekapTren = {}; 
         let dataTransaksiSetoran = globalTransaksi ? globalTransaksi.filter(t => t.total > 0) : [];
@@ -547,155 +531,64 @@
         let sortedKeys = Object.keys(rekapTren).sort(); 
         let listLabels = sortedKeys.map(k => rekapTren[k].label); 
         let listValues = sortedKeys.map(k => rekapTren[k].val);
-        
-        let listPct = [];
-        let listColors = [];
+        let listPct = []; let listColors = [];
         
         for (let i = 0; i < listValues.length; i++) {
-            if (i === 0) {
-                listPct.push(null); 
-                listColors.push('#3b82f6'); 
-            } else {
-                let prev = listValues[i-1];
-                let curr = listValues[i];
-                if (prev === 0) {
-                    listPct.push(curr > 0 ? 100 : 0);
-                    listColors.push(curr > 0 ? '#10b981' : '#94a3b8');
-                } else {
-                    let pct = ((curr - prev) / prev) * 100;
-                    listPct.push(pct);
-                    listColors.push(pct > 0 ? '#10b981' : (pct < 0 ? '#ef4444' : '#94a3b8'));
-                }
+            if (i === 0) { listPct.push(null); listColors.push('#3b82f6'); } 
+            else {
+                let prev = listValues[i-1]; let curr = listValues[i];
+                if (prev === 0) { listPct.push(curr > 0 ? 100 : 0); listColors.push(curr > 0 ? '#10b981' : '#94a3b8'); } 
+                else { let pct = ((curr - prev) / prev) * 100; listPct.push(pct); listColors.push(pct > 0 ? '#10b981' : (pct < 0 ? '#ef4444' : '#94a3b8')); }
             }
         }
 
         let ctx = document.getElementById('lineChart').getContext('2d'); 
-        
         const topLabelsPlugin = {
-            id: 'topLabels',
-            afterDatasetsDraw(chart, args, pluginOptions) {
+            id: 'topLabels', afterDatasetsDraw(chart) {
                 const { ctx } = chart;
                 chart.data.datasets.forEach((dataset, i) => {
                     const meta = chart.getDatasetMeta(i);
                     meta.data.forEach((bar, index) => {
-                        const dataVal = dataset.data[index].toFixed(1);
-                        const pctVal = dataset.pctChange[index];
-                        
-                        let textTop = dataVal + ' Kg';
-                        let textBot = '';
-                        let colorBot = '#94a3b8';
-
-                        if (pctVal !== null) {
-                            if (pctVal > 0) { textBot = '▲ +' + pctVal.toFixed(1) + '%'; colorBot = '#10b981'; }
-                            else if (pctVal < 0) { textBot = '▼ ' + pctVal.toFixed(1) + '%'; colorBot = '#ef4444'; }
-                            else { textBot = '- 0%'; }
-                        } else {
-                            textBot = 'Awal';
-                        }
-
-                        ctx.save();
-                        ctx.textAlign = 'center';
-                        ctx.font = '600 10px "Plus Jakarta Sans", sans-serif';
-                        ctx.fillStyle = '#64748b';
-                        ctx.fillText(textTop, bar.x, bar.y - 18);
-                        ctx.font = '800 11px "Plus Jakarta Sans", sans-serif';
-                        ctx.fillStyle = colorBot;
-                        ctx.fillText(textBot, bar.x, bar.y - 6);
-                        ctx.restore();
+                        const dataVal = dataset.data[index].toFixed(1); const pctVal = dataset.pctChange[index];
+                        let textTop = dataVal + ' Kg'; let textBot = ''; let colorBot = '#94a3b8';
+                        if (pctVal !== null) { if (pctVal > 0) { textBot = '▲ +' + pctVal.toFixed(1) + '%'; colorBot = '#10b981'; } else if (pctVal < 0) { textBot = '▼ ' + pctVal.toFixed(1) + '%'; colorBot = '#ef4444'; } else { textBot = '- 0%'; } } 
+                        else { textBot = 'Awal'; }
+                        ctx.save(); ctx.textAlign = 'center'; ctx.font = '600 10px "Plus Jakarta Sans", sans-serif'; ctx.fillStyle = '#64748b'; ctx.fillText(textTop, bar.x, bar.y - 18); ctx.font = '800 11px "Plus Jakarta Sans", sans-serif'; ctx.fillStyle = colorBot; ctx.fillText(textBot, bar.x, bar.y - 6); ctx.restore();
                     });
                 });
             }
         };
 
         if (lineChartInstance) lineChartInstance.destroy();
-        lineChartInstance = new Chart(ctx, { 
-            type: 'bar', 
-            data: { 
-                labels: listLabels, 
-                datasets: [{ 
-                    label: 'Volume Setoran', 
-                    data: listValues, 
-                    backgroundColor: listColors, 
-                    borderRadius: 6,
-                    pctChange: listPct 
-                }] 
-            }, 
-            options: { 
-                responsive: true, 
-                layout: { padding: { top: 35 } },
-                plugins: { 
-                    legend: { display: false },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                let label = 'Volume: ';
-                                if (context.parsed.y !== null) { label += context.parsed.y.toFixed(1) + ' Kg'; }
-                                let pct = context.dataset.pctChange[context.dataIndex];
-                                if (pct !== null) { label += ' (' + (pct > 0 ? '+' : '') + pct.toFixed(1) + '%)'; }
-                                return label;
-                            }
-                        }
-                    }
-                }, 
-                scales: { 
-                    x: { grid: { display: false } }, 
-                    y: { beginAtZero: true, grid: { borderDash: [4, 4] }, suggestedMax: Math.max(...(listValues.length ? listValues : [0])) * 1.25 }
-                } 
-            },
-            plugins: [topLabelsPlugin]
-        });
+        lineChartInstance = new Chart(ctx, { type: 'bar', data: { labels: listLabels, datasets: [{ label: 'Volume Setoran', data: listValues, backgroundColor: listColors, borderRadius: 6, pctChange: listPct }] }, options: { responsive: true, layout: { padding: { top: 35 } }, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { beginAtZero: true, grid: { borderDash: [4, 4] }, suggestedMax: Math.max(...(listValues.length ? listValues : [0])) * 1.25 } } }, plugins: [topLabelsPlugin] });
     }
 
     function renderHierarkiKomposisi() {
-        let rekap = {};
-        let totalSemuaBerat = 0;
-
+        let rekap = {}; let totalSemuaBerat = 0;
         if (globalTransaksi && globalTransaksi.length > 0) {
             globalTransaksi.forEach(t => {
                 if (t.total > 0) {
                     let cat = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null;
                     let jenisUtama = (cat && cat.jenis_material) ? String(cat.jenis_material) : 'Lainnya';
-                    let subKategori = String(t.jenis || 'Tidak Diketahui');
-                    let berat = parseFloat(t.berat) || 0;
-
+                    let subKategori = String(t.jenis || 'Tidak Diketahui'); let berat = parseFloat(t.berat) || 0;
                     if (!rekap[jenisUtama]) { rekap[jenisUtama] = { totalBerat: 0, sub: {} }; }
                     rekap[jenisUtama].totalBerat += berat;
                     if (!rekap[jenisUtama].sub[subKategori]) { rekap[jenisUtama].sub[subKategori] = 0; }
-                    rekap[jenisUtama].sub[subKategori] += berat;
-                    totalSemuaBerat += berat;
+                    rekap[jenisUtama].sub[subKategori] += berat; totalSemuaBerat += berat;
                 }
             });
         }
-
-        let container = document.getElementById('hierarkiKomposisiContainer');
-        if (!container) return;
-
-        if (totalSemuaBerat === 0) {
-            container.innerHTML = '<div style="color: #64748b;">Belum ada data setoran material untuk dianalisis.</div>';
-            return;
-        }
-
+        let container = document.getElementById('hierarkiKomposisiContainer'); if (!container) return;
+        if (totalSemuaBerat === 0) { container.innerHTML = '<div style="color: #64748b;">Belum ada data setoran material untuk dianalisis.</div>'; return; }
         const warnaMap = { 'Kertas': 'kertas', 'Plastik': 'plastik', 'Besi': 'besi', 'Botol Kaca': 'kaca', 'Logam': 'logam', 'Minyak': 'minyak', 'Elektronik': 'elektro', 'Lainnya': 'lainnya' };
-        let htmlCards = '';
-        let sortedUtama = Object.keys(rekap).sort((a, b) => rekap[b].totalBerat - rekap[a].totalBerat);
-
+        let htmlCards = ''; let sortedUtama = Object.keys(rekap).sort((a, b) => rekap[b].totalBerat - rekap[a].totalBerat);
         sortedUtama.forEach(utama => {
-            let dataUtama = rekap[utama];
-            let pctUtama = ((dataUtama.totalBerat / totalSemuaBerat) * 100).toFixed(1);
-            let warnaKelas = warnaMap[utama] || 'lainnya';
-
+            let dataUtama = rekap[utama]; let pctUtama = ((dataUtama.totalBerat / totalSemuaBerat) * 100).toFixed(1); let warnaKelas = warnaMap[utama] || 'lainnya';
             let subHtml = '<div class="bd-label">BREAKDOWN MATERIAL:</div>';
             let sortedSub = Object.keys(dataUtama.sub).sort((a, b) => dataUtama.sub[b] - dataUtama.sub[a]);
-            
-            sortedSub.forEach(sub => {
-                let beratSub = dataUtama.sub[sub];
-                let pctSub = ((beratSub / dataUtama.totalBerat) * 100).toFixed(1);
-                subHtml += `<div class="bd-item"><div class="bd-info"><span class="bd-name">${sub}</span><span>${beratSub.toFixed(1)} Kg <span style="color:#64748b; font-size:10px;">(${pctSub}%)</span></span></div><div class="bd-prog-bg"><div class="prog-bar bg-${warnaKelas}" style="width: ${pctSub}%;"></div></div></div>`;
-            });
-
+            sortedSub.forEach(sub => { let beratSub = dataUtama.sub[sub]; let pctSub = ((beratSub / dataUtama.totalBerat) * 100).toFixed(1); subHtml += `<div class="bd-item"><div class="bd-info"><span class="bd-name">${sub}</span><span>${beratSub.toFixed(1)} Kg <span style="color:#64748b; font-size:10px;">(${pctSub}%)</span></span></div><div class="bd-prog-bg"><div class="prog-bar bg-${warnaKelas}" style="width: ${pctSub}%;"></div></div></div>`; });
             htmlCards += `<div class="komp-card"><div class="komp-head"><h3 class="komp-title">${utama}</h3><div><span class="komp-value color-${warnaKelas}">${dataUtama.totalBerat.toFixed(1)} Kg</span><span class="komp-pct">(${pctUtama}%)</span></div></div><div class="prog-bg"><div class="prog-bar bg-${warnaKelas}" style="width: ${pctUtama}%;"></div></div>${subHtml}</div>`;
         });
-
         container.innerHTML = htmlCards;
     }
 
@@ -723,15 +616,98 @@
         let el = document.getElementById('tabelDaftarBsuRegistrasi'); if(el) el.innerHTML = tbody;
     }
 
-    // Fungsi placeholder untuk tombol Edit & Hapus BSU
+    // FUNGSI EDIT BSU
     function editBsu(id) {
-        alert("Fitur Edit BSU dengan ID " + id + " belum diimplementasikan.");
+        let bsu = globalNasabah.find(b => b.id === id);
+        if(!bsu) return alert("Data BSU tidak ditemukan!");
+
+        document.getElementById('idBsu').value = bsu.id;
+        document.getElementById('namaBsu').value = bsu.nama || '';
+        document.getElementById('kecBsu').value = bsu.kecamatan || '';
+        document.getElementById('desaBsu').value = bsu.desa || '';
+        document.getElementById('alamatBsu').value = bsu.alamat || '';
+        document.getElementById('koordinatBsu').value = bsu.koordinat || '';
+        document.getElementById('ketuaBsu').value = bsu.ketua || '';
+        document.getElementById('pengurusBsu').value = bsu.jumlah_pengurus || '';
+        document.getElementById('nasabahBsu').value = bsu.jumlah_nasabah || '';
+        document.getElementById('hpBsu').value = bsu.hp || '';
+        document.getElementById('passBsu').value = bsu.password || '';
+
+        let btn = document.getElementById('btnSimpanBSU');
+        btn.innerText = "💾 SIMPAN PERUBAHAN BSU";
+        btn.onclick = updateBSU; 
+
+        document.getElementById('btnBatalEdit').style.display = 'block';
+        document.getElementById('formRegistrasiBSU').scrollIntoView({behavior: 'smooth'});
     }
-    
+
+    // FUNGSI BATAL EDIT
+    function batalEditBsu() {
+        document.getElementById('formRegistrasiBSU').reset();
+        document.getElementById('idBsu').value = 'BSU-'+Math.floor(10000+Math.random()*90000);
+        
+        let btn = document.getElementById('btnSimpanBSU');
+        btn.innerText = "SIMPAN & TAMBAHKAN BSU";
+        btn.onclick = simpanBSU; 
+        
+        document.getElementById('btnBatalEdit').style.display = 'none';
+    }
+
+    // FUNGSI HAPUS BSU
     function hapusBsu(id) {
-        if(confirm("Yakin ingin menghapus BSU dengan ID " + id + "?")) {
-            alert("Fitur Hapus BSU belum diimplementasikan pada Google Apps Script Anda.");
+        if(confirm("PERINGATAN!\n\nYakin ingin menghapus BSU dengan ID " + id + "?\nData yang dihapus tidak dapat dikembalikan.")) {
+            let fd = new URLSearchParams(); 
+            fd.append('action', 'deleteUnit'); 
+            fd.append('id', id);
+            
+            fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() })
+            .then(r=>r.text())
+            .then(res=>{ 
+                if(res.includes("Sukses")) { 
+                    alert("BSU Berhasil Dihapus!"); 
+                    loadDataPusat(); 
+                } else {
+                    alert("Server Error: " + res);
+                }
+            })
+            .catch(err => alert("Gagal koneksi: " + err));
         }
+    }
+
+    // FUNGSI UPDATE DATA KE SERVER
+    function updateBSU() {
+        let id = document.getElementById('idBsu').value; 
+        let nama = document.getElementById('namaBsu').value; 
+        let ketua = document.getElementById('ketuaBsu').value; 
+        let hp = document.getElementById('hpBsu').value; 
+        let pass = document.getElementById('passBsu').value; 
+        let kec = document.getElementById('kecBsu').value;
+        let desa = document.getElementById('desaBsu').value;
+        let alamat = document.getElementById('alamatBsu').value;
+        let koordinat = document.getElementById('koordinatBsu').value;
+        let pengurus = document.getElementById('pengurusBsu').value;
+        let nasabah = document.getElementById('nasabahBsu').value;
+
+        if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !nasabah || !pengurus) return alert("Isi semua data wajib!");
+        
+        let btn = document.getElementById('btnSimpanBSU'); 
+        btn.innerText = "MEMPROSES UPDATE..."; 
+        btn.disabled = true;
+        
+        let fd = new URLSearchParams(); 
+        fd.append('action', 'updateUnit');
+        fd.append('id', id); fd.append('nama', nama); fd.append('kecamatan', kec); fd.append('desa', desa); fd.append('alamat', alamat); fd.append('koordinat', koordinat); fd.append('ketua', ketua); fd.append('jumlah_pengurus', pengurus); fd.append('jumlah_nasabah', nasabah); fd.append('hp', hp); fd.append('password', pass);
+        
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() })
+        .then(r=>r.text())
+        .then(res=>{ 
+            if(res.includes("Sukses")) { 
+                alert("Data BSU Berhasil Diperbarui!"); 
+                batalEditBsu(); 
+                loadDataPusat(); 
+            } else alert("Pesan Server: " + res);
+        })
+        .catch(err => alert("Gagal: " + err)).finally(()=>{ btn.disabled = false; });
     }
 
     function renderDataBSU() {
@@ -739,24 +715,9 @@
         if(globalNasabah && globalNasabah.length > 0) {
             globalNasabah.forEach(b => {
                 let noHpUrl = String(b.hp || '').replace(/^0+/, '');
-                
                 let btnPeta = '-';
-                if(b.koordinat && String(b.koordinat).length > 4) {
-                    btnPeta = `<a href="https://maps.google.com/?q=${encodeURIComponent(b.koordinat)}" target="_blank" style="color:var(--secondary); text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:4px 8px; border-radius:6px; font-size:11.5px;">📍 Lihat Peta</a>`;
-                }
-
-                tbHtml += `<tr>
-                    <td style="font-family:monospace; font-size:13px; font-weight:700; color:var(--text-muted);">${b.id}</td>
-                    <td style="font-weight:800; color:var(--text-main);">${b.nama}</td>
-                    <td style="font-weight:700;">${b.ketua}</td>
-                    <td class="text-center"><span class="badge-material">${b.jumlah_pengurus || "0"}</span></td>
-                    <td class="text-center"><span class="badge-material">${b.jumlah_nasabah || "0"}</span></td>
-                    <td><a href="https://wa.me/62${noHpUrl}" target="_blank" class="badge-wa">💬 ${b.hp}</a></td>
-                    <td>${b.kecamatan || "-"}</td>
-                    <td>${b.desa || "-"}</td>
-                    <td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${b.alamat || ''}">${b.alamat || "-"}</div></td>
-                    <td class="text-center">${btnPeta}</td>
-                </tr>`;
+                if(b.koordinat && String(b.koordinat).length > 4) { btnPeta = `<a href="https://maps.google.com/?q=${encodeURIComponent(b.koordinat)}" target="_blank" style="color:var(--secondary); text-decoration:none; font-weight:700; display:inline-flex; align-items:center; gap:4px; background:#eff6ff; padding:4px 8px; border-radius:6px; font-size:11.5px;">📍 Lihat Peta</a>`; }
+                tbHtml += `<tr><td style="font-family:monospace; font-size:13px; font-weight:700; color:var(--text-muted);">${b.id}</td><td style="font-weight:800; color:var(--text-main);">${b.nama}</td><td style="font-weight:700;">${b.ketua}</td><td class="text-center"><span class="badge-material">${b.jumlah_pengurus || "0"}</span></td><td class="text-center"><span class="badge-material">${b.jumlah_nasabah || "0"}</span></td><td><a href="https://wa.me/62${noHpUrl}" target="_blank" class="badge-wa">💬 ${b.hp}</a></td><td>${b.kecamatan || "-"}</td><td>${b.desa || "-"}</td><td><div style="max-width:200px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${b.alamat || ''}">${b.alamat || "-"}</div></td><td class="text-center">${btnPeta}</td></tr>`;
             });
         } else tbHtml = `<tr><td colspan="10" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
         let dirEl = document.getElementById('tabelDirektoriBsu'); if(dirEl) dirEl.innerHTML = tbHtml;
@@ -792,32 +753,20 @@
         let trxSetor = globalTransaksi ? globalTransaksi.filter(t => t.total > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) : [];
         let trxTarik = globalTransaksi ? globalTransaksi.filter(t => t.total < 0 || t.jenis === 'Penarikan Tunai') : [];
 
-        if(trxSetor.length > 0) { trxSetor.slice().reverse().forEach(t => { 
-            let tglIndah = formatTglTabel(t.tgl); let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; let jenisMatUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya';
-            tbSetor += `<tr><td style="font-size:12px; color:var(--text-muted); font-weight:600;">${tglIndah}</td><td style="font-weight:800; color:var(--text-main);">${t.nama}</td><td class="text-center"><span class="badge-material">${jenisMatUtama}</span></td><td style="font-weight:700; color:var(--text-main);">${t.jenis}</td><td class="text-right" style="font-weight:800;">${t.berat}</td><td class="text-success text-right">Rp ${parseInt(t.total).toLocaleString('id-ID')}</td></tr>`; });
-        } else tbSetor = `<tr><td colspan="6" class="text-center">Belum ada catatan setoran.</td></tr>`;
-
-        if(trxTarik.length > 0) { trxTarik.slice().reverse().forEach(t => { let tglIndah = formatTglTabel(t.tgl); tbTarik += `<tr><td style="font-size:12px; font-weight:600;">${tglIndah}</td><td style="font-weight:800; color:var(--text-main);">${t.nama}</td><td class="text-danger text-right">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`; });
-        } else tbTarik = `<tr><td colspan="3" class="text-center">Belum ada catatan penarikan.</td></tr>`;
+        if(trxSetor.length > 0) { trxSetor.slice().reverse().forEach(t => { let tglIndah = formatTglTabel(t.tgl); let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; let jenisMatUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya'; tbSetor += `<tr><td style="font-size:12px; color:var(--text-muted); font-weight:600;">${tglIndah}</td><td style="font-weight:800; color:var(--text-main);">${t.nama}</td><td class="text-center"><span class="badge-material">${jenisMatUtama}</span></td><td style="font-weight:700; color:var(--text-main);">${t.jenis}</td><td class="text-right" style="font-weight:800;">${t.berat}</td><td class="text-success text-right">Rp ${parseInt(t.total).toLocaleString('id-ID')}</td></tr>`; }); } else tbSetor = `<tr><td colspan="6" class="text-center">Belum ada catatan setoran.</td></tr>`;
+        if(trxTarik.length > 0) { trxTarik.slice().reverse().forEach(t => { let tglIndah = formatTglTabel(t.tgl); tbTarik += `<tr><td style="font-size:12px; font-weight:600;">${tglIndah}</td><td style="font-weight:800; color:var(--text-main);">${t.nama}</td><td class="text-danger text-right">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`; }); } else tbTarik = `<tr><td colspan="3" class="text-center">Belum ada catatan penarikan.</td></tr>`;
 
         let setEl = document.getElementById('tabelSetoran'); if(setEl) setEl.innerHTML = tbSetor;
         let tarEl = document.getElementById('tabelPenarikan'); if(tarEl) tarEl.innerHTML = tbTarik;
     }
 
     function renderLaporanBulanan() {
-        let selBulan = document.getElementById('filterBulanLaporan'); if(!selBulan) return;
-        let filterVal = selBulan.value;
-        if(selBulan.options.length <= 1 && globalTransaksi && globalTransaksi.length > 0) {
-            let months = new Set(); globalTransaksi.forEach(t => { let d = new Date(t.tgl); if(!isNaN(d.getTime())) months.add((d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getFullYear()); }); Array.from(months).sort().forEach(m => { selBulan.innerHTML += `<option value="${m}">${m}</option>`; });
-        }
+        let selBulan = document.getElementById('filterBulanLaporan'); if(!selBulan) return; let filterVal = selBulan.value;
+        if(selBulan.options.length <= 1 && globalTransaksi && globalTransaksi.length > 0) { let months = new Set(); globalTransaksi.forEach(t => { let d = new Date(t.tgl); if(!isNaN(d.getTime())) months.add((d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getFullYear()); }); Array.from(months).sort().forEach(m => { selBulan.innerHTML += `<option value="${m}">${m}</option>`; }); }
         let rekap = {};
-        if(globalTransaksi) {
-            globalTransaksi.forEach(t => { let d = new Date(t.tgl); let mStr = !isNaN(d.getTime()) ? ((d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getFullYear()) : "Lainnya";
-                if(filterVal === 'semua' || filterVal === mStr) { if(!rekap[t.nama]) rekap[t.nama] = {masuk: 0, keluar: 0}; if(t.total > 0) rekap[t.nama].masuk += parseFloat(t.total); else rekap[t.nama].keluar += Math.abs(parseFloat(t.total)); } });
-        }
+        if(globalTransaksi) { globalTransaksi.forEach(t => { let d = new Date(t.tgl); let mStr = !isNaN(d.getTime()) ? ((d.getMonth()+1).toString().padStart(2,'0') + "-" + d.getFullYear()) : "Lainnya"; if(filterVal === 'semua' || filterVal === mStr) { if(!rekap[t.nama]) rekap[t.nama] = {masuk: 0, keluar: 0}; if(t.total > 0) rekap[t.nama].masuk += parseFloat(t.total); else rekap[t.nama].keluar += Math.abs(parseFloat(t.total)); } }); }
         let tbLaporan = '';
-        if(Object.keys(rekap).length > 0) { Object.keys(rekap).forEach(bsu => { tbLaporan += `<tr><td style="font-weight:800; color:var(--text-main);">${bsu}</td><td class="text-success text-right">Rp ${rekap[bsu].masuk.toLocaleString('id-ID')}</td><td class="text-danger text-right">Rp ${rekap[bsu].keluar.toLocaleString('id-ID')}</td></tr>`; }); }
-        else tbLaporan = `<tr><td colspan="3" class="text-center">Tidak ada transaksi.</td></tr>`;
+        if(Object.keys(rekap).length > 0) { Object.keys(rekap).forEach(bsu => { tbLaporan += `<tr><td style="font-weight:800; color:var(--text-main);">${bsu}</td><td class="text-success text-right">Rp ${rekap[bsu].masuk.toLocaleString('id-ID')}</td><td class="text-danger text-right">Rp ${rekap[bsu].keluar.toLocaleString('id-ID')}</td></tr>`; }); } else tbLaporan = `<tr><td colspan="3" class="text-center">Tidak ada transaksi.</td></tr>`;
         let lapEl = document.getElementById('tabelLaporanBulanan'); if(lapEl) lapEl.innerHTML = tbLaporan;
     }
 
@@ -825,13 +774,7 @@
         let bsu = document.getElementById('trxBsu').value; let jenisTrx = document.getElementById('trxJenis').value;
         if(!bsu) return alert("Pilih BSU terlebih dahulu!");
         let materialNama = "Penarikan Tunai"; let berat = 0; let total = 0;
-        if(jenisTrx === 'setor') {
-            let matData = document.getElementById('trxMaterial').value; berat = parseFloat(document.getElementById('trxBerat').value);
-            if(!matData || isNaN(berat) || berat <= 0) return alert("Pilih kategori produk dan pastikan berat diisi dengan benar!");
-            let arr = matData.split('|'); let hargaMat = parseFloat(arr[0]); materialNama = arr[1]; total = hargaMat * berat;
-        } else {
-            let nominal = parseFloat(document.getElementById('trxNominal').value); if(isNaN(nominal) || nominal <= 0) return alert("Nominal invalid!"); total = -Math.abs(nominal); 
-        }
+        if(jenisTrx === 'setor') { let matData = document.getElementById('trxMaterial').value; berat = parseFloat(document.getElementById('trxBerat').value); if(!matData || isNaN(berat) || berat <= 0) return alert("Pilih kategori produk dan pastikan berat diisi dengan benar!"); let arr = matData.split('|'); let hargaMat = parseFloat(arr[0]); materialNama = arr[1]; total = hargaMat * berat; } else { let nominal = parseFloat(document.getElementById('trxNominal').value); if(isNaN(nominal) || nominal <= 0) return alert("Nominal invalid!"); total = -Math.abs(nominal); }
         let btn = document.getElementById('btnSimpanTrx'); btn.innerText = "MEMPROSES..."; btn.disabled = true;
         let now = new Date(); let tglFormat = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
         let fd = new URLSearchParams(); fd.append('action', 'tambahTransaksi'); fd.append('id', Date.now()); fd.append('tgl', tglFormat); fd.append('nama', bsu); fd.append('jenis', materialNama); fd.append('berat', berat); fd.append('total', total); fd.append('id_unit', ''); 
@@ -853,37 +796,10 @@
     }
 
     function simpanBSU() {
-        let id = document.getElementById('idBsu').value; 
-        let nama = document.getElementById('namaBsu').value; 
-        let ketua = document.getElementById('ketuaBsu').value; 
-        let hp = document.getElementById('hpBsu').value; 
-        let pass = document.getElementById('passBsu').value; 
-        
-        let kec = document.getElementById('kecBsu').value;
-        let desa = document.getElementById('desaBsu').value;
-        let alamat = document.getElementById('alamatBsu').value;
-        let koordinat = document.getElementById('koordinatBsu').value;
-        
-        let pengurus = document.getElementById('pengurusBsu').value;
-        let nasabah = document.getElementById('nasabahBsu').value;
-
+        let id = document.getElementById('idBsu').value; let nama = document.getElementById('namaBsu').value; let ketua = document.getElementById('ketuaBsu').value; let hp = document.getElementById('hpBsu').value; let pass = document.getElementById('passBsu').value; let kec = document.getElementById('kecBsu').value; let desa = document.getElementById('desaBsu').value; let alamat = document.getElementById('alamatBsu').value; let koordinat = document.getElementById('koordinatBsu').value; let pengurus = document.getElementById('pengurusBsu').value; let nasabah = document.getElementById('nasabahBsu').value;
         if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !nasabah || !pengurus) return alert("Isi semua data wajib!");
-        
         let btn = document.getElementById('btnSimpanBSU'); btn.innerText = "MEMPROSES..."; btn.disabled = true;
-        let fd = new URLSearchParams(); 
-        fd.append('action', 'tambahUnit'); 
-        fd.append('id', id); 
-        fd.append('nama', nama); 
-        fd.append('kecamatan', kec);
-        fd.append('desa', desa);
-        fd.append('alamat', alamat);
-        fd.append('koordinat', koordinat);
-        fd.append('ketua', ketua); 
-        fd.append('jumlah_pengurus', pengurus); 
-        fd.append('jumlah_nasabah', nasabah); 
-        fd.append('hp', hp); 
-        fd.append('password', pass);
-        
+        let fd = new URLSearchParams(); fd.append('action', 'tambahUnit'); fd.append('id', id); fd.append('nama', nama); fd.append('kecamatan', kec); fd.append('desa', desa); fd.append('alamat', alamat); fd.append('koordinat', koordinat); fd.append('ketua', ketua); fd.append('jumlah_pengurus', pengurus); fd.append('jumlah_nasabah', nasabah); fd.append('hp', hp); fd.append('password', pass);
         fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r=>r.text()).then(res=>{ if(res.includes("Sukses")) { alert("BSU Didaftarkan!"); document.getElementById('formRegistrasiBSU').reset(); document.getElementById('idBsu').value = 'BSU-'+Math.floor(10000+Math.random()*90000); loadDataPusat(); } }).catch(err => alert("Gagal: " + err)).finally(()=>{ btn.innerText = "SIMPAN & TAMBAHKAN BSU"; btn.disabled = false; });
     }
 
@@ -894,109 +810,38 @@
         fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() }).then(r=>r.text()).then(res=>alert(res)).finally(()=>{ btn.innerText = "☁️ Export Google Sheets"; btn.disabled = false; });
     }
 
-    // FUNGSI BARU UNTUK MONITORING BSU
     function populateDropdownMonitoring() {
-        let sel = document.getElementById('selectMonitoringBsu');
-        if(!sel) return;
+        let sel = document.getElementById('selectMonitoringBsu'); if(!sel) return;
         sel.innerHTML = '<option value="" disabled selected>-- Silakan Pilih Bank Sampah Unit --</option>';
-        if(globalNasabah && globalNasabah.length > 0) {
-            globalNasabah.forEach(b => {
-                sel.innerHTML += `<option value="${b.nama}">${b.nama} (ID: ${b.id})</option>`;
-            });
-        }
+        if(globalNasabah && globalNasabah.length > 0) { globalNasabah.forEach(b => { sel.innerHTML += `<option value="${b.nama}">${b.nama} (ID: ${b.id})</option>`; }); }
     }
 
     function prosesMonitoringBSU(namaBsu) {
         document.getElementById('monitoringArea').style.display = 'block';
-        
-        // Dapatkan data profil BSU
-        let profilBsu = globalNasabah.find(b => b.nama === namaBsu);
-        document.getElementById('monNasabah').innerText = profilBsu ? (profilBsu.jumlah_nasabah || "0") : "0";
-
-        // Filter Transaksi khusus BSU ini
+        let profilBsu = globalNasabah.find(b => b.nama === namaBsu); document.getElementById('monNasabah').innerText = profilBsu ? (profilBsu.jumlah_nasabah || "0") : "0";
         let trxBsu = globalTransaksi ? globalTransaksi.filter(t => t.nama === namaBsu) : [];
-        
-        let totalSampah = 0;
-        let totalSaldo = 0;
-        let setoranHtml = '';
-        let penarikanHtml = '';
-        let komposisi = {};
-        let bulanSet = new Set();
-
+        let totalSampah = 0; let totalSaldo = 0; let setoranHtml = ''; let penarikanHtml = ''; let komposisi = {}; let bulanSet = new Set();
         trxBsu.slice().reverse().forEach(t => {
-            let tglIndah = formatTglTabel(t.tgl);
-            totalSaldo += (parseFloat(t.total) || 0);
-
+            let tglIndah = formatTglTabel(t.tgl); totalSaldo += (parseFloat(t.total) || 0);
             if (t.total > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) {
-                // SETORAN SAMPAH
-                let berat = parseFloat(t.berat) || 0;
-                totalSampah += berat;
-                
-                // Kumpulkan bulan unik untuk rata-rata (format YYYY-MM)
-                let d = uraikanTanggalInput(t.tgl);
-                bulanSet.add(d.getFullYear() + "-" + d.getMonth());
-
-                // Pengelompokan Data Donut Chart
-                let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; 
-                let jenisUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya';
+                let berat = parseFloat(t.berat) || 0; totalSampah += berat;
+                let d = uraikanTanggalInput(t.tgl); bulanSet.add(d.getFullYear() + "-" + d.getMonth());
+                let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; let jenisUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya';
                 komposisi[jenisUtama] = (komposisi[jenisUtama] || 0) + berat;
-
-                // Masukkan ke Tabel (Limit 50 data terbaru agar tidak berat)
-                if (setoranHtml.split('<tr>').length < 50) { 
-                    setoranHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td style="font-weight:700;">${t.jenis}</td><td class="text-right text-success fw-bold">${berat} Kg</td></tr>`;
-                }
+                if (setoranHtml.split('<tr>').length < 50) { setoranHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td style="font-weight:700;">${t.jenis}</td><td class="text-right text-success fw-bold">${berat} Kg</td></tr>`; }
             } else if (t.total < 0 || t.jenis === 'Penarikan Tunai') {
-                // PENARIKAN SALDO
-                if (penarikanHtml.split('<tr>').length < 50) {
-                    penarikanHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td class="text-right text-danger fw-bold">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`;
-                }
+                if (penarikanHtml.split('<tr>').length < 50) { penarikanHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td class="text-right text-danger fw-bold">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`; }
             }
         });
-
-        // Update Text Dashboard Monitoring
-        document.getElementById('monTotalSampah').innerText = totalSampah.toFixed(1);
-        document.getElementById('monSaldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
-        
-        // Kalkulasi Rata-rata
-        let jmlBulan = bulanSet.size > 0 ? bulanSet.size : 1;
-        document.getElementById('monRataSampah').innerText = (totalSampah / jmlBulan).toFixed(1);
-
-        // Update Tabel
+        document.getElementById('monTotalSampah').innerText = totalSampah.toFixed(1); document.getElementById('monSaldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
+        let jmlBulan = bulanSet.size > 0 ? bulanSet.size : 1; document.getElementById('monRataSampah').innerText = (totalSampah / jmlBulan).toFixed(1);
         document.getElementById('monTabelSetoran').innerHTML = setoranHtml || '<tr><td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas setoran tercatat.</td></tr>';
         document.getElementById('monTabelPenarikan').innerHTML = penarikanHtml || '<tr><td colspan="2" class="text-center text-muted py-4">Belum ada aktivitas penarikan saldo.</td></tr>';
-
-        // Render Donut Chart Komposisi
-        let ctx = document.getElementById('monKomposisiChart').getContext('2d');
-        if (monKomposisiChartInstance) monKomposisiChartInstance.destroy();
-        
+        let ctx = document.getElementById('monKomposisiChart').getContext('2d'); if (monKomposisiChartInstance) monKomposisiChartInstance.destroy();
         if(Object.keys(komposisi).length > 0) {
-            document.getElementById('monChartContainer').innerHTML = '<canvas id="monKomposisiChart"></canvas>';
-            ctx = document.getElementById('monKomposisiChart').getContext('2d');
-            
-            monKomposisiChartInstance = new Chart(ctx, { 
-                type: 'doughnut', 
-                data: { 
-                    labels: Object.keys(komposisi), 
-                    datasets: [{ 
-                        data: Object.values(komposisi), 
-                        backgroundColor: modernColors, 
-                        borderWidth: 0, 
-                        hoverOffset: 6 
-                    }] 
-                }, 
-                options: { 
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '65%', 
-                    plugins: { 
-                        legend: { position: 'right', labels: { boxWidth: 12, padding: 15, font: { size: 12, family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } },
-                        tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + context.parsed.toFixed(1) + ' Kg'; } } }
-                    } 
-                } 
-            });
-        } else {
-            document.getElementById('monChartContainer').innerHTML = '<p style="color:var(--text-muted);">Data visual tidak tersedia.</p>';
-        }
+            document.getElementById('monChartContainer').innerHTML = '<canvas id="monKomposisiChart"></canvas>'; ctx = document.getElementById('monKomposisiChart').getContext('2d');
+            monKomposisiChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(komposisi), datasets: [{ data: Object.values(komposisi), backgroundColor: modernColors, borderWidth: 0, hoverOffset: 6 }] }, options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'right', labels: { boxWidth: 12, padding: 15, font: { size: 12, family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } }, tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + context.parsed.toFixed(1) + ' Kg'; } } } } });
+        } else { document.getElementById('monChartContainer').innerHTML = '<p style="color:var(--text-muted);">Data visual tidak tersedia.</p>'; }
     }
 
     window.onload = function() { loadDataPusat(); };
