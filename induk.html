@@ -391,7 +391,7 @@
             <div class="panel">
                 <div class="panel-header"><h2>📋 DAFTAR BSU TERDAFTAR</h2></div>
                 <div class="table-container" style="overflow-y: auto; max-height: 600px;">
-                    <table><thead><tr><th>NAMA BSU</th><th>KETUA</th><th>KECAMATAN</th><th>DESA</th><th class="text-center">KATA SANDI</th></tr></thead><tbody id="tabelDaftarBsuRegistrasi"><tr><td colspan="5" class="text-center">Memuat data...</td></tr></tbody></table>
+                    <table><thead><tr><th>NAMA BSU</th><th>KETUA</th><th>KECAMATAN</th><th>DESA</th><th class="text-center">KATA SANDI</th><th class="text-center">AKSI</th></tr></thead><tbody id="tabelDaftarBsuRegistrasi"><tr><td colspan="6" class="text-center">Memuat data...</td></tr></tbody></table>
                 </div>
             </div>
             <div class="panel">
@@ -415,7 +415,7 @@
                     <div class="form-group"><label>Jumlah Nasabah</label><input type="number" id="nasabahBsu" class="form-control" placeholder="Contoh: 50" required></div>
                 </div>
 
-                <div class="form-group"><label>Nomor WhatsApp Aktif</label><input type="tel" id="hpBsu" class="form-control" placeholder="0812xxxxxx" required></div>
+                <div class="form-group"><label>Kontak WA (WhatsApp Aktif)</label><input type="tel" id="hpBsu" class="form-control" placeholder="0812xxxxxx" required></div>
                 <div class="form-group"><label>Kata Sandi Akses Unit</label><input type="text" id="passBsu" class="form-control" placeholder="Buat sandi minimal 6 karakter" required></div>
                 
                 <button type="button" class="btn-submit" id="btnSimpanBSU" onclick="simpanBSU()" style="margin-top: 10px;">SIMPAN & TAMBAHKAN BSU</button>
@@ -703,16 +703,35 @@
         let tbody = '';
         if(globalNasabah && globalNasabah.length > 0) {
             [...globalNasabah].reverse().forEach(b => {
+                let noHpUrl = String(b.hp || '').replace(/^0+/, '');
                 tbody += `<tr>
                     <td style="font-weight:800; color:var(--text-main);">${b.nama || '-'}</td>
                     <td style="font-weight:700;">${b.ketua || '-'}</td>
                     <td>${b.kecamatan || '-'}</td>
                     <td>${b.desa || '-'}</td>
                     <td class="text-center"><span style="font-family:monospace; font-weight:800; font-size:14px; color:var(--accent); background: #fffbeb; padding:4px 10px; border-radius:8px;">${b.password || '-'}</span></td>
+                    <td class="text-center">
+                        <div style="display: flex; gap: 6px; justify-content: center;">
+                            <button onclick="editBsu('${b.id}')" style="background-color: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700;">Edit</button>
+                            <button onclick="hapusBsu('${b.id}')" style="background-color: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700;">Hapus</button>
+                            <a href="https://wa.me/62${noHpUrl}" target="_blank" style="background-color: #10b981; color: white; text-decoration: none; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center;">Kirim WA</a>
+                        </div>
+                    </td>
                 </tr>`;
             });
-        } else tbody = `<tr><td colspan="5" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
+        } else tbody = `<tr><td colspan="6" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
         let el = document.getElementById('tabelDaftarBsuRegistrasi'); if(el) el.innerHTML = tbody;
+    }
+
+    // Fungsi placeholder untuk tombol Edit & Hapus BSU
+    function editBsu(id) {
+        alert("Fitur Edit BSU dengan ID " + id + " belum diimplementasikan.");
+    }
+    
+    function hapusBsu(id) {
+        if(confirm("Yakin ingin menghapus BSU dengan ID " + id + "?")) {
+            alert("Fitur Hapus BSU belum diimplementasikan pada Google Apps Script Anda.");
+        }
     }
 
     function renderDataBSU() {
