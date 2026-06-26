@@ -116,9 +116,12 @@
 
   <div class="container">
     <div class="header">
-        <div>
-            <h1>Dashboard Bank Sampah Induk</h1>
-            <p>Dinas Lingkungan Hidup Kab. Tulungagung</p>
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <img src="LOGO_DLH.png" alt="Logo DLH Tulungagung" style="height: 64px; background: #ffffff; padding: 8px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+            <div>
+                <h1>Dashboard Bank Sampah Induk</h1>
+                <p>Dinas Lingkungan Hidup Kab. Tulungagung</p>
+            </div>
         </div>
         <div style="text-align: right;">
             <button class="btn-sync" onclick="sinkronKeSheets()" id="btnSync">
@@ -127,7 +130,6 @@
         </div>
     </div>
 
-    <!-- MENU NAVIGASI -->
     <div class="nav-bar">
       <button class="nav-btn active" onclick="pindahTab('dash', this)">📊 Statistik</button>
       <button class="nav-btn" onclick="pindahTab('datasu', this)">🏢 Data BSU</button>
@@ -139,7 +141,6 @@
       <button class="nav-btn" style="color: #ef4444; margin-left: auto;" onclick="logoutPusat()">🚪 Keluar</button>
     </div>
 
-    <!-- KONTEN DASHBOARD UMUM -->
     <div id="dash" class="content-section active">
       <div id="loading" style="text-align:center; padding:60px; font-weight:700; color:var(--text-muted); font-size: 16px;">
           ⏳ Menarik Data Real-time... Mohon Tunggu.
@@ -172,7 +173,6 @@
             </div>
         </div>
 
-        <!-- PANEL KOMPOSISI -->
         <div class="komposisi-panel">
             <div class="komposisi-header">
                 <div style="background: #1e293b; padding: 8px; border-radius: 8px; border: 1px solid #334155; font-size: 18px;">🎛️</div>
@@ -189,7 +189,6 @@
       </div>
     </div>
 
-    <!-- KONTEN DATA UNIT BSU -->
     <div id="datasu" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -228,7 +227,6 @@
         </div>
     </div>
 
-    <!-- KONTEN KEUANGAN -->
     <div id="keuangan" class="content-section">
         <div class="cards" style="grid-template-columns: 1fr;">
             <div class="card card-orange" style="text-align: center; border-left: none; border-top: 6px solid var(--accent); background: linear-gradient(to bottom, #ffffff, #fffbeb);">
@@ -256,7 +254,6 @@
         </div>
     </div>
 
-    <!-- HARGA SAMPAH MASTER -->
     <div id="harga" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -286,12 +283,15 @@
         </div>
     </div>
 
-    <!-- TRANSAKSI -->
     <div id="transaksi" class="content-section">
         <div class="grid-2">
             <div class="panel">
                 <div class="panel-header"><h2>📝 CATAT TRANSAKSI UNIT (BSU)</h2></div>
                 <form id="formTransaksi" style="margin-top:10px;">
+                    <div class="form-group">
+                        <label>Tanggal Transaksi</label>
+                        <input type="date" id="trxTanggal" class="form-control" required>
+                    </div>
                     <div class="form-group"><label>Pilih Unit BSU</label><select id="trxBsu" class="form-control" required><option value="">Memuat BSU...</option></select></div>
                     <div class="form-group"><label>Jenis Aktivitas</label><select id="trxJenis" class="form-control" onchange="ubahFormTransaksi()" required><option value="setor">Setoran Sampah (Saldo Masuk)</option><option value="tarik">Penarikan Saldo (Saldo Keluar)</option></select></div>
                     <div id="areaSetor">
@@ -330,7 +330,6 @@
         </div>
     </div>
 
-    <!-- KONTEN MONITORING SPESIFIK BSU -->
     <div id="monitoring" class="content-section">
         <div class="panel" style="margin-bottom: 24px; border: 1px solid var(--primary); background: var(--primary-light);">
             <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
@@ -379,7 +378,6 @@
         </div>
     </div>
 
-    <!-- REGISTRASI -->
     <div id="daftar" class="content-section">
         <div class="grid-2" style="grid-template-columns: 1fr; margin-bottom: 24px;">
             <div class="panel">
@@ -388,6 +386,7 @@
                     <table style="white-space: nowrap; min-width: 600px;">
                         <thead>
                             <tr>
+                                <th>ID REGISTER</th>
                                 <th>NAMA BSU</th>
                                 <th>KETUA</th>
                                 <th>KONTAK HP/WA</th>
@@ -396,7 +395,7 @@
                             </tr>
                         </thead>
                         <tbody id="tabelDaftarBsuRegistrasi">
-                            <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
+                            <tr><td colspan="6" class="text-center">Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -415,9 +414,9 @@
                 <div class="form-group"><label>Alamat Lengkap</label><input type="text" id="alamatBsu" class="form-control" placeholder="Contoh: Jl. Diponegoro RT 01 / RW 02" required></div>
                 <div class="form-group"><label>Titik Koordinat (Google Maps)</label><input type="text" id="koordinatBsu" class="form-control" placeholder="Contoh: -8.0655, 111.9011"></div>
                 <div class="form-group"><label>Nama Ketua Pengurus</label><input type="text" id="ketuaBsu" class="form-control" placeholder="Nama lengkap ketua" required></div>
-                <div class="grid-2" style="margin-bottom: 0;">
-                    <div class="form-group"><label>Jumlah Pengurus</label><input type="number" id="pengurusBsu" class="form-control" placeholder="Contoh: 3" required></div>
-                    <div class="form-group"><label>Jumlah Nasabah</label><input type="number" id="nasabahBsu" class="form-control" placeholder="Contoh: 50" required></div>
+                <div class="form-group">
+                    <label>Jumlah Pengurus</label>
+                    <input type="number" id="pengurusBsu" class="form-control" placeholder="Contoh: 3" required>
                 </div>
                 <div class="form-group"><label>Kontak WA (WhatsApp Aktif)</label><input type="tel" id="hpBsu" class="form-control" placeholder="0812xxxxxx" required></div>
                 <div class="form-group"><label>Kata Sandi Akses Unit</label><input type="text" id="passBsu" class="form-control" placeholder="Buat sandi minimal 6 karakter" required></div>
@@ -461,9 +460,15 @@
 
     function formatTglTabel(strTgl) {
         if(!strTgl) return '-';
-        if(String(strTgl).includes('T') || String(strTgl).includes('Z')) {
-            let d = new Date(strTgl);
-            if(!isNaN(d)) return d.toLocaleDateString('id-ID') + ' ' + d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+        
+        let d = uraikanTanggalInput(strTgl);
+        
+        if(!isNaN(d.getTime())) {
+            let day = d.getDate().toString().padStart(2, '0');
+            let month = (d.getMonth() + 1).toString().padStart(2, '0');
+            let year = d.getFullYear();
+            
+            return `${day}/${month}/${year}`;
         }
         return strTgl;
     }
@@ -752,8 +757,8 @@
             [...globalNasabah].reverse().forEach(b => {
                 let noHpUrl = String(b.hp || '').replace(/^0+/, '');
 
-                // Kolom Alamat, Koordinat, Pengurus, Nasabah dihilangkan dari tabel ini
                 tbody += `<tr>
+                    <td style="font-family:monospace; font-size:13px; font-weight:700; color:var(--text-muted);">${b.id}</td>
                     <td style="font-weight:800; color:var(--text-main);">${b.nama || '-'}</td>
                     <td style="font-weight:700;">${b.ketua || '-'}</td>
                     <td style="font-family:monospace; font-weight:600;">${b.hp || '-'}</td>
@@ -769,8 +774,7 @@
                 </tr>`;
             });
         } else {
-            // Berubah menjadi 5 kolom
-            tbody = `<tr><td colspan="5" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
+            tbody = `<tr><td colspan="6" class="text-center">Belum ada BSU terdaftar.</td></tr>`;
         }
         let el = document.getElementById('tabelDaftarBsuRegistrasi');
         if(el) el.innerHTML = tbody;
@@ -788,7 +792,7 @@
         document.getElementById('koordinatBsu').value = bsu.koordinat || '';
         document.getElementById('ketuaBsu').value = bsu.ketua || '';
         document.getElementById('pengurusBsu').value = bsu.jumlah_pengurus || '';
-        document.getElementById('nasabahBsu').value = bsu.jumlah_nasabah || '';
+        
         document.getElementById('hpBsu').value = bsu.hp || '';
         document.getElementById('passBsu').value = bsu.password || '';
 
@@ -842,9 +846,8 @@
         let alamat = document.getElementById('alamatBsu').value;
         let koordinat = document.getElementById('koordinatBsu').value;
         let pengurus = document.getElementById('pengurusBsu').value;
-        let nasabah = document.getElementById('nasabahBsu').value;
 
-        if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !nasabah || !pengurus) {
+        if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !pengurus) {
             return alert("Isi semua data wajib!");
         }
         
@@ -862,7 +865,6 @@
         fd.append('koordinat', koordinat); 
         fd.append('ketua', ketua); 
         fd.append('jumlah_pengurus', pengurus); 
-        fd.append('jumlah_nasabah', nasabah); 
         fd.append('hp', hp); 
         fd.append('password', pass);
         
@@ -967,6 +969,13 @@
         
         let selMat = document.getElementById('trxMaterial'); 
         if(selMat) selMat.innerHTML = '<option value="" disabled selected>-- Pilih Jenis Material Dulu --</option>';
+
+        let elTanggal = document.getElementById('trxTanggal');
+        if(elTanggal) {
+            let today = new Date();
+            today.setMinutes(today.getMinutes() - today.getTimezoneOffset());
+            elTanggal.value = today.toISOString().split('T')[0];
+        }
     }
 
     function renderTabelTransaksi() {
@@ -1068,8 +1077,17 @@
         btn.innerText = "MEMPROSES..."; 
         btn.disabled = true;
         
-        let now = new Date(); 
-        let tglFormat = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        let tglInput = document.getElementById('trxTanggal').value;
+        if(!tglInput) return alert("Pilih Tanggal Transaksi terlebih dahulu!");
+
+        let d = new Date(tglInput);
+        let now = new Date();
+        let tglFormat = d.getDate().toString().padStart(2, '0') + '/' + 
+                        (d.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                        d.getFullYear() + ' ' + 
+                        now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0');
+
         let fd = new URLSearchParams(); 
         fd.append('action', 'tambahTransaksi'); 
         fd.append('id', Date.now()); 
@@ -1154,9 +1172,8 @@
         let alamat = document.getElementById('alamatBsu').value; 
         let koordinat = document.getElementById('koordinatBsu').value; 
         let pengurus = document.getElementById('pengurusBsu').value; 
-        let nasabah = document.getElementById('nasabahBsu').value;
         
-        if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !nasabah || !pengurus) {
+        if(!nama || !ketua || !hp || !pass || !kec || !desa || !alamat || !pengurus) {
             return alert("Isi semua data wajib!");
         }
         
@@ -1174,7 +1191,6 @@
         fd.append('koordinat', koordinat); 
         fd.append('ketua', ketua); 
         fd.append('jumlah_pengurus', pengurus); 
-        fd.append('jumlah_nasabah', nasabah); 
         fd.append('hp', hp); 
         fd.append('password', pass);
         
@@ -1226,77 +1242,106 @@
     }
 
     function prosesMonitoringBSU(namaBsu) {
+        if (!namaBsu) return;
+        
         document.getElementById('monitoringArea').style.display = 'block';
+        
+        // 1. Tampilkan state "Memuat" agar UI terlihat responsif
+        document.getElementById('monTotalSampah').innerText = "..."; 
+        document.getElementById('monSaldo').innerText = "...";
+        document.getElementById('monRataSampah').innerText = "...";
+        document.getElementById('monTabelSetoran').innerHTML = '<tr><td colspan="3" class="text-center py-4" style="color:var(--text-muted);">⏳ Menarik data riwayat dari BSU...</td></tr>';
+        document.getElementById('monTabelPenarikan').innerHTML = '<tr><td colspan="2" class="text-center py-4" style="color:var(--text-muted);">⏳ Menarik data riwayat dari BSU...</td></tr>';
+        
+        // 2. Tampilkan jumlah nasabah dari data profil BSU yang sudah ada di memory
         let profilBsu = globalNasabah.find(b => b.nama === namaBsu); 
         document.getElementById('monNasabah').innerText = profilBsu ? (profilBsu.jumlah_nasabah || "0") : "0";
         
-        let trxBsu = globalTransaksi ? globalTransaksi.filter(t => t.nama === namaBsu) : [];
-        let totalSampah = 0; 
-        let totalSaldo = 0; 
-        let setoranHtml = ''; 
-        let penarikanHtml = ''; 
-        let komposisi = {}; 
-        let bulanSet = new Set();
-        
-        trxBsu.slice().reverse().forEach(t => {
-            let tglIndah = formatTglTabel(t.tgl); 
-            totalSaldo += (parseFloat(t.total) || 0);
+        // 3. Tarik data dari server
+        let ts = new Date().getTime();
+        fetch(API_URL + "?action=getTransaksiInternalBSU&nama_bsu=" + encodeURIComponent(namaBsu) + "&_t=" + ts)
+        .then(r => r.json())
+        .then(res => {
+            let trxBsuInternal = res.transaksi || []; 
             
-            if (t.total > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) {
-                let berat = parseFloat(t.berat) || 0; 
-                totalSampah += berat;
-                let d = uraikanTanggalInput(t.tgl); 
-                bulanSet.add(d.getFullYear() + "-" + d.getMonth());
-                
-                let matMaster = globalKategori ? globalKategori.find(k => k.nama_kategori === t.jenis) : null; 
-                let jenisUtama = (matMaster && matMaster.jenis_material) ? matMaster.jenis_material : 'Lainnya';
-                komposisi[jenisUtama] = (komposisi[jenisUtama] || 0) + berat;
-                
-                if (setoranHtml.split('<tr>').length < 50) { 
-                    setoranHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td style="font-weight:700;">${t.jenis}</td><td class="text-right text-success fw-bold">${berat} Kg</td></tr>`; 
-                }
-            } else if (t.total < 0 || t.jenis === 'Penarikan Tunai') {
-                if (penarikanHtml.split('<tr>').length < 50) { 
-                    penarikanHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td class="text-right text-danger fw-bold">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`; 
-                }
-            }
-        });
-        
-        document.getElementById('monTotalSampah').innerText = totalSampah.toFixed(1); 
-        document.getElementById('monSaldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
-        
-        let jmlBulan = bulanSet.size > 0 ? bulanSet.size : 1; 
-        document.getElementById('monRataSampah').innerText = (totalSampah / jmlBulan).toFixed(1);
-        
-        document.getElementById('monTabelSetoran').innerHTML = setoranHtml || '<tr><td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas setoran tercatat.</td></tr>';
-        document.getElementById('monTabelPenarikan').innerHTML = penarikanHtml || '<tr><td colspan="2" class="text-center text-muted py-4">Belum ada aktivitas penarikan saldo.</td></tr>';
-        
-        let ctx = document.getElementById('monKomposisiChart').getContext('2d'); 
-        if (monKomposisiChartInstance) monKomposisiChartInstance.destroy();
-        
-        if(Object.keys(komposisi).length > 0) {
-            document.getElementById('monChartContainer').innerHTML = '<canvas id="monKomposisiChart"></canvas>'; 
-            ctx = document.getElementById('monKomposisiChart').getContext('2d');
+            let totalSampah = 0; 
+            let totalSaldo = 0; 
+            let setoranHtml = ''; 
+            let penarikanHtml = ''; 
+            let komposisi = {}; 
+            let bulanSet = new Set();
             
-            monKomposisiChartInstance = new Chart(ctx, { 
-                type: 'doughnut', 
-                data: { 
-                    labels: Object.keys(komposisi), 
-                    datasets: [{ data: Object.values(komposisi), backgroundColor: modernColors, borderWidth: 0, hoverOffset: 6 }] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    cutout: '65%', 
-                    plugins: { 
-                        legend: { position: 'right', labels: { boxWidth: 12, padding: 15, font: { size: 12, family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } }, 
-                        tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + context.parsed.toFixed(1) + ' Kg'; } } } 
-                    } 
-                } 
+            trxBsuInternal.slice().reverse().forEach(t => {
+                let tglIndah = formatTglTabel(t.tgl); 
+                totalSaldo += (parseFloat(t.total) || 0);
+                
+                if (t.total > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) {
+                    let berat = parseFloat(t.berat) || 0; 
+                    totalSampah += berat;
+                    
+                    let d = uraikanTanggalInput(t.tgl); 
+                    if (!isNaN(d.getTime())) {
+                        bulanSet.add(d.getFullYear() + "-" + d.getMonth());
+                    }
+                    
+                    let jenisUtama = t.jenis_material || t.jenis || 'Lainnya';
+                    komposisi[jenisUtama] = (komposisi[jenisUtama] || 0) + berat;
+                    
+                    if (setoranHtml.split('<tr>').length < 50) { 
+                        setoranHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td style="font-weight:700;">${t.jenis}</td><td class="text-right text-success fw-bold">${berat} Kg</td></tr>`; 
+                    }
+                } else if (t.total < 0 || t.jenis === 'Penarikan Tunai') {
+                    if (penarikanHtml.split('<tr>').length < 50) { 
+                        penarikanHtml += `<tr><td style="font-size:12px; color: var(--text-muted);">${tglIndah}</td><td class="text-right text-danger fw-bold">Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`; 
+                    }
+                }
             });
-        } else { 
-            document.getElementById('monChartContainer').innerHTML = '<p style="color:var(--text-muted);">Data visual tidak tersedia.</p>'; 
-        }
+            
+            // 4. Update UI Dashboard Monitoring
+            document.getElementById('monTotalSampah').innerText = totalSampah.toFixed(1); 
+            document.getElementById('monSaldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
+            
+            let jmlBulan = bulanSet.size > 0 ? bulanSet.size : 1; 
+            document.getElementById('monRataSampah').innerText = (totalSampah / jmlBulan).toFixed(1);
+            
+            document.getElementById('monTabelSetoran').innerHTML = setoranHtml || '<tr><td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas setoran dari warga tercatat.</td></tr>';
+            document.getElementById('monTabelPenarikan').innerHTML = penarikanHtml || '<tr><td colspan="2" class="text-center text-muted py-4">Belum ada aktivitas penarikan saldo oleh warga.</td></tr>';
+            
+            // 5. PERBAIKAN BUG: Amankan grafik sebelum digambar ulang
+            if (monKomposisiChartInstance) {
+                monKomposisiChartInstance.destroy();
+                monKomposisiChartInstance = null;
+            }
+            
+            if(Object.keys(komposisi).length > 0) {
+                document.getElementById('monChartContainer').innerHTML = '<canvas id="monKomposisiChart"></canvas>'; 
+                let ctx = document.getElementById('monKomposisiChart').getContext('2d');
+                
+                monKomposisiChartInstance = new Chart(ctx, { 
+                    type: 'doughnut', 
+                    data: { 
+                        labels: Object.keys(komposisi), 
+                        datasets: [{ data: Object.values(komposisi), backgroundColor: modernColors, borderWidth: 0, hoverOffset: 6 }] 
+                    }, 
+                    options: { 
+                        responsive: true, 
+                        maintainAspectRatio: false, 
+                        cutout: '65%', 
+                        plugins: { 
+                            legend: { position: 'right', labels: { boxWidth: 12, padding: 15, font: { size: 12, family: "'Plus Jakarta Sans', sans-serif", weight: '600' } } }, 
+                            tooltip: { callbacks: { label: function(context) { return ' ' + context.label + ': ' + context.parsed.toFixed(1) + ' Kg'; } } } 
+                        } 
+                    } 
+                });
+            } else { 
+                document.getElementById('monChartContainer').innerHTML = '<p style="color:var(--text-muted);">Data visual komposisi tidak tersedia.</p>'; 
+            }
+        })
+        .catch(err => {
+            console.error("Kesalahan koneksi saat menarik data unit:", err);
+            document.getElementById('monTabelSetoran').innerHTML = '<tr><td colspan="3" class="text-center py-4 text-danger">⚠️ Gagal menarik data. Periksa koneksi atau script server Anda.</td></tr>';
+            document.getElementById('monTabelPenarikan').innerHTML = '<tr><td colspan="2" class="text-center py-4 text-danger">⚠️ Gagal menarik data.</td></tr>';
+        });
     }
 
     window.onload = function() { loadDataPusat(); };
