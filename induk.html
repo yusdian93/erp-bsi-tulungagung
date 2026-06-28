@@ -28,6 +28,26 @@
     .nav-btn { padding: 12px 20px; cursor: pointer; border: none; background: transparent; border-radius: 10px; font-weight: 600; color: var(--text-muted); transition: all 0.3s ease; font-size: 13.5px; font-family: inherit;}
     .nav-btn:hover { background: #f1f5f9; color: var(--text-main); }
     .nav-btn.active { background: var(--primary-light); color: var(--primary-dark); }
+    
+    /* Tombol Menu Khusus Mobile */
+    .menu-toggle {
+        display: none; 
+        width: 100%;
+        padding: 12px;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font-weight: 800;
+        color: var(--text-main);
+        cursor: pointer;
+        margin-bottom: 16px;
+        font-family: inherit;
+        font-size: 15px;
+        box-shadow: var(--shadow-sm);
+        text-align: center;
+    }
+    .menu-toggle:hover { background: #f1f5f9; }
+
     .content-section { display: none; }
     .content-section.active { display: block; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
     @keyframes slideUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
@@ -44,6 +64,58 @@
     .card p { margin: 0; font-size: 34px; font-weight: 800; color: var(--text-main); letter-spacing: -1px;}
     .card-orange::before { background: var(--accent); } 
     .card-orange p { color: var(--accent); }
+
+    .atm-cards-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 24px; margin-bottom: 24px; }
+    .atm-card {
+        padding: 24px; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.25);
+        color: #ffffff; display: flex; flex-direction: column; justify-content: space-between;
+        position: relative; overflow: hidden; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        aspect-ratio: 1.586 / 1; border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .atm-card::before {
+        content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+        background: radial-gradient(ellipse at center, rgba(255,255,255,0.15) 0%, transparent 60%);
+        transform: rotate(-30deg); pointer-events: none; z-index: 1;
+    }
+    .atm-card:hover { transform: translateY(-8px) scale(1.03); box-shadow: 0 25px 50px rgba(0,0,0,0.3); }
+
+    .atm-header { display: flex; justify-content: space-between; align-items: flex-start; z-index: 2; position: relative; }
+    .atm-chip-wrapper { display: flex; align-items: center; gap: 12px; }
+    .atm-chip {
+        width: 48px; height: 34px; background: linear-gradient(135deg, #d4af37 0%, #fff2cd 30%, #d4af37 70%, #aa771c 100%);
+        border-radius: 6px; position: relative; box-shadow: inset 0 0 6px rgba(0,0,0,0.5), 0 2px 4px rgba(0,0,0,0.2);
+        border: 1px solid #8a631c; overflow: hidden;
+    }
+    .atm-chip::before { 
+        content: ''; position: absolute; top: 35%; bottom: 35%; left: 0; right: 0; 
+        border-top: 1px solid rgba(0,0,0,0.4); border-bottom: 1px solid rgba(0,0,0,0.4); 
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.6), 0 1px 0 rgba(255,255,255,0.6); 
+    }
+    .atm-chip::after { 
+        content: ''; position: absolute; top: 0; bottom: 0; left: 30%; right: 30%; 
+        border-left: 1px solid rgba(0,0,0,0.4); border-right: 1px solid rgba(0,0,0,0.4); 
+        box-shadow: inset 1px 0 0 rgba(255,255,255,0.6), 1px 0 0 rgba(255,255,255,0.6); 
+    }
+
+    .contactless-icon { opacity: 0.8; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.4)); }
+    .atm-logo-text { font-size: 17px; font-weight: 900; font-style: italic; opacity: 0.95; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+    
+    .atm-blue { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1d4ed8 100%); }
+    .atm-green { background: linear-gradient(135deg, #022c22 0%, #065f46 50%, #10b981 100%); }
+    .atm-purple { background: linear-gradient(135deg, #2e1065 0%, #581c87 50%, #7c3aed 100%); }
+    .atm-gold { background: linear-gradient(135deg, #a67c00 0%, #bf953f 25%, #fcf6ba 50%, #b38728 75%, #fdbf59 100%); color: #1a1a1a; border: 1px solid rgba(255,255,255,0.6); }
+    
+    .atm-content { z-index: 2; position: relative; margin-top: auto; }
+    .atm-card h3 { margin: 0 0 8px 0; font-size: 11px; font-weight: 700; opacity: 0.75; text-transform: uppercase; letter-spacing: 2px; }
+    .atm-card p {
+        margin: 0; font-size: 28px; font-weight: 700; letter-spacing: 3px; font-family: 'Courier New', Courier, monospace;
+        text-shadow: -1px -1px 0px rgba(255,255,255,0.2), 1px 1px 0px rgba(0,0,0,0.6), 0 3px 6px rgba(0,0,0,0.3);
+    }
+    
+    .atm-gold h3 { color: #333; opacity: 0.85; font-weight: 800; text-shadow: 0 1px 1px rgba(255,255,255,0.6); }
+    .atm-gold p { color: #222; text-shadow: -1px -1px 0px rgba(255,255,255,0.8), 1px 1px 0px rgba(0,0,0,0.2), 0 2px 4px rgba(0,0,0,0.15); }
+    .atm-gold .atm-logo-text { color: #111; text-shadow: 0 1px 1px rgba(255,255,255,0.6); }
+    .atm-gold .contactless-icon { stroke: #222; filter: drop-shadow(0 1px 1px rgba(255,255,255,0.6)); }
     
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;}
     .panel { background: var(--bg-card); padding: 24px; border-radius: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);}
@@ -67,7 +139,7 @@
     
     .btn-submit { background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%); color: white; border: none; padding: 14px 20px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: 700; font-size: 15px; font-family: inherit; transition: all 0.3s; letter-spacing: 0.3px; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);}
     .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3);}
-    .btn-sync { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; font-family: inherit; transition: 0.2s; box-shadow: var(--shadow-sm);}
+    .btn-sync { background-color: var(--bg-card); color: var(--text-main); border: 1px solid var(--border); padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; font-family: inherit; transition: 0.2s; box-shadow: var(--shadow-sm); display: inline-flex; align-items: center; justify-content: center; gap: 6px;}
     .btn-sync:hover { background-color: #f1f5f9; border-color: #cbd5e1;}
     .btn-danger { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 12px; font-family: inherit; transition: 0.2s;}
     .btn-danger:hover { background-color: var(--danger); color: white; }
@@ -82,7 +154,6 @@
     .rank-name { font-weight: 700; color: var(--text-main); font-size: 14px; flex-grow: 1;}
     .rank-val { font-weight: 800; font-size: 15px; }
 
-    /* --- CSS KOMPOSISI & HIERARKI MATERIAL (DARK MODE) --- */
     .komposisi-panel { background: #0f172a; border-radius: 20px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-md); font-family: 'Plus Jakarta Sans', sans-serif;}
     .komposisi-header { margin-bottom: 24px; display: flex; align-items: center; gap: 12px; }
     .komposisi-header h2 { color: #10b981; margin: 0; font-size: 16px; font-weight: 800; letter-spacing: 0.3px;}
@@ -110,6 +181,71 @@
     .color-minyak { color: #f97316; } .bg-minyak { background: #f97316; }
     .color-elektro { color: #06b6d4; } .bg-elektro { background: #06b6d4; }
     .color-lainnya { color: #94a3b8; } .bg-lainnya { background: #94a3b8; }
+
+    /* --- KODE RESPONSIVE UNTUK HP & TABLET --- */
+    @media screen and (max-width: 768px) {
+        body { padding: 12px; }
+        
+        .header { 
+            flex-direction: column; 
+            text-align: center; 
+            padding: 24px 20px; 
+            gap: 16px; 
+        }
+        
+        .header > div:first-child {
+            flex-direction: column;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .header div[style*="text-align: right;"] {
+            text-align: center !important;
+            width: 100%;
+        }
+        
+        .btn-sync { width: 100%; }
+
+        /* Konfigurasi Hamburger Menu Navigasi */
+        .menu-toggle { display: block; }
+        .nav-bar { 
+            display: none; 
+            flex-direction: column; 
+            gap: 4px; 
+            padding: 12px; 
+        }
+        .nav-bar.show { 
+            display: flex; 
+            animation: slideDown 0.3s ease; 
+        }
+        .nav-btn { 
+            width: 100%; 
+            text-align: center; 
+            padding: 12px; 
+        }
+        @keyframes slideDown { 
+            from { opacity: 0; transform: translateY(-10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+
+        .grid-2 { 
+            grid-template-columns: 1fr; 
+            gap: 16px;
+        }
+
+        .atm-cards-container { grid-template-columns: 1fr; }
+        .komposisi-grid { grid-template-columns: 1fr; }
+        
+        .header h1 { font-size: 22px; }
+        .atm-card p { font-size: 24px; }
+        
+        .panel { padding: 16px; }
+        
+        th, td { 
+            padding: 12px 10px; 
+            font-size: 12px; 
+        }
+    }
   </style>
 </head>
 <body>
@@ -130,7 +266,9 @@
         </div>
     </div>
 
-    <div class="nav-bar">
+    <button class="menu-toggle" onclick="toggleMenu()">☰ Buka Menu Navigasi</button>
+
+    <div class="nav-bar" id="navBar">
       <button class="nav-btn active" onclick="pindahTab('dash', this)">📊 Statistik</button>
       <button class="nav-btn" onclick="pindahTab('datasu', this)">🏢 Data BSU</button>
       <button class="nav-btn" onclick="pindahTab('keuangan', this)">💰 Keuangan</button>
@@ -147,11 +285,60 @@
       </div>
       
       <div id="dashboardContent" style="display:none;">
-        <div class="cards">
-          <div class="card"><h3>Bank Sampah Unit</h3><p id="valUnit">0</p></div>
-          <div class="card"><h3>Setoran Bulan Ini (KG)</h3><p id="valBulanIni">0</p></div>
-          <div class="card"><h3>Total Sampah Masuk BSI (KG)</h3><p id="valTotalSampah">0</p></div>
-          <div class="card card-orange"><h3>Kewajiban Saldo (Rp)</h3><p id="valSaldo">Rp 0</p></div>
+        
+        <div class="atm-cards-container">
+          <div class="atm-card atm-blue">
+            <div class="atm-header">
+              <div class="atm-chip-wrapper">
+                  <div class="atm-chip"></div>
+                  <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+              </div>
+              <span class="atm-logo-text">BSI UNIT</span>
+            </div>
+            <div class="atm-content">
+              <h3>Bank Sampah Unit</h3>
+              <p id="valUnit">0</p>
+            </div>
+          </div>
+          <div class="atm-card atm-green">
+            <div class="atm-header">
+              <div class="atm-chip-wrapper">
+                  <div class="atm-chip"></div>
+                  <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+              </div>
+              <span class="atm-logo-text">MONTHLY</span>
+            </div>
+            <div class="atm-content">
+              <h3>Setoran Bulan Ini (KG)</h3>
+              <p id="valBulanIni">0</p>
+            </div>
+          </div>
+          <div class="atm-card atm-purple">
+            <div class="atm-header">
+              <div class="atm-chip-wrapper">
+                  <div class="atm-chip"></div>
+                  <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+              </div>
+              <span class="atm-logo-text">VOLUME</span>
+            </div>
+            <div class="atm-content">
+              <h3>Total Sampah Masuk BSI (KG)</h3>
+              <p id="valTotalSampah">0</p>
+            </div>
+          </div>
+          <div class="atm-card atm-gold">
+            <div class="atm-header">
+              <div class="atm-chip-wrapper">
+                  <div class="atm-chip"></div>
+                  <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+              </div>
+              <span class="atm-logo-text">PLATINUM</span>
+            </div>
+            <div class="atm-content">
+              <h3>Kewajiban Saldo (Rp)</h3>
+              <p id="valSaldo">Rp 0</p>
+            </div>
+          </div>
         </div>
 
         <div class="grid-2">
@@ -203,7 +390,7 @@
 
         <div class="panel">
             <div class="panel-header"><h2>🏢 PROFIL BANK SAMPAH UNIT</h2></div>
-            <div class="table-container" style="overflow-x: auto; max-height: 500px;">
+            <div class="table-container" style="overflow-x: auto; overflow-y: auto; max-height: 500px;">
                 <table>
                     <thead>
                         <tr>
@@ -232,6 +419,74 @@
             <div class="card card-orange" style="text-align: center; border-left: none; border-top: 6px solid var(--accent); background: linear-gradient(to bottom, #ffffff, #fffbeb);">
                 <h3>NILAI EKONOMI TOTAL (TOTAL KESELURUHAN SALDO BSU)</h3>
                 <p id="valKeuanganTotal" style="font-size: 46px; margin-top: 10px; letter-spacing: -1.5px;">Rp 0</p>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-bottom: 24px; border: 1px solid var(--accent); background: #fffbeb;">
+            <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
+                <h2 style="color: #b45309;">💳 LAYANAN KEUANGAN & CEK SALDO BSU</h2>
+                <select id="selectKeuanganBsu" class="form-control" style="max-width: 400px; border-color: var(--accent); font-weight: 700;" onchange="prosesCekSaldoBSU(this.value)">
+                    <option value="" disabled selected>-- Memuat Daftar BSU... --</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="areaCekSaldo" style="display:none; animation: slideUp 0.4s ease; margin-bottom: 24px;">
+            <div class="grid-2">
+                <div class="panel">
+                    <div class="panel-header"><h2>💼 INFORMASI REKENING BSU</h2></div>
+                    <div style="background: var(--bg-body); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
+                        <p style="margin:0; font-size:12px; color:var(--text-muted); font-weight:700;">TOTAL SALDO SAAT INI</p>
+                        <h3 id="infoSaldoRp" style="margin:4px 0 16px 0; font-size:36px; color:var(--accent); font-weight:800; letter-spacing:-1px;">Rp 0</h3>
+                        <p style="margin:0; font-size:12px; color:var(--text-muted); font-weight:700;">TOTAL VOLUME SAMPAH MASUK</p>
+                        <h3 id="infoVolumeKg" style="margin:4px 0 0 0; font-size:22px; color:var(--text-main); font-weight:800;">0 Kg</h3>
+                    </div>
+
+                    <div class="panel-header" style="padding-bottom: 12px;"><h2>💸 FORM PENARIKAN SALDO BSU</h2></div>
+                    <div class="form-group">
+                        <label>Nominal Penarikan Tunai (Rp)</label>
+                        <input type="number" id="inputTarikSaldo" class="form-control" placeholder="Contoh: 150000">
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-submit" onclick="prosesTarikSaldoUi()" id="btnTarikSaldoUi" style="flex: 1; min-width: 140px;">PROSES TARIK SALDO</button>
+                        <button class="btn-sync" onclick="cetakStrukTarik()" id="btnCetakStruk" style="display:none; border-color:var(--secondary); color:var(--secondary);" title="Cetak Struk PDF"><span style="font-size:15px; margin-right:4px;">📄</span> Cetak Struk PDF</button>
+                        <button class="btn-sync" onclick="waStrukTarik()" id="btnWaStruk" style="display:none; background:#dcfce7; color:#166534; border-color:#86efac;" title="Kirim Struk via WA"><span style="font-size:15px; margin-right:4px;">💬</span> WA Struk</button>
+                    </div>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-header" style="margin-bottom: 16px;">
+                        <h2>📝 LOG RIWAYAT TRANSAKSI BSU - BSI</h2>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
+                        <div style="flex-grow: 1; display:flex; gap:8px;">
+                            <input type="date" id="filterTglRiwayat" class="form-control" style="padding:8px 12px; max-width:140px;" onchange="renderRiwayatBsu('tgl')" title="Filter Harian">
+                            <input type="month" id="filterBulanRiwayat" class="form-control" style="padding:8px 12px; max-width:140px;" onchange="renderRiwayatBsu('bulan')" title="Filter Bulanan">
+                            <button class="btn-sync" style="padding:8px 16px;" onclick="renderRiwayatBsu('semua')">Semua Waktu</button>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-sync" onclick="cetakLaporanPDF()" title="Cetak Laporan Riwayat PDF" style="padding:8px 12px; border-color:#94a3b8;"><span style="font-size:14px; margin-right:4px;">📄</span> Cetak Laporan PDF</button>
+                            <button class="btn-sync" onclick="kirimLaporanWA()" style="padding:8px 12px; background:#dcfce7; color:#166534; border-color:#86efac;" title="Kirim Rekap Laporan via WA"><span style="font-size:14px; margin-right:4px;">💬</span> Kirim WA</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container" style="overflow-y: auto; max-height: 400px;">
+                        <table id="tabelRiwayatBsuForPrint">
+                            <thead style="position: sticky; top: 0; z-index: 1;">
+                                <tr>
+                                    <th>WAKTU</th>
+                                    <th>KETERANGAN TRANSAKSI</th>
+                                    <th class="text-right">MUTASI</th>
+                                    <th class="text-right">SALDO BERJALAN</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelRiwayatBsu">
+                                <tr><td colspan="4" class="text-center">Memuat riwayat transaksi...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -341,11 +596,60 @@
         </div>
 
         <div id="monitoringArea" style="display:none; animation: slideUp 0.4s ease;">
-            <div class="cards">
-                <div class="card"><h3>Total Nasabah BSU</h3><p id="monNasabah">0</p></div>
-                <div class="card"><h3>Total Sampah (KG)</h3><p id="monTotalSampah" class="text-success">0</p></div>
-                <div class="card"><h3>Rata-rata/Bulan (KG)</h3><p id="monRataSampah">0</p></div>
-                <div class="card card-orange"><h3>Saldo Saat Ini (Rp)</h3><p id="monSaldo">Rp 0</p></div>
+            
+            <div class="atm-cards-container">
+                <div class="atm-card atm-blue">
+                    <div class="atm-header">
+                        <div class="atm-chip-wrapper">
+                            <div class="atm-chip"></div>
+                            <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+                        </div>
+                        <span class="atm-logo-text">NASABAH</span>
+                    </div>
+                    <div class="atm-content">
+                        <h3>Total Nasabah BSU</h3>
+                        <p id="monNasabah">0</p>
+                    </div>
+                </div>
+                <div class="atm-card atm-green">
+                    <div class="atm-header">
+                        <div class="atm-chip-wrapper">
+                            <div class="atm-chip"></div>
+                            <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+                        </div>
+                        <span class="atm-logo-text">TOTAL</span>
+                    </div>
+                    <div class="atm-content">
+                        <h3>Total Sampah (KG)</h3>
+                        <p id="monTotalSampah">0</p>
+                    </div>
+                </div>
+                <div class="atm-card atm-purple">
+                    <div class="atm-header">
+                        <div class="atm-chip-wrapper">
+                            <div class="atm-chip"></div>
+                            <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+                        </div>
+                        <span class="atm-logo-text">AVERAGE</span>
+                    </div>
+                    <div class="atm-content">
+                        <h3>Rata-rata/Bulan (KG)</h3>
+                        <p id="monRataSampah">0</p>
+                    </div>
+                </div>
+                <div class="atm-card atm-gold">
+                    <div class="atm-header">
+                        <div class="atm-chip-wrapper">
+                            <div class="atm-chip"></div>
+                            <svg class="contactless-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14c-.3-.8-.5-1.6-.5-2.5s.2-1.7.5-2.5"/><path d="M12 16.5c-.7-1.3-1-2.9-1-4.5s.3-3.2 1-4.5"/><path d="M15.5 19c-1-1.8-1.5-3.8-1.5-6.5s.5-4.7 1.5-6.5"/><path d="M19 21.5c-1.3-2.3-2-4.8-2-7.5s.7-5.2 2-7.5"/></svg>
+                        </div>
+                        <span class="atm-logo-text">SALDO</span>
+                    </div>
+                    <div class="atm-content">
+                        <h3>Saldo Saat Ini (Rp)</h3>
+                        <p id="monSaldo">Rp 0</p>
+                    </div>
+                </div>
             </div>
 
             <div class="grid-2">
@@ -444,7 +748,16 @@
     let keuanganPieChartInstance = null;
     let monKomposisiChartInstance = null;
     
+    let currentRiwayatBsu = [];
+    let currentSaldoBsu = 0;
+    let lastTrxObj = {};
+
     const modernColors = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6', '#f97316', '#6366f1'];
+
+    // Fungsi Toggle Hamburger Menu untuk Mobile
+    function toggleMenu() {
+        document.getElementById('navBar').classList.toggle('show');
+    }
 
     function uraikanTanggalInput(dateStr) {
         if (!dateStr) return new Date();
@@ -460,14 +773,11 @@
 
     function formatTglTabel(strTgl) {
         if(!strTgl) return '-';
-        
         let d = uraikanTanggalInput(strTgl);
-        
         if(!isNaN(d.getTime())) {
             let day = d.getDate().toString().padStart(2, '0');
             let month = (d.getMonth() + 1).toString().padStart(2, '0');
             let year = d.getFullYear();
-            
             return `${day}/${month}/${year}`;
         }
         return strTgl;
@@ -485,8 +795,15 @@
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
       document.getElementById(id).classList.add('active');
       btn.classList.add('active');
+      
       if(id === 'daftar' && document.getElementById('idBsu').value === '') {
           document.getElementById('idBsu').value = 'BSU-' + Math.floor(10000 + Math.random()*90000);
+      }
+      
+      // Auto-close menu di mobile setelah klik tombol
+      let nav = document.getElementById('navBar');
+      if(window.innerWidth <= 768 && nav.classList.contains('show')) {
+          nav.classList.remove('show');
       }
     }
 
@@ -589,7 +906,248 @@
             try { renderLaporanBulanan(); } catch(e){}
             try { renderTabelRegistrasiBsu(); } catch(e){}
             try { populateDropdownMonitoring(); } catch(e){}
+            try { populateDropdownKeuangan(); } catch(e){}
         });
+    }
+
+    function populateDropdownKeuangan() {
+        let sel = document.getElementById('selectKeuanganBsu'); 
+        if(!sel) return;
+        sel.innerHTML = '<option value="" disabled selected>-- Pilih Bank Sampah Unit --</option>';
+        if(globalNasabah && globalNasabah.length > 0) { 
+            globalNasabah.forEach(b => { 
+                sel.innerHTML += `<option value="${b.nama}">${b.nama} (ID: ${b.id})</option>`; 
+            }); 
+        }
+    }
+
+    function prosesCekSaldoBSU(namaBsu, isRefresh = false) {
+        if(!namaBsu) return;
+        document.getElementById('areaCekSaldo').style.display = 'block';
+        
+        if (!isRefresh) {
+            document.getElementById('btnCetakStruk').style.display = 'none';
+            document.getElementById('btnWaStruk').style.display = 'none';
+            document.getElementById('inputTarikSaldo').value = '';
+        }
+
+        let trx = globalTransaksi.filter(t => t.nama === namaBsu);
+        trx.sort((a,b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+
+        let totalVol = 0;
+        let runningSaldo = 0;
+        currentRiwayatBsu = [];
+
+        trx.forEach(t => {
+            let mutasi = parseFloat(t.total) || 0;
+            let berat = parseFloat(t.berat) || 0;
+            runningSaldo += mutasi;
+
+            if (mutasi > 0 || (t.jenis && t.jenis !== 'Penarikan Tunai')) {
+                totalVol += berat;
+            }
+
+            currentRiwayatBsu.push({
+                tglStr: t.tgl,
+                tglObj: uraikanTanggalInput(t.tgl),
+                jenis: t.jenis || 'Aktivitas Tidak Diketahui',
+                mutasi: mutasi,
+                saldo: runningSaldo
+            });
+        });
+
+        currentSaldoBsu = runningSaldo;
+
+        document.getElementById('infoSaldoRp').innerText = 'Rp ' + runningSaldo.toLocaleString('id-ID');
+        document.getElementById('infoVolumeKg').innerText = totalVol.toFixed(1) + ' Kg';
+
+        if (!isRefresh) {
+            document.getElementById('filterTglRiwayat').value = '';
+            document.getElementById('filterBulanRiwayat').value = '';
+        }
+        renderRiwayatBsu(isRefresh ? 'semua_atau_terfilter' : 'semua');
+    }
+
+    function renderRiwayatBsu(type) {
+        let filtered = [...currentRiwayatBsu];
+
+        if(type === 'tgl') {
+            let val = document.getElementById('filterTglRiwayat').value; 
+            document.getElementById('filterBulanRiwayat').value = '';
+            if(val) {
+                filtered = filtered.filter(f => {
+                    let d = f.tglObj;
+                    let s = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0') + "-" + String(d.getDate()).padStart(2,'0');
+                    return s === val;
+                });
+            }
+        } else if (type === 'bulan') {
+            let val = document.getElementById('filterBulanRiwayat').value; 
+            document.getElementById('filterTglRiwayat').value = '';
+            if(val) {
+                filtered = filtered.filter(f => {
+                    let d = f.tglObj;
+                    let s = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,'0');
+                    return s === val;
+                });
+            }
+        } else if (type === 'semua') {
+            document.getElementById('filterTglRiwayat').value = '';
+            document.getElementById('filterBulanRiwayat').value = '';
+        }
+
+        let tbody = '';
+        filtered.slice().reverse().forEach(r => {
+            let tglIndah = formatTglTabel(r.tglStr);
+            let colorMutasi = r.mutasi >= 0 ? 'text-success' : 'text-danger';
+            let sign = r.mutasi >= 0 ? '+' : '';
+            tbody += `<tr>
+                <td style="font-size:12px; color:var(--text-muted); font-weight:600;">${tglIndah}</td>
+                <td style="font-weight:700; color:var(--text-main);">${r.jenis}</td>
+                <td class="text-right ${colorMutasi} fw-bold" style="white-space:nowrap;">${sign}Rp ${Math.abs(r.mutasi).toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:800; white-space:nowrap;">Rp ${r.saldo.toLocaleString('id-ID')}</td>
+            </tr>`;
+        });
+
+        if(filtered.length === 0) {
+            tbody = `<tr><td colspan="4" class="text-center text-muted" style="padding: 20px;">Tidak ada riwayat transaksi pada filter waktu yang dipilih.</td></tr>`;
+        }
+
+        document.getElementById('tabelRiwayatBsu').innerHTML = tbody;
+    }
+
+    function prosesTarikSaldoUi() {
+        let bsu = document.getElementById('selectKeuanganBsu').value;
+        let nominal = parseFloat(document.getElementById('inputTarikSaldo').value);
+
+        if(!bsu) return alert("Pilih BSU terlebih dahulu pada kolom pencarian!");
+        if(isNaN(nominal) || nominal <= 0) return alert("Masukkan nominal penarikan yang valid!");
+        if(nominal > currentSaldoBsu) return alert("GAGAL: Total saldo BSU tidak mencukupi untuk penarikan ini.");
+
+        if(!confirm(`Konfirmasi Penarikan Tunai:\n\nBSU: ${bsu}\nNominal: Rp ${nominal.toLocaleString('id-ID')}\n\nLanjutkan Proses?`)) return;
+
+        let btn = document.getElementById('btnTarikSaldoUi');
+        btn.innerText = "MEMPROSES TARIK SALDO...";
+        btn.disabled = true;
+
+        let now = new Date();
+        let tglFormat = now.getDate().toString().padStart(2, '0') + '/' + 
+                        (now.getMonth() + 1).toString().padStart(2, '0') + '/' + 
+                        now.getFullYear() + ' ' + 
+                        now.getHours().toString().padStart(2, '0') + ':' + 
+                        now.getMinutes().toString().padStart(2, '0');
+
+        let fd = new URLSearchParams();
+        fd.append('action', 'tambahTransaksi');
+        fd.append('id', Date.now());
+        fd.append('tgl', tglFormat);
+        fd.append('nama', bsu);
+        fd.append('jenis', 'Penarikan Tunai');
+        fd.append('berat', 0);
+        fd.append('total', -Math.abs(nominal));
+        fd.append('id_unit', '');
+
+        fetch(API_URL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: fd.toString() })
+        .then(r => r.text())
+        .then(res => {
+            if(res.includes("Sukses")) {
+                alert("Penarikan Saldo Berhasil!");
+                
+                lastTrxObj = { bsu: bsu, nominal: nominal, tgl: tglFormat, sisa: currentSaldoBsu - nominal };
+                
+                document.getElementById('btnCetakStruk').style.display = 'inline-flex';
+                document.getElementById('btnWaStruk').style.display = 'inline-flex';
+                document.getElementById('inputTarikSaldo').value = '';
+
+                loadDataPusat();
+                
+                setTimeout(() => { prosesCekSaldoBSU(bsu, true); }, 2500); 
+            } else {
+                alert("Gagal melakukan penarikan: " + res);
+            }
+        })
+        .finally(() => {
+            btn.innerText = "PROSES TARIK SALDO";
+            btn.disabled = false;
+        });
+    }
+
+    function cetakStrukTarik() {
+        if(!lastTrxObj.bsu) return alert("Belum ada data penarikan terbaru.");
+        let bsu = globalNasabah.find(n => n.nama === lastTrxObj.bsu);
+        let namaKetua = bsu && bsu.ketua ? bsu.ketua : 'Pengurus';
+        
+        let printWindow = window.open('', '', 'width=400,height=600');
+        printWindow.document.write('<html><head><title>Struk Penarikan - '+lastTrxObj.bsu+'</title>');
+        printWindow.document.write('<style>body{font-family:monospace; text-align:center; padding:20px; font-size:14px; color:#000;} .hr{border-bottom:1px dashed #000; margin:14px 0;} </style></head><body>');
+        printWindow.document.write('<h2 style="margin:0; font-size:18px;">BANK SAMPAH INDUK</h2>');
+        printWindow.document.write('<p style="margin:4px 0;">STRUK PENARIKAN SALDO BSU</p>');
+        printWindow.document.write('<div class="hr"></div>');
+        printWindow.document.write('<p style="text-align:left; margin:4px 0;">Waktu : '+lastTrxObj.tgl+'<br>');
+        printWindow.document.write('Unit  : '+lastTrxObj.bsu+'<br>');
+        printWindow.document.write('Ketua : '+namaKetua+'</p>');
+        printWindow.document.write('<div class="hr"></div>');
+        printWindow.document.write('<h3 style="text-align:left; font-size:16px; margin:4px 0;">TARIK TUNAI : Rp '+lastTrxObj.nominal.toLocaleString('id-ID')+'</h3>');
+        printWindow.document.write('<p style="text-align:left; margin:4px 0;">SISA SALDO  : Rp '+lastTrxObj.sisa.toLocaleString('id-ID')+'</p>');
+        printWindow.document.write('<div class="hr"></div>');
+        printWindow.document.write('<p style="font-size:12px; margin-top:20px;">*Terima kasih telah bertransaksi*</p>');
+        printWindow.document.write('<script>window.onload=function(){window.print();window.close();}<\/script>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+    }
+
+    function waStrukTarik() {
+        if(!lastTrxObj.bsu) return alert("Belum ada data penarikan terbaru.");
+        let bsu = globalNasabah.find(n => n.nama === lastTrxObj.bsu);
+        if(!bsu || !bsu.hp) return alert("Nomor Handphone BSU tidak ditemukan pada Profil!");
+        let namaKetua = bsu.ketua || 'Pengurus';
+        let noHp = String(bsu.hp).replace(/^0+/, '62');
+        let text = `Halo Bapak/Ibu ${namaKetua} (Ketua BSU ${lastTrxObj.bsu}),\n\nBerikut adalah *STRUK PENARIKAN SALDO BSU*\n\nTanggal: ${lastTrxObj.tgl}\nUnit: ${lastTrxObj.bsu}\n\n*NOMINAL TARIK:* Rp ${lastTrxObj.nominal.toLocaleString('id-ID')}\n*SISA SALDO:* Rp ${lastTrxObj.sisa.toLocaleString('id-ID')}\n\n_Terima kasih telah bertransaksi dengan Bank Sampah Induk._`;
+        window.open(`https://wa.me/${noHp}?text=${encodeURIComponent(text)}`);
+    }
+
+    function cetakLaporanPDF() {
+        let bsuName = document.getElementById('selectKeuanganBsu').value;
+        if(!bsuName) return alert("Pilih BSU terlebih dahulu!");
+        
+        let bsu = globalNasabah.find(n => n.nama === bsuName);
+        let namaKetua = bsu && bsu.ketua ? bsu.ketua : 'Pengurus';
+        
+        let printContents = document.getElementById('tabelRiwayatBsuForPrint').outerHTML;
+        let filterTgl = document.getElementById('filterTglRiwayat').value;
+        let filterBulan = document.getElementById('filterBulanRiwayat').value;
+        let periode = "Semua Waktu";
+        if (filterTgl) periode = "Tanggal: " + filterTgl;
+        else if (filterBulan) periode = "Bulan: " + filterBulan;
+
+        let printWindow = window.open('', '', 'width=900,height=700');
+        printWindow.document.write('<html><head><title>Cetak Laporan - '+bsuName+'</title>');
+        printWindow.document.write('<style>body{font-family:Arial, sans-serif; padding:30px; color:#333;} table{width:100%; border-collapse:collapse; margin-top:20px; font-size:13px;} th,td{border:1px solid #ddd; padding:10px; text-align:left;} th{background:#f4f4f4;} .text-right{text-align:right;} .text-center{text-align:center;} .text-success{color:green;} .text-danger{color:red;}</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write('<h2 style="margin:0;">Laporan Log Transaksi Keuangan BSU</h2>');
+        printWindow.document.write('<p style="margin:5px 0;"><strong>Nama Unit BSU:</strong> '+bsuName+'<br>');
+        printWindow.document.write('<strong>Ketua BSU:</strong> '+namaKetua+'<br>');
+        printWindow.document.write('<strong>Periode Filter:</strong> '+periode+'</p>');
+        printWindow.document.write(printContents);
+        printWindow.document.write('<p style="text-align:right; font-size:11px; margin-top:20px; color:#777;"><i>Dicetak secara sistem dari Dashboard Bank Sampah Induk</i></p>');
+        printWindow.document.write('<script>window.onload=function(){window.print(); window.close();}<\/script>');
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+    }
+
+    function kirimLaporanWA() {
+        let bsuName = document.getElementById('selectKeuanganBsu').value;
+        if(!bsuName) return alert("Pilih BSU terlebih dahulu!");
+        let bsu = globalNasabah.find(n => n.nama === bsuName);
+        if(!bsu || !bsu.hp) return alert("Nomor WA BSU tidak ditemukan pada Master Data!");
+        let namaKetua = bsu.ketua || 'Pengurus';
+        let noHp = String(bsu.hp).replace(/^0+/, '62');
+        
+        let totalSaldoStr = document.getElementById('infoSaldoRp').innerText;
+        let totalVolStr = document.getElementById('infoVolumeKg').innerText;
+
+        let text = `Halo Bapak/Ibu ${namaKetua} selaku Ketua BSU *${bsuName}*,\nBerikut adalah Rekapitulasi Sistem Layanan Keuangan Bank Sampah Induk:\n\n*Total Saldo Saat Ini:* ${totalSaldoStr}\n*Total Volume Masuk:* ${totalVolStr}\n\nSilakan cek detail pada aplikasi login unit Anda atau hubungi admin BSI jika ada pertanyaan.\nTerima kasih.`;
+        window.open(`https://wa.me/${noHp}?text=${encodeURIComponent(text)}`);
     }
 
     function renderVisualisasiTren(range) {
@@ -1246,18 +1804,15 @@
         
         document.getElementById('monitoringArea').style.display = 'block';
         
-        // 1. Tampilkan state "Memuat" agar UI terlihat responsif
         document.getElementById('monTotalSampah').innerText = "..."; 
         document.getElementById('monSaldo').innerText = "...";
         document.getElementById('monRataSampah').innerText = "...";
         document.getElementById('monTabelSetoran').innerHTML = '<tr><td colspan="3" class="text-center py-4" style="color:var(--text-muted);">⏳ Menarik data riwayat dari BSU...</td></tr>';
         document.getElementById('monTabelPenarikan').innerHTML = '<tr><td colspan="2" class="text-center py-4" style="color:var(--text-muted);">⏳ Menarik data riwayat dari BSU...</td></tr>';
         
-        // 2. Tampilkan jumlah nasabah dari data profil BSU yang sudah ada di memory
         let profilBsu = globalNasabah.find(b => b.nama === namaBsu); 
         document.getElementById('monNasabah').innerText = profilBsu ? (profilBsu.jumlah_nasabah || "0") : "0";
         
-        // 3. Tarik data dari server
         let ts = new Date().getTime();
         fetch(API_URL + "?action=getTransaksiInternalBSU&nama_bsu=" + encodeURIComponent(namaBsu) + "&_t=" + ts)
         .then(r => r.json())
@@ -1297,7 +1852,6 @@
                 }
             });
             
-            // 4. Update UI Dashboard Monitoring
             document.getElementById('monTotalSampah').innerText = totalSampah.toFixed(1); 
             document.getElementById('monSaldo').innerText = 'Rp ' + totalSaldo.toLocaleString('id-ID');
             
@@ -1307,7 +1861,6 @@
             document.getElementById('monTabelSetoran').innerHTML = setoranHtml || '<tr><td colspan="3" class="text-center text-muted py-4">Belum ada aktivitas setoran dari warga tercatat.</td></tr>';
             document.getElementById('monTabelPenarikan').innerHTML = penarikanHtml || '<tr><td colspan="2" class="text-center text-muted py-4">Belum ada aktivitas penarikan saldo oleh warga.</td></tr>';
             
-            // 5. PERBAIKAN BUG: Amankan grafik sebelum digambar ulang
             if (monKomposisiChartInstance) {
                 monKomposisiChartInstance.destroy();
                 monKomposisiChartInstance = null;
