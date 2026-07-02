@@ -463,7 +463,7 @@
 </div>
 
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbzHVQ5F0CjFtSKkAVOSmCbRxvRWgmFZyyphWXInAB7mDACAvThU8wOGpa6FJVH4QPkZNA/exec";
+    const scriptURL = "https://script.google.com/macros/s/AKfycbx2gyOqGSI5juNzvwEIOWxVx75dBlhp8dMJWGYibwB6sAl86v-q5-mu_Mo_y5uVQ9L8Sw/exec";
     const CURRENT_ROLE = 'BSU'; 
 
     // === SISTEM KEAMANAN & PENGAMBILAN DATA SESI (LGSG JALAN) ===
@@ -730,7 +730,7 @@
         if (!nama || selSampah.value === "") return alert("Harap lengkapi form!"); 
         let jenisSampah = selSampah.options[selSampah.selectedIndex].text; let harga = parseInt(selSampah.value); let berat = parseFloat(document.getElementById('beratSampah').value); 
         let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0'); 
-        let jenisBersih = jenisSampah.split(' (')[0]; let formData = new URLSearchParams(); formData.append('action', 'tambahTransaksi'); formData.append('id', Date.now()); formData.append('id_unit', CURRENT_UNIT_ID); formData.append('tgl', tgl); formData.append('nama', nama); formData.append('jenis', jenisBersih); formData.append('berat', berat.toString().replace('.', ',')); formData.append('total', total); 
+        let jenisBersih = jenisSampah.split(' (')[0]; let formData = new URLSearchParams(); formData.append('action', 'tambahTransaksi'); formData.append('id', Date.now()); formData.append('id_unit', CURRENT_UNIT_ID); formData.append('tgl', tgl); formData.append('nama', nama); formData.append('jenis', jenisBersih); formData.append('berat', berat); formData.append('total', total); 
         let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...'; 
         fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() }).then(response => { alert(`Transaksi Berhasil!`); document.getElementById('formSetor').reset(); loadDataDatabase(); showTab('dashboard', document.querySelector('.nav-btn')); }).finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; }); 
     }
