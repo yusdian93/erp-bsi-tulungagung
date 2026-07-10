@@ -239,25 +239,6 @@
                 </div>
             </div>
             
-            <div class="card p-4 p-md-5 mt-5">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="m-0 fw-bold" style="color: var(--primary-dark);"><i class="bi bi-clock-history me-2 text-success"></i>Riwayat Transaksi Terbaru</h5>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Waktu Transaksi</th>
-                                <th>Identitas Nasabah</th>
-                                <th>Aktivitas / Material</th>
-                                <th>Total Nominal</th>
-                                <th class="text-center">Aksi Struk</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabel-riwayat"></tbody>
-                    </table>
-                </div>
-            </div>
         </div>
 
         <div id="nasabah" class="tab-content" style="display:none;">
@@ -353,6 +334,26 @@
                             <button type="submit" class="btn btn-success w-100 py-3"><i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran</button>
                         </form>
                     </div>
+                </div>
+            </div>
+
+            <div class="card p-4 p-md-5 mt-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="m-0 fw-bold" style="color: var(--primary-dark);"><i class="bi bi-clock-history me-2 text-success"></i>Riwayat Transaksi Terbaru</h5>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Waktu Transaksi</th>
+                                <th>Identitas Nasabah</th>
+                                <th>Aktivitas / Material</th>
+                                <th>Total Nominal</th>
+                                <th class="text-center">Aksi Struk</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabel-riwayat"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -729,7 +730,7 @@
         let jenisBersih = jenisSampah.split(' (')[0];
         let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...'; 
         AdapterAPI.tambahTransaksiUnit({ id: Date.now(), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: jenisBersih, berat: berat, total: total })
-            .then(response => { alert(`Transaksi Berhasil!`); document.getElementById('formSetor').reset(); loadDataDatabase(); showTab('dashboard', document.querySelector('.nav-btn')); }).finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; }); 
+            .then(response => { alert(`Transaksi Berhasil! Struk bisa dicetak/dikirim WA di tabel Riwayat Transaksi di bawah.`); document.getElementById('formSetor').reset(); loadDataDatabase(); }).finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; }); 
     }
 
     function cetakPdfStruk(index) {
