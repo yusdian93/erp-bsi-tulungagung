@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-adapter.js"></script>
 
     <style>
         :root {
@@ -118,7 +120,7 @@
             <div class="container-fluid px-2 px-md-4">
                 
                 <span class="navbar-brand d-flex align-items-center me-lg-4">
-                    <img src="logo_dlh.png" alt="Logo DLH" style="height: 90px; margin-right: 14px; object-fit: contain;" onerror="this.src='LOGO_DLH.png'">
+                    <img src="logo_dlh.png" alt="Logo DLH" style="height: 90px; margin-right: 14px; object-fit: contain;" onerror="this.onerror=null; this.src='LOGO_DLH.png';">
                     <div class="d-flex flex-column justify-content-center" style="line-height: 1.1;">
                         <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); letter-spacing: 1px;">SISTEM</span>
                         <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary-dark);">BANK SAMPAH UNIT</span>
@@ -463,7 +465,7 @@
 </div>
 
 <script>
-    const scriptURL = "https://script.google.com/macros/s/AKfycbx2gyOqGSI5juNzvwEIOWxVx75dBlhp8dMJWGYibwB6sAl86v-q5-mu_Mo_y5uVQ9L8Sw/exec";
+    // scriptURL Google Apps Script sudah tidak dipakai lagi -> diganti AdapterAPI (Supabase)
     const CURRENT_ROLE = 'BSU'; 
 
     // === SISTEM KEAMANAN & PENGAMBILAN DATA SESI (LGSG JALAN) ===
@@ -490,8 +492,7 @@
     let masterNasabah = []; let masterTransaksi = [];
 
     function loadDataDatabase() {
-        let url = scriptURL + "?role=" + CURRENT_ROLE + "&id_unit=" + CURRENT_UNIT_ID;
-        fetch(url).then(response => response.json()).then(data => {
+        AdapterAPI.getBundleBSU(CURRENT_UNIT_ID).then(data => {
             masterNasabah = data.nasabah || []; 
             masterTransaksi = data.transaksi || []; 
             dataKategori = data.kategori || [];
@@ -676,14 +677,10 @@
         let nama = document.getElementById('namaNasabah').value.trim();
         let hp = document.getElementById('hpNasabah').value.trim();
         if(nama === '') return alert("Nama tidak boleh kosong!");
-        let formData = new URLSearchParams();
-        formData.append('action', 'tambahNasabah'); formData.append('id', 'NSB-' + Date.now());
-	    formData.append('id_unit', CURRENT_UNIT_ID);
-        formData.append('nama', nama); formData.append('hp', hp);
         let btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.disabled = true; btnSubmit.innerHTML = 'Menyimpan...';
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
-            .then(response => { alert('Berhasil! Data nasabah telah direkam.'); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
+        AdapterAPI.tambahNasabah({ id: 'NSB-' + Date.now(), id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
+            .then(() => { alert('Berhasil! Data nasabah telah direkam.'); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
             .catch(error => alert('Gagal menyimpan.'))
             .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data Nasabah'; });
     }
@@ -693,17 +690,16 @@
         if (!nasabah) return alert("Data tidak ditemukan!");
         let namaBaru = prompt("Edit Nama Lengkap Nasabah:", nasabah.nama); if (namaBaru === null) return; namaBaru = namaBaru.trim(); if (namaBaru === '') return alert("Nama tidak boleh kosong!");
         let hpBaru = prompt("Edit Nomor WhatsApp / HP:", nasabah.hp || ''); if (hpBaru === null) return;
-        let formData = new URLSearchParams(); formData.append('action', 'editNasabah'); formData.append('id', id); formData.append('nama', namaBaru); formData.append('hp', hpBaru.trim());
         document.body.style.cursor = 'wait';
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() }).then(response => response.text()).then(text => {
+        AdapterAPI.editNasabah({ id: id, nama: namaBaru, hp: hpBaru.trim() }).then(text => {
             if (text.includes("Sukses")) { alert("Berhasil diperbarui."); loadDataDatabase(); } else { alert(text); }
         }).catch(error => alert("Gagal memperbarui data.")).finally(() => { document.body.style.cursor = 'default'; });
     }
 
     function hapusNasabah(id) {
         if(confirm('Yakin ingin menghapus data nasabah ini secara permanen?')) {
-            let formData = new URLSearchParams(); formData.append('action', 'deleteNasabah'); formData.append('id', id); document.body.style.cursor = 'wait';
-            fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() }).then(response => response.text()).then(text => {
+            document.body.style.cursor = 'wait';
+            AdapterAPI.deleteNasabah(id).then(text => {
                 if (text.includes("Sukses")) { alert("Data dihapus."); loadDataDatabase(); } else { alert(text); }
             }).catch(error => alert("Gagal menghapus data.")).finally(() => { document.body.style.cursor = 'default'; });
         }
@@ -730,9 +726,10 @@
         if (!nama || selSampah.value === "") return alert("Harap lengkapi form!"); 
         let jenisSampah = selSampah.options[selSampah.selectedIndex].text; let harga = parseInt(selSampah.value); let berat = parseFloat(document.getElementById('beratSampah').value); 
         let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0'); 
-        let jenisBersih = jenisSampah.split(' (')[0]; let formData = new URLSearchParams(); formData.append('action', 'tambahTransaksi'); formData.append('id', Date.now()); formData.append('id_unit', CURRENT_UNIT_ID); formData.append('tgl', tgl); formData.append('nama', nama); formData.append('jenis', jenisBersih); formData.append('berat', berat); formData.append('total', total); 
+        let jenisBersih = jenisSampah.split(' (')[0];
         let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...'; 
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() }).then(response => { alert(`Transaksi Berhasil!`); document.getElementById('formSetor').reset(); loadDataDatabase(); showTab('dashboard', document.querySelector('.nav-btn')); }).finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; }); 
+        AdapterAPI.tambahTransaksiUnit({ id: Date.now(), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: jenisBersih, berat: berat, total: total })
+            .then(response => { alert(`Transaksi Berhasil!`); document.getElementById('formSetor').reset(); loadDataDatabase(); showTab('dashboard', document.querySelector('.nav-btn')); }).finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; }); 
     }
 
     function cetakPdfStruk(index) {
@@ -812,9 +809,8 @@
         let saldoTersedia = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => saldoTersedia += t.total);
         if (nominal > saldoTersedia) return alert(`Gagal: Maksimal penarikan Rp ${saldoTersedia.toLocaleString('id-ID')}`);
         let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        let formData = new URLSearchParams(); formData.append('action', 'tambahTransaksi'); formData.append('id', Date.now()); formData.append('id_unit', CURRENT_UNIT_ID); formData.append('tgl', tgl); formData.append('nama', nama); formData.append('jenis', 'Penarikan Tunai'); formData.append('berat', 0); formData.append('total', -nominal); 
         let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true;
-        fetch(scriptURL, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: formData.toString() })
+        AdapterAPI.tambahTransaksiUnit({ id: Date.now(), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: 'Penarikan Tunai', berat: 0, total: -nominal })
             .then(response => { alert(`Penarikan sukses.`); document.getElementById('formTarikSaldo').reset(); loadDataDatabase(); })
             .finally(() => btnSubmit.disabled = false);
     }

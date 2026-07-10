@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+    <script src="supabase-adapter.js" defer></script>
 
     <style>
         body { 
@@ -70,7 +72,7 @@
 <body>
 
     <div class="login-card text-center">
-        <img src="logo_dlh.png" alt="Logo DLH Tulungagung" style="height: 110px; margin-bottom: 20px; object-fit: contain;" onerror="this.src='LOGO_DLH.png'">
+        <img src="logo_dlh.png" alt="Logo DLH Tulungagung" style="height: 110px; margin-bottom: 20px; object-fit: contain;" onerror="this.onerror=null; this.src='LOGO_DLH.png';">
         
         <h4 style="font-weight: 800; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 5px;">PORTAL TERPADU</h4>
         <p style="color: #475569; font-size: 0.9rem; font-weight: 600; margin-bottom: 30px; line-height: 1.4;">
@@ -106,8 +108,6 @@
     </div>
 
     <script>
-        const scriptURL = "https://script.google.com/macros/s/AKfycbzHVQ5F0CjFtSKkAVOSmCbRxvRWgmFZyyphWXInAB7mDACAvThU8wOGpa6FJVH4QPkZNA/exec";
-
         function lihatSandi(inputId, iconId) {
             let input = document.getElementById(inputId);
             let icon = document.getElementById(iconId);
@@ -133,8 +133,7 @@
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memeriksa Database...';
 
-            fetch(scriptURL + "?role=BSI&id_unit=") 
-                .then(response => response.json())
+            AdapterAPI.getDataLogin()
                 .then(data => {
                     // CEK 1: ADMIN PUSAT (BSI)
                     let idAdminAsli = data.admin_user ? String(data.admin_user).trim() : 'admin';

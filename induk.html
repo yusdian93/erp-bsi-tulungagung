@@ -8,7 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase-adapter.js" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -1103,7 +1105,7 @@
     </div>
 
   <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbx2gyOqGSI5juNzvwEIOWxVx75dBlhp8dMJWGYibwB6sAl86v-q5-mu_Mo_y5uVQ9L8Sw/exec";
+    // API_URL Google Apps Script sudah tidak dipakai lagi -> diganti AdapterAPI (Supabase)
     
     let globalDataDashboard = null;
     let globalTransaksi = [];
@@ -1238,12 +1240,20 @@
     // Ini adalah perbaikan untuk error "Parameter tidak valid" yang muncul saat body/parameter
     // POST tidak terbaca dengan benar oleh Google Apps Script.
     function postAksi(paramsObj) {
-        let fd = new FormData();
-        Object.keys(paramsObj).forEach(k => {
-            let v = paramsObj[k];
-            fd.append(k, (v === undefined || v === null) ? '' : v);
-        });
-        return fetch(API_URL, { method: 'POST', body: fd }).then(r => r.text());
+        const { action, ...rest } = paramsObj;
+        switch (action) {
+            case 'tambahTransaksi': return AdapterAPI.tambahTransaksiInduk(rest);
+            case 'updateTransaksi': return AdapterAPI.updateTransaksi(rest);
+            case 'deleteTransaksi': return AdapterAPI.deleteTransaksi(rest.id);
+            case 'tambahUnit': return AdapterAPI.tambahUnit(rest);
+            case 'updateUnit': return AdapterAPI.updateUnit(rest);
+            case 'deleteUnit': return AdapterAPI.deleteUnit(rest.id);
+            case 'tambahKategori': return AdapterAPI.tambahKategori(rest);
+            case 'updateKategori': return AdapterAPI.updateKategori(rest);
+            case 'deleteKategori': return AdapterAPI.deleteKategori(rest.id);
+            case 'sinkronLaporanFisik': return Promise.resolve('Fitur sinkron manual tidak diperlukan lagi (data sudah realtime di Supabase).');
+            default: return Promise.reject('Aksi tidak dikenali: ' + action);
+        }
     }
 
     function sinkronKeSheets() {
@@ -2317,8 +2327,7 @@
         document.getElementById('monNsbTotalSampah').innerText = '...';
         document.getElementById('monNsbTotalSaldo').innerText = '...';
 
-        fetch(API_URL + "?action=getTransaksiInternalBSU&nama_bsu=" + encodeURIComponent(namaBsu) + "&_t=" + new Date().getTime())
-        .then(r => r.json())
+        AdapterAPI.getTransaksiInternalBSU(namaBsu)
         .then(res => {
             let semuaTrxUnit = res.transaksi || [];
             let trxNasabah = semuaTrxUnit.filter(t => t.nama && t.nama !== namaBsu && (parseFloat(t.berat)||0) > 0 && (parseFloat(t.total)||0) > 0);
@@ -2718,7 +2727,7 @@
         if(document.getElementById('tabelPenjualan')) document.getElementById('tabelPenjualan').innerHTML = jualHtml + '</tbody>';
         renderRiwayatPenjualanHariIni();
         
-        let regHtml = ''; globalNasabah.slice().reverse().forEach(n => regHtml += `<tr><td>${n.id}</td><td style="font-family:monospace;">${n.password || '-'}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center"><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#dcfce7; color:#166534; border-color:#86efac;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 Kirim WA</button></td></tr>`);
+        let regHtml = ''; globalNasabah.slice().reverse().forEach(n => regHtml += `<tr><td>${n.id}</td><td style="font-family:monospace;">${n.password || '-'}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#dcfce7; color:#166534; border-color:#86efac; margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#dbeafe; color:#1e40af; border-color:#93c5fd; margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button></td></tr>`);
         if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="8" class="text-center">Belum ada data</td></tr>';
 
         // 6. Eksekusi Grafik
@@ -2733,12 +2742,11 @@
     // =========================================
     function loadDataPusat() {
         let ts = new Date().getTime(); 
-        fetch(API_URL + "?action=getDashboardInduk&_t=" + ts)
-        .then(r => r.json())
+        AdapterAPI.getRingkasanDashboard()
         .then(res => {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('dashboardContent').style.display = 'block';
-            globalDataDashboard = res.data; 
+            globalDataDashboard = res; 
             
             document.getElementById('valUnit').innerText = globalDataDashboard.ringkasan.unit || 0;
             document.getElementById('valBulanIni').innerText = globalDataDashboard.ringkasan.setoran_bulan || 0;
@@ -2750,8 +2758,7 @@
     }
 
     function loadDataTambahan() {
-        fetch(API_URL + "?role=BSI&_t=" + new Date().getTime())
-        .then(r => r.json())
+        AdapterAPI.getBundleBSI()
         .then(res => {
             globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
             populateYearDropdowns(); populateUI();
