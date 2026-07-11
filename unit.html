@@ -651,8 +651,9 @@
                 let items = dataTransaksi.filter(x => x.kelompok_id === t.kelompok_id);
                 let totalNominal = items.reduce((a, x) => a + x.total, 0);
                 let totalBerat = items.reduce((a, x) => a + x.berat, 0);
-                tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${items.length} jenis material</span></td>
-                    <td class="fw-bold text-success align-middle">Rp ${totalNominal.toLocaleString('id-ID')}<br><small class="text-muted fw-normal">${totalBerat.toFixed(2)} Kg</small></td>
+                let rincianHtmlBaris = items.map(it => `<div style="display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:2px 0;"><span>${it.jenis} <span class="text-muted">(${it.berat} Kg)</span></span><span class="fw-bold text-success">Rp ${it.total.toLocaleString('id-ID')}</span></div>`).join('');
+                tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle">${rincianHtmlBaris}</td>
+                    <td class="fw-bold text-success align-middle" style="border-top:1px dashed #cbd5e1;">Rp ${totalNominal.toLocaleString('id-ID')}<br><small class="text-muted fw-normal">Total ${totalBerat.toFixed(2)} Kg</small></td>
                     <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStrukGrup('${escAttrJs(t.kelompok_id)}')"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
                     <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStrukGrup('${escAttrJs(t.kelompok_id)}')"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
             } else {
