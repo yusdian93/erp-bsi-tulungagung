@@ -26,6 +26,21 @@ const AdapterAPI = {
     return res.json(); // { ok:true, role, id_unit, nama } atau { ok:false, error }
   },
 
+  // Ubah ID/password Admin Pusat. Dicek & disimpan di server (Edge Function),
+  // password lama wajib benar dulu sebelum diizinkan mengganti.
+  async updateAdminAccount({ currentPassword, newUsername, newPassword }) {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/update-admin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ currentPassword, newUsername, newPassword })
+    });
+    return res.json(); // { ok:true, username } atau { ok:false, error }
+  },
+
   // ================== DATA UNTUK INDUK.HTML ==================
   async getBundleBSI() {
     const [{ data: kategori }, { data: bsuList }, { data: transaksi }] = await Promise.all([

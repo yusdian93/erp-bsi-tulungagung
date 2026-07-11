@@ -409,6 +409,7 @@
         </nav>
 
         <div class="sidebar-foot">
+            <button class="nav-btn" data-label="Ubah ID & Kata Sandi" onclick="pindahTab('akun', this)"><span class="nav-ic">🔑</span> Ubah ID & Kata Sandi</button>
             <button class="nav-btn nav-logout" data-label="Keluar" onclick="logoutPusat()"><span class="nav-ic">🚪</span> Keluar</button>
         </div>
     </aside>
@@ -1025,6 +1026,35 @@
         </div>
     </div>
 
+    <div id="akun" class="content-section">
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>🔑 UBAH ID & KATA SANDI ADMIN PUSAT</h2></div>
+                <form id="formUbahAkunAdmin" style="margin-top:10px;" onsubmit="return false;">
+                    <div class="form-group">
+                        <label>Password Saat Ini <span style="color:#ef4444;">*wajib diisi untuk verifikasi</span></label>
+                        <input type="password" id="akunPasswordLama" class="form-control" placeholder="Masukkan password yang sedang dipakai" required>
+                    </div>
+                    <hr style="margin:20px 0; border-color:#e2e8f0;">
+                    <div class="form-group">
+                        <label>ID / Username Baru <span style="color:#94a3b8; font-weight:500;">(kosongkan jika tidak diganti)</span></label>
+                        <input type="text" id="akunUsernameBaru" class="form-control" placeholder="Contoh: admin">
+                    </div>
+                    <div class="form-group">
+                        <label>Password Baru <span style="color:#94a3b8; font-weight:500;">(kosongkan jika tidak diganti)</span></label>
+                        <input type="password" id="akunPasswordBaru" class="form-control" placeholder="Minimal 6 karakter">
+                    </div>
+                    <div class="form-group">
+                        <label>Ulangi Password Baru</label>
+                        <input type="password" id="akunPasswordBaruUlang" class="form-control" placeholder="Ketik ulang password baru">
+                    </div>
+                    <button type="button" class="btn-submit" id="btnSimpanAkunAdmin" onclick="simpanUbahAkunAdmin()">SIMPAN PERUBAHAN</button>
+                </form>
+                <p style="margin-top:16px; font-size:12px; color:#94a3b8;">Setelah ID/password diganti, gunakan yang baru untuk login berikutnya. Sesi yang sedang aktif ini tidak akan otomatis logout.</p>
+            </div>
+        </div>
+    </div>
+
     <div id="daftar" class="content-section">
         <div class="grid-2">
             <div class="panel">
@@ -1130,7 +1160,13 @@
 
   <script>
     // API_URL Google Apps Script sudah tidak dipakai lagi -> diganti AdapterAPI (Supabase)
-    
+
+    // === PENJAGAAN AKSES: hanya boleh diakses jika sudah login sebagai BSI ===
+    if (localStorage.getItem('ROLE_PENGGUNA') !== 'BSI') {
+        alert("Sesi tidak valid atau telah berakhir! Silakan login melalui portal utama.");
+        window.location.href = 'index.html';
+    }
+
     let globalDataDashboard = null;
     let globalTransaksi = [];
     let globalNasabah = []; 
@@ -1180,7 +1216,39 @@
     }
 
     function logoutPusat() {
-        if(confirm('Apakah Anda yakin ingin keluar dari Portal Bank Sampah Induk?')) window.location.reload();
+        if(confirm('Apakah Anda yakin ingin keluar dari Portal Bank Sampah Induk?')) {
+            localStorage.removeItem('ROLE_PENGGUNA');
+            localStorage.removeItem('ID_UNIT_PENGGUNA');
+            localStorage.removeItem('NAMA_UNIT_PENGGUNA');
+            window.location.href = 'index.html';
+        }
+    }
+
+    function simpanUbahAkunAdmin() {
+        let passLama = document.getElementById('akunPasswordLama').value;
+        let userBaru = document.getElementById('akunUsernameBaru').value.trim();
+        let passBaru = document.getElementById('akunPasswordBaru').value;
+        let passBaruUlang = document.getElementById('akunPasswordBaruUlang').value;
+
+        if (!passLama) return alert('Password saat ini wajib diisi untuk verifikasi.');
+        if (!userBaru && !passBaru) return alert('Isi minimal salah satu: ID baru atau Password baru.');
+        if (passBaru && passBaru !== passBaruUlang) return alert('Konfirmasi password baru tidak cocok!');
+        if (passBaru && passBaru.length < 6) return alert('Password baru minimal 6 karakter.');
+
+        let btn = document.getElementById('btnSimpanAkunAdmin');
+        btn.disabled = true; btn.innerText = 'Menyimpan...';
+
+        AdapterAPI.updateAdminAccount({ currentPassword: passLama, newUsername: userBaru, newPassword: passBaru })
+            .then(res => {
+                if (res.ok) {
+                    alert('Berhasil diperbarui! Gunakan ID/password baru untuk login berikutnya.');
+                    document.getElementById('formUbahAkunAdmin').reset();
+                } else {
+                    alert('Gagal: ' + (res.error || 'Terjadi kesalahan.'));
+                }
+            })
+            .catch(e => alert('Gagal terhubung ke server: ' + e))
+            .finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN PERUBAHAN'; });
     }
 
     function uraikanTanggalInput(dateStr) {
