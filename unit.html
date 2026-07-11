@@ -135,6 +135,7 @@
                         <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
                         <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-people me-2"></i>Nasabah</li>
                         <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down me-2"></i>Setor Sampah</li>
+                        <li class="nav-link nav-btn" onclick="showTab('stock', this)"><i class="bi bi-boxes me-2"></i>Stock Sampah</li>
                         <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2 me-2"></i>Cek Saldo</li>
                         <li class="nav-link nav-btn" onclick="showTab('hargasampah', this)"><i class="bi bi-tags me-2"></i>Harga Sampah</li>                    
                         <li class="nav-link nav-btn" onclick="showTab('broadcast-harga', this)"><i class="bi bi-megaphone-fill me-2"></i>Kirim Harga</li>                    
@@ -257,6 +258,48 @@
                             <table class="table table-hover">
                                 <thead><tr><th>Nama Lengkap</th><th>Nomor WA</th><th class="text-center">Manajemen</th></tr></thead>
                                 <tbody id="tabel-daftar-nasabah"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="stock" class="tab-content" style="display:none;">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h5 class="fw-bold m-0" style="color: var(--primary-dark);"><i class="bi bi-boxes me-2 text-success"></i>Stock Sampah di Gudang Unit</h5>
+                        </div>
+                        <p class="text-muted small mb-4">Sisa stock = total diterima dari nasabah &minus; total yang sudah disetor/terjual ke Bank Sampah Induk. Gunakan ini untuk memantau material yang masih ada di gudang sebelum dijual/disetor ke Induk.</p>
+                        <div class="row g-3 mb-4">
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
+                                    <div class="small text-muted">Total Sisa Stock</div>
+                                    <div class="fw-bold fs-5" style="color:#166534;" id="stock-total-kg">0 Kg</div>
+                                </div>
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <div class="p-3 rounded-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
+                                    <div class="small text-muted">Estimasi Nilai Stock</div>
+                                    <div class="fw-bold fs-5" style="color:#1e40af;" id="stock-total-rp">Rp 0</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Jenis</th>
+                                        <th>Nama Material</th>
+                                        <th class="text-end">Masuk (Kg)</th>
+                                        <th class="text-end">Sudah ke Induk (Kg)</th>
+                                        <th class="text-end">Sisa Stock (Kg)</th>
+                                        <th class="text-end">Estimasi Nilai</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabel-stock-sampah"></tbody>
                             </table>
                         </div>
                     </div>
@@ -501,13 +544,14 @@
     }
     // ==========================================================
 
-    let dataNasabah = []; let dataTransaksi = []; let dataKategori = []; let dataUnit = []; 
+    let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = []; 
     let masterNasabah = []; let masterTransaksi = [];
 
     function loadDataDatabase() {
         AdapterAPI.getBundleBSU(CURRENT_UNIT_ID).then(data => {
             masterNasabah = data.nasabah || []; 
             masterTransaksi = data.transaksi || []; 
+            dataTransaksiKeluar = data.transaksiKeluar || [];
             dataKategori = data.kategori || [];
             dataUnit = data.unit || []; 
             
@@ -534,6 +578,7 @@
             updateDashboard(); 
             updateBukuBesar(); 
             updateLaporan();
+            updateTabelStock();
         }).catch(error => { 
             console.error("Gagal memuat data:", error);
             alert("Gagal memuat data. Periksa koneksi internet atau script Google Anda.");
@@ -689,6 +734,36 @@
             let jenis = k.jenis_material ? k.jenis_material : '-';
             tbody.innerHTML += `<tr><td class="align-middle fw-bold" style="color: #64748b;">${jenis}</td><td class="align-middle fw-bold" style="color: var(--primary-dark);">${k.nama_kategori}</td><td class="align-middle text-success fw-bold">Rp ${parseInt(k.harga).toLocaleString('id-ID')}</td></tr>`;
         });
+    }
+
+    function updateTabelStock() {
+        let tbody = document.getElementById('tabel-stock-sampah'); if(!tbody) return;
+        if (dataKategori.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-5">Belum ada sinkronisasi kategori material dari Bank Sampah Induk.</td></tr>`; return; }
+
+        let baris = dataKategori.map(k => {
+            let masuk = dataTransaksi.filter(t => t.jenis === k.nama_kategori).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
+            let keluar = dataTransaksiKeluar.filter(t => t.jenis === k.nama_kategori).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
+            let sisa = masuk - keluar;
+            let nilai = sisa * (parseFloat(k.harga) || 0);
+            return { jenis_material: k.jenis_material || '-', nama_kategori: k.nama_kategori, masuk, keluar, sisa, nilai };
+        }).sort((a, b) => b.sisa - a.sisa);
+
+        let totalSisa = baris.reduce((a, b) => a + b.sisa, 0);
+        let totalNilai = baris.reduce((a, b) => a + b.nilai, 0);
+        document.getElementById('stock-total-kg').innerText = totalSisa.toFixed(2) + ' Kg';
+        document.getElementById('stock-total-rp').innerText = 'Rp ' + Math.round(totalNilai).toLocaleString('id-ID');
+
+        tbody.innerHTML = baris.map(b => {
+            let warnaSisa = b.sisa <= 0 ? 'text-muted' : (b.sisa < 5 ? 'text-warning' : 'text-success');
+            return `<tr>
+                <td class="align-middle text-muted">${b.jenis_material}</td>
+                <td class="align-middle fw-bold" style="color: var(--primary-dark);">${b.nama_kategori}</td>
+                <td class="align-middle text-end">${b.masuk.toFixed(2)}</td>
+                <td class="align-middle text-end">${b.keluar.toFixed(2)}</td>
+                <td class="align-middle text-end fw-bold ${warnaSisa}">${b.sisa.toFixed(2)} Kg</td>
+                <td class="align-middle text-end">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td>
+            </tr>`;
+        }).join('') || `<tr><td colspan="6" class="text-center text-muted py-5">Belum ada aktivitas setoran.</td></tr>`;
     }
 
     function updateDropdownKategori() {

@@ -113,13 +113,14 @@ const AdapterAPI = {
 
   // ================== DATA UNTUK UNIT.HTML ==================
   async getBundleBSU(idUnit) {
-    const [{ data: nasabahList }, { data: transaksi }, { data: kategori }, { data: unitRow }] = await Promise.all([
+    const [{ data: nasabahList }, { data: transaksi }, { data: transaksiKeluar }, { data: kategori }, { data: unitRow }] = await Promise.all([
       sb.from('nasabah').select('*').eq('id_unit', idUnit),
       sb.from('transaksi').select('*').eq('id_unit', idUnit).eq('level', 'nasabah_ke_unit'),
+      sb.from('transaksi').select('*').eq('id_unit', idUnit).eq('level', 'unit_ke_induk'),
       sb.from('kategori').select('*'),
       sb.from('bsu').select('*').eq('id', idUnit)
     ]);
-    return { nasabah: nasabahList || [], transaksi: transaksi || [], kategori: kategori || [], unit: unitRow || [] };
+    return { nasabah: nasabahList || [], transaksi: transaksi || [], transaksiKeluar: transaksiKeluar || [], kategori: kategori || [], unit: unitRow || [] };
   },
 
   async tambahNasabah({ id, id_unit, nama, hp }) {
