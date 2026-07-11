@@ -824,7 +824,7 @@
                 <div class="panel-header"><h2>📝 CATAT TRANSAKSI UNIT (BSU)</h2></div>
                 <form id="formTransaksi" style="margin-top:10px;" onsubmit="return false;">
                     <div class="form-group"><label>Tanggal Transaksi</label><input type="date" id="trxTanggal" class="form-control" required></div>
-                    <div class="form-group"><label>Pilih Unit BSU</label><select id="trxBsu" class="form-control" required></select></div>
+                    <div class="form-group"><label>Pilih Unit BSU</label><select id="trxBsu" class="form-control" required onchange="renderStockTrxBsu()"></select></div>
                     <div class="form-group"><label>Jenis Aktivitas</label><select id="trxJenis" class="form-control" onchange="ubahFormTransaksi()" required><option value="setor">Setoran Sampah (Saldo Masuk)</option><option value="tarik">Penarikan Saldo (Saldo Keluar)</option></select></div>
                     <div id="areaSetor">
                         <div class="form-group"><label>Jenis Material Utama</label><select id="trxJenisMaterialUtama" class="form-control" onchange="filterProdukTransaksi()" required><option value="Plastik">Plastik</option></select></div>
@@ -843,6 +843,32 @@
                 <p id="riwayatSetoranCounter" style="margin:0 0 16px; font-size:11.5px; font-weight:700; color:var(--text-muted);">Memuat data...</p>
                 <div id="feedRiwayatSetoranTrx" class="trx-feed" style="flex:1; overflow-y:auto; max-height: 460px; padding-right:4px;">
                     <div style="text-align:center; padding:36px; color:var(--text-muted);">Memuat data...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-top:24px;" id="panelStockTrxBsu">
+            <div class="panel-header">
+                <h2>📦 STOCK SAMPAH BSU: <span id="stockTrxBsuNama" style="color:var(--accent);">Belum Dipilih</span></h2>
+            </div>
+            <p style="margin:-8px 0 16px; font-size:12px; color:var(--text-muted);">Referensi sebelum mencatat setoran: sampah apa saja yang masih ada di gudang BSU yang dipilih di atas.</p>
+            <div id="stockTrxBsuKosong" style="text-align:center; padding:24px; color:var(--text-muted);">Pilih Unit BSU di form sebelah kiri untuk melihat stock sampahnya.</div>
+            <div id="stockTrxBsuIsi" style="display:none;">
+                <div class="grid-2" style="margin-bottom:20px;">
+                    <div class="card card-green">
+                        <h3>Total Sisa Stock (KG)</h3>
+                        <p id="stockTrxTotalKg">0</p>
+                    </div>
+                    <div class="card card-blue">
+                        <h3>Estimasi Nilai Stock (Rp)</h3>
+                        <p id="stockTrxTotalRp">Rp 0</p>
+                    </div>
+                </div>
+                <div class="table-container" style="max-height: 360px; overflow-y:auto;">
+                    <table>
+                        <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>Jenis</th><th>Nama Material</th><th class="text-right">Masuk (Kg)</th><th class="text-right">Sudah ke Induk (Kg)</th><th class="text-right">Sisa Stock (Kg)</th><th class="text-right">Estimasi Nilai</th></tr></thead>
+                        <tbody id="tbodyStockTrxBsu"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -2393,6 +2419,56 @@
         .catch(e=>alert('Error: ' + e)).finally(()=>{ btn.innerText = 'SIMPAN PERUBAHAN'; btn.disabled = false; });
     }
 
+    function renderStockTrxBsu() {
+        let bsuSelect = document.getElementById('trxBsu');
+        let namaBsu = bsuSelect ? bsuSelect.value : '';
+        let elKosong = document.getElementById('stockTrxBsuKosong');
+        let elIsi = document.getElementById('stockTrxBsuIsi');
+        let elNama = document.getElementById('stockTrxBsuNama');
+
+        if (!namaBsu) {
+            if(elNama) elNama.innerText = 'Belum Dipilih';
+            if(elKosong) elKosong.style.display = 'block';
+            if(elIsi) elIsi.style.display = 'none';
+            return;
+        }
+
+        if(elNama) elNama.innerText = namaBsu;
+        if(elKosong) elKosong.innerHTML = '<div style="text-align:center; padding:24px; color:var(--text-muted);">Memuat data stock...</div>';
+        if(elKosong) elKosong.style.display = 'block';
+        if(elIsi) elIsi.style.display = 'none';
+
+        AdapterAPI.getTransaksiInternalBSU(namaBsu)
+        .then(res => {
+            let trxMasuk = res.transaksi || [];
+            let trxKeluar = globalTransaksi.filter(t => t.nama === namaBsu && t.total > 0 && t.berat > 0);
+
+            let baris = (globalKategori || []).map(k => {
+                let masuk = trxMasuk.filter(t => t.jenis === k.nama_kategori).reduce((a, t) => a + (parseFloat(t.berat)||0), 0);
+                let keluar = trxKeluar.filter(t => t.jenis === k.nama_kategori).reduce((a, t) => a + (parseFloat(t.berat)||0), 0);
+                let sisa = masuk - keluar;
+                let nilai = sisa * (parseFloat(k.harga)||0);
+                return { jenis_material: k.jenis_material || '-', nama_kategori: k.nama_kategori, masuk, keluar, sisa, nilai };
+            }).filter(b => b.masuk > 0 || b.keluar > 0).sort((a,b) => b.sisa - a.sisa);
+
+            let totalSisa = baris.reduce((a,b) => a + b.sisa, 0);
+            let totalNilai = baris.reduce((a,b) => a + b.nilai, 0);
+            document.getElementById('stockTrxTotalKg').innerText = totalSisa.toFixed(1);
+            document.getElementById('stockTrxTotalRp').innerText = 'Rp ' + Math.round(totalNilai).toLocaleString('id-ID');
+
+            document.getElementById('tbodyStockTrxBsu').innerHTML = baris.map(b => {
+                let warna = b.sisa <= 0 ? 'text-muted' : (b.sisa < 5 ? 'text-warning' : 'text-success');
+                return `<tr><td>${b.jenis_material}</td><td style="font-weight:700;">${b.nama_kategori}</td><td class="text-right">${b.masuk.toLocaleString('id-ID')}</td><td class="text-right">${b.keluar.toLocaleString('id-ID')}</td><td class="text-right ${warna}" style="font-weight:700;">${b.sisa.toLocaleString('id-ID')} Kg</td><td class="text-right">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td></tr>`;
+            }).join('') || '<tr><td colspan="6" class="text-center text-muted">Belum ada aktivitas untuk BSU ini</td></tr>';
+
+            if(elKosong) elKosong.style.display = 'none';
+            if(elIsi) elIsi.style.display = 'block';
+        })
+        .catch(e => {
+            if(elKosong) elKosong.innerHTML = '<div style="text-align:center; padding:24px; color:var(--danger);">⚠️ Gagal memuat data stock: ' + e + '</div>';
+        });
+    }
+
     function renderMonitoringBsu(namaBsu) {
         if(!namaBsu) return;
         document.getElementById('areaMonitoringData').style.display = 'block';
@@ -2776,6 +2852,7 @@
             let el = document.getElementById(id);
             if(el) { let prev = el.value; el.innerHTML = opts; if(prev) el.value = prev; }
         });
+        renderStockTrxBsu();
         renderRiwayatSetoranTrx();
         renderSeluruhRiwayatSetoranBsu();
 
