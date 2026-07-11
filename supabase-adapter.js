@@ -133,9 +133,9 @@ const AdapterAPI = {
     return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
   },
 
-  async tambahTransaksiUnit({ id, id_unit, tgl, nama, jenis, berat, total }) {
+  async tambahTransaksiUnit({ id, id_unit, tgl, nama, jenis, berat, total, kelompok_id }) {
     const { error } = await sb.from('transaksi').insert({
-      id: String(id), id_unit, level: 'nasabah_ke_unit', nama, tgl, jenis, berat, total
+      id: String(id), id_unit, level: 'nasabah_ke_unit', nama, tgl, jenis, berat, total, kelompok_id: kelompok_id || null
     });
     return error ? 'Gagal: ' + error.message : 'Sukses';
   }

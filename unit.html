@@ -309,10 +309,10 @@
                     <div class="card p-4 p-md-5">
                         <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-basket me-2 text-success"></i>Formulir Input Timbangan</h5>
                         <form id="formSetor" onsubmit="simpanSetoran(event)">
-                            <div class="mb-4"><label>Identitas Nasabah</label><select id="pilihNasabah" class="form-select" required></select></div>
+                            <div class="mb-4"><label>Identitas Nasabah</label><select id="pilihNasabah" class="form-select" required onchange="onGantiNasabahSetor()"></select></div>
                             <div class="mb-4">
                                 <label>Pilih Jenis Material</label>
-                                <select id="pilihJenisMaterialSetor" class="form-select" onchange="filterDropdownKategori()" required>
+                                <select id="pilihJenisMaterialSetor" class="form-select" onchange="filterDropdownKategori()">
                                     <option value="" disabled selected>-- Klik Pilih Jenis Material --</option>
                                     <option value="Plastik">Plastik</option>
                                     <option value="Botol Kaca">Botol Kaca</option>
@@ -323,15 +323,27 @@
                                     <option value="Minyak">Minyak</option>
                                 </select>
                             </div>
-                            <div class="mb-4"><label>Nama Material</label><select id="pilihSampah" class="form-select" required></select></div>
-                            <div class="mb-5">
+                            <div class="mb-4"><label>Nama Material</label><select id="pilihSampah" class="form-select"></select></div>
+                            <div class="mb-4">
                                 <label>Volume Timbangan Bersih (Gunakan "." sebagai pengganti Koma)</label>
                                 <div class="input-group">
-                                    <input type="number" step="any" min="0" id="beratSampah" class="form-control" placeholder="Contoh: 2.6 atau 0.007" required>
+                                    <input type="number" step="any" min="0" id="beratSampah" class="form-control" placeholder="Contoh: 2.6 atau 0.007">
                                     <span class="input-group-text bg-white fw-bold" style="border-color: var(--border-color); color: var(--text-muted);">Kg</span>
+                                    <button type="button" class="btn btn-outline-success" onclick="tambahKeKeranjang()"><i class="bi bi-plus-lg me-1"></i>Tambah</button>
                                 </div>
+                                <small class="text-muted">Untuk 1 nasabah dengan beberapa jenis sampah sekaligus: klik <b>Tambah</b> tiap selesai isi 1 jenis, ulangi untuk jenis berikutnya, baru klik <b>Simpan Semua Setoran</b> di akhir — struknya akan digabung jadi satu.</small>
                             </div>
-                            <button type="submit" class="btn btn-success w-100 py-3"><i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran</button>
+
+                            <div id="areaKeranjangSetor" class="mb-4" style="display:none;">
+                                <label class="fw-bold">Daftar Material yang Akan Disetor</label>
+                                <div class="table-responsive"><table class="table table-sm mb-2">
+                                    <thead><tr><th>Jenis Material</th><th>Berat</th><th class="text-end">Subtotal</th><th></th></tr></thead>
+                                    <tbody id="tabelKeranjangSetor"></tbody>
+                                </table></div>
+                                <div class="text-end fw-bold" id="totalKeranjangSetor" style="color: var(--primary-dark);"></div>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100 py-3 mt-3"><i class="bi bi-check-circle me-2"></i>Simpan Semua Setoran</button>
                         </form>
                     </div>
                 </div>
@@ -629,14 +641,32 @@
         if(!tbody) return;
         tbody.innerHTML = '';
         if(dataTransaksi.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">Belum ada aktivitas.</td></tr>`;
-        dataTransaksi.slice().reverse().slice(0, 10).forEach((t, i) => {
-            let indexAsli = dataTransaksi.length - 1 - i; let absTotal = Math.abs(t.total); let sign = t.total < 0 ? '-' : ''; let colorClass = t.total < 0 ? 'text-danger' : 'text-success'; let beratHtml = t.jenis !== 'Penarikan Tunai' ? `<br><small class="text-muted fw-normal">${t.berat} Kg</small>` : '';
-            tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${t.jenis}</span></td>
-                <td class="fw-bold ${colorClass} align-middle">${sign} Rp ${absTotal.toLocaleString('id-ID')} ${beratHtml}</td>
-                <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStruk(${indexAsli})"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
-                <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStruk(${indexAsli})"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
-        });
+
+        let sudahDitampilkan = new Set(); let barisDitampilkan = 0;
+        for (let i = dataTransaksi.length - 1; i >= 0 && barisDitampilkan < 10; i--) {
+            let t = dataTransaksi[i];
+            if (t.kelompok_id) {
+                if (sudahDitampilkan.has(t.kelompok_id)) continue;
+                sudahDitampilkan.add(t.kelompok_id);
+                let items = dataTransaksi.filter(x => x.kelompok_id === t.kelompok_id);
+                let totalNominal = items.reduce((a, x) => a + x.total, 0);
+                let totalBerat = items.reduce((a, x) => a + x.berat, 0);
+                tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${items.length} jenis material</span></td>
+                    <td class="fw-bold text-success align-middle">Rp ${totalNominal.toLocaleString('id-ID')}<br><small class="text-muted fw-normal">${totalBerat.toFixed(2)} Kg</small></td>
+                    <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStrukGrup('${escAttrJs(t.kelompok_id)}')"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
+                    <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStrukGrup('${escAttrJs(t.kelompok_id)}')"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
+            } else {
+                let absTotal = Math.abs(t.total); let sign = t.total < 0 ? '-' : ''; let colorClass = t.total < 0 ? 'text-danger' : 'text-success'; let beratHtml = t.jenis !== 'Penarikan Tunai' ? `<br><small class="text-muted fw-normal">${t.berat} Kg</small>` : '';
+                tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${t.jenis}</span></td>
+                    <td class="fw-bold ${colorClass} align-middle">${sign} Rp ${absTotal.toLocaleString('id-ID')} ${beratHtml}</td>
+                    <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStruk(${i})"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
+                    <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStruk(${i})"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
+            }
+            barisDitampilkan++;
+        }
     }
+
+    function escAttrJs(str) { return String(str).replace(/'/g, "\\'"); }
 
     // ==========================================
     // FUNGSI LAINNYA LENGKAP
@@ -722,15 +752,121 @@
         dataNasabah.forEach(n => sel.innerHTML += `<option value="${n.nama}">${n.nama}</option>`);
     }
 
-    function simpanSetoran(e) { 
-        e.preventDefault(); let nama = document.getElementById('pilihNasabah').value; let selSampah = document.getElementById('pilihSampah'); 
-        if (!nama || selSampah.value === "") return alert("Harap lengkapi form!"); 
-        let jenisSampah = selSampah.options[selSampah.selectedIndex].text; let harga = parseInt(selSampah.value); let berat = parseFloat(document.getElementById('beratSampah').value); 
-        let total = harga * berat; let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0'); 
+    let keranjangSetor = [];
+
+    function ambilItemFormSetorSaatIni() {
+        let selSampah = document.getElementById('pilihSampah');
+        let berat = parseFloat(document.getElementById('beratSampah').value);
+        if (!selSampah || !selSampah.value || isNaN(berat) || berat <= 0) return null;
+        let jenisSampah = selSampah.options[selSampah.selectedIndex].text;
+        let harga = parseInt(selSampah.value);
         let jenisBersih = jenisSampah.split(' (')[0];
-        let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...'; 
-        AdapterAPI.tambahTransaksiUnit({ id: Date.now(), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: jenisBersih, berat: berat, total: total })
-            .then(response => { alert(`Transaksi Berhasil! Struk bisa dicetak/dikirim WA di tabel Riwayat Transaksi di bawah.`); document.getElementById('formSetor').reset(); loadDataDatabase(); }).finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Konfirmasi Setoran'; }); 
+        return { jenis: jenisBersih, berat: berat, total: harga * berat };
+    }
+
+    function tambahKeKeranjang() {
+        let nama = document.getElementById('pilihNasabah').value;
+        if (!nama) return alert('Pilih nasabah terlebih dahulu.');
+        let item = ambilItemFormSetorSaatIni();
+        if (!item) return alert('Lengkapi Jenis Material, Nama Material, dan Volume terlebih dahulu.');
+        keranjangSetor.push(item);
+        document.getElementById('pilihJenisMaterialSetor').value = '';
+        updateDropdownKategori();
+        document.getElementById('beratSampah').value = '';
+        renderKeranjangSetor();
+    }
+
+    function hapusItemKeranjang(idx) {
+        keranjangSetor.splice(idx, 1);
+        renderKeranjangSetor();
+    }
+
+    function renderKeranjangSetor() {
+        let area = document.getElementById('areaKeranjangSetor');
+        let tbody = document.getElementById('tabelKeranjangSetor');
+        if (!area || !tbody) return;
+        if (keranjangSetor.length === 0) { area.style.display = 'none'; tbody.innerHTML = ''; return; }
+        area.style.display = 'block';
+        tbody.innerHTML = keranjangSetor.map((it, i) => `<tr><td>${it.jenis}</td><td>${it.berat} Kg</td><td class="text-end">Rp ${it.total.toLocaleString('id-ID')}</td><td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="hapusItemKeranjang(${i})">&times;</button></td></tr>`).join('');
+        let total = keranjangSetor.reduce((a, it) => a + it.total, 0);
+        document.getElementById('totalKeranjangSetor').innerText = 'Total: Rp ' + total.toLocaleString('id-ID');
+    }
+
+    function onGantiNasabahSetor() {
+        if (keranjangSetor.length > 0) {
+            alert('Daftar material sebelumnya dikosongkan karena nasabah diganti.');
+            keranjangSetor = [];
+            renderKeranjangSetor();
+        }
+    }
+
+    function simpanSetoran(e) { 
+        e.preventDefault();
+        let nama = document.getElementById('pilihNasabah').value;
+        if (!nama) return alert('Harap pilih nasabah!');
+
+        let itemSaatIni = ambilItemFormSetorSaatIni();
+        let semuaItem = keranjangSetor.slice();
+        if (itemSaatIni) semuaItem.push(itemSaatIni);
+        if (semuaItem.length === 0) return alert('Harap lengkapi minimal 1 material untuk disetor!');
+
+        let now = new Date();
+        let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        let kelompokId = semuaItem.length > 1 ? ('GRP-' + Date.now()) : null;
+
+        let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...';
+        Promise.all(semuaItem.map((item, i) =>
+            AdapterAPI.tambahTransaksiUnit({ id: Date.now() + '-' + i, id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: item.jenis, berat: item.berat, total: item.total, kelompok_id: kelompokId })
+        )).then(() => {
+            alert(`Setoran Berhasil disimpan (${semuaItem.length} jenis material)! Struk bisa dicetak/dikirim WA di tabel Riwayat Transaksi di bawah.`);
+            keranjangSetor = [];
+            renderKeranjangSetor();
+            document.getElementById('formSetor').reset();
+            updateDropdownKategori();
+            loadDataDatabase();
+        }).catch(err => alert('Gagal menyimpan: ' + err))
+          .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Simpan Semua Setoran'; });
+    }
+
+    function cetakPdfStrukGrup(kelompokId) {
+        let items = dataTransaksi.filter(x => x.kelompok_id === kelompokId);
+        if (items.length === 0) return alert('Data struk tidak ditemukan.');
+        let nama = items[0].nama; let tgl = items[0].tgl;
+        let totalNominal = items.reduce((a, x) => a + x.total, 0);
+        let baris = items.map(it => `<tr><td style="padding:4px 0;">${it.jenis}<br><small style="color:#64748b;">${it.berat} Kg</small></td><td style="text-align:right;padding:4px 0;">Rp ${Math.abs(it.total).toLocaleString('id-ID')}</td></tr>`).join('');
+
+        let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:320px;margin:0 auto;padding:25px;border:1px solid #e2e8f0;border-radius:12px;">
+            <h3 style="text-align:center;margin:0;font-weight:800;font-size:18px;">BANK SAMPAH UNIT ${CURRENT_UNIT_NAMA.toUpperCase()}</h3>
+            <p style="text-align:center;margin:5px 0 15px 0;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p>
+            <hr style="border-top:1px dashed #cbd5e1;">
+            <table style="width:100%;font-size:14px;margin:10px 0;">
+                <tr><td style="color:#64748b;">Tgl</td><td style="text-align:right;font-weight:600;">${tgl}</td></tr>
+                <tr><td style="color:#64748b;">Nasabah</td><td style="text-align:right;font-weight:600;">${nama}</td></tr>
+            </table>
+            <hr style="border-top:1px dashed #cbd5e1;">
+            <table style="width:100%;font-size:13px;margin:10px 0;">${baris}</table>
+            <hr style="border-top:1px dashed #cbd5e1;">
+            <div style="display:flex;justify-content:space-between;font-weight:800;margin-top:15px;color:#059669;">
+                <span>SETORAN MATERIAL</span><span>Rp ${totalNominal.toLocaleString('id-ID')}</span>
+            </div>
+        </div>`;
+
+        document.getElementById('area-laporan-a4').innerHTML = html;
+        document.body.className = 'mode-cetak';
+        window.print();
+        document.body.className = '';
+    }
+
+    function kirimWaStrukGrup(kelompokId) {
+        let items = dataTransaksi.filter(x => x.kelompok_id === kelompokId);
+        if (items.length === 0) return alert('Data struk tidak ditemukan.');
+        let nama = items[0].nama; let tgl = items[0].tgl;
+        let n = dataNasabah.find(x => x.nama === nama); let hp = n && n.hp ? String(n.hp).trim() : '';
+        if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
+        let totalNominal = items.reduce((a, x) => a + x.total, 0);
+        let rincian = items.map(it => `▪ ${it.jenis}: ${it.berat} Kg (Rp ${Math.abs(it.total).toLocaleString('id-ID')})`).join('\n');
+        let pesan = `*STRUK BANK SAMPAH*\nTgl: ${tgl}\nNasabah: *${nama}*\n\n${rincian}\n\n*TOTAL: Rp ${totalNominal.toLocaleString('id-ID')}*`;
+        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function cetakPdfStruk(index) {
