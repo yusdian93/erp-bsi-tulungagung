@@ -133,38 +133,15 @@
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memeriksa Database...';
 
-            AdapterAPI.getDataLogin()
+            AdapterAPI.loginServer(user, pass)
                 .then(data => {
-                    // CEK 1: ADMIN PUSAT (BSI)
-                    let idAdminAsli = data.admin_user ? String(data.admin_user).trim() : 'admin';
-                    let passAdminAsli = data.admin_pass ? String(data.admin_pass).trim() : 'admin123';
-
-                    if (user.toLowerCase() === idAdminAsli.toLowerCase()) {
-                        if (pass === passAdminAsli) {
-                            localStorage.setItem('ROLE_PENGGUNA', 'BSI');
-                            localStorage.setItem('ID_UNIT_PENGGUNA', 'PUSAT');
-                            window.location.href = 'induk.html';
-                        } else {
-                            alert('Akses Ditolak: Kata Sandi Admin Pusat salah!');
-                        }
-                        return; 
-                    }
-
-                    // CEK 2: PENGURUS UNIT (BSU)
-                    let dataBSU = data.nasabah || [];
-                    let bsuDitemukan = dataBSU.find(n => String(n.id).trim().toLowerCase() === user.toLowerCase());
-
-                    if (bsuDitemukan) {
-                        if (String(bsuDitemukan.password).trim() === pass) {
-                            localStorage.setItem('ROLE_PENGGUNA', 'BSU');
-                            localStorage.setItem('ID_UNIT_PENGGUNA', bsuDitemukan.id);
-                            localStorage.setItem('NAMA_UNIT_PENGGUNA', bsuDitemukan.nama);
-                            window.location.href = 'unit.html';
-                        } else {
-                            alert('Akses Ditolak: Kata Sandi untuk BSU tersebut salah!');
-                        }
+                    if (data.ok) {
+                        localStorage.setItem('ROLE_PENGGUNA', data.role);
+                        localStorage.setItem('ID_UNIT_PENGGUNA', data.id_unit);
+                        if (data.role === 'BSU') localStorage.setItem('NAMA_UNIT_PENGGUNA', data.nama);
+                        window.location.href = data.role === 'BSI' ? 'induk.html' : 'unit.html';
                     } else {
-                        alert('Akses Ditolak: ID Pengguna tidak terdaftar dalam sistem!');
+                        alert('Akses Ditolak: ' + (data.error || 'Login gagal.'));
                     }
                 })
                 .catch(error => {

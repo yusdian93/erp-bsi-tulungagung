@@ -12,16 +12,18 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const AdapterAPI = {
 
   // ================== LOGIN (dipakai index.html) ==================
-  async getDataLogin() {
-    const [{ data: admin }, { data: bsuList }] = await Promise.all([
-      sb.from('admin').select('*').eq('id', 1).single(),
-      sb.from('bsu').select('*')
-    ]);
-    return {
-      admin_user: admin ? admin.username : 'admin',
-      admin_pass: admin ? admin.password : 'admin123',
-      nasabah: (bsuList || []) // dipakai index.html sebagai daftar BSU untuk cek login
-    };
+  // Password dicek di server (Edge Function), TIDAK PERNAH dikirim mentah ke browser.
+  async loginServer(username, password) {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+        'apikey': SUPABASE_ANON_KEY
+      },
+      body: JSON.stringify({ username, password })
+    });
+    return res.json(); // { ok:true, role, id_unit, nama } atau { ok:false, error }
   },
 
   // ================== DATA UNTUK INDUK.HTML ==================
