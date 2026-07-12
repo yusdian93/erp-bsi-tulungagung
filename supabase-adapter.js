@@ -176,5 +176,42 @@ const AdapterAPI = {
       id: String(id), id_unit, level: 'nasabah_ke_unit', nama, tgl, jenis, berat, total, kelompok_id: kelompok_id || null
     });
     return error ? 'Gagal: ' + error.message : 'Sukses';
+  },
+
+  // ================== INVENTARIS & OPERASIONAL ==================
+  async getInventarisBundle() {
+    const [{ data: alat }, { data: biaya }, { data: pemeliharaan }] = await Promise.all([
+      sb.from('alat').select('*').order('id'),
+      sb.from('biaya_operasional').select('*'),
+      sb.from('pemeliharaan_investasi').select('*')
+    ]);
+    return { alat: alat || [], biaya: biaya || [], pemeliharaan: pemeliharaan || [] };
+  },
+
+  async tambahAlat(form) {
+    const { error } = await sb.from('alat').insert(form);
+    return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
+  },
+  async deleteAlat(id) {
+    const { error } = await sb.from('alat').delete().eq('id', id);
+    return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
+  },
+
+  async tambahBiayaOperasional(form) {
+    const { error } = await sb.from('biaya_operasional').insert({ id: 'BOP-' + Date.now(), ...form });
+    return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
+  },
+  async deleteBiayaOperasional(id) {
+    const { error } = await sb.from('biaya_operasional').delete().eq('id', id);
+    return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
+  },
+
+  async tambahPemeliharaan(form) {
+    const { error } = await sb.from('pemeliharaan_investasi').insert({ id: 'PML-' + Date.now(), ...form });
+    return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
+  },
+  async deletePemeliharaan(id) {
+    const { error } = await sb.from('pemeliharaan_investasi').delete().eq('id', id);
+    return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
   }
 };

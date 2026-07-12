@@ -388,6 +388,15 @@
                 </div>
             </div>
             
+            <div class="nav-group" id="grp-inventaris">
+                <button class="nav-group-header" onclick="toggleGroup('grp-inventaris')">
+                    <span class="gh-ic">🧰</span><span class="gh-label">Inventaris & Operasional</span><span class="gh-arrow">›</span>
+                </button>
+                <div class="nav-group-items">
+                    <button class="nav-btn" data-label="Inventaris & Operasional" data-group="grp-inventaris" onclick="pindahTab('inventaris', this); loadInventarisOperasional();"><span class="nav-ic">🧰</span> Data & Rekap</button>
+                </div>
+            </div>
+
             <div class="nav-group" id="grp-laporan">
                 <button class="nav-group-header" onclick="toggleGroup('grp-laporan')">
                     <span class="gh-ic">📁</span><span class="gh-label">Pusat Laporan</span><span class="gh-arrow">›</span>
@@ -878,6 +887,113 @@
             .tabel-kompak th, .tabel-kompak td { padding: 8px 8px !important; font-size: 11px !important; line-height: 1.35; white-space: normal; word-break: normal; overflow-wrap: break-word; }
             .tabel-kompak th { font-size: 9.5px !important; letter-spacing: 0.3px; }
         </style>
+    </div>
+
+    <div id="inventaris" class="content-section">
+        <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #7c3aed; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">1</span>
+            Data Alat (Inventaris)
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>➕ TAMBAH ALAT</h2></div>
+            <form onsubmit="return false;">
+                <div class="grid-2">
+                    <div class="form-group"><label>Nama Alat</label><input type="text" id="alatNama" class="form-control" placeholder="Contoh: Timbangan Digital"></div>
+                    <div class="form-group"><label>Kode Alat</label><input type="text" id="alatKode" class="form-control" placeholder="Contoh: ALT001"></div>
+                    <div class="form-group"><label>Jumlah</label><input type="number" id="alatJumlah" class="form-control" min="1" value="1"></div>
+                    <div class="form-group"><label>Kondisi</label><select id="alatKondisi" class="form-control"><option>Baru</option><option>Baik</option><option>Perlu Servis</option><option>Rusak</option></select></div>
+                    <div class="form-group"><label>Lokasi</label><input type="text" id="alatLokasi" class="form-control" placeholder="Contoh: Gudang BSI"></div>
+                    <div class="form-group"><label>Keterangan</label><input type="text" id="alatKeterangan" class="form-control" placeholder="Opsional"></div>
+                </div>
+                <button type="button" class="btn-submit" id="btnSimpanAlat" onclick="simpanAlat()">SIMPAN ALAT</button>
+            </form>
+        </div>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>📋 DAFTAR ALAT</h2></div>
+            <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:6%;">No</th><th style="width:20%;">Nama Alat</th><th style="width:12%;">Kode</th><th style="width:8%;">Jumlah</th><th style="width:13%;">Kondisi</th><th style="width:15%;">Lokasi</th><th style="width:18%;">Keterangan</th><th class="text-center" style="width:8%;">Aksi</th></tr></thead>
+                    <tbody id="tbodyDataAlat"><tr><td colspan="8" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #7c3aed; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">2</span>
+            Biaya Operasional
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header" style="flex-wrap:wrap; gap:12px;">
+                <h2>➕ TAMBAH BIAYA</h2>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-size:12px; color:var(--text-muted); white-space:nowrap;">Saldo Awal Kas:</label>
+                    <input type="number" id="biayaSaldoAwal" class="form-control" style="max-width:160px;" placeholder="0" onchange="simpanSaldoAwalBiaya(); renderTabelBiaya();">
+                </div>
+            </div>
+            <form onsubmit="return false;">
+                <div class="grid-2">
+                    <div class="form-group"><label>Tanggal</label><input type="date" id="biayaTanggal" class="form-control"></div>
+                    <div class="form-group"><label>Jenis Biaya</label><input type="text" id="biayaJenis" class="form-control" placeholder="Contoh: Listrik, ATK, Transportasi, Gaji Operator"></div>
+                    <div class="form-group"><label>Keterangan</label><input type="text" id="biayaKeterangan" class="form-control" placeholder="Contoh: Tagihan PLN bulan Juli"></div>
+                    <div class="form-group"><label>Jumlah (Rp)</label><input type="number" id="biayaJumlah" class="form-control" min="0" placeholder="Contoh: 500000"></div>
+                    <div class="form-group"><label>Disetujui Oleh</label><input type="text" id="biayaDisetujui" class="form-control" placeholder="Contoh: Bendahara BSI"></div>
+                </div>
+                <button type="button" class="btn-submit" id="btnSimpanBiaya" onclick="simpanBiayaOperasional()">SIMPAN BIAYA</button>
+            </form>
+        </div>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>📋 DAFTAR BIAYA OPERASIONAL</h2></div>
+            <p style="margin:-8px 0 12px; font-size:11.5px; color:var(--text-muted);">*Kolom "Saldo Akhir" dihitung dari "Saldo Awal Kas" di atas dikurangi biaya secara berjalan (kronologis) — bukan saldo rekening bank sungguhan, murni alat bantu pencatatan.</p>
+            <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:5%;">No</th><th style="width:10%;">Tanggal</th><th style="width:14%;">Jenis Biaya</th><th style="width:22%;">Keterangan</th><th class="text-right" style="width:12%;">Jumlah</th><th style="width:13%;">Disetujui Oleh</th><th class="text-right" style="width:14%;">Saldo Akhir</th><th class="text-center" style="width:10%;">Aksi</th></tr></thead>
+                    <tbody id="tbodyBiayaOperasional"><tr><td colspan="8" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #7c3aed; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">3</span>
+            Pemeliharaan & Investasi Alat
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>➕ TAMBAH CATATAN</h2></div>
+            <form onsubmit="return false;">
+                <div class="grid-2">
+                    <div class="form-group"><label>Tanggal</label><input type="date" id="pmlTanggal" class="form-control"></div>
+                    <div class="form-group"><label>Jenis</label><select id="pmlJenis" class="form-control"><option>Pemeliharaan</option><option>Investasi Alat</option></select></div>
+                    <div class="form-group"><label>Nama Alat</label><select id="pmlNamaAlat" class="form-control"><option value="">-- Pilih dari Data Alat (opsional) --</option></select></div>
+                    <div class="form-group"><label>Atau Nama Alat Baru (jika belum ada di daftar)</label><input type="text" id="pmlNamaAlatManual" class="form-control" placeholder="Ketik manual jika perlu"></div>
+                    <div class="form-group"><label>Keterangan</label><input type="text" id="pmlKeterangan" class="form-control" placeholder="Contoh: Service rutin"></div>
+                    <div class="form-group"><label>Biaya (Rp)</label><input type="number" id="pmlBiaya" class="form-control" min="0" placeholder="Contoh: 1000000"></div>
+                    <div class="form-group"><label>Status</label><select id="pmlStatus" class="form-control"><option>Selesai</option><option>Digunakan</option><option>Dalam Proses</option></select></div>
+                </div>
+                <button type="button" class="btn-submit" id="btnSimpanPml" onclick="simpanPemeliharaan()">SIMPAN CATATAN</button>
+            </form>
+        </div>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>📋 DAFTAR PEMELIHARAAN & INVESTASI</h2></div>
+            <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:5%;">No</th><th style="width:10%;">Tanggal</th><th style="width:13%;">Jenis</th><th style="width:16%;">Nama Alat</th><th style="width:24%;">Keterangan</th><th class="text-right" style="width:12%;">Biaya</th><th style="width:11%;">Status</th><th class="text-center" style="width:9%;">Aksi</th></tr></thead>
+                    <tbody id="tbodyPemeliharaan"><tr><td colspan="8" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #7c3aed; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">4</span>
+            Rekap Bulanan Inventaris & Operasional
+        </h3>
+        <div class="panel">
+            <div class="panel-header"><h2>📊 RINGKASAN PER BULAN</h2></div>
+            <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:20%;">Bulan/Tahun</th><th class="text-right" style="width:22%;">Total Biaya Operasional</th><th class="text-right" style="width:20%;">Total Pemeliharaan Alat</th><th class="text-right" style="width:18%;">Total Investasi Alat</th><th class="text-right" style="width:20%;">Total Pengeluaran</th></tr></thead>
+                    <tbody id="tbodyRekapInventaris"></tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <div id="harga" class="content-section">
@@ -3150,6 +3266,203 @@
 
         let url = hp ? `https://wa.me/${hp}?text=${encodeURIComponent(pesan)}` : `https://wa.me/?text=${encodeURIComponent(pesan)}`;
         window.open(url, '_blank');
+    }
+
+    // =========================================
+    // MODUL INVENTARIS & OPERASIONAL
+    // =========================================
+    let globalAlat = [], globalBiayaOp = [], globalPemeliharaan = [];
+
+    function loadInventarisOperasional() {
+        AdapterAPI.getInventarisBundle().then(res => {
+            globalAlat = res.alat || [];
+            globalBiayaOp = res.biaya || [];
+            globalPemeliharaan = res.pemeliharaan || [];
+
+            let saldoAwalTersimpan = localStorage.getItem('BIAYA_SALDO_AWAL');
+            if (saldoAwalTersimpan !== null) document.getElementById('biayaSaldoAwal').value = saldoAwalTersimpan;
+
+            if (!document.getElementById('biayaTanggal').value) document.getElementById('biayaTanggal').value = new Date().toISOString().slice(0, 10);
+            if (!document.getElementById('pmlTanggal').value) document.getElementById('pmlTanggal').value = new Date().toISOString().slice(0, 10);
+
+            let selAlat = document.getElementById('pmlNamaAlat');
+            selAlat.innerHTML = '<option value="">-- Pilih dari Data Alat (opsional) --</option>' + globalAlat.map(a => `<option value="${escAttr(a.nama_alat)}">${a.nama_alat}</option>`).join('');
+
+            renderTabelAlat();
+            renderTabelBiaya();
+            renderTabelPemeliharaan();
+            renderRekapInventaris();
+        }).catch(e => alert('Gagal memuat data Inventaris & Operasional: ' + e));
+    }
+
+    // ---- Data Alat ----
+    function simpanAlat() {
+        let nama = document.getElementById('alatNama').value.trim();
+        if (!nama) return alert('Nama alat wajib diisi.');
+        let form = {
+            nama_alat: nama,
+            kode_alat: document.getElementById('alatKode').value.trim(),
+            jumlah: parseInt(document.getElementById('alatJumlah').value) || 1,
+            kondisi: document.getElementById('alatKondisi').value,
+            lokasi: document.getElementById('alatLokasi').value.trim(),
+            keterangan: document.getElementById('alatKeterangan').value.trim()
+        };
+        let btn = document.getElementById('btnSimpanAlat'); btn.disabled = true; btn.innerText = 'Menyimpan...';
+        AdapterAPI.tambahAlat(form).then(res => {
+            alert(res);
+            document.getElementById('alatNama').value = ''; document.getElementById('alatKode').value = '';
+            document.getElementById('alatJumlah').value = 1; document.getElementById('alatLokasi').value = '';
+            document.getElementById('alatKeterangan').value = '';
+            loadInventarisOperasional();
+        }).catch(e => alert('Gagal: ' + e)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN ALAT'; });
+    }
+
+    function hapusAlat(id) {
+        if (!confirm('Yakin ingin menghapus data alat ini?')) return;
+        AdapterAPI.deleteAlat(id).then(res => { alert(res); loadInventarisOperasional(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function renderTabelAlat() {
+        let tbody = document.getElementById('tbodyDataAlat');
+        if (globalAlat.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada data alat</td></tr>'; return; }
+        tbody.innerHTML = globalAlat.map((a, i) => `<tr>
+            <td>${i + 1}</td><td style="font-weight:700;">${a.nama_alat}</td><td>${a.kode_alat || '-'}</td><td>${a.jumlah}</td>
+            <td>${a.kondisi || '-'}</td><td>${a.lokasi || '-'}</td><td>${a.keterangan || '-'}</td>
+            <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusAlat(${a.id})">🗑️</button></td>
+        </tr>`).join('');
+    }
+
+    // ---- Biaya Operasional ----
+    function simpanSaldoAwalBiaya() {
+        localStorage.setItem('BIAYA_SALDO_AWAL', document.getElementById('biayaSaldoAwal').value || '0');
+    }
+
+    function simpanBiayaOperasional() {
+        let tanggal = document.getElementById('biayaTanggal').value;
+        let jenis = document.getElementById('biayaJenis').value.trim();
+        let jumlah = parseFloat(document.getElementById('biayaJumlah').value);
+        if (!tanggal) return alert('Tanggal wajib diisi.');
+        if (!jenis) return alert('Jenis biaya wajib diisi.');
+        if (!jumlah || jumlah <= 0) return alert('Jumlah harus lebih dari 0.');
+
+        let form = {
+            tanggal, jenis_biaya: jenis,
+            keterangan: document.getElementById('biayaKeterangan').value.trim(),
+            jumlah, disetujui_oleh: document.getElementById('biayaDisetujui').value.trim()
+        };
+        let btn = document.getElementById('btnSimpanBiaya'); btn.disabled = true; btn.innerText = 'Menyimpan...';
+        AdapterAPI.tambahBiayaOperasional(form).then(res => {
+            alert(res);
+            document.getElementById('biayaJenis').value = ''; document.getElementById('biayaKeterangan').value = '';
+            document.getElementById('biayaJumlah').value = ''; document.getElementById('biayaDisetujui').value = '';
+            loadInventarisOperasional();
+        }).catch(e => alert('Gagal: ' + e)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN BIAYA'; });
+    }
+
+    function hapusBiayaOperasional(id) {
+        if (!confirm('Yakin ingin menghapus catatan biaya ini?')) return;
+        AdapterAPI.deleteBiayaOperasional(id).then(res => { alert(res); loadInventarisOperasional(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function renderTabelBiaya() {
+        let tbody = document.getElementById('tbodyBiayaOperasional');
+        let saldoAwal = parseFloat(document.getElementById('biayaSaldoAwal').value) || 0;
+        if (globalBiayaOp.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada catatan biaya operasional</td></tr>'; return; }
+
+        let terurut = globalBiayaOp.slice().sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal));
+        let saldoBerjalan = saldoAwal;
+        let baris = terurut.map(b => {
+            saldoBerjalan -= (parseFloat(b.jumlah) || 0);
+            return { ...b, saldoAkhir: saldoBerjalan };
+        });
+
+        tbody.innerHTML = baris.slice().reverse().map((b, i) => `<tr>
+            <td>${baris.length - i}</td><td>${new Date(b.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${b.jenis_biaya}</td>
+            <td>${b.keterangan || '-'}</td><td class="text-right" style="color:var(--danger); font-weight:700;">Rp ${parseFloat(b.jumlah).toLocaleString('id-ID')}</td>
+            <td>${b.disetujui_oleh || '-'}</td><td class="text-right" style="font-weight:800;">Rp ${b.saldoAkhir.toLocaleString('id-ID')}</td>
+            <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBiayaOperasional('${escAttr(b.id)}')">🗑️</button></td>
+        </tr>`).join('');
+    }
+
+    // ---- Pemeliharaan & Investasi ----
+    function simpanPemeliharaan() {
+        let tanggal = document.getElementById('pmlTanggal').value;
+        let namaAlat = document.getElementById('pmlNamaAlatManual').value.trim() || document.getElementById('pmlNamaAlat').value;
+        let biaya = parseFloat(document.getElementById('pmlBiaya').value);
+        if (!tanggal) return alert('Tanggal wajib diisi.');
+        if (!namaAlat) return alert('Nama alat wajib diisi (pilih dari daftar atau ketik manual).');
+        if (!biaya || biaya <= 0) return alert('Biaya harus lebih dari 0.');
+
+        let form = {
+            tanggal, jenis: document.getElementById('pmlJenis').value, nama_alat: namaAlat,
+            keterangan: document.getElementById('pmlKeterangan').value.trim(),
+            biaya, status: document.getElementById('pmlStatus').value
+        };
+        let btn = document.getElementById('btnSimpanPml'); btn.disabled = true; btn.innerText = 'Menyimpan...';
+        AdapterAPI.tambahPemeliharaan(form).then(res => {
+            alert(res);
+            document.getElementById('pmlNamaAlatManual').value = ''; document.getElementById('pmlKeterangan').value = '';
+            document.getElementById('pmlBiaya').value = '';
+            loadInventarisOperasional();
+        }).catch(e => alert('Gagal: ' + e)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN CATATAN'; });
+    }
+
+    function hapusPemeliharaan(id) {
+        if (!confirm('Yakin ingin menghapus catatan ini?')) return;
+        AdapterAPI.deletePemeliharaan(id).then(res => { alert(res); loadInventarisOperasional(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function renderTabelPemeliharaan() {
+        let tbody = document.getElementById('tbodyPemeliharaan');
+        if (globalPemeliharaan.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada catatan pemeliharaan/investasi</td></tr>'; return; }
+        let terurut = globalPemeliharaan.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        tbody.innerHTML = terurut.map((p, i) => {
+            let warnaJenis = p.jenis === 'Investasi Alat' ? 'var(--primary)' : '#b45309';
+            return `<tr>
+                <td>${terurut.length - i}</td><td>${new Date(p.tanggal).toLocaleDateString('id-ID')}</td>
+                <td style="color:${warnaJenis}; font-weight:700;">${p.jenis}</td><td style="font-weight:700;">${p.nama_alat}</td>
+                <td>${p.keterangan || '-'}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(p.biaya).toLocaleString('id-ID')}</td>
+                <td>${p.status || '-'}</td>
+                <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPemeliharaan('${escAttr(p.id)}')">🗑️</button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ---- Rekap Bulanan ----
+    function renderRekapInventaris() {
+        let tbody = document.getElementById('tbodyRekapInventaris');
+        let namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+
+        let semuaTgl = [
+            ...globalBiayaOp.map(b => new Date(b.tanggal)),
+            ...globalPemeliharaan.map(p => new Date(p.tanggal))
+        ].filter(d => !isNaN(d));
+
+        if (semuaTgl.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada data</td></tr>'; return; }
+
+        let tglMin = new Date(Math.min(...semuaTgl));
+        let now = new Date();
+        let daftarBulan = [];
+        let cursor = new Date(tglMin.getFullYear(), tglMin.getMonth(), 1);
+        let batasAkhir = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cursor <= batasAkhir) { daftarBulan.push(new Date(cursor)); cursor.setMonth(cursor.getMonth() + 1); }
+        if (daftarBulan.length > 12) daftarBulan = daftarBulan.slice(-12);
+
+        tbody.innerHTML = daftarBulan.slice().reverse().map(bln => {
+            let awal = bln, akhir = new Date(bln.getFullYear(), bln.getMonth() + 1, 1);
+            let totalOp = globalBiayaOp.filter(b => { let d = new Date(b.tanggal); return d >= awal && d < akhir; }).reduce((a, b) => a + (parseFloat(b.jumlah) || 0), 0);
+            let totalPml = globalPemeliharaan.filter(p => { let d = new Date(p.tanggal); return d >= awal && d < akhir && p.jenis === 'Pemeliharaan'; }).reduce((a, p) => a + (parseFloat(p.biaya) || 0), 0);
+            let totalInv = globalPemeliharaan.filter(p => { let d = new Date(p.tanggal); return d >= awal && d < akhir && p.jenis === 'Investasi Alat'; }).reduce((a, p) => a + (parseFloat(p.biaya) || 0), 0);
+            let totalSemua = totalOp + totalPml + totalInv;
+            let label = namaBulan[bln.getMonth()] + ' ' + bln.getFullYear();
+            return `<tr>
+                <td style="font-weight:700;">${label}</td>
+                <td class="text-right">Rp ${totalOp.toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${totalPml.toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${totalInv.toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:800; color:var(--danger);">Rp ${totalSemua.toLocaleString('id-ID')}</td>
+            </tr>`;
+        }).join('');
     }
 
     function renderStockTrxBsu() {
