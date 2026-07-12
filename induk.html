@@ -382,7 +382,6 @@
                     <span class="gh-ic">💳</span><span class="gh-label">Sistem Keuangan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Keuangan" data-group="grp-keuangan" onclick="pindahTab('keuangan', this)"><span class="nav-ic">💰</span> Keuangan</button>
                     <button class="nav-btn" data-label="Saldo/Tabungan BSU" data-group="grp-keuangan" onclick="pindahTab('saldobsu', this); loadSaldoTabunganBsu();"><span class="nav-ic">🏦</span> Saldo/Tabungan BSU</button>
                     <button class="nav-btn" data-label="Saldo/Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();"><span class="nav-ic">💾</span> Saldo/Tabungan BSI</button>
                     <button class="nav-btn" data-label="Arus Kas Induk" data-group="grp-keuangan" onclick="pindahTab('kasinduk', this)"><span class="nav-ic">📑</span> Arus Kas Induk</button>
@@ -718,85 +717,6 @@
         </div>
     </div>
 
-    <div id="keuangan" class="content-section">
-        <div class="cards" style="grid-template-columns: 1fr;">
-            <div class="card card-orange" style="text-align: center; border-left: none; border-top: 6px solid var(--accent); background: linear-gradient(to bottom, #ffffff, #fffbeb);">
-                <h3>NILAI EKONOMI TOTAL (TOTAL KESELURUHAN SALDO BSU)</h3>
-                <p id="valKeuanganTotal" style="font-size: 46px; margin-top: 10px; letter-spacing: -1.5px;">Rp 0</p>
-            </div>
-        </div>
-
-        <div class="panel" style="margin-bottom: 24px; border: 1px solid var(--accent); background: #fffbeb;">
-            <div class="panel-header" style="border-bottom: none; padding-bottom: 0;">
-                <h2 style="color: #b45309;">💳 LAYANAN KEUANGAN & CEK SALDO BSU</h2>
-                <select id="selectKeuanganBsu" class="form-control" style="max-width: 400px; border-color: var(--accent); font-weight: 700;" onchange="prosesCekSaldoBSU(this.value)">
-                    <option value="" disabled selected>-- Memuat Daftar BSU... --</option>
-                </select>
-            </div>
-        </div>
-
-        <div id="areaCekSaldo" style="display:none; animation: slideUp 0.4s ease; margin-bottom: 24px;">
-            <div class="grid-2">
-                <div class="panel">
-                    <div class="panel-header"><h2>💼 INFORMASI REKENING BSU</h2></div>
-                    <div style="background: var(--bg-body); padding: 20px; border-radius: 12px; margin-bottom: 24px; border: 1px solid var(--border);">
-                        <p style="margin:0; font-size:12px; color:var(--text-muted); font-weight:700;">TOTAL SALDO SAAT INI</p>
-                        <h3 id="infoSaldoRp" style="margin:4px 0 16px 0; font-size:36px; color:var(--accent); font-weight:800; letter-spacing:-1px;">Rp 0</h3>
-                        <p style="margin:0; font-size:12px; color:var(--text-muted); font-weight:700;">TOTAL VOLUME SAMPAH MASUK</p>
-                        <h3 id="infoVolumeKg" style="margin:4px 0 0 0; font-size:22px; color:var(--text-main); font-weight:800;">0 Kg</h3>
-                    </div>
-
-                    <div class="panel-header" style="padding-bottom: 12px;"><h2>💸 FORM PENARIKAN SALDO BSU</h2></div>
-                    <div class="form-group">
-                        <label>Nominal Penarikan Tunai (Rp)</label>
-                        <input type="number" id="inputTarikSaldo" class="form-control" placeholder="Contoh: 150000">
-                    </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="btn-submit" onclick="prosesTarikSaldoUi()" id="btnTarikSaldoUi" style="flex: 1; min-width: 140px;">PROSES TARIK SALDO</button>
-                        <button class="btn-sync" onclick="cetakStrukTarik()" id="btnCetakStruk" style="display:none; border-color:var(--secondary); color:var(--secondary);" title="Cetak Struk PDF"><span style="font-size:15px; margin-right:4px;">📄</span> Cetak Struk PDF</button>
-                        <button class="btn-sync" onclick="waStrukTarik()" id="btnWaStruk" style="display:none; background:#dcfce7; color:#166534; border-color:#86efac;" title="Kirim Struk via WA"><span style="font-size:15px; margin-right:4px;">💬</span> WA Struk</button>
-                    </div>
-                </div>
-
-                <div class="panel">
-                    <div class="panel-header" style="margin-bottom: 16px;">
-                        <h2>📝 LOG RIWAYAT TRANSAKSI BSU - BSI</h2>
-                    </div>
-                    <div style="display: flex; gap: 10px; margin-bottom: 16px; align-items: center; flex-wrap: wrap; background: #f8fafc; padding: 12px; border-radius: 10px; border: 1px solid var(--border);">
-                        <div style="flex-grow: 1; display:flex; gap:8px;">
-                            <input type="date" id="filterTglRiwayat" class="form-control" style="padding:8px 12px; max-width:140px;" onchange="renderRiwayatBsu('tgl')" title="Filter Harian">
-                            <input type="month" id="filterBulanRiwayat" class="form-control" style="padding:8px 12px; max-width:140px;" onchange="renderRiwayatBsu('bulan')" title="Filter Bulanan">
-                            <button class="btn-sync" style="padding:8px 16px;" onclick="renderRiwayatBsu('semua')">Semua Waktu</button>
-                        </div>
-                    </div>
-                    <div class="table-container" style="overflow-y: auto; max-height: 400px;">
-                        <table id="tabelRiwayatBsuForPrint">
-                            <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>WAKTU</th><th>KETERANGAN TRANSAKSI</th><th class="text-right">MUTASI</th><th class="text-right">SALDO BERJALAN</th></tr></thead>
-                            <tbody id="tabelRiwayatBsu"><tr><td colspan="4" class="text-center">Memuat riwayat transaksi...</td></tr></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="grid-2">
-            <div class="panel">
-                <div class="panel-header"><h2>💰 SALDO PER BSU</h2></div>
-                <div class="table-container" style="overflow-y: auto; max-height: 400px;">
-                    <table>
-                        <thead><tr><th>NAMA BSU</th><th class="text-right">TOTAL SALDO (Rp)</th></tr></thead>
-                        <tbody id="tabelKeuanganSaldo"><tr><td colspan="2" class="text-center">Memuat data...</td></tr></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><h2>🍩 DISTRIBUSI TABUNGAN</h2></div>
-                <div style="display: flex; justify-content: center; align-items: center; height: 350px;">
-                    <canvas id="keuanganPieChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <div id="saldobsu" class="content-section">
         <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
