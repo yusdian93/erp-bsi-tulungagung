@@ -786,7 +786,7 @@
         if(nama === '') return alert("Nama tidak boleh kosong!");
         let btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.disabled = true; btnSubmit.innerHTML = 'Menyimpan...';
-        AdapterAPI.tambahNasabah({ id: 'NSB-' + Date.now(), id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
+        AdapterAPI.tambahNasabah({ id: 'NSB-' + String(Date.now()).slice(-5), id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
             .then(() => { alert('Berhasil! Data nasabah telah direkam.'); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
             .catch(error => alert('Gagal menyimpan.'))
             .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data Nasabah'; });
