@@ -93,6 +93,16 @@ const AdapterAPI = {
     });
     return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
   },
+
+  // Tarik Tabungan BSU (BSI membayar tunai/transfer ke BSU, mengurangi saldo BSU di BSI)
+  async tambahPenarikanBSU({ nomorTransaksi, tgl, nama, id_unit, jumlah, metode, status, disetujuiOleh }) {
+    const { error } = await sb.from('transaksi').insert({
+      id: nomorTransaksi, id_unit, level: 'unit_ke_induk', nama, tgl,
+      jenis: 'Penarikan Tabungan', berat: 0, total: -Math.abs(jumlah),
+      metode, status, disetujui_oleh: disetujuiOleh
+    });
+    return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
+  },
   async updateTransaksi({ id, tgl, jenis, berat, total }) {
     const { error } = await sb.from('transaksi').update({ tgl, jenis, berat, total }).eq('id', id);
     return error ? 'Gagal: ' + error.message : 'Sukses diperbarui';

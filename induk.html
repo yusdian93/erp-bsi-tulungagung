@@ -383,6 +383,7 @@
                 </button>
                 <div class="nav-group-items">
                     <button class="nav-btn" data-label="Saldo/Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();"><span class="nav-ic">💾</span> Saldo/Tabungan BSI</button>
+                    <button class="nav-btn" data-label="Tarik Tabungan BSU" data-group="grp-keuangan" onclick="pindahTab('tarikbsu', this); loadTarikTabunganBSU();"><span class="nav-ic">💸</span> Tarik Tabungan BSU</button>
                     <button class="nav-btn" data-label="Arus Kas Induk" data-group="grp-keuangan" onclick="pindahTab('kasinduk', this)"><span class="nav-ic">📑</span> Arus Kas Induk</button>
                 </div>
             </div>
@@ -789,6 +790,75 @@
             <div class="panel">
                 <div class="panel-header"><h2>📈 TREN TABUNGAN BSU DI BSI</h2></div>
                 <div style="height:380px;"><canvas id="chartTrenSaldoBSI"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="tarikbsu" class="content-section">
+        <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #dc2626; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">1</span>
+            Formulir Penarikan Tabungan (BSI &rarr; BSU)
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>💸 PROSES PENARIKAN</h2></div>
+            <form id="formTarikBSU" onsubmit="return false;">
+                <div class="grid-2">
+                    <div>
+                        <div class="form-group">
+                            <label>Pilih BSU</label>
+                            <select id="tarikBsuPilih" class="form-control" required onchange="ubahBsuTarikBSU()"><option value="">-- Pilih BSU --</option></select>
+                        </div>
+                        <div id="tarikBsuIdentitas" style="display:none; background: var(--bg-body); padding:14px 18px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
+                            <div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="color:var(--text-muted); font-size:12.5px;">Nomor Rekening / ID BSU</span><b id="tarikBsuId">-</b></div>
+                            <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted); font-size:12.5px;">Saldo Tersedia Saat Ini</span><b id="tarikBsuSaldo" style="color:var(--secondary);">Rp 0</b></div>
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Penarikan (Rp)</label>
+                            <input type="number" id="tarikBsuJumlah" class="form-control" placeholder="Contoh: 1500000" min="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Penarikan</label>
+                            <input type="date" id="tarikBsuTanggal" class="form-control" required>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>Metode Penarikan</label>
+                            <select id="tarikBsuMetode" class="form-control" required>
+                                <option value="Tunai">Tunai (Kas Langsung)</option>
+                                <option value="Transfer Bank">Transfer ke Rekening BSU</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Nama Pengelola BSI yang Menyetujui</label>
+                            <input type="text" id="tarikBsuDisetujui" class="form-control" placeholder="Contoh: Admin BSI / Bendahara BSI" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Status Transaksi</label>
+                            <select id="tarikBsuStatus" class="form-control" required>
+                                <option value="Disetujui">Disetujui</option>
+                                <option value="Tertunda">Tertunda</option>
+                                <option value="Ditolak">Ditolak</option>
+                            </select>
+                        </div>
+                        <p style="font-size:11.5px; color:var(--text-muted); margin-top:8px;">⚠️ Catatan: begitu disimpan, jumlah penarikan langsung mengurangi saldo tabungan BSU di sistem (dianggap kas/dana sudah benar-benar diserahkan). Status "Tertunda"/"Ditolak" tetap tercatat untuk keperluan arsip, tapi saldo tetap ikut berkurang — pastikan isi form saat serah-terima sudah pasti terjadi.</p>
+                    </div>
+                </div>
+                <button type="button" class="btn-submit" id="btnSimpanTarikBSU" onclick="simpanTarikBSU()" style="margin-top:10px; background:linear-gradient(135deg,#dc2626,#991b1b);">💸 PROSES PENARIKAN</button>
+            </form>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #dc2626; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">2</span>
+            Riwayat Penarikan Tabungan BSU
+        </h3>
+        <div class="panel">
+            <div class="panel-header"><h2>📋 DAFTAR SEMUA PENARIKAN</h2></div>
+            <div class="table-container" style="max-width:100%; max-height:480px; overflow-y:auto; overflow-x:auto;">
+                <table style="width:100%; font-size:10.5px;">
+                    <thead><tr><th>No</th><th>Tanggal</th><th>Nama BSU</th><th>ID BSU</th><th>Nomor Transaksi</th><th class="text-right">Jumlah Penarikan</th><th>Metode</th><th>Disetujui Oleh</th><th>Status</th><th class="text-right">Saldo Akhir</th></tr></thead>
+                    <tbody id="tbodyRiwayatTarikBSU"><tr><td colspan="10" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -2890,6 +2960,109 @@
                 }
             });
         }
+    }
+
+    // =========================================
+    // MODUL TARIK TABUNGAN BSU (BSI -> BSU)
+    // =========================================
+    function loadTarikTabunganBSU() {
+        let sel = document.getElementById('tarikBsuPilih');
+        let prevVal = sel.value;
+        sel.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${n.nama}</option>`).join('');
+        if (prevVal) sel.value = prevVal;
+
+        if (!document.getElementById('tarikBsuTanggal').value) {
+            document.getElementById('tarikBsuTanggal').value = new Date().toISOString().slice(0, 10);
+        }
+
+        ubahBsuTarikBSU();
+        renderRiwayatTarikBSU();
+    }
+
+    function hitungSaldoBsuSaatIni(namaBsu) {
+        return globalTransaksi.filter(t => t.nama === namaBsu).reduce((a, t) => a + (parseFloat(t.total) || 0), 0);
+    }
+
+    function ubahBsuTarikBSU() {
+        let namaBsu = document.getElementById('tarikBsuPilih').value;
+        let elIdentitas = document.getElementById('tarikBsuIdentitas');
+        if (!namaBsu) { elIdentitas.style.display = 'none'; return; }
+        let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
+        let saldo = hitungSaldoBsuSaatIni(namaBsu);
+        document.getElementById('tarikBsuId').innerText = bsuInfo.id || '-';
+        document.getElementById('tarikBsuSaldo').innerText = 'Rp ' + saldo.toLocaleString('id-ID');
+        elIdentitas.style.display = 'block';
+    }
+
+    function simpanTarikBSU() {
+        let namaBsu = document.getElementById('tarikBsuPilih').value;
+        let jumlah = parseFloat(document.getElementById('tarikBsuJumlah').value);
+        let tglInput = document.getElementById('tarikBsuTanggal').value;
+        let metode = document.getElementById('tarikBsuMetode').value;
+        let disetujui = document.getElementById('tarikBsuDisetujui').value.trim();
+        let status = document.getElementById('tarikBsuStatus').value;
+
+        if (!namaBsu) return alert('Pilih BSU terlebih dahulu.');
+        if (!jumlah || jumlah <= 0) return alert('Jumlah penarikan harus lebih dari 0.');
+        if (!tglInput) return alert('Tanggal penarikan wajib diisi.');
+        if (!disetujui) return alert('Nama pengelola BSI yang menyetujui wajib diisi.');
+
+        let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
+        let saldoSaatIni = hitungSaldoBsuSaatIni(namaBsu);
+        if (jumlah > saldoSaatIni) {
+            if (!confirm(`Jumlah penarikan (Rp ${jumlah.toLocaleString('id-ID')}) melebihi saldo saat ini (Rp ${saldoSaatIni.toLocaleString('id-ID')}). Tetap lanjutkan?`)) return;
+        }
+
+        let tglObj = new Date(tglInput + 'T' + new Date().toTimeString().slice(0, 5));
+        let tglFormatted = tglObj.toLocaleDateString('id-ID') + ' ' + new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0');
+        let nomorTransaksi = 'TRX-' + tglInput.replace(/-/g, '') + '-' + String(Date.now()).slice(-4);
+
+        let btn = document.getElementById('btnSimpanTarikBSU');
+        btn.disabled = true; btn.innerText = 'Memproses...';
+
+        AdapterAPI.tambahPenarikanBSU({
+            nomorTransaksi, tgl: tglFormatted, nama: namaBsu, id_unit: bsuInfo.id,
+            jumlah, metode, status, disetujuiOleh: disetujui
+        }).then(res => {
+            alert(res);
+            document.getElementById('formTarikBSU').reset();
+            document.getElementById('tarikBsuTanggal').value = new Date().toISOString().slice(0, 10);
+            loadDataTambahan(); // refresh globalTransaksi supaya saldo & riwayat ikut update
+        }).catch(e => alert('Gagal: ' + e))
+          .finally(() => { btn.disabled = false; btn.innerText = '💸 PROSES PENARIKAN'; });
+    }
+
+    function renderRiwayatTarikBSU() {
+        let tbody = document.getElementById('tbodyRiwayatTarikBSU');
+        let penarikan = globalTransaksi.filter(t => t.jenis === 'Penarikan Tabungan').slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+
+        if (penarikan.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Belum ada penarikan tabungan BSU</td></tr>';
+            return;
+        }
+
+        // Hitung saldo akhir tiap BSU secara berjalan (kronologis, gabungan semua jenis transaksi BSU tsb)
+        let baris = penarikan.map(p => {
+            let semuaTrxBsu = globalTransaksi.filter(t => t.nama === p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+            let saldoBerjalan = 0;
+            for (let t of semuaTrxBsu) {
+                saldoBerjalan += parseFloat(t.total) || 0;
+                if (t.id === p.id) break; // berhenti persis di transaksi penarikan ini
+            }
+            return { ...p, saldoAkhir: saldoBerjalan };
+        });
+
+        tbody.innerHTML = baris.slice().reverse().map((p, i) => {
+            let bsuInfo = globalNasabah.find(n => n.nama === p.nama) || {};
+            let warnaStatus = p.status === 'Disetujui' ? 'var(--secondary)' : (p.status === 'Ditolak' ? 'var(--danger)' : '#b45309');
+            return `<tr>
+                <td>${baris.length - i}</td><td>${formatTglTabel(p.tgl)}</td><td style="font-weight:700;">${p.nama}</td><td>${bsuInfo.id || p.id_unit || '-'}</td>
+                <td>${p.id}</td><td class="text-right" style="color:var(--danger); font-weight:700;">Rp ${Math.abs(p.total).toLocaleString('id-ID')}</td>
+                <td>${p.metode || '-'}</td><td>${p.disetujui_oleh || '-'}</td>
+                <td style="color:${warnaStatus}; font-weight:700;">${p.status || '-'}</td>
+                <td class="text-right" style="font-weight:800;">Rp ${p.saldoAkhir.toLocaleString('id-ID')}</td>
+            </tr>`;
+        }).join('');
     }
 
     function renderStockTrxBsu() {
