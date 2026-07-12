@@ -739,8 +739,8 @@
                 <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">SALDO SAAT INI</p><p id="idNsbSaldo" style="margin:2px 0 0; font-weight:800; color:var(--secondary);">Rp 0</p></div>
             </div>
             <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto; -webkit-overflow-scrolling:touch;">
-                <table style="width:100%; font-size:12.5px;">
-                    <thead style="position:sticky; top:0; z-index:1;"><tr><th style="white-space:nowrap;">No</th><th style="white-space:nowrap;">Tanggal</th><th style="white-space:nowrap;">Nama Nasabah</th><th style="white-space:nowrap;">ID Nasabah</th><th style="white-space:nowrap;">Jenis Sampah</th><th class="text-right" style="white-space:nowrap;">Berat (Kg)</th><th class="text-right" style="white-space:nowrap;">Harga/Kg</th><th class="text-right" style="white-space:nowrap;">Nilai Setoran</th><th class="text-right" style="white-space:nowrap;">Saldo Sebelum</th><th class="text-right" style="white-space:nowrap;">Saldo Sesudah</th></tr></thead>
+                <table style="width:100%; font-size:10.5px;">
+                    <thead><tr><th>No</th><th>Tanggal</th><th>Nama Nasabah</th><th>ID Nasabah</th><th>Jenis Sampah</th><th class="text-right">Berat (Kg)</th><th class="text-right">Harga/Kg</th><th class="text-right">Nilai Setoran</th><th class="text-right">Saldo Sebelum</th><th class="text-right">Saldo Sesudah</th></tr></thead>
                     <tbody id="tbodyDetailSaldoNasabah"><tr><td colspan="10" class="text-center text-muted">Pilih BSU terlebih dahulu</td></tr></tbody>
                 </table>
             </div>
@@ -757,8 +757,7 @@
                 <input type="month" id="rekapSaldoBulan" class="form-control" style="max-width:180px;" onchange="renderRekapSaldoBsu()">
             </div>
             <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
-                <table style="width:100%; table-layout:fixed; font-size:12.5px;">
-                    <thead style="position:sticky; top:0; z-index:1;"><tr><th style="white-space:normal; word-break:break-word; width:6%;">No</th><th style="white-space:normal; word-break:break-word; width:26%;">Nama BSU</th><th style="white-space:normal; word-break:break-word; width:14%;">ID BSU</th><th class="text-right" style="white-space:normal; word-break:break-word; width:14%;">Total Setoran</th><th class="text-right" style="white-space:normal; word-break:break-word; width:14%;">Total Penarikan</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Saldo Awal Bulan</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Saldo Akhir Bulan</th></tr></thead>
+                <table style="width:100%; font-size:10.5px;"><thead><tr><th>No</th><th>Nama BSU</th><th>ID BSU</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
                     <tbody id="tbodyRekapSaldoBsu"></tbody>
                     <tfoot><tr style="font-weight:800; background:#f8fafc;"><td colspan="3" class="text-right">TOTAL BSI</td><td class="text-right" id="totRekapSetoran">Rp 0</td><td class="text-right" id="totRekapTarik">Rp 0</td><td class="text-right" id="totRekapAwal">Rp 0</td><td class="text-right" id="totRekapAkhir">Rp 0</td></tr></tfoot>
                 </table>
@@ -773,8 +772,7 @@
             <div class="panel">
                 <div class="panel-header"><h2>📅 REKAP PER BULAN (SEMUA BSU)</h2></div>
                 <div class="table-container" style="max-width:100%; max-height:400px; overflow-y:auto; overflow-x:auto;">
-                    <table style="width:100%; table-layout:fixed; font-size:12.5px;">
-                        <thead style="position:sticky; top:0; z-index:1;"><tr><th style="white-space:normal; word-break:break-word; width:24%;">Bulan/Tahun</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Total Setoran</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Total Penarikan</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Saldo Awal</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Saldo Akhir</th></tr></thead>
+                    <table style="width:100%; font-size:10.5px;"><thead><tr><th>Bulan/Tahun</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
                         <tbody id="tbodyMultiBulanSaldo"></tbody>
                     </table>
                 </div>
@@ -817,8 +815,8 @@
                 </div>
 
                 <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
-                    <table style="width:100%; table-layout:fixed; font-size:12.5px;">
-                        <thead style="position:sticky; top:0; z-index:1;"><tr><th style="white-space:normal; word-break:break-word; width:14%;">Tanggal</th><th style="white-space:normal; word-break:break-word; width:22%;">Jenis Sampah</th><th class="text-right" style="white-space:normal; word-break:break-word; width:12%;">Berat (Kg)</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Harga/Kg</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Nilai</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Saldo Sebelum</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Saldo Sesudah</th></tr></thead>
+                    <table style="width:100%; font-size:10.5px;">
+                        <thead><tr><th>Tanggal</th><th>Jenis Sampah</th><th class="text-right">Berat (Kg)</th><th class="text-right">Harga/Kg</th><th class="text-right">Nilai</th><th class="text-right">Saldo Sebelum</th><th class="text-right">Saldo Sesudah</th></tr></thead>
                         <tbody id="tbodyDetailSaldoBSI"></tbody>
                     </table>
                 </div>
@@ -835,8 +833,7 @@
                 <input type="month" id="rekapSaldoBSIBulan" class="form-control" style="max-width:180px; border-color:var(--accent);" onchange="renderRekapSaldoBSI()">
             </div>
             <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
-                <table style="width:100%; table-layout:fixed; font-size:12.5px;">
-                    <thead style="position:sticky; top:0; z-index:1;"><tr><th style="white-space:normal; word-break:break-word; width:6%;">No</th><th style="white-space:normal; word-break:break-word; width:26%;">Nama BSU</th><th style="white-space:normal; word-break:break-word; width:14%;">ID BSU</th><th class="text-right" style="white-space:normal; word-break:break-word; width:14%;">Total Setoran</th><th class="text-right" style="white-space:normal; word-break:break-word; width:14%;">Total Penarikan</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Saldo Awal Bulan</th><th class="text-right" style="white-space:normal; word-break:break-word; width:13%;">Saldo Akhir Bulan</th></tr></thead>
+                <table style="width:100%; font-size:10.5px;"><thead><tr><th>No</th><th>Nama BSU</th><th>ID BSU</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
                     <tbody id="tbodyRekapSaldoBSI"></tbody>
                     <tfoot><tr style="font-weight:800; background:#fef3c7;"><td colspan="3" class="text-right">TOTAL TABUNGAN BSU DI BSI</td><td class="text-right" id="totRekapSetoranBSI">Rp 0</td><td class="text-right" id="totRekapTarikBSI">Rp 0</td><td class="text-right" id="totRekapAwalBSI">Rp 0</td><td class="text-right" id="totRekapAkhirBSI">Rp 0</td></tr></tfoot>
                 </table>
@@ -851,8 +848,7 @@
             <div class="panel">
                 <div class="panel-header"><h2>📅 REKAP PER BULAN (SEMUA BSU DI BSI)</h2></div>
                 <div class="table-container" style="max-width:100%; max-height:400px; overflow-y:auto; overflow-x:auto;">
-                    <table style="width:100%; table-layout:fixed; font-size:12.5px;">
-                        <thead style="position:sticky; top:0; z-index:1;"><tr><th style="white-space:normal; word-break:break-word; width:24%;">Bulan/Tahun</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Total Setoran</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Total Penarikan</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Saldo Awal</th><th class="text-right" style="white-space:normal; word-break:break-word; width:19%;">Saldo Akhir</th></tr></thead>
+                    <table style="width:100%; font-size:10.5px;"><thead><tr><th>Bulan/Tahun</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
                         <tbody id="tbodyMultiBulanSaldoBSI"></tbody>
                     </table>
                 </div>
