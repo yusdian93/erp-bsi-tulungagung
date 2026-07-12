@@ -382,7 +382,6 @@
                     <span class="gh-ic">💳</span><span class="gh-label">Sistem Keuangan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Saldo/Tabungan BSU" data-group="grp-keuangan" onclick="pindahTab('saldobsu', this); loadSaldoTabunganBsu();"><span class="nav-ic">🏦</span> Saldo/Tabungan BSU</button>
                     <button class="nav-btn" data-label="Saldo/Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();"><span class="nav-ic">💾</span> Saldo/Tabungan BSI</button>
                     <button class="nav-btn" data-label="Arus Kas Induk" data-group="grp-keuangan" onclick="pindahTab('kasinduk', this)"><span class="nav-ic">📑</span> Arus Kas Induk</button>
                 </div>
@@ -717,72 +716,6 @@
         </div>
     </div>
 
-
-    <div id="saldobsu" class="content-section">
-        <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
-            <span style="background: #0284c7; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">1</span>
-            Detail Saldo/Tabungan Per Nasabah
-        </h3>
-        <div class="panel" style="margin-bottom:24px;">
-            <div class="panel-header" style="flex-wrap:wrap; gap:12px; min-width:0;">
-                <h2>👤 IDENTITAS & RIWAYAT TRANSAKSI</h2>
-                <div style="display:flex; gap:10px; flex-wrap:wrap; min-width:0; flex:1 1 auto; justify-content:flex-end;">
-                    <select id="saldoBsuPilihBsu" class="form-control" style="flex:1 1 200px; min-width:160px; max-width:260px;" onchange="ubahBsuSaldoTabungan()"><option value="">-- Pilih BSU --</option></select>
-                    <select id="saldoBsuPilihNasabah" class="form-control" style="flex:1 1 200px; min-width:160px; max-width:260px;" onchange="renderDetailSaldoNasabah()"><option value="">-- Semua Nasabah --</option></select>
-                </div>
-            </div>
-            <div id="saldoBsuIdentitas" style="display:none; background: var(--bg-body); padding:16px 20px; border-radius:12px; margin:16px 0; border:1px solid var(--border); display:none; gap:24px; flex-wrap:wrap;">
-                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">NAMA BSU</p><p id="idBsuNama" style="margin:2px 0 0; font-weight:800;">-</p></div>
-                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">ID BSU</p><p id="idBsuId" style="margin:2px 0 0; font-weight:800;">-</p></div>
-                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">NAMA NASABAH</p><p id="idNsbNama" style="margin:2px 0 0; font-weight:800;">-</p></div>
-                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">ID NASABAH</p><p id="idNsbId" style="margin:2px 0 0; font-weight:800;">-</p></div>
-                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">SALDO SAAT INI</p><p id="idNsbSaldo" style="margin:2px 0 0; font-weight:800; color:var(--secondary);">Rp 0</p></div>
-            </div>
-            <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto; -webkit-overflow-scrolling:touch;">
-                <table style="width:100%; font-size:10.5px;">
-                    <thead><tr><th>No</th><th>Tanggal</th><th>Nama Nasabah</th><th>ID Nasabah</th><th>Jenis Sampah</th><th class="text-right">Berat (Kg)</th><th class="text-right">Harga/Kg</th><th class="text-right">Nilai Setoran</th><th class="text-right">Saldo Sebelum</th><th class="text-right">Saldo Sesudah</th></tr></thead>
-                    <tbody id="tbodyDetailSaldoNasabah"><tr><td colspan="10" class="text-center text-muted">Pilih BSU terlebih dahulu</td></tr></tbody>
-                </table>
-            </div>
-            <p style="margin:8px 0 0; font-size:11px; color:var(--text-muted); text-align:center;">◀ Geser tabel ke kiri/kanan untuk melihat semua kolom ▶</p>
-        </div>
-
-        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
-            <span style="background: #0284c7; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">2</span>
-            Rekap Saldo/Tabungan Keseluruhan BSU
-        </h3>
-        <div class="panel" style="margin-bottom:24px;">
-            <div class="panel-header">
-                <h2>📊 REKAP BULANAN PER BSU</h2>
-                <input type="month" id="rekapSaldoBulan" class="form-control" style="max-width:180px;" onchange="renderRekapSaldoBsu()">
-            </div>
-            <div class="table-container" style="max-width:100%; max-height:420px; overflow-y:auto; overflow-x:auto;">
-                <table style="width:100%; font-size:10.5px;"><thead><tr><th>No</th><th>Nama BSU</th><th>ID BSU</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
-                    <tbody id="tbodyRekapSaldoBsu"></tbody>
-                    <tfoot><tr style="font-weight:800; background:#f8fafc;"><td colspan="3" class="text-right">TOTAL BSI</td><td class="text-right" id="totRekapSetoran">Rp 0</td><td class="text-right" id="totRekapTarik">Rp 0</td><td class="text-right" id="totRekapAwal">Rp 0</td><td class="text-right" id="totRekapAkhir">Rp 0</td></tr></tfoot>
-                </table>
-            </div>
-        </div>
-
-        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
-            <span style="background: #0284c7; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">3</span>
-            Dashboard Rekap Saldo/Tabungan BSU (Multi-Bulan)
-        </h3>
-        <div class="grid-2">
-            <div class="panel">
-                <div class="panel-header"><h2>📅 REKAP PER BULAN (SEMUA BSU)</h2></div>
-                <div class="table-container" style="max-width:100%; max-height:400px; overflow-y:auto; overflow-x:auto;">
-                    <table style="width:100%; font-size:10.5px;"><thead><tr><th>Bulan/Tahun</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
-                        <tbody id="tbodyMultiBulanSaldo"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="panel">
-                <div class="panel-header"><h2>📈 TREN SETORAN vs PENARIKAN vs SALDO AKHIR</h2></div>
-                <div style="height:380px;"><canvas id="chartTrenSaldoBsu"></canvas></div>
-            </div>
-        </div>
-    </div>
 
     <div id="saldobsi" class="content-section">
         <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
