@@ -384,6 +384,7 @@
                 <div class="nav-group-items">
                     <button class="nav-btn" data-label="Keuangan" data-group="grp-keuangan" onclick="pindahTab('keuangan', this)"><span class="nav-ic">💰</span> Keuangan</button>
                     <button class="nav-btn" data-label="Saldo/Tabungan BSU" data-group="grp-keuangan" onclick="pindahTab('saldobsu', this); loadSaldoTabunganBsu();"><span class="nav-ic">🏦</span> Saldo/Tabungan BSU</button>
+                    <button class="nav-btn" data-label="Saldo/Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();"><span class="nav-ic">💾</span> Saldo/Tabungan BSI</button>
                     <button class="nav-btn" data-label="Arus Kas Induk" data-group="grp-keuangan" onclick="pindahTab('kasinduk', this)"><span class="nav-ic">📑</span> Arus Kas Induk</button>
                 </div>
             </div>
@@ -864,6 +865,84 @@
         </div>
     </div>
 
+    <div id="saldobsi" class="content-section">
+        <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #b45309; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">1</span>
+            Rekening Tabungan Per BSU
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header" style="flex-wrap:wrap; gap:12px;">
+                <h2>👁️ CEK RINCIAN & CETAK REKENING</h2>
+                <select id="saldoBSIPilihBsu" class="form-control" style="max-width:280px;" onchange="ubahPilihanSaldoBSI()"><option value="">-- Pilih BSU --</option></select>
+            </div>
+
+            <div id="saldoBSIKosong" style="text-align:center; padding:24px; color:var(--text-muted);">Pilih BSU untuk melihat rincian setoran &amp; saldo tabungannya di BSI.</div>
+
+            <div id="saldoBSIIsi" style="display:none;">
+                <div class="cards" style="grid-template-columns: repeat(3, 1fr); margin: 16px 0 20px;">
+                    <div class="card card-green"><h3>Total Setoran</h3><p id="bsiTotalSetor" style="font-size:22px;">Rp 0</p></div>
+                    <div class="card" style="border-left-color:var(--danger);"><h3>Total Penarikan</h3><p id="bsiTotalTarik" style="font-size:22px; color:var(--danger);">Rp 0</p></div>
+                    <div class="card card-blue"><h3>Saldo Akhir</h3><p id="bsiSaldoAkhir" style="font-size:22px;">Rp 0</p></div>
+                </div>
+
+                <div style="background: var(--bg-body); padding:14px 18px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
+                    <p style="margin:0 0 6px; font-size:12px; font-weight:700; color:var(--text-muted);">RINCIAN SAMPAH YANG SUDAH DISETOR (Kg per jenis)</p>
+                    <div id="bsiRincianJenis" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                </div>
+
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+                    <button class="btn-sync" onclick="cetakRekeningBSI()" style="border-color:var(--secondary); color:var(--secondary);">👁️ Lihat Preview & Cetak (PDF)</button>
+                    <button class="btn-sync" onclick="kirimWaRekeningBSI()" style="background:#dcfce7; color:#166534; border-color:#86efac;">💬 Kirim Rekening via WA</button>
+                </div>
+
+                <div class="table-container" style="max-height:420px; overflow-y:auto;">
+                    <table>
+                        <thead style="position:sticky; top:0; z-index:1;"><tr><th>Tanggal</th><th>Jenis Sampah</th><th class="text-right">Berat (Kg)</th><th class="text-right">Harga/Kg</th><th class="text-right">Nilai</th><th class="text-right">Saldo Sebelum</th><th class="text-right">Saldo Sesudah</th></tr></thead>
+                        <tbody id="tbodyDetailSaldoBSI"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #b45309; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">2</span>
+            Saldo Tabungan BSI &mdash; BSU yang Sudah Setor/Nabung ke Induk
+        </h3>
+        <div class="panel" style="margin-bottom:24px; border: 1px solid var(--accent); background: #fffbeb;">
+            <div class="panel-header">
+                <h2 style="color:#b45309;">📊 REKAP BULANAN PER BSU (Tabungan di BSI)</h2>
+                <input type="month" id="rekapSaldoBSIBulan" class="form-control" style="max-width:180px; border-color:var(--accent);" onchange="renderRekapSaldoBSI()">
+            </div>
+            <div class="table-container" style="max-height:420px; overflow-y:auto;">
+                <table>
+                    <thead style="position:sticky; top:0; z-index:1;"><tr><th>No</th><th>Nama BSU</th><th>ID BSU</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal Bulan</th><th class="text-right">Saldo Akhir Bulan</th></tr></thead>
+                    <tbody id="tbodyRekapSaldoBSI"></tbody>
+                    <tfoot><tr style="font-weight:800; background:#fef3c7;"><td colspan="3" class="text-right">TOTAL TABUNGAN BSU DI BSI</td><td class="text-right" id="totRekapSetoranBSI">Rp 0</td><td class="text-right" id="totRekapTarikBSI">Rp 0</td><td class="text-right" id="totRekapAwalBSI">Rp 0</td><td class="text-right" id="totRekapAkhirBSI">Rp 0</td></tr></tfoot>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #b45309; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">3</span>
+            Dashboard Rekap Saldo Tabungan BSI (Multi-Bulan)
+        </h3>
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>📅 REKAP PER BULAN (SEMUA BSU DI BSI)</h2></div>
+                <div class="table-container" style="max-height:400px; overflow-y:auto;">
+                    <table>
+                        <thead style="position:sticky; top:0; z-index:1;"><tr><th>Bulan/Tahun</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
+                        <tbody id="tbodyMultiBulanSaldoBSI"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>📈 TREN TABUNGAN BSU DI BSI</h2></div>
+                <div style="height:380px;"><canvas id="chartTrenSaldoBSI"></canvas></div>
+            </div>
+        </div>
+    </div>
+
     <div id="harga" class="content-section">
         <div class="panel" style="margin-bottom: 24px;">
             <div class="panel-header"><h2>➕ TAMBAH KATEGORI / HARGA MATERIAL</h2></div>
@@ -1270,6 +1349,7 @@
     let barChartInstance = null; 
     let keuanganPieChartInstance = null;
     let saldoBsuChartInstance = null;
+    let saldoBSIChartInstance = null;
     let globalSemuaTransaksiNasabah = [];
     let globalSemuaNasabahLintasUnit = [];
     
@@ -2517,6 +2597,144 @@
         });
     }
 
+    function loadSaldoTabunganBSI() {
+        if (!document.getElementById('rekapSaldoBSIBulan').value) {
+            let now = new Date();
+            document.getElementById('rekapSaldoBSIBulan').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+        let selBsu = document.getElementById('saldoBSIPilihBsu');
+        let prevVal = selBsu.value;
+        selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${n.nama}</option>`).join('');
+        if (prevVal) selBsu.value = prevVal;
+
+        renderRekapSaldoBSI();
+        renderMultiBulanSaldoBSI();
+        ubahPilihanSaldoBSI();
+    }
+
+    let lastRekeningBSI = null;
+
+    function ubahPilihanSaldoBSI() {
+        let namaBsu = document.getElementById('saldoBSIPilihBsu').value;
+        let elKosong = document.getElementById('saldoBSIKosong');
+        let elIsi = document.getElementById('saldoBSIIsi');
+
+        if (!namaBsu) {
+            elKosong.style.display = 'block'; elIsi.style.display = 'none';
+            lastRekeningBSI = null;
+            return;
+        }
+
+        let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
+        let trx = globalTransaksi.filter(t => t.nama === namaBsu).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+
+        let saldoBerjalan = 0, totalSetor = 0, totalTarik = 0;
+        let rincianJenis = {};
+        let baris = trx.map(t => {
+            let saldoSebelum = saldoBerjalan;
+            let nilai = parseFloat(t.total) || 0;
+            saldoBerjalan += nilai;
+            let berat = parseFloat(t.berat) || 0;
+            let hargaKg = berat > 0 ? (nilai / berat) : 0;
+            if (nilai >= 0) totalSetor += nilai; else totalTarik += Math.abs(nilai);
+            if (berat > 0) rincianJenis[t.jenis] = (rincianJenis[t.jenis] || 0) + berat;
+            return { tgl: t.tgl, jenis: t.jenis, berat, hargaKg, nilai, saldoSebelum, saldoSesudah: saldoBerjalan };
+        });
+
+        document.getElementById('bsiTotalSetor').innerText = 'Rp ' + totalSetor.toLocaleString('id-ID');
+        document.getElementById('bsiTotalTarik').innerText = 'Rp ' + totalTarik.toLocaleString('id-ID');
+        document.getElementById('bsiSaldoAkhir').innerText = 'Rp ' + saldoBerjalan.toLocaleString('id-ID');
+
+        document.getElementById('bsiRincianJenis').innerHTML = Object.keys(rincianJenis).length === 0
+            ? '<span style="color:var(--text-muted); font-size:13px;">Belum ada setoran</span>'
+            : Object.entries(rincianJenis).map(([jenis, kg]) => `<span class="badge-material" style="font-size:12.5px;">${jenis}: <b>${kg.toLocaleString('id-ID')} Kg</b></span>`).join('');
+
+        document.getElementById('tbodyDetailSaldoBSI').innerHTML = baris.length === 0
+            ? '<tr><td colspan="7" class="text-center text-muted">Belum ada transaksi</td></tr>'
+            : baris.map(b => `<tr>
+                <td>${formatTglTabel(b.tgl)}</td><td><span class="badge-material">${b.jenis}</span></td>
+                <td class="text-right">${b.berat.toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${Math.round(b.hargaKg).toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:700; color:${b.nilai < 0 ? 'var(--danger)' : 'var(--secondary)'};">Rp ${b.nilai.toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${b.saldoSebelum.toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:800;">Rp ${b.saldoSesudah.toLocaleString('id-ID')}</td>
+            </tr>`).join('');
+
+        document.getElementById('saldoBSIKosong').style.display = 'none';
+        document.getElementById('saldoBSIIsi').style.display = 'block';
+
+        lastRekeningBSI = { namaBsu, idBsu: bsuInfo.id || '-', hp: bsuInfo.hp || '', baris, totalSetor, totalTarik, saldoAkhir: saldoBerjalan, rincianJenis };
+    }
+
+    function cetakRekeningBSI() {
+        if (!lastRekeningBSI) return alert('Pilih BSU terlebih dahulu.');
+        if (typeof window.jspdf === 'undefined') return alert('Pustaka PDF belum siap, coba lagi sesaat.');
+        const { jsPDF } = window.jspdf;
+        let r = lastRekeningBSI;
+        let doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        let pageW = doc.internal.pageSize.getWidth();
+        let y = 18;
+
+        doc.setFont(undefined, 'bold'); doc.setFontSize(14);
+        doc.text('REKENING TABUNGAN BANK SAMPAH UNIT', pageW / 2, y, { align: 'center' }); y += 6;
+        doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+        doc.text('Bank Sampah Induk - DLH Kab. Tulungagung', pageW / 2, y, { align: 'center' }); y += 10;
+
+        doc.setFontSize(10);
+        doc.text('Nama BSU', 14, y); doc.text(': ' + r.namaBsu, 55, y);
+        doc.text('Dicetak', pageW - 70, y); doc.text(': ' + new Date().toLocaleString('id-ID'), pageW - 45, y); y += 6;
+        doc.text('ID BSU', 14, y); doc.text(': ' + r.idBsu, 55, y); y += 10;
+
+        let colX = [14, 44, 84, 104, 129, 154, 179];
+        let headers = ['Tanggal', 'Jenis Sampah', 'Berat', 'Harga/Kg', 'Nilai', 'Saldo Sblm', 'Saldo Ssdh'];
+        doc.setFont(undefined, 'bold'); doc.setFontSize(8.5);
+        doc.setFillColor(240, 240, 240); doc.rect(14, y - 4, pageW - 28, 6, 'F');
+        headers.forEach((h, i) => doc.text(h, colX[i], y));
+        y += 6;
+        doc.setFont(undefined, 'normal');
+
+        r.baris.forEach(b => {
+            if (y > 275) { doc.addPage(); y = 18; }
+            doc.text(formatTglTabel(b.tgl), colX[0], y);
+            doc.text(String(b.jenis).slice(0, 18), colX[1], y);
+            doc.text(b.berat.toLocaleString('id-ID'), colX[2], y);
+            doc.text(Math.round(b.hargaKg).toLocaleString('id-ID'), colX[3], y);
+            doc.text(b.nilai.toLocaleString('id-ID'), colX[4], y);
+            doc.text(b.saldoSebelum.toLocaleString('id-ID'), colX[5], y);
+            doc.text(b.saldoSesudah.toLocaleString('id-ID'), colX[6], y);
+            y += 5.5;
+        });
+
+        y += 4;
+        if (y > 270) { doc.addPage(); y = 18; }
+        doc.setFont(undefined, 'bold'); doc.setFontSize(9.5);
+        doc.text('Total Setoran: Rp ' + r.totalSetor.toLocaleString('id-ID'), 14, y); y += 5.5;
+        doc.text('Total Penarikan: Rp ' + r.totalTarik.toLocaleString('id-ID'), 14, y); y += 5.5;
+        doc.text('Saldo Akhir: Rp ' + r.saldoAkhir.toLocaleString('id-ID'), 14, y);
+
+        // Tampilkan dulu sebagai preview di tab baru (viewer PDF bawaan browser),
+        // biar bisa dilihat & dicek dulu sebelum diunduh/dicetak.
+        let namaFile = 'Rekening_Tabungan_' + r.namaBsu.replace(/\s+/g, '_') + '_' + new Date().toISOString().slice(0, 10) + '.pdf';
+        doc.setProperties({ title: namaFile });
+        let blobUrl = doc.output('bloburl');
+        let jendela = window.open(blobUrl, '_blank');
+        if (!jendela) alert('Preview diblokir browser. Izinkan pop-up untuk situs ini lalu coba lagi.');
+    }
+
+    function kirimWaRekeningBSI() {
+        if (!lastRekeningBSI) return alert('Pilih BSU terlebih dahulu.');
+        let r = lastRekeningBSI;
+        let rincian = Object.entries(r.rincianJenis).map(([jenis, kg]) => `▪ ${jenis}: ${kg.toLocaleString('id-ID')} Kg`).join('\n') || 'Belum ada setoran';
+
+        let pesan = `*REKENING TABUNGAN BANK SAMPAH UNIT*\nBank Sampah Induk - DLH Kab. Tulungagung\n\nNama BSU: *${r.namaBsu}*\nID BSU: ${r.idBsu}\n\n*Rincian Sampah yang Sudah Disetor:*\n${rincian}\n\nTotal Setoran: Rp ${r.totalSetor.toLocaleString('id-ID')}\nTotal Penarikan: Rp ${r.totalTarik.toLocaleString('id-ID')}\n*Saldo Akhir: Rp ${r.saldoAkhir.toLocaleString('id-ID')}*\n\nTerima kasih.`;
+
+        let hp = String(r.hp || '').replace(/[^0-9]/g, '');
+        if (hp.startsWith('0')) hp = '62' + hp.slice(1);
+
+        let url = hp ? `https://wa.me/${hp}?text=${encodeURIComponent(pesan)}` : `https://wa.me/?text=${encodeURIComponent(pesan)}`;
+        window.open(url, '_blank');
+    }
+
     function ubahBsuSaldoTabungan() {
         let idBsu = document.getElementById('saldoBsuPilihBsu').value;
         let selNasabah = document.getElementById('saldoBsuPilihNasabah');
@@ -2698,6 +2916,119 @@
                     labels: labelBulan,
                     datasets: [
                         { type: 'bar', label: 'Total Setoran', data: dataSetoran, backgroundColor: '#059669' },
+                        { type: 'bar', label: 'Total Penarikan', data: dataTarik, backgroundColor: '#dc2626' },
+                        { type: 'line', label: 'Saldo Akhir', data: dataSaldoAkhir, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => 'Rp ' + (v / 1000).toLocaleString('id-ID') + 'rb' } } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
+    }
+
+    function renderRekapSaldoBSI() {
+        let elBulan = document.getElementById('rekapSaldoBSIBulan');
+        let bulanStr = elBulan ? elBulan.value : '';
+        if (!bulanStr) return;
+        let [tahun, bulan] = bulanStr.split('-').map(Number);
+        let awalBulan = new Date(tahun, bulan - 1, 1);
+        let akhirBulan = new Date(tahun, bulan, 1);
+
+        let tbody = document.getElementById('tbodyRekapSaldoBSI');
+        let totSetoran = 0, totTarik = 0, totAwal = 0, totAkhir = 0;
+
+        let baris = globalNasabah.map((bsu, i) => {
+            let trxBsu = globalTransaksi.filter(t => t.nama === bsu.nama);
+
+            let setoranBulan = 0, tarikBulan = 0, saldoAwal = 0;
+            trxBsu.forEach(t => {
+                let tgl = uraikanTanggalInput(t.tgl);
+                if (isNaN(tgl)) return;
+                let nilai = parseFloat(t.total) || 0;
+                if (tgl < awalBulan) { saldoAwal += nilai; }
+                else if (tgl >= awalBulan && tgl < akhirBulan) {
+                    if (nilai >= 0) setoranBulan += nilai; else tarikBulan += Math.abs(nilai);
+                }
+            });
+            let saldoAkhir = saldoAwal + setoranBulan - tarikBulan;
+
+            totSetoran += setoranBulan; totTarik += tarikBulan; totAwal += saldoAwal; totAkhir += saldoAkhir;
+            return { no: i + 1, nama: bsu.nama, id: bsu.id, setoranBulan, tarikBulan, saldoAwal, saldoAkhir };
+        });
+
+        tbody.innerHTML = baris.map(b => `<tr>
+            <td>${b.no}</td><td style="font-weight:700;">${b.nama}</td><td>${b.id}</td>
+            <td class="text-right" style="color:var(--secondary);">Rp ${b.setoranBulan.toLocaleString('id-ID')}</td>
+            <td class="text-right" style="color:var(--danger);">Rp ${b.tarikBulan.toLocaleString('id-ID')}</td>
+            <td class="text-right">Rp ${b.saldoAwal.toLocaleString('id-ID')}</td>
+            <td class="text-right" style="font-weight:800;">Rp ${b.saldoAkhir.toLocaleString('id-ID')}</td>
+        </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted">Belum ada data BSU</td></tr>';
+
+        document.getElementById('totRekapSetoranBSI').innerText = 'Rp ' + totSetoran.toLocaleString('id-ID');
+        document.getElementById('totRekapTarikBSI').innerText = 'Rp ' + totTarik.toLocaleString('id-ID');
+        document.getElementById('totRekapAwalBSI').innerText = 'Rp ' + totAwal.toLocaleString('id-ID');
+        document.getElementById('totRekapAkhirBSI').innerText = 'Rp ' + totAkhir.toLocaleString('id-ID');
+    }
+
+    function renderMultiBulanSaldoBSI() {
+        if (!globalTransaksi || globalTransaksi.length === 0) {
+            document.getElementById('tbodyMultiBulanSaldoBSI').innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada data setoran BSU ke Induk</td></tr>';
+            if (saldoBSIChartInstance) saldoBSIChartInstance.destroy();
+            return;
+        }
+
+        let semuaTgl = globalTransaksi.map(t => uraikanTanggalInput(t.tgl)).filter(d => !isNaN(d));
+        let tglMin = semuaTgl.length ? new Date(Math.min(...semuaTgl)) : new Date();
+        let now = new Date();
+        let daftarBulan = [];
+        let cursor = new Date(tglMin.getFullYear(), tglMin.getMonth(), 1);
+        let batasAkhir = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cursor <= batasAkhir) {
+            daftarBulan.push(new Date(cursor));
+            cursor.setMonth(cursor.getMonth() + 1);
+        }
+        if (daftarBulan.length > 12) daftarBulan = daftarBulan.slice(-12);
+
+        let namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        let labelBulan = [], dataSetoran = [], dataTarik = [], dataSaldoAkhir = [];
+        let tbodyHtml = '';
+
+        daftarBulan.forEach(bln => {
+            let awalBulan = bln;
+            let akhirBulan = new Date(bln.getFullYear(), bln.getMonth() + 1, 1);
+            let setoran = 0, tarik = 0, saldoAwal = 0, saldoAkhir = 0;
+
+            globalTransaksi.forEach(t => {
+                let tgl = uraikanTanggalInput(t.tgl);
+                if (isNaN(tgl)) return;
+                let nilai = parseFloat(t.total) || 0;
+                if (tgl < awalBulan) { saldoAwal += nilai; }
+                else if (tgl >= awalBulan && tgl < akhirBulan) {
+                    if (nilai >= 0) setoran += nilai; else tarik += Math.abs(nilai);
+                }
+            });
+            saldoAkhir = saldoAwal + setoran - tarik;
+
+            let label = namaBulan[bln.getMonth()] + ' ' + bln.getFullYear();
+            labelBulan.push(label); dataSetoran.push(setoran); dataTarik.push(tarik); dataSaldoAkhir.push(saldoAkhir);
+
+            tbodyHtml += `<tr><td>${label}</td><td class="text-right" style="color:var(--secondary);">Rp ${setoran.toLocaleString('id-ID')}</td><td class="text-right" style="color:var(--danger);">Rp ${tarik.toLocaleString('id-ID')}</td><td class="text-right">Rp ${saldoAwal.toLocaleString('id-ID')}</td><td class="text-right" style="font-weight:800;">Rp ${saldoAkhir.toLocaleString('id-ID')}</td></tr>`;
+        });
+
+        document.getElementById('tbodyMultiBulanSaldoBSI').innerHTML = tbodyHtml;
+
+        let canvasEl = document.getElementById('chartTrenSaldoBSI');
+        if (canvasEl) {
+            let ctx = canvasEl.getContext('2d');
+            if (saldoBSIChartInstance) saldoBSIChartInstance.destroy();
+            saldoBSIChartInstance = new Chart(ctx, {
+                data: {
+                    labels: labelBulan,
+                    datasets: [
+                        { type: 'bar', label: 'Total Setoran', data: dataSetoran, backgroundColor: '#b45309' },
                         { type: 'bar', label: 'Total Penarikan', data: dataTarik, backgroundColor: '#dc2626' },
                         { type: 'line', label: 'Saldo Akhir', data: dataSaldoAkhir, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.3 }
                     ]
