@@ -383,6 +383,7 @@
                 </button>
                 <div class="nav-group-items">
                     <button class="nav-btn" data-label="Keuangan" data-group="grp-keuangan" onclick="pindahTab('keuangan', this)"><span class="nav-ic">💰</span> Keuangan</button>
+                    <button class="nav-btn" data-label="Saldo/Tabungan BSU" data-group="grp-keuangan" onclick="pindahTab('saldobsu', this); loadSaldoTabunganBsu();"><span class="nav-ic">🏦</span> Saldo/Tabungan BSU</button>
                     <button class="nav-btn" data-label="Arus Kas Induk" data-group="grp-keuangan" onclick="pindahTab('kasinduk', this)"><span class="nav-ic">📑</span> Arus Kas Induk</button>
                 </div>
             </div>
@@ -796,6 +797,73 @@
         </div>
     </div>
 
+    <div id="saldobsu" class="content-section">
+        <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #0284c7; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">1</span>
+            Detail Saldo/Tabungan Per Nasabah
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header" style="flex-wrap:wrap; gap:12px;">
+                <h2>👤 IDENTITAS & RIWAYAT TRANSAKSI</h2>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <select id="saldoBsuPilihBsu" class="form-control" style="max-width:260px;" onchange="ubahBsuSaldoTabungan()"><option value="">-- Pilih BSU --</option></select>
+                    <select id="saldoBsuPilihNasabah" class="form-control" style="max-width:260px;" onchange="renderDetailSaldoNasabah()"><option value="">-- Semua Nasabah --</option></select>
+                </div>
+            </div>
+            <div id="saldoBsuIdentitas" style="display:none; background: var(--bg-body); padding:16px 20px; border-radius:12px; margin:16px 0; border:1px solid var(--border); display:none; gap:24px; flex-wrap:wrap;">
+                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">NAMA BSU</p><p id="idBsuNama" style="margin:2px 0 0; font-weight:800;">-</p></div>
+                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">ID BSU</p><p id="idBsuId" style="margin:2px 0 0; font-weight:800;">-</p></div>
+                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">NAMA NASABAH</p><p id="idNsbNama" style="margin:2px 0 0; font-weight:800;">-</p></div>
+                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">ID NASABAH</p><p id="idNsbId" style="margin:2px 0 0; font-weight:800;">-</p></div>
+                <div><p style="margin:0; font-size:11px; color:var(--text-muted); font-weight:700;">SALDO SAAT INI</p><p id="idNsbSaldo" style="margin:2px 0 0; font-weight:800; color:var(--secondary);">Rp 0</p></div>
+            </div>
+            <div class="table-container" style="max-height:420px; overflow-y:auto;">
+                <table>
+                    <thead style="position:sticky; top:0; z-index:1;"><tr><th>No</th><th>Tanggal</th><th>Nama Nasabah</th><th>ID Nasabah</th><th>Jenis Sampah</th><th class="text-right">Berat (Kg)</th><th class="text-right">Harga/Kg</th><th class="text-right">Nilai Setoran</th><th class="text-right">Saldo Sebelum</th><th class="text-right">Saldo Sesudah</th></tr></thead>
+                    <tbody id="tbodyDetailSaldoNasabah"><tr><td colspan="10" class="text-center text-muted">Pilih BSU terlebih dahulu</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #0284c7; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">2</span>
+            Rekap Saldo/Tabungan Keseluruhan BSU
+        </h3>
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header">
+                <h2>📊 REKAP BULANAN PER BSU</h2>
+                <input type="month" id="rekapSaldoBulan" class="form-control" style="max-width:180px;" onchange="renderRekapSaldoBsu()">
+            </div>
+            <div class="table-container" style="max-height:420px; overflow-y:auto;">
+                <table>
+                    <thead style="position:sticky; top:0; z-index:1;"><tr><th>No</th><th>Nama BSU</th><th>ID BSU</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal Bulan</th><th class="text-right">Saldo Akhir Bulan</th></tr></thead>
+                    <tbody id="tbodyRekapSaldoBsu"></tbody>
+                    <tfoot><tr style="font-weight:800; background:#f8fafc;"><td colspan="3" class="text-right">TOTAL BSI</td><td class="text-right" id="totRekapSetoran">Rp 0</td><td class="text-right" id="totRekapTarik">Rp 0</td><td class="text-right" id="totRekapAwal">Rp 0</td><td class="text-right" id="totRekapAkhir">Rp 0</td></tr></tfoot>
+                </table>
+            </div>
+        </div>
+
+        <h3 style="margin: 32px 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
+            <span style="background: #0284c7; color: #fff; width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size: 11px;">3</span>
+            Dashboard Rekap Saldo/Tabungan BSU (Multi-Bulan)
+        </h3>
+        <div class="grid-2">
+            <div class="panel">
+                <div class="panel-header"><h2>📅 REKAP PER BULAN (SEMUA BSU)</h2></div>
+                <div class="table-container" style="max-height:400px; overflow-y:auto;">
+                    <table>
+                        <thead style="position:sticky; top:0; z-index:1;"><tr><th>Bulan/Tahun</th><th class="text-right">Total Setoran</th><th class="text-right">Total Penarikan</th><th class="text-right">Saldo Awal</th><th class="text-right">Saldo Akhir</th></tr></thead>
+                        <tbody id="tbodyMultiBulanSaldo"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="panel">
+                <div class="panel-header"><h2>📈 TREN SETORAN vs PENARIKAN vs SALDO AKHIR</h2></div>
+                <div style="height:380px;"><canvas id="chartTrenSaldoBsu"></canvas></div>
+            </div>
+        </div>
+    </div>
+
     <div id="harga" class="content-section">
         <div class="panel" style="margin-bottom: 24px;">
             <div class="panel-header"><h2>➕ TAMBAH KATEGORI / HARGA MATERIAL</h2></div>
@@ -1201,6 +1269,9 @@
     let lineChartInstance = null; 
     let barChartInstance = null; 
     let keuanganPieChartInstance = null;
+    let saldoBsuChartInstance = null;
+    let globalSemuaTransaksiNasabah = [];
+    let globalSemuaNasabahLintasUnit = [];
     
     let currentRiwayatBsu = [];
     let currentSaldoBsu = 0;
@@ -2417,6 +2488,227 @@
         postAksi(form)
         .then(res=>{ alert(res); tutupModalEditKategori(); loadDataTambahan(); })
         .catch(e=>alert('Error: ' + e)).finally(()=>{ btn.innerText = 'SIMPAN PERUBAHAN'; btn.disabled = false; });
+    }
+
+    // =========================================
+    // MODUL SALDO / TABUNGAN BSU (nasabah -> BSU, dilihat dari sisi Induk)
+    // =========================================
+    function loadSaldoTabunganBsu() {
+        document.getElementById('tbodyDetailSaldoNasabah').innerHTML = '<tr><td colspan="10" class="text-center text-muted">Memuat data...</td></tr>';
+        AdapterAPI.getSemuaTransaksiNasabah().then(res => {
+            globalSemuaTransaksiNasabah = res.transaksi || [];
+            globalSemuaNasabahLintasUnit = res.nasabah || [];
+
+            let selBsu = document.getElementById('saldoBsuPilihBsu');
+            let prevVal = selBsu.value;
+            selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.id)}">${n.nama}</option>`).join('');
+            if (prevVal) selBsu.value = prevVal;
+
+            if (!document.getElementById('rekapSaldoBulan').value) {
+                let now = new Date();
+                document.getElementById('rekapSaldoBulan').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+            }
+
+            ubahBsuSaldoTabungan();
+            renderRekapSaldoBsu();
+            renderMultiBulanSaldo();
+        }).catch(e => {
+            document.getElementById('tbodyDetailSaldoNasabah').innerHTML = '<tr><td colspan="10" class="text-center text-danger">⚠️ Gagal memuat data: ' + e + '</td></tr>';
+        });
+    }
+
+    function ubahBsuSaldoTabungan() {
+        let idBsu = document.getElementById('saldoBsuPilihBsu').value;
+        let selNasabah = document.getElementById('saldoBsuPilihNasabah');
+        if (!idBsu) {
+            selNasabah.innerHTML = '<option value="">-- Semua Nasabah --</option>';
+            document.getElementById('tbodyDetailSaldoNasabah').innerHTML = '<tr><td colspan="10" class="text-center text-muted">Pilih BSU terlebih dahulu</td></tr>';
+            document.getElementById('saldoBsuIdentitas').style.display = 'none';
+            return;
+        }
+        let daftarNasabah = globalSemuaNasabahLintasUnit.filter(n => n.id_unit === idBsu);
+        selNasabah.innerHTML = '<option value="">-- Semua Nasabah --</option>' + daftarNasabah.map(n => `<option value="${escAttr(n.id)}">${n.nama}</option>`).join('');
+        renderDetailSaldoNasabah();
+    }
+
+    function renderDetailSaldoNasabah() {
+        let idBsu = document.getElementById('saldoBsuPilihBsu').value;
+        let idNasabahDipilih = document.getElementById('saldoBsuPilihNasabah').value;
+        let tbody = document.getElementById('tbodyDetailSaldoNasabah');
+        let boxIdentitas = document.getElementById('saldoBsuIdentitas');
+
+        if (!idBsu) { tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">Pilih BSU terlebih dahulu</td></tr>'; boxIdentitas.style.display = 'none'; return; }
+
+        let bsuInfo = globalNasabah.find(n => n.id === idBsu);
+        let daftarNasabahBsu = globalSemuaNasabahLintasUnit.filter(n => n.id_unit === idBsu);
+        let trxBsu = globalSemuaTransaksiNasabah.filter(t => t.id_unit === idBsu);
+
+        let semuaBaris = [];
+        daftarNasabahBsu.forEach(nsb => {
+            if (idNasabahDipilih && nsb.id !== idNasabahDipilih) return;
+            let trxNsb = trxBsu.filter(t => t.nama === nsb.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+            let saldoBerjalan = 0;
+            trxNsb.forEach(t => {
+                let saldoSebelum = saldoBerjalan;
+                let nilai = parseFloat(t.total) || 0;
+                saldoBerjalan += nilai;
+                let berat = parseFloat(t.berat) || 0;
+                let hargaKg = berat > 0 ? (nilai / berat) : 0;
+                semuaBaris.push({
+                    tgl: t.tgl, tglSort: uraikanTanggalInput(t.tgl), nama: nsb.nama, idNasabah: nsb.id,
+                    jenis: t.jenis, berat: berat, hargaKg: hargaKg, nilai: nilai,
+                    saldoSebelum: saldoSebelum, saldoSesudah: saldoBerjalan
+                });
+            });
+        });
+
+        semuaBaris.sort((a, b) => a.tglSort - b.tglSort);
+
+        tbody.innerHTML = semuaBaris.length === 0 ? '<tr><td colspan="10" class="text-center text-muted">Belum ada transaksi</td></tr>' :
+            semuaBaris.map((b, i) => `<tr>
+                <td>${i + 1}</td><td>${formatTglTabel(b.tgl)}</td><td style="font-weight:700;">${b.nama}</td><td>${b.idNasabah}</td>
+                <td><span class="badge-material">${b.jenis}</span></td><td class="text-right">${b.berat.toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${Math.round(b.hargaKg).toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:700; color:${b.nilai < 0 ? 'var(--danger)' : 'var(--secondary)'};">Rp ${b.nilai.toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${b.saldoSebelum.toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:800;">Rp ${b.saldoSesudah.toLocaleString('id-ID')}</td>
+            </tr>`).join('');
+
+        if (idNasabahDipilih) {
+            let nsb = daftarNasabahBsu.find(n => n.id === idNasabahDipilih);
+            let saldoAkhir = semuaBaris.length ? semuaBaris[semuaBaris.length - 1].saldoSesudah : 0;
+            document.getElementById('idBsuNama').innerText = bsuInfo ? bsuInfo.nama : '-';
+            document.getElementById('idBsuId').innerText = idBsu;
+            document.getElementById('idNsbNama').innerText = nsb ? nsb.nama : '-';
+            document.getElementById('idNsbId').innerText = nsb ? nsb.id : '-';
+            document.getElementById('idNsbSaldo').innerText = 'Rp ' + saldoAkhir.toLocaleString('id-ID');
+            boxIdentitas.style.display = 'flex';
+        } else {
+            boxIdentitas.style.display = 'none';
+        }
+    }
+
+    function hitungSaldoNasabahHinggaTgl(daftarNasabahBsu, trxBsu, sebelumTgl) {
+        let total = 0;
+        daftarNasabahBsu.forEach(nsb => {
+            trxBsu.filter(t => t.nama === nsb.nama).forEach(t => {
+                let tgl = uraikanTanggalInput(t.tgl);
+                if (!isNaN(tgl) && tgl < sebelumTgl) total += parseFloat(t.total) || 0;
+            });
+        });
+        return total;
+    }
+
+    function renderRekapSaldoBsu() {
+        let bulanStr = document.getElementById('rekapSaldoBulan').value;
+        if (!bulanStr) return;
+        let [tahun, bulan] = bulanStr.split('-').map(Number);
+        let awalBulan = new Date(tahun, bulan - 1, 1);
+        let akhirBulan = new Date(tahun, bulan, 1);
+
+        let tbody = document.getElementById('tbodyRekapSaldoBsu');
+        let totSetoran = 0, totTarik = 0, totAwal = 0, totAkhir = 0;
+
+        let baris = globalNasabah.map((bsu, i) => {
+            let daftarNasabahBsu = globalSemuaNasabahLintasUnit.filter(n => n.id_unit === bsu.id);
+            let trxBsu = globalSemuaTransaksiNasabah.filter(t => t.id_unit === bsu.id);
+
+            let setoranBulan = 0, tarikBulan = 0;
+            trxBsu.forEach(t => {
+                let tgl = uraikanTanggalInput(t.tgl);
+                if (isNaN(tgl) || tgl < awalBulan || tgl >= akhirBulan) return;
+                let nilai = parseFloat(t.total) || 0;
+                if (nilai >= 0) setoranBulan += nilai; else tarikBulan += Math.abs(nilai);
+            });
+
+            let saldoAwal = hitungSaldoNasabahHinggaTgl(daftarNasabahBsu, trxBsu, awalBulan);
+            let saldoAkhir = saldoAwal + setoranBulan - tarikBulan;
+
+            totSetoran += setoranBulan; totTarik += tarikBulan; totAwal += saldoAwal; totAkhir += saldoAkhir;
+            return { no: i + 1, nama: bsu.nama, id: bsu.id, setoranBulan, tarikBulan, saldoAwal, saldoAkhir };
+        });
+
+        tbody.innerHTML = baris.map(b => `<tr>
+            <td>${b.no}</td><td style="font-weight:700;">${b.nama}</td><td>${b.id}</td>
+            <td class="text-right" style="color:var(--secondary);">Rp ${b.setoranBulan.toLocaleString('id-ID')}</td>
+            <td class="text-right" style="color:var(--danger);">Rp ${b.tarikBulan.toLocaleString('id-ID')}</td>
+            <td class="text-right">Rp ${b.saldoAwal.toLocaleString('id-ID')}</td>
+            <td class="text-right" style="font-weight:800;">Rp ${b.saldoAkhir.toLocaleString('id-ID')}</td>
+        </tr>`).join('') || '<tr><td colspan="7" class="text-center text-muted">Belum ada data BSU</td></tr>';
+
+        document.getElementById('totRekapSetoran').innerText = 'Rp ' + totSetoran.toLocaleString('id-ID');
+        document.getElementById('totRekapTarik').innerText = 'Rp ' + totTarik.toLocaleString('id-ID');
+        document.getElementById('totRekapAwal').innerText = 'Rp ' + totAwal.toLocaleString('id-ID');
+        document.getElementById('totRekapAkhir').innerText = 'Rp ' + totAkhir.toLocaleString('id-ID');
+    }
+
+    function renderMultiBulanSaldo() {
+        if (globalSemuaTransaksiNasabah.length === 0) {
+            document.getElementById('tbodyMultiBulanSaldo').innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada data transaksi</td></tr>';
+            if (saldoBsuChartInstance) saldoBsuChartInstance.destroy();
+            return;
+        }
+
+        let semuaTgl = globalSemuaTransaksiNasabah.map(t => uraikanTanggalInput(t.tgl)).filter(d => !isNaN(d));
+        let tglMin = semuaTgl.length ? new Date(Math.min(...semuaTgl)) : new Date();
+        let now = new Date();
+        let daftarBulan = [];
+        let cursor = new Date(tglMin.getFullYear(), tglMin.getMonth(), 1);
+        let batasAkhir = new Date(now.getFullYear(), now.getMonth(), 1);
+        while (cursor <= batasAkhir) {
+            daftarBulan.push(new Date(cursor));
+            cursor.setMonth(cursor.getMonth() + 1);
+        }
+        if (daftarBulan.length > 12) daftarBulan = daftarBulan.slice(-12);
+
+        let namaBulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+        let labelBulan = [], dataSetoran = [], dataTarik = [], dataSaldoAkhir = [];
+        let tbodyHtml = '';
+
+        daftarBulan.forEach(bln => {
+            let awalBulan = bln;
+            let akhirBulan = new Date(bln.getFullYear(), bln.getMonth() + 1, 1);
+            let setoran = 0, tarik = 0, saldoAwal = 0, saldoAkhir = 0;
+
+            globalSemuaTransaksiNasabah.forEach(t => {
+                let tgl = uraikanTanggalInput(t.tgl);
+                if (isNaN(tgl)) return;
+                let nilai = parseFloat(t.total) || 0;
+                if (tgl < awalBulan) { saldoAwal += nilai; }
+                else if (tgl >= awalBulan && tgl < akhirBulan) {
+                    if (nilai >= 0) setoran += nilai; else tarik += Math.abs(nilai);
+                }
+            });
+            saldoAkhir = saldoAwal + setoran - tarik;
+
+            let label = namaBulan[bln.getMonth()] + ' ' + bln.getFullYear();
+            labelBulan.push(label); dataSetoran.push(setoran); dataTarik.push(tarik); dataSaldoAkhir.push(saldoAkhir);
+
+            tbodyHtml += `<tr><td>${label}</td><td class="text-right" style="color:var(--secondary);">Rp ${setoran.toLocaleString('id-ID')}</td><td class="text-right" style="color:var(--danger);">Rp ${tarik.toLocaleString('id-ID')}</td><td class="text-right">Rp ${saldoAwal.toLocaleString('id-ID')}</td><td class="text-right" style="font-weight:800;">Rp ${saldoAkhir.toLocaleString('id-ID')}</td></tr>`;
+        });
+
+        document.getElementById('tbodyMultiBulanSaldo').innerHTML = tbodyHtml;
+
+        let canvasEl = document.getElementById('chartTrenSaldoBsu');
+        if (canvasEl) {
+            let ctx = canvasEl.getContext('2d');
+            if (saldoBsuChartInstance) saldoBsuChartInstance.destroy();
+            saldoBsuChartInstance = new Chart(ctx, {
+                data: {
+                    labels: labelBulan,
+                    datasets: [
+                        { type: 'bar', label: 'Total Setoran', data: dataSetoran, backgroundColor: '#059669' },
+                        { type: 'bar', label: 'Total Penarikan', data: dataTarik, backgroundColor: '#dc2626' },
+                        { type: 'line', label: 'Saldo Akhir', data: dataSaldoAkhir, borderColor: '#0284c7', backgroundColor: '#0284c7', tension: 0.3 }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => 'Rp ' + (v / 1000).toLocaleString('id-ID') + 'rb' } } },
+                    plugins: { legend: { position: 'bottom' } }
+                }
+            });
+        }
     }
 
     function renderStockTrxBsu() {

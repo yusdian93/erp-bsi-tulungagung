@@ -76,6 +76,16 @@ const AdapterAPI = {
     return { transaksi: data || [] };
   },
 
+  // Semua transaksi nasabah->BSU (SEMUA unit) + master data nasabah, dipakai untuk
+  // menu Saldo/Tabungan BSU di induk.html.
+  async getSemuaTransaksiNasabah() {
+    const [{ data: transaksi }, { data: nasabah }] = await Promise.all([
+      sb.from('transaksi').select('*').eq('level', 'nasabah_ke_unit'),
+      sb.from('nasabah').select('*')
+    ]);
+    return { transaksi: transaksi || [], nasabah: nasabah || [] };
+  },
+
   // ---- Transaksi (level BSI: BSU -> BSI) ----
   async tambahTransaksiInduk({ tgl, nama, id_unit, jenis, berat, total }) {
     const { error } = await sb.from('transaksi').insert({
