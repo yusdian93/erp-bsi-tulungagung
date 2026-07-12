@@ -218,7 +218,7 @@
     .btn-danger { background-color: #fef2f2; color: var(--danger); border: 1px solid #fecaca; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 12px; font-family: inherit; transition: 0.2s;}
     .btn-danger:hover { background-color: var(--danger); color: white; }
     
-    .badge-material { background: var(--bg-body); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px;}
+    .badge-material { background: var(--bg-body); padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--text-muted); border: 1px solid var(--border); text-transform: uppercase; letter-spacing: 0.5px; white-space: normal; word-break: break-word; overflow-wrap: break-word; max-width: 100%; display: inline-block;}
     .badge-wa { display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 12px; border-radius: 8px; font-size: 12.5px; font-weight: 700; text-decoration: none; border: 1px solid #bfdbfe; transition: 0.2s; white-space: nowrap;}
     .badge-wa:hover { background: #dbeafe; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(37, 99, 235, 0.1);}
 
@@ -887,7 +887,7 @@
 
                 <div style="background: var(--bg-body); padding:14px 18px; border-radius:12px; margin-bottom:16px; border:1px solid var(--border);">
                     <p style="margin:0 0 6px; font-size:12px; font-weight:700; color:var(--text-muted);">RINCIAN SAMPAH YANG SUDAH DISETOR (Kg per jenis)</p>
-                    <div id="bsiRincianJenis" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+                    <div id="bsiRincianJenis" style="display:flex; gap:10px; flex-wrap:wrap; min-width:0;"></div>
                 </div>
 
                 <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
