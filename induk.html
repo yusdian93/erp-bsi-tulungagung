@@ -421,6 +421,22 @@
                     </button>
                 </div>
             </div>
+
+            <div class="nav-group" id="grp-dokumen">
+                <button class="nav-group-header" onclick="toggleGroup('grp-dokumen')">
+                    <span class="gh-ic">🗂️</span><span class="gh-label">Dokumen Laporan</span><span class="gh-arrow">›</span>
+                </button>
+                <div class="nav-group-items">
+                    <button class="nav-btn" data-label="Laporan Operasional Bulanan" data-group="grp-dokumen" onclick="pindahTab('dok_operasional', this); initDokOperasional();"><span class="nav-ic">📘</span> a. Operasional Bulanan</button>
+                    <button class="nav-btn" data-label="Laporan Stok & Hasil Pengolahan" data-group="grp-dokumen" onclick="pindahTab('dok_stok', this); initDokStok();"><span class="nav-ic">📦</span> b. Stok & Pengolahan</button>
+                    <button class="nav-btn" data-label="Laporan Sampah Masuk & Keluar" data-group="grp-dokumen" onclick="pindahTab('dok_sampah', this); initDokSampah();"><span class="nav-ic">♻️</span> c. Sampah Masuk & Keluar</button>
+                    <button class="nav-btn" data-label="Laporan Hasil Penjualan" data-group="grp-dokumen" onclick="pindahTab('dok_penjualan', this); initDokPenjualan();"><span class="nav-ic">💵</span> d. Hasil Penjualan</button>
+                    <button class="nav-btn" data-label="Laporan Kondisi Peralatan" data-group="grp-dokumen" onclick="pindahTab('dok_peralatan', this); initDokPeralatan();"><span class="nav-ic">🧰</span> e. Kondisi Peralatan</button>
+                    <button class="nav-btn" data-label="Laporan Pembinaan BSU" data-group="grp-dokumen" onclick="pindahTab('dok_pembinaan', this); loadDokPembinaan();"><span class="nav-ic">🎓</span> f. Pembinaan BSU</button>
+                    <button class="nav-btn" data-label="Laporan Kecelakaan/Darurat" data-group="grp-dokumen" onclick="pindahTab('dok_darurat', this); loadDokDarurat();"><span class="nav-ic">🚨</span> g. Kecelakaan/Darurat</button>
+                    <button class="nav-btn" data-label="Laporan Tahunan" data-group="grp-dokumen" onclick="pindahTab('dok_tahunan', this); initDokTahunan();"><span class="nav-ic">📅</span> h. Laporan Tahunan</button>
+                </div>
+            </div>
         </nav>
 
         <div class="sidebar-foot">
@@ -1191,6 +1207,142 @@
                     <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>TANGGAL</th><th>KATEGORI</th><th>KETERANGAN</th><th class="text-right">NOMINAL</th></tr></thead>
                     <tbody id="tbody_lap_kaskeluar"><tr><td colspan="4" class="text-center">Memuat data...</td></tr></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_operasional" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>📘 a. LAPORAN OPERASIONAL BULANAN</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Ringkasan menyeluruh kegiatan Bank Sampah Induk dalam satu bulan: setoran BSU, penjualan, kas masuk/keluar, biaya operasional, dan aktivitas pembinaan/kejadian darurat (jika ada).</p>
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="form-group" style="margin-bottom:0;"><label>Pilih Bulan</label><input type="month" id="dokOpBulan" class="form-control" onchange="renderRingkasanDokOperasional()"></div>
+                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="cetakDokOperasional()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div id="dokOpRingkasan" class="cards"></div>
+        </div>
+    </div>
+
+    <div id="dok_stok" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>📦 b. LAPORAN STOK & HASIL PENGOLAHAN</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Posisi stok material per kategori: total masuk dari BSU, total keluar terjual ke off-taker, dan sisa stok gudang.</p>
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="form-group" style="margin-bottom:0;"><label>Pilih Bulan (kosongkan untuk semua waktu)</label><input type="month" id="dokStokBulan" class="form-control" onchange="renderTabelDokStok()"></div>
+                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="cetakDokStok()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%;"><thead><tr><th>Kategori</th><th class="text-right">Masuk (Kg)</th><th class="text-right">Keluar (Kg)</th><th class="text-right">Sisa Stok (Kg)</th></tr></thead><tbody id="tbodyDokStok"></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_sampah" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>♻️ c. LAPORAN SAMPAH MASUK & KELUAR</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Rekap arus sampah: total yang masuk dari seluruh BSU dan total yang keluar terjual ke off-taker/pabrik daur ulang, per kategori material.</p>
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="form-group" style="margin-bottom:0;"><label>Pilih Bulan (kosongkan untuk semua waktu)</label><input type="month" id="dokSampahBulan" class="form-control" onchange="renderTabelDokSampah()"></div>
+                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="cetakDokSampah()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%;"><thead><tr><th>Kategori</th><th class="text-right">Sampah Masuk (Kg)</th><th class="text-right">Sampah Keluar (Kg)</th></tr></thead><tbody id="tbodyDokSampah"></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_penjualan" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>💵 d. LAPORAN HASIL PENJUALAN</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Rincian seluruh transaksi penjualan material ke off-taker/pabrik daur ulang.</p>
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="form-group" style="margin-bottom:0;"><label>Pilih Bulan (kosongkan untuk semua waktu)</label><input type="month" id="dokJualBulan" class="form-control" onchange="renderTabelDokPenjualan()"></div>
+                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="cetakDokPenjualan()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%;"><thead><tr><th>Tanggal</th><th>Pembeli</th><th>Material</th><th class="text-right">Berat</th><th class="text-right">Total</th></tr></thead><tbody id="tbodyDokPenjualan"></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_peralatan" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>🧰 e. LAPORAN KONDISI PERALATAN DAN BARANG</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Snapshot kondisi seluruh alat/barang inventaris saat ini (data diambil dari menu Inventaris & Operasional).</p>
+            <button type="button" class="btn-submit" style="width:auto; padding:12px 24px; margin-bottom:20px;" onclick="cetakDokPeralatan()">👁️ Preview & Cetak PDF</button>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%;"><thead><tr><th>Nama Alat</th><th>Kode</th><th>Jumlah</th><th>Kondisi</th><th>Lokasi</th><th>Keterangan</th></tr></thead><tbody id="tbodyDokPeralatan"></tbody></table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_pembinaan" class="content-section">
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header"><h2>➕ CATAT PEMBINAAN BSU</h2></div>
+            <form onsubmit="return false;">
+                <div class="grid-2">
+                    <div class="form-group"><label>Tanggal</label><input type="date" id="pbnTanggal" class="form-control"></div>
+                    <div class="form-group"><label>Nama BSU</label><select id="pbnBsu" class="form-control"><option value="">-- Pilih BSU --</option></select></div>
+                    <div class="form-group"><label>Jenis Pembinaan</label><input type="text" id="pbnJenis" class="form-control" placeholder="Contoh: Kunjungan Rutin, Pelatihan Pemilahan, Evaluasi Administrasi"></div>
+                    <div class="form-group"><label>Petugas</label><input type="text" id="pbnPetugas" class="form-control" placeholder="Nama petugas pembina"></div>
+                    <div class="form-group" style="grid-column:1/-1;"><label>Hasil / Catatan</label><input type="text" id="pbnCatatan" class="form-control" placeholder="Ringkasan hasil pembinaan"></div>
+                </div>
+                <button type="button" class="btn-submit" id="btnSimpanPbn" onclick="simpanPembinaan()">SIMPAN CATATAN PEMBINAAN</button>
+            </form>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>📋 f. LAPORAN PEMBINAAN BANK SAMPAH UNIT</h2>
+                <button type="button" class="btn-sync" onclick="cetakDokPembinaan()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:10%;">Tanggal</th><th style="width:18%;">Nama BSU</th><th style="width:20%;">Jenis Pembinaan</th><th style="width:15%;">Petugas</th><th style="width:27%;">Hasil/Catatan</th><th class="text-center" style="width:10%;">Aksi</th></tr></thead>
+                    <tbody id="tbodyDokPembinaan"><tr><td colspan="6" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_darurat" class="content-section">
+        <div class="panel" style="margin-bottom:24px; border:1px solid #fecaca; background:#fef2f2;">
+            <div class="panel-header"><h2 style="color:#991b1b;">🚨 CATAT KECELAKAAN / KEADAAN DARURAT</h2></div>
+            <form onsubmit="return false;">
+                <div class="grid-2">
+                    <div class="form-group"><label>Tanggal</label><input type="date" id="drtTanggal" class="form-control"></div>
+                    <div class="form-group"><label>Lokasi</label><input type="text" id="drtLokasi" class="form-control" placeholder="Contoh: Gudang BSI / BSU Karangwaru"></div>
+                    <div class="form-group"><label>Jenis Kejadian</label><input type="text" id="drtJenis" class="form-control" placeholder="Contoh: Kebakaran, Kecelakaan Kerja, Keracunan"></div>
+                    <div class="form-group"><label>Korban (jika ada)</label><input type="text" id="drtKorban" class="form-control" placeholder="Nama & kondisi korban, atau 'Tidak ada'"></div>
+                    <div class="form-group" style="grid-column:1/-1;"><label>Kronologi</label><input type="text" id="drtKronologi" class="form-control" placeholder="Ceritakan kejadian secara singkat"></div>
+                    <div class="form-group" style="grid-column:1/-1;"><label>Tindak Lanjut</label><input type="text" id="drtTindakLanjut" class="form-control" placeholder="Langkah penanganan yang sudah/akan dilakukan"></div>
+                </div>
+                <button type="button" class="btn-submit" id="btnSimpanDrt" onclick="simpanKejadianDarurat()" style="background:linear-gradient(135deg,#dc2626,#991b1b);">SIMPAN CATATAN KEJADIAN</button>
+            </form>
+        </div>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>📋 g. LAPORAN KECELAKAAN ATAU KEADAAN DARURAT</h2>
+                <button type="button" class="btn-sync" onclick="cetakDokDarurat()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:9%;">Tanggal</th><th style="width:15%;">Lokasi</th><th style="width:15%;">Jenis</th><th style="width:14%;">Korban</th><th style="width:20%;">Kronologi</th><th style="width:17%;">Tindak Lanjut</th><th class="text-center" style="width:10%;">Aksi</th></tr></thead>
+                    <tbody id="tbodyDokDarurat"><tr><td colspan="7" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div id="dok_tahunan" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>📅 h. LAPORAN TAHUNAN</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Rekap seluruh kegiatan dan keuangan Bank Sampah Induk selama satu tahun, per bulan.</p>
+            <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
+                <div class="form-group" style="margin-bottom:0;"><label>Pilih Tahun</label><select id="dokTahunPilih" class="form-control" style="max-width:140px;" onchange="renderTabelDokTahunan()"></select></div>
+                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="cetakDokTahunan()">👁️ Preview & Cetak PDF</button>
+            </div>
+            <div class="table-container" style="max-height:480px; overflow-y:auto;">
+                <table class="tabel-kompak" style="width:100%;"><thead><tr><th>Bulan</th><th class="text-right">Setoran Masuk (Kg)</th><th class="text-right">Kas Masuk (Rp)</th><th class="text-right">Kas Keluar (Rp)</th><th class="text-right">Saldo Bersih (Rp)</th></tr></thead><tbody id="tbodyDokTahunan"></tbody></table>
             </div>
         </div>
     </div>
@@ -3283,6 +3435,7 @@
     // MODUL INVENTARIS & OPERASIONAL
     // =========================================
     let globalAlat = [], globalBiayaOp = [], globalPemeliharaan = [], globalHibah = [];
+    let globalPembinaan = [], globalDarurat = [];
 
     function loadInventarisOperasional() {
         AdapterAPI.getInventarisBundle().then(res => {
@@ -3474,6 +3627,410 @@
                 <td class="text-right" style="font-weight:800; color:var(--danger);">Rp ${totalSemua.toLocaleString('id-ID')}</td>
             </tr>`;
         }).join('');
+    }
+
+    // =========================================
+    // DOKUMEN LAPORAN (a-h)
+    // =========================================
+    function bukaPreviewDokumen(judul, subjudul, sections) {
+        if (typeof window.jspdf === 'undefined') return alert('Pustaka PDF belum siap, coba lagi sesaat.');
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        let pageW = doc.internal.pageSize.getWidth();
+        let y = 18;
+
+        doc.setFont(undefined, 'bold'); doc.setFontSize(13);
+        doc.text('BANK SAMPAH INDUK', pageW / 2, y, { align: 'center' }); y += 6;
+        doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+        doc.text('Dinas Lingkungan Hidup Kabupaten Tulungagung', pageW / 2, y, { align: 'center' }); y += 6;
+        doc.setDrawColor(180); doc.line(14, y, pageW - 14, y); y += 8;
+
+        doc.setFont(undefined, 'bold'); doc.setFontSize(12);
+        doc.text(judul, pageW / 2, y, { align: 'center' }); y += 6;
+        if (subjudul) { doc.setFont(undefined, 'normal'); doc.setFontSize(9.5); doc.text(subjudul, pageW / 2, y, { align: 'center' }); y += 8; } else y += 4;
+
+        sections.forEach(sec => {
+            if (y > 265) { doc.addPage(); y = 18; }
+            if (sec.heading) { doc.setFont(undefined, 'bold'); doc.setFontSize(10.5); doc.text(sec.heading, 14, y); y += 6; }
+            if (sec.text) {
+                doc.setFont(undefined, 'normal'); doc.setFontSize(9.5);
+                let lines = doc.splitTextToSize(sec.text, pageW - 28);
+                doc.text(lines, 14, y); y += lines.length * 4.5 + 4;
+            }
+            if (sec.rows && sec.rows.length && doc.autoTable) {
+                doc.autoTable({ startY: y, head: sec.headers ? [sec.headers] : undefined, body: sec.rows, styles: { fontSize: 8.5 }, headStyles: { fillColor: [124, 58, 237] }, margin: { left: 14, right: 14 } });
+                y = doc.lastAutoTable.finalY + 8;
+            }
+        });
+
+        if (y > 250) { doc.addPage(); y = 18; }
+        y += 8;
+        doc.setFont(undefined, 'normal'); doc.setFontSize(9);
+        doc.text('Tulungagung, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }), pageW - 75, y); y += 6;
+        doc.text('Mengetahui,', pageW - 75, y); y += 22;
+        doc.setFont(undefined, 'bold'); doc.text('( ................................... )', pageW - 75, y); y += 5;
+        doc.setFont(undefined, 'normal'); doc.text('Admin Bank Sampah Induk', pageW - 75, y);
+
+        let namaFile = judul.replace(/[^a-zA-Z0-9]+/g, '_') + '.pdf';
+        doc.setProperties({ title: namaFile });
+        let jendela = window.open(doc.output('bloburl'), '_blank');
+        if (!jendela) alert('Preview diblokir browser. Izinkan pop-up untuk situs ini lalu coba lagi.');
+    }
+
+    // ---- a. Operasional Bulanan ----
+    function initDokOperasional() {
+        if (!document.getElementById('dokOpBulan').value) {
+            let now = new Date();
+            document.getElementById('dokOpBulan').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+        renderRingkasanDokOperasional();
+    }
+
+    function hitungRingkasanOperasional(bulanStr) {
+        let [tahun, bulan] = bulanStr.split('-').map(Number);
+        let awal = new Date(tahun, bulan - 1, 1), akhir = new Date(tahun, bulan, 1);
+        let dalamPeriode = (tglStr) => { let d = uraikanTanggalInput(tglStr); return !isNaN(d) && d >= awal && d < akhir; };
+        let dalamPeriodeISO = (tglStr) => { let d = new Date(tglStr); return !isNaN(d) && d >= awal && d < akhir; };
+
+        let totalSetoranKg = globalTransaksi.filter(t => t.total > 0 && t.berat > 0 && dalamPeriode(t.tgl)).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
+        let totalPenjualanRp = ambilDataLokal(KEY_PENJUALAN).filter(d => dalamPeriode(d.tanggal)).reduce((a, d) => a + (parseFloat(d.total) || 0), 0);
+
+        let kasData = getDataKasIndukOtomatis().filter(d => d.tanggalObj >= awal && d.tanggalObj < akhir);
+        let kasMasuk = kasData.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
+        let kasKeluar = kasData.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
+
+        let biayaOp = (globalBiayaOp || []).filter(b => dalamPeriodeISO(b.tanggal)).reduce((a, b) => a + (parseFloat(b.jumlah) || 0), 0);
+        let jmlPembinaan = (globalPembinaan || []).filter(p => dalamPeriodeISO(p.tanggal)).length;
+        let jmlDarurat = (globalDarurat || []).filter(d => dalamPeriodeISO(d.tanggal)).length;
+
+        return { totalSetoranKg, totalPenjualanRp, kasMasuk, kasKeluar, saldoBersih: kasMasuk - kasKeluar, biayaOp, jmlBsuAktif: globalNasabah.length, jmlPembinaan, jmlDarurat };
+    }
+
+    function renderRingkasanDokOperasional() {
+        let bulanStr = document.getElementById('dokOpBulan').value;
+        if (!bulanStr) return;
+        let r = hitungRingkasanOperasional(bulanStr);
+        document.getElementById('dokOpRingkasan').innerHTML = `
+            <div class="card card-green"><h3>Total Setoran BSU</h3><p>${r.totalSetoranKg.toFixed(1)} Kg</p></div>
+            <div class="card card-blue"><h3>Hasil Penjualan</h3><p>Rp ${r.totalPenjualanRp.toLocaleString('id-ID')}</p></div>
+            <div class="card card-orange"><h3>Kas Masuk</h3><p>Rp ${r.kasMasuk.toLocaleString('id-ID')}</p></div>
+            <div class="card card-red"><h3>Kas Keluar</h3><p>Rp ${r.kasKeluar.toLocaleString('id-ID')}</p></div>
+            <div class="card"><h3>Saldo Bersih Bulan Ini</h3><p>Rp ${r.saldoBersih.toLocaleString('id-ID')}</p></div>
+            <div class="card"><h3>Jumlah BSU Terdaftar</h3><p>${r.jmlBsuAktif}</p></div>
+            <div class="card"><h3>Kegiatan Pembinaan</h3><p>${r.jmlPembinaan}</p></div>
+            <div class="card"><h3>Kejadian Darurat</h3><p>${r.jmlDarurat}</p></div>
+        `;
+    }
+
+    function cetakDokOperasional() {
+        let bulanStr = document.getElementById('dokOpBulan').value;
+        if (!bulanStr) return alert('Pilih bulan terlebih dahulu.');
+        renderRingkasanDokOperasional();
+        let r = hitungRingkasanOperasional(bulanStr);
+        let [tahun, bulan] = bulanStr.split('-').map(Number);
+        let namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][bulan - 1];
+
+        bukaPreviewDokumen('LAPORAN OPERASIONAL BULANAN', 'Periode: ' + namaBulan + ' ' + tahun, [
+            { heading: 'Ringkasan Kegiatan', rows: [
+                ['Total Setoran dari BSU', r.totalSetoranKg.toFixed(1) + ' Kg'],
+                ['Total Hasil Penjualan', 'Rp ' + r.totalPenjualanRp.toLocaleString('id-ID')],
+                ['Total Kas Masuk', 'Rp ' + r.kasMasuk.toLocaleString('id-ID')],
+                ['Total Kas Keluar', 'Rp ' + r.kasKeluar.toLocaleString('id-ID')],
+                ['Saldo Bersih Bulan Ini', 'Rp ' + r.saldoBersih.toLocaleString('id-ID')],
+                ['Biaya Operasional', 'Rp ' + r.biayaOp.toLocaleString('id-ID')],
+                ['Jumlah BSU Terdaftar', r.jmlBsuAktif + ' Unit'],
+                ['Kegiatan Pembinaan BSU', r.jmlPembinaan + ' Kegiatan'],
+                ['Kejadian Kecelakaan/Darurat', r.jmlDarurat + ' Kejadian']
+            ] }
+        ]);
+    }
+
+    // ---- b & c. Stok dan Sampah Masuk/Keluar (sumber data sama) ----
+    function hitungDataStok(bulanStr) {
+        let filterFn = null;
+        if (bulanStr) {
+            let [tahun, bulan] = bulanStr.split('-').map(Number);
+            let awal = new Date(tahun, bulan - 1, 1), akhir = new Date(tahun, bulan, 1);
+            filterFn = (d) => d >= awal && d < akhir;
+        }
+        let stokMap = {};
+        globalTransaksi.filter(t => t.total > 0 && t.berat > 0).forEach(t => {
+            let d = uraikanTanggalInput(t.tgl);
+            if (filterFn && (isNaN(d) || !filterFn(d))) return;
+            let jns = t.jenis || 'Lainnya'; if (!stokMap[jns]) stokMap[jns] = { masuk: 0, keluar: 0 };
+            stokMap[jns].masuk += parseFloat(t.berat) || 0;
+        });
+        ambilDataLokal(KEY_PENJUALAN).forEach(d0 => {
+            let d = uraikanTanggalInput(d0.tanggal);
+            if (filterFn && (isNaN(d) || !filterFn(d))) return;
+            let jns = d0.material || 'Lainnya'; if (!stokMap[jns]) stokMap[jns] = { masuk: 0, keluar: 0 };
+            stokMap[jns].keluar += parseFloat(d0.berat) || 0;
+        });
+        return stokMap;
+    }
+
+    function initDokStok() { renderTabelDokStok(); }
+
+    function renderTabelDokStok() {
+        let stokMap = hitungDataStok(document.getElementById('dokStokBulan').value);
+        let tbody = document.getElementById('tbodyDokStok');
+        let keys = Object.keys(stokMap).sort();
+        if (keys.length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted">Tidak ada data</td></tr>'; return; }
+        tbody.innerHTML = keys.map(k => {
+            let m = stokMap[k].masuk, ke = stokMap[k].keluar, sisa = Math.max(0, m - ke);
+            return `<tr><td style="font-weight:700;">${k}</td><td class="text-right">${m.toFixed(1)}</td><td class="text-right">${ke.toFixed(1)}</td><td class="text-right" style="font-weight:800;">${sisa.toFixed(1)}</td></tr>`;
+        }).join('');
+    }
+
+    function cetakDokStok() {
+        renderTabelDokStok();
+        let bulanStr = document.getElementById('dokStokBulan').value;
+        let stokMap = hitungDataStok(bulanStr);
+        let keys = Object.keys(stokMap).sort();
+        if (keys.length === 0) return alert('Tidak ada data untuk dicetak.');
+        let rows = keys.map(k => { let m = stokMap[k].masuk, ke = stokMap[k].keluar; return [k, m.toFixed(1), ke.toFixed(1), Math.max(0, m - ke).toFixed(1)]; });
+        let sub = bulanStr ? 'Periode: ' + bulanStr : 'Seluruh Periode';
+        bukaPreviewDokumen('LAPORAN STOK & HASIL PENGOLAHAN', sub, [
+            { headers: ['Kategori', 'Masuk (Kg)', 'Keluar (Kg)', 'Sisa Stok (Kg)'], rows }
+        ]);
+    }
+
+    function initDokSampah() { renderTabelDokSampah(); }
+
+    function renderTabelDokSampah() {
+        let stokMap = hitungDataStok(document.getElementById('dokSampahBulan').value);
+        let tbody = document.getElementById('tbodyDokSampah');
+        let keys = Object.keys(stokMap).sort();
+        if (keys.length === 0) { tbody.innerHTML = '<tr><td colspan="3" class="text-center text-muted">Tidak ada data</td></tr>'; return; }
+        tbody.innerHTML = keys.map(k => `<tr><td style="font-weight:700;">${k}</td><td class="text-right" style="color:var(--secondary);">${stokMap[k].masuk.toFixed(1)}</td><td class="text-right" style="color:var(--danger);">${stokMap[k].keluar.toFixed(1)}</td></tr>`).join('');
+    }
+
+    function cetakDokSampah() {
+        renderTabelDokSampah();
+        let bulanStr = document.getElementById('dokSampahBulan').value;
+        let stokMap = hitungDataStok(bulanStr);
+        let keys = Object.keys(stokMap).sort();
+        if (keys.length === 0) return alert('Tidak ada data untuk dicetak.');
+        let rows = keys.map(k => [k, stokMap[k].masuk.toFixed(1), stokMap[k].keluar.toFixed(1)]);
+        let sub = bulanStr ? 'Periode: ' + bulanStr : 'Seluruh Periode';
+        bukaPreviewDokumen('LAPORAN SAMPAH MASUK & KELUAR', sub, [
+            { headers: ['Kategori', 'Sampah Masuk (Kg)', 'Sampah Keluar (Kg)'], rows }
+        ]);
+    }
+
+    // ---- d. Hasil Penjualan ----
+    function ambilDataDokPenjualan(bulanStr) {
+        let list = ambilDataLokal(KEY_PENJUALAN);
+        if (bulanStr) {
+            let [tahun, bulan] = bulanStr.split('-').map(Number);
+            let awal = new Date(tahun, bulan - 1, 1), akhir = new Date(tahun, bulan, 1);
+            list = list.filter(d => { let dt = uraikanTanggalInput(d.tanggal); return !isNaN(dt) && dt >= awal && dt < akhir; });
+        }
+        return list.slice().sort((a, b) => uraikanTanggalInput(b.tanggal) - uraikanTanggalInput(a.tanggal));
+    }
+
+    function initDokPenjualan() { renderTabelDokPenjualan(); }
+
+    function renderTabelDokPenjualan() {
+        let list = ambilDataDokPenjualan(document.getElementById('dokJualBulan').value);
+        let tbody = document.getElementById('tbodyDokPenjualan');
+        if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Tidak ada data</td></tr>'; return; }
+        tbody.innerHTML = list.map(d => `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${d.pembeli}</td><td>${d.material}</td><td class="text-right">${parseFloat(d.berat).toLocaleString('id-ID')}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(d.total).toLocaleString('id-ID')}</td></tr>`).join('');
+    }
+
+    function cetakDokPenjualan() {
+        renderTabelDokPenjualan();
+        let bulanStr = document.getElementById('dokJualBulan').value;
+        let list = ambilDataDokPenjualan(bulanStr);
+        if (list.length === 0) return alert('Tidak ada data untuk dicetak.');
+        let total = list.reduce((a, d) => a + (parseFloat(d.total) || 0), 0);
+        let rows = list.map(d => [formatTglTabel(d.tanggal), d.pembeli, d.material, parseFloat(d.berat).toLocaleString('id-ID') + ' Kg', 'Rp ' + parseFloat(d.total).toLocaleString('id-ID')]);
+        rows.push(['', '', '', 'TOTAL', 'Rp ' + total.toLocaleString('id-ID')]);
+        let sub = bulanStr ? 'Periode: ' + bulanStr : 'Seluruh Periode';
+        bukaPreviewDokumen('LAPORAN HASIL PENJUALAN', sub, [
+            { headers: ['Tanggal', 'Pembeli', 'Material', 'Berat', 'Total'], rows }
+        ]);
+    }
+
+    // ---- e. Kondisi Peralatan ----
+    function initDokPeralatan() { renderTabelDokPeralatan(); }
+
+    function renderTabelDokPeralatan() {
+        let tbody = document.getElementById('tbodyDokPeralatan');
+        if ((globalAlat || []).length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada data alat</td></tr>'; return; }
+        tbody.innerHTML = globalAlat.map(a => `<tr><td style="font-weight:700;">${a.nama_alat}</td><td>${a.kode_alat || '-'}</td><td>${a.jumlah}</td><td>${a.kondisi || '-'}</td><td>${a.lokasi || '-'}</td><td>${a.keterangan || '-'}</td></tr>`).join('');
+    }
+
+    function cetakDokPeralatan() {
+        renderTabelDokPeralatan();
+        if ((globalAlat || []).length === 0) return alert('Belum ada data alat untuk dicetak.');
+        let rows = globalAlat.map(a => [a.nama_alat, a.kode_alat || '-', a.jumlah, a.kondisi || '-', a.lokasi || '-', a.keterangan || '-']);
+        bukaPreviewDokumen('LAPORAN KONDISI PERALATAN DAN BARANG', 'Per ' + new Date().toLocaleDateString('id-ID'), [
+            { headers: ['Nama Alat', 'Kode', 'Jumlah', 'Kondisi', 'Lokasi', 'Keterangan'], rows }
+        ]);
+    }
+
+    // ---- f. Pembinaan BSU ----
+    function loadDokPembinaan() {
+        AdapterAPI.getDokumenLaporanBundle().then(res => {
+            globalPembinaan = res.pembinaan || [];
+            globalDarurat = res.darurat || [];
+            if (!document.getElementById('pbnTanggal').value) document.getElementById('pbnTanggal').value = new Date().toISOString().slice(0, 10);
+            let selBsu = document.getElementById('pbnBsu');
+            let prevVal = selBsu.value;
+            selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${n.nama}</option>`).join('');
+            if (prevVal) selBsu.value = prevVal;
+            renderTabelDokPembinaan();
+            renderTabelDokDarurat();
+        }).catch(e => alert('Gagal memuat data: ' + e));
+    }
+
+    function simpanPembinaan() {
+        let tanggal = document.getElementById('pbnTanggal').value;
+        let namaBsu = document.getElementById('pbnBsu').value;
+        let jenis = document.getElementById('pbnJenis').value.trim();
+        if (!tanggal) return alert('Tanggal wajib diisi.');
+        if (!namaBsu) return alert('Pilih BSU terlebih dahulu.');
+        if (!jenis) return alert('Jenis pembinaan wajib diisi.');
+        let form = { tanggal, nama_bsu: namaBsu, jenis_pembinaan: jenis, petugas: document.getElementById('pbnPetugas').value.trim(), hasil_catatan: document.getElementById('pbnCatatan').value.trim() };
+        let btn = document.getElementById('btnSimpanPbn'); btn.disabled = true; btn.innerText = 'Menyimpan...';
+        AdapterAPI.tambahPembinaan(form).then(res => {
+            alert(res);
+            document.getElementById('pbnJenis').value = ''; document.getElementById('pbnPetugas').value = ''; document.getElementById('pbnCatatan').value = '';
+            loadDokPembinaan();
+        }).catch(e => alert('Gagal: ' + e)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN CATATAN PEMBINAAN'; });
+    }
+
+    function hapusPembinaan(id) {
+        if (!confirm('Yakin ingin menghapus catatan ini?')) return;
+        AdapterAPI.deletePembinaan(id).then(res => { alert(res); loadDokPembinaan(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function renderTabelDokPembinaan() {
+        let tbody = document.getElementById('tbodyDokPembinaan');
+        if (!tbody) return;
+        if ((globalPembinaan || []).length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada catatan pembinaan</td></tr>'; return; }
+        let terurut = globalPembinaan.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        tbody.innerHTML = terurut.map(p => `<tr>
+            <td>${new Date(p.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${p.nama_bsu || '-'}</td>
+            <td>${p.jenis_pembinaan || '-'}</td><td>${p.petugas || '-'}</td><td>${p.hasil_catatan || '-'}</td>
+            <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPembinaan('${escAttr(p.id)}')">🗑️</button></td>
+        </tr>`).join('');
+    }
+
+    function cetakDokPembinaan() {
+        let rows = (globalPembinaan || []).slice().sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)).map(p => [
+            new Date(p.tanggal).toLocaleDateString('id-ID'), p.nama_bsu || '-', p.jenis_pembinaan || '-', p.petugas || '-', p.hasil_catatan || '-'
+        ]);
+        if (rows.length === 0) return alert('Belum ada data pembinaan untuk dicetak.');
+        bukaPreviewDokumen('LAPORAN PEMBINAAN BANK SAMPAH UNIT', 'Seluruh Catatan Pembinaan', [
+            { headers: ['Tanggal', 'Nama BSU', 'Jenis Pembinaan', 'Petugas', 'Hasil/Catatan'], rows }
+        ]);
+    }
+
+    // ---- g. Kecelakaan / Keadaan Darurat ----
+    function loadDokDarurat() {
+        AdapterAPI.getDokumenLaporanBundle().then(res => {
+            globalPembinaan = res.pembinaan || [];
+            globalDarurat = res.darurat || [];
+            if (!document.getElementById('drtTanggal').value) document.getElementById('drtTanggal').value = new Date().toISOString().slice(0, 10);
+            renderTabelDokDarurat();
+            renderTabelDokPembinaan();
+        }).catch(e => alert('Gagal memuat data: ' + e));
+    }
+
+    function simpanKejadianDarurat() {
+        let tanggal = document.getElementById('drtTanggal').value;
+        let lokasi = document.getElementById('drtLokasi').value.trim();
+        let jenis = document.getElementById('drtJenis').value.trim();
+        if (!tanggal) return alert('Tanggal wajib diisi.');
+        if (!lokasi) return alert('Lokasi wajib diisi.');
+        if (!jenis) return alert('Jenis kejadian wajib diisi.');
+        let form = { tanggal, lokasi, jenis_kejadian: jenis, kronologi: document.getElementById('drtKronologi').value.trim(), korban: document.getElementById('drtKorban').value.trim(), tindak_lanjut: document.getElementById('drtTindakLanjut').value.trim() };
+        let btn = document.getElementById('btnSimpanDrt'); btn.disabled = true; btn.innerText = 'Menyimpan...';
+        AdapterAPI.tambahKejadianDarurat(form).then(res => {
+            alert(res);
+            document.getElementById('drtLokasi').value = ''; document.getElementById('drtJenis').value = ''; document.getElementById('drtKorban').value = ''; document.getElementById('drtKronologi').value = ''; document.getElementById('drtTindakLanjut').value = '';
+            loadDokDarurat();
+        }).catch(e => alert('Gagal: ' + e)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN CATATAN KEJADIAN'; });
+    }
+
+    function hapusKejadianDarurat(id) {
+        if (!confirm('Yakin ingin menghapus catatan ini?')) return;
+        AdapterAPI.deleteKejadianDarurat(id).then(res => { alert(res); loadDokDarurat(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function renderTabelDokDarurat() {
+        let tbody = document.getElementById('tbodyDokDarurat');
+        if (!tbody) return;
+        if ((globalDarurat || []).length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada catatan kejadian</td></tr>'; return; }
+        let terurut = globalDarurat.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        tbody.innerHTML = terurut.map(d => `<tr>
+            <td>${new Date(d.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${d.lokasi || '-'}</td>
+            <td>${d.jenis_kejadian || '-'}</td><td>${d.korban || '-'}</td><td>${d.kronologi || '-'}</td><td>${d.tindak_lanjut || '-'}</td>
+            <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusKejadianDarurat('${escAttr(d.id)}')">🗑️</button></td>
+        </tr>`).join('');
+    }
+
+    function cetakDokDarurat() {
+        let rows = (globalDarurat || []).slice().sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)).map(d => [
+            new Date(d.tanggal).toLocaleDateString('id-ID'), d.lokasi || '-', d.jenis_kejadian || '-', d.korban || '-', d.kronologi || '-', d.tindak_lanjut || '-'
+        ]);
+        if (rows.length === 0) return alert('Belum ada data kejadian untuk dicetak.');
+        bukaPreviewDokumen('LAPORAN KECELAKAAN ATAU KEADAAN DARURAT', 'Seluruh Catatan Kejadian', [
+            { headers: ['Tanggal', 'Lokasi', 'Jenis', 'Korban', 'Kronologi', 'Tindak Lanjut'], rows }
+        ]);
+    }
+
+    // ---- h. Laporan Tahunan ----
+    function initDokTahunan() {
+        let selTahun = document.getElementById('dokTahunPilih');
+        let tahunSekarang = new Date().getFullYear();
+        let tahunSet = new Set([tahunSekarang]);
+        globalTransaksi.forEach(t => { let d = uraikanTanggalInput(t.tgl); if (!isNaN(d)) tahunSet.add(d.getFullYear()); });
+        let opsi = Array.from(tahunSet).sort((a, b) => b - a);
+        let prevVal = selTahun.value;
+        selTahun.innerHTML = opsi.map(t => `<option value="${t}">${t}</option>`).join('');
+        if (prevVal && opsi.includes(parseInt(prevVal))) selTahun.value = prevVal; else selTahun.value = tahunSekarang;
+        renderTabelDokTahunan();
+    }
+
+    function hitungDataTahunan(tahun) {
+        let namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+        let kasData = getDataKasIndukOtomatis();
+        return namaBulan.map((nama, idx) => {
+            let awal = new Date(tahun, idx, 1), akhir = new Date(tahun, idx + 1, 1);
+            let setoranKg = globalTransaksi.filter(t => t.total > 0 && t.berat > 0).filter(t => { let d = uraikanTanggalInput(t.tgl); return !isNaN(d) && d >= awal && d < akhir; }).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
+            let kasBulan = kasData.filter(d => d.tanggalObj >= awal && d.tanggalObj < akhir);
+            let masuk = kasBulan.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
+            let keluar = kasBulan.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
+            return { bulan: nama, setoranKg, masuk, keluar, saldo: masuk - keluar };
+        });
+    }
+
+    function renderTabelDokTahunan() {
+        let tahun = parseInt(document.getElementById('dokTahunPilih').value) || new Date().getFullYear();
+        let data = hitungDataTahunan(tahun);
+        let tbody = document.getElementById('tbodyDokTahunan');
+        let totSetoran = 0, totMasuk = 0, totKeluar = 0;
+        let html = data.map(d => {
+            totSetoran += d.setoranKg; totMasuk += d.masuk; totKeluar += d.keluar;
+            return `<tr><td style="font-weight:700;">${d.bulan}</td><td class="text-right">${d.setoranKg.toFixed(1)}</td><td class="text-right" style="color:var(--secondary);">Rp ${d.masuk.toLocaleString('id-ID')}</td><td class="text-right" style="color:var(--danger);">Rp ${d.keluar.toLocaleString('id-ID')}</td><td class="text-right" style="font-weight:800;">Rp ${d.saldo.toLocaleString('id-ID')}</td></tr>`;
+        }).join('');
+        html += `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL ${tahun}</td><td class="text-right">${totSetoran.toFixed(1)} Kg</td><td class="text-right">Rp ${totMasuk.toLocaleString('id-ID')}</td><td class="text-right">Rp ${totKeluar.toLocaleString('id-ID')}</td><td class="text-right">Rp ${(totMasuk - totKeluar).toLocaleString('id-ID')}</td></tr>`;
+        tbody.innerHTML = html;
+    }
+
+    function cetakDokTahunan() {
+        let tahun = parseInt(document.getElementById('dokTahunPilih').value) || new Date().getFullYear();
+        renderTabelDokTahunan();
+        let data = hitungDataTahunan(tahun);
+        let totSetoran = 0, totMasuk = 0, totKeluar = 0;
+        let rows = data.map(d => { totSetoran += d.setoranKg; totMasuk += d.masuk; totKeluar += d.keluar; return [d.bulan, d.setoranKg.toFixed(1) + ' Kg', 'Rp ' + d.masuk.toLocaleString('id-ID'), 'Rp ' + d.keluar.toLocaleString('id-ID'), 'Rp ' + (d.masuk - d.keluar).toLocaleString('id-ID')]; });
+        rows.push(['TOTAL', totSetoran.toFixed(1) + ' Kg', 'Rp ' + totMasuk.toLocaleString('id-ID'), 'Rp ' + totKeluar.toLocaleString('id-ID'), 'Rp ' + (totMasuk - totKeluar).toLocaleString('id-ID')]);
+        bukaPreviewDokumen('LAPORAN TAHUNAN', 'Tahun ' + tahun, [
+            { headers: ['Bulan', 'Setoran (Kg)', 'Kas Masuk', 'Kas Keluar', 'Saldo Bersih'], rows }
+        ]);
     }
 
     function renderStockTrxBsu() {
@@ -4005,11 +4562,12 @@
     }
 
     function loadDataTambahan() {
-        Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle()])
-        .then(([res, resInv]) => {
+        Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle()])
+        .then(([res, resInv, resDok]) => {
             globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
             globalHibah = res.hibah || [];
             globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
+            globalPembinaan = resDok.pembinaan || []; globalDarurat = resDok.darurat || [];
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
         }).catch(err => console.error("Gagal memuat data:", err));

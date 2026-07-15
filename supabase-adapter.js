@@ -61,6 +61,31 @@ const AdapterAPI = {
     return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
   },
 
+  // ================== DOKUMEN LAPORAN ==================
+  async getDokumenLaporanBundle() {
+    const [{ data: pembinaan }, { data: darurat }] = await Promise.all([
+      sb.from('pembinaan_bsu').select('*'),
+      sb.from('kejadian_darurat').select('*')
+    ]);
+    return { pembinaan: pembinaan || [], darurat: darurat || [] };
+  },
+  async tambahPembinaan(form) {
+    const { error } = await sb.from('pembinaan_bsu').insert({ id: 'PBN-' + Date.now(), ...form });
+    return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
+  },
+  async deletePembinaan(id) {
+    const { error } = await sb.from('pembinaan_bsu').delete().eq('id', id);
+    return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
+  },
+  async tambahKejadianDarurat(form) {
+    const { error } = await sb.from('kejadian_darurat').insert({ id: 'DRT-' + Date.now(), ...form });
+    return error ? 'Gagal: ' + error.message : 'Sukses tersimpan';
+  },
+  async deleteKejadianDarurat(id) {
+    const { error } = await sb.from('kejadian_darurat').delete().eq('id', id);
+    return error ? 'Gagal: ' + error.message : 'Sukses dihapus';
+  },
+
   async getRingkasanDashboard() {
     const { count: unit } = await sb.from('bsu').select('*', { count: 'exact', head: true });
     const { data: trxBulanIni } = await sb
