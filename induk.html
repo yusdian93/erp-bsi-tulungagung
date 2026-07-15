@@ -1121,6 +1121,24 @@
     </div>
 
     <div id="kasinduk" class="content-section">
+        <div class="panel" style="margin-bottom:24px; border:1px solid #bbf7d0; background:#f0fdf4;">
+            <div class="panel-header"><h2 style="color:#166534;">🎁 CATAT BANTUAN / HIBAH (Kas Masuk)</h2></div>
+            <div class="grid-2" style="align-items:flex-end;">
+                <div class="form-group" style="margin-bottom:0;"><label>Tanggal</label><input type="date" id="hibahTanggal" class="form-control"></div>
+                <div class="form-group" style="margin-bottom:0;"><label>Sumber</label><input type="text" id="hibahSumber" class="form-control" placeholder="Contoh: Pemerintah Kab. Tulungagung / CSR PT XYZ"></div>
+                <div class="form-group" style="margin-bottom:0;"><label>Keterangan</label><input type="text" id="hibahKeterangan" class="form-control" placeholder="Opsional"></div>
+                <div class="form-group" style="margin-bottom:0;"><label>Jumlah (Rp)</label><input type="number" id="hibahJumlah" class="form-control" min="0" placeholder="Contoh: 5000000"></div>
+            </div>
+            <button type="button" class="btn-submit" id="btnSimpanHibah" onclick="simpanBantuanHibah()" style="margin-top:14px; background:linear-gradient(135deg,#059669,#047857);">SIMPAN BANTUAN/HIBAH</button>
+
+            <div class="table-container" style="max-height:220px; overflow-y:auto; margin-top:18px;">
+                <table class="tabel-kompak" style="width:100%; table-layout:fixed;">
+                    <thead><tr><th style="width:12%;">Tanggal</th><th style="width:28%;">Sumber</th><th style="width:35%;">Keterangan</th><th class="text-right" style="width:15%;">Jumlah</th><th class="text-center" style="width:10%;">Aksi</th></tr></thead>
+                    <tbody id="tbodyBantuanHibah"><tr><td colspan="5" class="text-center text-muted">Memuat...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="cards">
             <div class="card card-green">
                 <h3>Total Kas Masuk</h3>
@@ -2284,10 +2302,50 @@
         document.getElementById('tbody_lap_stok').innerHTML = html;
     }
 
+    function simpanBantuanHibah() {
+        let tanggal = document.getElementById('hibahTanggal').value;
+        let sumber = document.getElementById('hibahSumber').value.trim();
+        let jumlah = parseFloat(document.getElementById('hibahJumlah').value);
+        if (!tanggal) return alert('Tanggal wajib diisi.');
+        if (!sumber) return alert('Sumber bantuan/hibah wajib diisi.');
+        if (!jumlah || jumlah <= 0) return alert('Jumlah harus lebih dari 0.');
+
+        let form = { tanggal, sumber, keterangan: document.getElementById('hibahKeterangan').value.trim(), jumlah };
+        let btn = document.getElementById('btnSimpanHibah'); btn.disabled = true; btn.innerText = 'Menyimpan...';
+        AdapterAPI.tambahBantuanHibah(form).then(res => {
+            alert(res);
+            document.getElementById('hibahSumber').value = ''; document.getElementById('hibahKeterangan').value = ''; document.getElementById('hibahJumlah').value = '';
+            loadDataTambahan();
+        }).catch(e => alert('Gagal: ' + e)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN BANTUAN/HIBAH'; });
+    }
+
+    function hapusBantuanHibah(id) {
+        if (!confirm('Yakin ingin menghapus catatan bantuan/hibah ini?')) return;
+        AdapterAPI.deleteBantuanHibah(id).then(res => { alert(res); loadDataTambahan(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function renderTabelHibah() {
+        let tbody = document.getElementById('tbodyBantuanHibah');
+        if (!tbody) return;
+        if (!globalHibah || globalHibah.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada catatan bantuan/hibah</td></tr>'; return; }
+        let terurut = globalHibah.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+        tbody.innerHTML = terurut.map(h => `<tr>
+            <td>${new Date(h.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${h.sumber || '-'}</td>
+            <td>${h.keterangan || '-'}</td><td class="text-right" style="color:var(--secondary); font-weight:700;">Rp ${parseFloat(h.jumlah).toLocaleString('id-ID')}</td>
+            <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBantuanHibah('${escAttr(h.id)}')">🗑️</button></td>
+        </tr>`).join('');
+    }
+
     function getDataKasIndukOtomatis() {
         let entriMasuk = ambilDataLokal(KEY_PENJUALAN).map(d => ({ tanggalObj: uraikanTanggalInput(d.tanggal), tanggal: d.tanggal, jenis: 'masuk', kategori: 'Penjualan Sampah', keterangan: `${d.material || '-'} ke ${d.pembeli || '-'}`, nominal: parseFloat(d.total) || 0 }));
-        let entriKeluar = globalTransaksi.filter(t => (parseFloat(t.total) || 0) < 0 || t.jenis === 'Penarikan Tunai').map(t => ({ tanggalObj: uraikanTanggalInput(t.tgl), tanggal: t.tgl, jenis: 'keluar', kategori: 'Penarikan Saldo', keterangan: 'Pencairan ke ' + (t.nama || '-'), nominal: Math.abs(parseFloat(t.total) || 0) }));
-        return entriMasuk.concat(entriKeluar).sort((a, b) => a.tanggalObj - b.tanggalObj);
+        let entriHibah = (globalHibah || []).map(h => ({ tanggalObj: new Date(h.tanggal), tanggal: h.tanggal, jenis: 'masuk', kategori: 'Bantuan/Hibah', keterangan: (h.sumber || '-') + (h.keterangan ? ' - ' + h.keterangan : ''), nominal: parseFloat(h.jumlah) || 0 }));
+        let entriKeluar = globalTransaksi.filter(t => (parseFloat(t.total) || 0) < 0 || t.jenis === 'Penarikan Tunai').map(t => ({ tanggalObj: uraikanTanggalInput(t.tgl), tanggal: t.tgl, jenis: 'keluar', kategori: 'Pembayaran ke BSU (Tarik Tabungan)', keterangan: 'Pencairan ke ' + (t.nama || '-'), nominal: Math.abs(parseFloat(t.total) || 0) }));
+        let entriBiayaOp = (globalBiayaOp || []).map(b => ({ tanggalObj: new Date(b.tanggal), tanggal: b.tanggal, jenis: 'keluar', kategori: 'Biaya Operasional', keterangan: (b.jenis_biaya || '-') + (b.keterangan ? ' - ' + b.keterangan : ''), nominal: parseFloat(b.jumlah) || 0 }));
+        let entriInvestasi = (globalPemeliharaan || []).filter(p => p.jenis === 'Investasi Alat').map(p => ({ tanggalObj: new Date(p.tanggal), tanggal: p.tanggal, jenis: 'keluar', kategori: 'Investasi Alat', keterangan: (p.nama_alat || '-') + (p.keterangan ? ' - ' + p.keterangan : ''), nominal: parseFloat(p.biaya) || 0 }));
+        let entriPemeliharaan = (globalPemeliharaan || []).filter(p => p.jenis === 'Pemeliharaan').map(p => ({ tanggalObj: new Date(p.tanggal), tanggal: p.tanggal, jenis: 'keluar', kategori: 'Pemeliharaan Alat', keterangan: (p.nama_alat || '-') + (p.keterangan ? ' - ' + p.keterangan : ''), nominal: parseFloat(p.biaya) || 0 }));
+        return entriMasuk.concat(entriHibah, entriKeluar, entriBiayaOp, entriInvestasi, entriPemeliharaan)
+            .filter(d => !isNaN(d.tanggalObj))
+            .sort((a, b) => a.tanggalObj - b.tanggalObj);
     }
 
     // Ringkasan kartu selalu menampilkan angka SEPANJANG WAKTU (tidak terpengaruh filter
@@ -3271,7 +3329,7 @@
     // =========================================
     // MODUL INVENTARIS & OPERASIONAL
     // =========================================
-    let globalAlat = [], globalBiayaOp = [], globalPemeliharaan = [];
+    let globalAlat = [], globalBiayaOp = [], globalPemeliharaan = [], globalHibah = [];
 
     function loadInventarisOperasional() {
         AdapterAPI.getInventarisBundle().then(res => {
@@ -3958,6 +4016,7 @@
         renderKasIndukSummary();
         renderKasIndukChart();
         renderKasIndukTable('semua');
+        renderTabelHibah();
 
         // 5. Tabel Offline & BSU Baru
         let jualHtml = '<thead style="background:#f8fafc;"><tr><th>Tanggal</th><th>Pembeli</th><th>Material</th><th>Berat (Kg)</th><th>Total</th></tr></thead><tbody>';
@@ -3996,9 +4055,11 @@
     }
 
     function loadDataTambahan() {
-        AdapterAPI.getBundleBSI()
-        .then(res => {
+        Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle()])
+        .then(([res, resInv]) => {
             globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
+            globalHibah = res.hibah || [];
+            globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); } catch(e){}
         }).catch(err => console.error("Gagal memuat data:", err));
