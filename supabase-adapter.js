@@ -128,6 +128,85 @@ async function logAudit(tabel, record_id, aksi, data_lama, data_baru, keterangan
   } catch (e) { console.warn('Gagal mencatat audit log (' + tabel + '/' + aksi + '):', e); }
 }
 
+// ================== UTIL: RESTORE DATA DARI BACKUP ==================
+// Tabel-tabel yang bisa di-restore langsung dengan pola upsert-per-id biasa
+// (primary key kolom "id", tanpa constraint unik lain yang perlu ditangani
+// khusus, dan tanpa kolom rahasia yang harus disamarkan).
+const TABEL_RESTORE_SEDERHANA = [
+  'nasabah', 'kategori', 'transaksi', 'penjualan', 'bantuan_hibah', 'pembinaan_bsu',
+  'kejadian_darurat', 'alat', 'biaya_operasional', 'pemeliharaan_investasi',
+  'neraca_pos', 'rekonsiliasi_kas'
+];
+// Urutan hapus (mode Ganti Total): tabel "anak" dulu, baru "induk" (bsu paling akhir)
+// supaya tidak melanggar foreign key (nasabah & transaksi merujuk ke bsu.id).
+const URUTAN_HAPUS_TOTAL = [
+  'transaksi', 'nasabah', 'penjualan', 'bantuan_hibah', 'pembinaan_bsu', 'kejadian_darurat',
+  'alat', 'biaya_operasional', 'pemeliharaan_investasi', 'neraca_pos', 'rekonsiliasi_kas',
+  'periode_tutup_buku', 'kategori', 'bsu'
+];
+// Urutan insert (mode Ganti Total): kebalikan dari urutan hapus (induk dulu).
+const URUTAN_INSERT_TOTAL = ['bsu', 'kategori', 'nasabah', 'transaksi', 'penjualan', 'bantuan_hibah',
+  'pembinaan_bsu', 'kejadian_darurat', 'alat', 'biaya_operasional', 'pemeliharaan_investasi',
+  'neraca_pos', 'rekonsiliasi_kas'];
+
+// Upsert baris BSU dari backup TANPA menimpa password yang sudah ada di server.
+// BSU yang tidak ditemukan di server (berarti sebelumnya terhapus) akan dibuatkan
+// password sementara acak, dan wajib direset manual oleh Admin Pusat setelahnya.
+async function restoreBsuAman(rowsBackup) {
+  if (!Array.isArray(rowsBackup) || !rowsBackup.length) return { ok: true, jumlah: 0 };
+  const { data: existing } = await sb.from('bsu').select('id');
+  const existingIds = new Set((existing || []).map(r => r.id));
+  const perluReset = [];
+  const rows = rowsBackup.map(r => {
+    const row = { ...r };
+    delete row.password; // field ini memang tidak ada di backup, dijaga eksplisit
+    if (!existingIds.has(row.id)) {
+      row.password = 'RESET-' + genId().slice(0, 8).toUpperCase();
+      perluReset.push(row.id);
+    }
+    return row;
+  });
+  const { error } = await sb.from('bsu').upsert(rows, { onConflict: 'id' });
+  if (error) return { ok: false, error: error.message };
+  logAudit('bsu', 'RESTORE-' + rows.length + '-BARIS', 'update', null, { jumlah: rows.length }, 'Restore (gabung) dari file backup oleh ' + getPetugasSesi());
+  return { ok: true, jumlah: rows.length, perluResetPassword: perluReset };
+}
+
+// periode_tutup_buku punya constraint unik di (tahun, bulan), bukan di kolom id
+// (id-nya bigserial dan tidak stabil untuk dipulihkan persis). Kolom id dari
+// backup sengaja dibuang supaya id baru dibuat otomatis oleh database.
+async function restorePeriodeTutupBuku(rowsBackup) {
+  if (!Array.isArray(rowsBackup) || !rowsBackup.length) return { ok: true, jumlah: 0 };
+  const rows = rowsBackup.map(({ id, ...rest }) => rest);
+  const { error } = await sb.from('periode_tutup_buku').upsert(rows, { onConflict: 'tahun,bulan' });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, jumlah: rows.length };
+}
+
+async function upsertTabelSederhana(tabel, rowsBackup) {
+  if (!Array.isArray(rowsBackup) || !rowsBackup.length) return { ok: true, jumlah: 0 };
+  const { error } = await sb.from(tabel).upsert(rowsBackup, { onConflict: 'id' });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, jumlah: rowsBackup.length };
+}
+
+async function insertTabelSederhana(tabel, rowsBackup) {
+  if (!Array.isArray(rowsBackup) || !rowsBackup.length) return { ok: true, jumlah: 0 };
+  const { error } = await sb.from(tabel).insert(rowsBackup);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true, jumlah: rowsBackup.length };
+}
+
+// Menghapus SEMUA baris di sebuah tabel. `.not('id','is',null)` cocok untuk
+// kolom id bertipe teks maupun angka (selalu true untuk primary key, karena
+// PK tidak pernah NULL) -> dipakai sebagai filter "match semua baris" yang
+// aman tanpa perlu tahu tipe kolom id persis di tiap tabel.
+async function hapusSemuaBaris(tabel) {
+  const { error } = await sb.from(tabel).delete().not('id', 'is', null);
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 const AdapterAPI = {
 
   // ================== LOGIN (dipakai index.html) ==================
@@ -685,5 +764,54 @@ const AdapterAPI = {
       pemeliharaan_investasi: pemeliharaan_investasi || [], periode_tutup_buku: periode_tutup_buku || [],
       neraca_pos: neraca_pos || [], rekonsiliasi_kas: rekonsiliasi_kas || [], audit_log: audit_log || []
     };
+  },
+
+  // ================== RESTORE (MODE GABUNG/TIMPA — DISARANKAN) ==================
+  // Upsert per baris berdasarkan id: menimpa baris yang ID-nya sama, mengembalikan
+  // baris yang sebelumnya terhapus. TIDAK PERNAH menghapus data yang sudah ada di
+  // server tapi tidak ada di file backup. Tabel `admin` dan `audit_log` sengaja
+  // dilewati (lihat penjelasan di util RESTORE di atas file ini).
+  async restoreMerge(data) {
+    const laporan = {};
+    laporan.bsu = await restoreBsuAman(data.bsu);
+    for (const tabel of TABEL_RESTORE_SEDERHANA) {
+      laporan[tabel] = await upsertTabelSederhana(tabel, data[tabel]);
+    }
+    laporan.periode_tutup_buku = await restorePeriodeTutupBuku(data.periode_tutup_buku);
+    try { await sb.rpc('fix_kategori_sequence'); } catch (e) { console.warn('Gagal menyesuaikan sequence kategori:', e); }
+    logAudit('SYSTEM', 'RESTORE-GABUNG-' + Date.now(), 'update', null, { ringkasan: laporan }, 'Restore (gabung/timpa) dari file backup oleh ' + getPetugasSesi());
+    return laporan;
+  },
+
+  // ================== RESTORE (MODE GANTI TOTAL — BERISIKO TINGGI) ==================
+  // Menghapus SEMUA baris di setiap tabel relevan (urutan memperhatikan foreign
+  // key), lalu insert ulang persis isi backup. Dipakai untuk skenario pemulihan
+  // bencana total. UI pemanggil WAJIB sudah meminta konfirmasi eksplisit sebelum
+  // memanggil fungsi ini -- fungsi ini sendiri tidak meminta konfirmasi apa pun.
+  async restoreFullReplace(data) {
+    const laporan = {};
+
+    // 1) Hapus semua data lama (anak dulu, induk/bsu paling akhir)
+    for (const tabel of URUTAN_HAPUS_TOTAL) {
+      const hasil = await hapusSemuaBaris(tabel);
+      if (!hasil.ok) { laporan[tabel] = hasil; return laporan; } // hentikan lebih awal kalau hapus gagal, supaya tidak insert ke kondisi tak terduga
+    }
+
+    // 2) Insert ulang persis isi backup (induk dulu: bsu butuh password sementara
+    //    karena tabel baru saja dikosongkan total -> SEMUA baris bsu dianggap baru)
+    laporan.bsu = await restoreBsuAman(data.bsu);
+    for (const tabel of URUTAN_INSERT_TOTAL) {
+      if (tabel === 'bsu') continue; // sudah ditangani di atas
+      laporan[tabel] = await insertTabelSederhana(tabel, data[tabel]);
+    }
+    laporan.periode_tutup_buku = await restorePeriodeTutupBuku(data.periode_tutup_buku);
+
+    // Perbaiki counter auto-increment tabel kategori (lihat catatan di fix_kategori_sequence
+    // pada schema_upgrade.sql) supaya penambahan kategori baru setelah ini tidak berisiko
+    // bentrok id dengan data yang baru saja di-restore.
+    try { await sb.rpc('fix_kategori_sequence'); } catch (e) { console.warn('Gagal menyesuaikan sequence kategori (fungsi fix_kategori_sequence mungkin belum dibuat, jalankan schema_upgrade.sql terbaru):', e); }
+
+    logAudit('SYSTEM', 'RESTORE-TOTAL-' + Date.now(), 'delete', null, { ringkasan: laporan }, 'RESTORE TOTAL (hapus semua & ganti dari backup) oleh ' + getPetugasSesi());
+    return laporan;
   }
 };

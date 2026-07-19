@@ -446,7 +446,7 @@
                     <button class="nav-btn" data-label="Tutup Buku Periode" data-group="grp-akuntansi" onclick="pindahTab('tutupbuku', this); loadTutupBuku();"><span class="nav-ic">🔒</span> Tutup Buku Periode</button>
                     <button class="nav-btn" data-label="Rekonsiliasi Kas/Bank" data-group="grp-akuntansi" onclick="pindahTab('rekonsiliasi', this); loadRekonsiliasi();"><span class="nav-ic">🧾</span> Rekonsiliasi Kas/Bank</button>
                     <button class="nav-btn" data-label="Audit Trail / Log Aktivitas" data-group="grp-akuntansi" onclick="pindahTab('audittrail', this); loadAuditTrail();"><span class="nav-ic">🕵️</span> Audit Trail</button>
-                    <button class="nav-btn" data-label="Backup Data Lengkap" data-group="grp-akuntansi" onclick="pindahTab('backupdata', this);"><span class="nav-ic">💾</span> Backup Data</button>
+                    <button class="nav-btn" data-label="Backup & Restore Data" data-group="grp-akuntansi" onclick="pindahTab('backupdata', this);"><span class="nav-ic">💾</span> Backup & Restore Data</button>
                 </div>
             </div>
         </nav>
@@ -607,6 +607,7 @@
                 <select id="atFilterTabel" class="form-control" style="max-width:220px; padding:8px;" onchange="loadAuditTrail()">
                     <option value="">-- Semua Tabel --</option>
                     <option value="transaksi">Transaksi (Setoran/Penarikan)</option>
+                    <option value="penjualan">Penjualan ke Off-taker</option>
                     <option value="bsu">BSU (Unit)</option>
                     <option value="nasabah">Nasabah</option>
                     <option value="kategori">Kategori/Harga</option>
@@ -619,6 +620,7 @@
                     <option value="neraca_pos">Pos Neraca Manual</option>
                     <option value="periode_tutup_buku">Tutup Buku</option>
                     <option value="rekonsiliasi_kas">Rekonsiliasi Kas</option>
+                    <option value="SYSTEM">Sistem (Restore Data)</option>
                 </select>
                 <button class="btn-sync" style="padding:8px 16px;" onclick="loadAuditTrail()">🔄 Muat Ulang</button>
                 <span style="color:var(--text-muted); font-size:12px; margin-left:auto;">Menampilkan 300 aktivitas terbaru.</span>
@@ -650,6 +652,51 @@
             </div>
             <button type="button" class="btn-submit" style="width:auto; padding:14px 28px; font-size:15px;" id="btnBackup" onclick="unduhBackupLengkap()">⬇️ UNDUH BACKUP LENGKAP (JSON)</button>
             <p id="lblLastBackup" style="color:var(--text-muted); font-size:12px; margin-top:12px;"></p>
+        </div>
+
+        <div class="panel" style="margin-top:24px; border:1px solid #fecaca;">
+            <div class="panel-header"><h2 style="color:#991b1b;">♻️ RESTORE (PULIHKAN) DATA DARI BACKUP</h2></div>
+            <p style="color:var(--text-muted); font-size:14px;">
+                Unggah file backup JSON (hasil unduhan dari fitur di atas) untuk memulihkan data. Gunakan ini kalau ada data yang terhapus
+                tidak sengaja, atau saat memulihkan sistem setelah masalah. Password admin &amp; BSU <b>tidak</b> ikut ter-restore (memang
+                tidak disimpan di file backup demi keamanan) — BSU yang baru dipulihkan dari kondisi "sudah terhapus total" akan mendapat
+                password sementara acak, dan wajib direset manual lewat menu Data BSU.
+            </p>
+
+            <div class="form-group">
+                <label>Pilih File Backup (.json)</label>
+                <input type="file" id="fileRestoreBackup" class="form-control" accept="application/json,.json" onchange="bacaFileRestoreBackup(event)">
+            </div>
+            <div id="ringkasanFileRestore" style="display:none; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:14px; margin:14px 0; font-size:13px;"></div>
+
+            <div id="areaAksiRestore" style="display:none;">
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:16px; margin-bottom:16px;">
+                    <h3 style="margin:0 0 8px; font-size:14.5px; color:#166534;">✅ Mode 1 — Gabung/Timpa per Data (Disarankan)</h3>
+                    <p style="margin:0 0 12px; font-size:12.5px; color:#166534;">
+                        Setiap baris di file backup akan menimpa baris dengan ID yang sama di server (kalau sudah ada), atau ditambahkan
+                        kembali (kalau sebelumnya terhapus). <b>Tidak ada data yang dihapus</b> — data yang sekarang ada di server tapi
+                        tidak ada di file backup akan tetap dibiarkan apa adanya. Aman untuk memulihkan data yang tidak sengaja terhapus.
+                    </p>
+                    <button type="button" class="btn-submit" style="width:auto; padding:11px 22px; background:linear-gradient(135deg,#10b981,#065f46);" onclick="prosesRestoreGabung()">♻️ RESTORE (GABUNG/TIMPA PER DATA)</button>
+                </div>
+
+                <div style="background:#fef2f2; border:1px solid #fca5a5; border-radius:10px; padding:16px;">
+                    <h3 style="margin:0 0 8px; font-size:14.5px; color:#991b1b;">⚠️ Mode 2 — Ganti Total (SANGAT BERISIKO)</h3>
+                    <p style="margin:0 0 12px; font-size:12.5px; color:#991b1b;">
+                        <b>MENGHAPUS SEMUA data saat ini di server</b> lalu menggantinya persis dengan isi file backup. Semua transaksi,
+                        BSU, nasabah, dll yang dibuat/diubah SETELAH tanggal backup akan <b>hilang permanen</b>. Semua BSU akan butuh
+                        reset password ulang. Hanya gunakan ini kalau benar-benar yakin (misal: data server rusak/kacau total dan mau
+                        mulai bersih dari backup terakhir).
+                    </p>
+                    <div class="form-group" style="margin-bottom:10px;">
+                        <label style="color:#991b1b;">Ketik <code>HAPUS SEMUA DATA</code> untuk mengaktifkan tombol di bawah:</label>
+                        <input type="text" id="konfirmasiRestoreTotal" class="form-control" placeholder="Ketik di sini persis: HAPUS SEMUA DATA" oninput="cekKonfirmasiRestoreTotal()">
+                    </div>
+                    <button type="button" class="btn-submit" style="width:auto; padding:11px 22px; background:linear-gradient(135deg,#ef4444,#7f1d1d);" id="btnRestoreTotal" onclick="prosesRestoreTotal()" disabled>🗑️ HAPUS SEMUA & GANTI TOTAL DARI BACKUP</button>
+                </div>
+            </div>
+
+            <div id="hasilRestore" style="margin-top:18px;"></div>
         </div>
     </div>
 
@@ -5118,6 +5165,108 @@
     // =========================================
     // BACKUP DATA LENGKAP
     // =========================================
+    // =========================================
+    // RESTORE (PULIHKAN) DATA DARI BACKUP
+    // =========================================
+    let dataBackupTerpilih = null;
+    const DAFTAR_TABEL_RESTORE = [
+        ['bsu', 'Data BSU (Unit)'], ['nasabah', 'Nasabah'], ['kategori', 'Kategori/Harga'],
+        ['transaksi', 'Transaksi (Setoran/Penarikan)'], ['penjualan', 'Penjualan ke Off-taker'],
+        ['bantuan_hibah', 'Bantuan/Hibah'], ['pembinaan_bsu', 'Pembinaan BSU'], ['kejadian_darurat', 'Kejadian Darurat'],
+        ['alat', 'Alat/Inventaris'], ['biaya_operasional', 'Biaya Operasional'], ['pemeliharaan_investasi', 'Pemeliharaan/Investasi'],
+        ['periode_tutup_buku', 'Tutup Buku Periode'], ['neraca_pos', 'Pos Neraca Manual'], ['rekonsiliasi_kas', 'Rekonsiliasi Kas']
+    ];
+
+    function bacaFileRestoreBackup(event) {
+        let file = event.target.files[0];
+        dataBackupTerpilih = null;
+        document.getElementById('ringkasanFileRestore').style.display = 'none';
+        document.getElementById('areaAksiRestore').style.display = 'none';
+        document.getElementById('hasilRestore').innerHTML = '';
+        if (!file) return;
+
+        let reader = new FileReader();
+        reader.onload = (e) => {
+            let parsed;
+            try { parsed = JSON.parse(e.target.result); }
+            catch (err) { alert('File bukan JSON yang valid, atau rusak.'); return; }
+
+            if (!parsed || typeof parsed !== 'object' || !parsed.meta) {
+                alert('File ini sepertinya bukan file backup dari sistem ini (field "meta" tidak ditemukan).');
+                return;
+            }
+
+            dataBackupTerpilih = parsed;
+            let baris = DAFTAR_TABEL_RESTORE.map(([key, label]) => {
+                let jumlah = Array.isArray(parsed[key]) ? parsed[key].length : 0;
+                return `<div style="display:flex; justify-content:space-between; padding:3px 0; border-bottom:1px dashed #e2e8f0;"><span>${label}</span><b>${jumlah} baris</b></div>`;
+            }).join('');
+            document.getElementById('ringkasanFileRestore').style.display = 'block';
+            document.getElementById('ringkasanFileRestore').innerHTML = `
+                <p style="margin:0 0 8px;"><b>📄 File backup terdeteksi</b><br>
+                Diekspor pada: ${parsed.meta.diekspor_pada ? new Date(parsed.meta.diekspor_pada).toLocaleString('id-ID') : '-'}</p>
+                ${baris}
+            `;
+            document.getElementById('areaAksiRestore').style.display = 'block';
+        };
+        reader.readAsText(file);
+    }
+
+    function cekKonfirmasiRestoreTotal() {
+        let val = document.getElementById('konfirmasiRestoreTotal').value.trim();
+        document.getElementById('btnRestoreTotal').disabled = (val !== 'HAPUS SEMUA DATA');
+    }
+
+    function renderHasilRestore(laporan) {
+        let html = '<div class="table-container"><table><thead><tr><th>Tabel</th><th>Status</th><th class="text-right">Jumlah Baris</th></tr></thead><tbody>';
+        Object.keys(laporan).forEach(k => {
+            let r = laporan[k];
+            let status = r.ok ? '<span style="color:#166534; font-weight:800;">✓ Berhasil</span>' : `<span style="color:#991b1b; font-weight:800;">✗ Gagal: ${escAttr(r.error || '-')}</span>`;
+            html += `<tr><td style="font-weight:700;">${k}</td><td>${status}</td><td class="text-right">${r.jumlah ?? 0}</td></tr>`;
+        });
+        html += '</tbody></table></div>';
+        if (laporan.bsu && laporan.bsu.perluResetPassword && laporan.bsu.perluResetPassword.length) {
+            html += `<div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px; margin-top:14px; font-size:13px; color:#92400e;">
+                ⚠️ <b>${laporan.bsu.perluResetPassword.length} BSU dipulihkan sebagai data baru</b> (sebelumnya tidak ada di server) dan mendapat
+                password sementara acak: <code>${laporan.bsu.perluResetPassword.map(escAttr).join(', ')}</code>. Segera reset password BSU-BSU ini
+                lewat menu <b>Data BSU → Edit</b> sebelum memberitahu mereka untuk login.
+            </div>`;
+        }
+        document.getElementById('hasilRestore').innerHTML = html;
+    }
+
+    function prosesRestoreGabung() {
+        if (!dataBackupTerpilih) return alert('Pilih file backup terlebih dahulu.');
+        if (!confirm('Restore mode GABUNG/TIMPA akan menimpa data yang ID-nya sama dengan isi file backup, dan mengembalikan data yang sebelumnya terhapus. Data lain yang sudah ada di server TIDAK akan dihapus. Lanjutkan?')) return;
+
+        document.getElementById('hasilRestore').innerHTML = '⏳ Memproses restore, mohon tunggu (bisa memakan waktu untuk data besar)...';
+
+        AdapterAPI.restoreMerge(dataBackupTerpilih).then(laporan => {
+            renderHasilRestore(laporan);
+            alert('Restore (gabung/timpa) selesai. Lihat rincian hasil di bawah tombol.');
+            loadDataPusat(); loadTutupBuku(); loadNeracaPosManual();
+        }).catch(e => { alert('Gagal restore: ' + e); document.getElementById('hasilRestore').innerHTML = ''; });
+    }
+
+    function prosesRestoreTotal() {
+        if (!dataBackupTerpilih) return alert('Pilih file backup terlebih dahulu.');
+        if (document.getElementById('konfirmasiRestoreTotal').value.trim() !== 'HAPUS SEMUA DATA') return;
+        if (!confirm('⚠️ PERINGATAN TERAKHIR ⚠️\n\nSEMUA data saat ini di server akan DIHAPUS PERMANEN dan diganti persis dengan isi file backup. Transaksi/data yang dibuat setelah tanggal backup akan HILANG. Tindakan ini TIDAK BISA DIBATALKAN.\n\nBenar-benar yakin ingin melanjutkan?')) return;
+        if (!confirm('Konfirmasi sekali lagi: Anda yakin ingin MENGHAPUS SEMUA DATA SAAT INI dan menggantinya dari backup?')) return;
+
+        let btn = document.getElementById('btnRestoreTotal');
+        btn.disabled = true; btn.innerText = '⏳ Menghapus & memulihkan...';
+        document.getElementById('hasilRestore').innerHTML = '⏳ Memproses restore total, mohon tunggu, JANGAN tutup halaman ini...';
+
+        AdapterAPI.restoreFullReplace(dataBackupTerpilih).then(laporan => {
+            renderHasilRestore(laporan);
+            alert('Restore TOTAL selesai. Lihat rincian hasil di bawah tombol. Segera reset password BSU yang perlu di-reset (kalau ada, lihat catatan di bawah).');
+            document.getElementById('konfirmasiRestoreTotal').value = '';
+            loadDataPusat(); loadTutupBuku(); loadNeracaPosManual();
+        }).catch(e => { alert('Gagal restore total: ' + e); document.getElementById('hasilRestore').innerHTML = ''; })
+        .finally(() => { btn.innerText = '🗑️ HAPUS SEMUA & GANTI TOTAL DARI BACKUP'; cekKonfirmasiRestoreTotal(); });
+    }
+
     function unduhBackupLengkap() {
         let btn = document.getElementById('btnBackup');
         btn.disabled = true; btn.innerText = '⏳ Menyiapkan backup...';
