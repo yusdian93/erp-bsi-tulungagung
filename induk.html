@@ -437,6 +437,18 @@
                     <button class="nav-btn" data-label="Laporan Tahunan" data-group="grp-dokumen" onclick="pindahTab('dok_tahunan', this); initDokTahunan();"><span class="nav-ic">📅</span> h. Laporan Tahunan</button>
                 </div>
             </div>
+            <div class="nav-group" id="grp-akuntansi">
+                <button class="nav-group-header" onclick="toggleGroup('grp-akuntansi')">
+                    <span class="gh-ic">🧮</span><span class="gh-label">Akuntansi & Kontrol</span><span class="gh-arrow">›</span>
+                </button>
+                <div class="nav-group-items">
+                    <button class="nav-btn" data-label="Neraca (Posisi Aset & Kewajiban)" data-group="grp-akuntansi" onclick="pindahTab('neraca', this); loadNeracaPosManual();"><span class="nav-ic">⚖️</span> Neraca</button>
+                    <button class="nav-btn" data-label="Tutup Buku Periode" data-group="grp-akuntansi" onclick="pindahTab('tutupbuku', this); loadTutupBuku();"><span class="nav-ic">🔒</span> Tutup Buku Periode</button>
+                    <button class="nav-btn" data-label="Rekonsiliasi Kas/Bank" data-group="grp-akuntansi" onclick="pindahTab('rekonsiliasi', this); loadRekonsiliasi();"><span class="nav-ic">🧾</span> Rekonsiliasi Kas/Bank</button>
+                    <button class="nav-btn" data-label="Audit Trail / Log Aktivitas" data-group="grp-akuntansi" onclick="pindahTab('audittrail', this); loadAuditTrail();"><span class="nav-ic">🕵️</span> Audit Trail</button>
+                    <button class="nav-btn" data-label="Backup Data Lengkap" data-group="grp-akuntansi" onclick="pindahTab('backupdata', this);"><span class="nav-ic">💾</span> Backup Data</button>
+                </div>
+            </div>
         </nav>
 
         <div class="sidebar-foot">
@@ -456,13 +468,191 @@
                     <p class="topbar-sub">Dashboard Bank Sampah Induk</p>
                 </div>
             </div>
-            <button class="btn-sync" onclick="sinkronKeSheets()" id="btnSync">
-                <span style="font-size: 16px; margin-right: 6px;">☁️</span> Export Google Sheets Utama
-            </button>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button class="btn-sync" onclick="gantiPetugasSesi()" id="btnPetugasSesi" title="Nama ini dicatat sebagai 'oleh' di Audit Trail setiap kali Anda menambah/mengubah/menghapus data. Klik untuk mengganti.">
+                    <span style="font-size: 16px; margin-right: 6px;">👤</span> <span id="lblPetugasSesi">Petugas: -</span>
+                </button>
+                <button class="btn-sync" onclick="sinkronKeSheets()" id="btnSync">
+                    <span style="font-size: 16px; margin-right: 6px;">☁️</span> Export Google Sheets Utama
+                </button>
+            </div>
         </div>
 
     <div class="container">
-    
+
+    <!-- ================= NERACA ================= -->
+    <div id="neraca" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>⚖️ NERACA — POSISI ASET, KEWAJIBAN & MODAL</h2></div>
+            <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+                Kas &amp; setara kas, tabungan BSU yang belum ditarik, dan akumulasi investasi alat dihitung <b>otomatis</b> dari data transaksi.
+                Pos lain (misal modal awal, aset tanah/bangunan, utang bank) bisa ditambahkan manual di bawah.
+                Baris <b>"Laba Ditahan / Selisih Penyeimbang"</b> dihitung otomatis agar Neraca selalu seimbang (Aset = Kewajiban + Modal) —
+                sistem ini mencatat transaksi berbasis kas, bukan akuntansi berpasangan (double-entry) penuh, sehingga untuk pelaporan resmi/audit
+                sebaiknya tetap diverifikasi oleh akuntan.
+            </p>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                <label style="font-weight:700; font-size:13px;">Neraca per tanggal:</label>
+                <input type="date" id="neracaTanggal" class="form-control" style="max-width:170px; padding:8px;" onchange="renderNeraca()">
+                <button class="btn-sync" style="padding:8px 16px;" onclick="renderNeraca()">🔄 Hitung Ulang</button>
+                <button class="btn-sync" style="padding:8px 12px; border-color:#ef4444; color:#ef4444; margin-left:auto;" onclick="cetakNeraca()"><span style="font-size:14px; margin-right:4px;">📄</span> Cetak PDF</button>
+            </div>
+
+            <div class="cards" id="neracaCards" style="margin-bottom:20px;"></div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div>
+                    <h3 style="margin:0 0 8px;">ASET</h3>
+                    <div class="table-container"><table id="tbl_neraca_aset">
+                        <thead><tr><th>POS</th><th class="text-right">NILAI (Rp)</th><th></th></tr></thead>
+                        <tbody id="tbody_neraca_aset"></tbody>
+                    </table></div>
+                </div>
+                <div>
+                    <h3 style="margin:0 0 8px;">KEWAJIBAN &amp; MODAL</h3>
+                    <div class="table-container"><table id="tbl_neraca_kewajiban">
+                        <thead><tr><th>POS</th><th class="text-right">NILAI (Rp)</th><th></th></tr></thead>
+                        <tbody id="tbody_neraca_kewajiban"></tbody>
+                    </table></div>
+                </div>
+            </div>
+
+            <div class="panel" style="margin-top:20px; background:#f8fafc;">
+                <div class="panel-header"><h2 style="font-size:15px;">➕ Tambah Pos Neraca Manual</h2></div>
+                <div class="form-row-grid">
+                    <div class="form-group"><label>Kategori</label>
+                        <select id="nrcKategori" class="form-control">
+                            <option value="aset_lancar">Aset Lancar</option>
+                            <option value="aset_tetap">Aset Tetap</option>
+                            <option value="kewajiban">Kewajiban</option>
+                            <option value="modal">Modal</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Nama Pos</label><input type="text" id="nrcNamaPos" class="form-control" placeholder="Contoh: Modal Awal Pendirian"></div>
+                    <div class="form-group"><label>Nilai (Rp)</label><input type="number" id="nrcNilai" class="form-control" placeholder="0"></div>
+                    <div class="form-group"><label>Tanggal</label><input type="date" id="nrcTanggal" class="form-control"></div>
+                    <div class="form-group" style="grid-column: 1 / -1;"><label>Keterangan</label><input type="text" id="nrcKeterangan" class="form-control"></div>
+                </div>
+                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="simpanPosNeraca()">SIMPAN POS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= TUTUP BUKU ================= -->
+    <div id="tutupbuku" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>🔒 TUTUP BUKU / KONTROL PERIODE</h2></div>
+            <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+                Setelah periode (bulan) ditutup, semua transaksi setoran/penarikan dengan tanggal di bulan tsb TIDAK BISA lagi ditambah,
+                diubah, atau dihapus — baik dari Portal Induk maupun Portal Unit — sampai periode tersebut dibuka kembali oleh Admin Pusat.
+            </p>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; align-items:flex-end; background:#f8fafc; padding:14px; border-radius:10px; border:1px solid var(--border);">
+                <div class="form-group" style="margin:0;"><label>Pilih Bulan</label><input type="month" id="tutupBukuBulan" class="form-control" style="max-width:170px;"></div>
+                <button class="btn-submit" style="width:auto; padding:11px 20px; background:linear-gradient(135deg,#ef4444,#991b1b);" onclick="prosesTutupBuku()">🔒 TUTUP BUKU BULAN INI</button>
+            </div>
+
+            <div class="table-container">
+                <table id="tbl_tutupbuku">
+                    <thead><tr><th>PERIODE</th><th>STATUS</th><th>DITUTUP OLEH</th><th>WAKTU DITUTUP</th><th>CATATAN</th><th class="text-center">AKSI</th></tr></thead>
+                    <tbody id="tbody_tutupbuku"><tr><td colspan="6" class="text-center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= REKONSILIASI KAS/BANK ================= -->
+    <div id="rekonsiliasi" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>🧾 REKONSILIASI KAS / BANK</h2></div>
+            <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+                Cocokkan saldo hasil hitung sistem (otomatis dari catatan transaksi) dengan saldo fisik riil (hitung tunai / mutasi rekening
+                koran) secara berkala. Selisih akan ditandai merah dan perlu ditelusuri.
+            </p>
+
+            <div class="form-row-grid" style="background:#f8fafc; padding:14px; border-radius:10px; border:1px solid var(--border); margin-bottom:20px;">
+                <div class="form-group"><label>Tanggal Pemeriksaan</label><input type="date" id="rekTanggal" class="form-control" onchange="hitungSaldoSistemRekon()"></div>
+                <div class="form-group"><label>Sumber</label>
+                    <select id="rekSumber" class="form-control">
+                        <option>Kas Tunai</option><option>Rekening Bank</option><option>E-Wallet</option><option>Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Saldo Menurut Sistem (Rp)</label><input type="number" id="rekSaldoSistem" class="form-control" placeholder="Otomatis terisi dari tanggal di atas"></div>
+                <div class="form-group"><label>Saldo Fisik / Riil (Rp)</label><input type="number" id="rekSaldoFisik" class="form-control" placeholder="Hasil hitung tunai / rekening koran"></div>
+                <div class="form-group"><label>Diperiksa Oleh</label><input type="text" id="rekDiperiksaOleh" class="form-control" placeholder="Nama petugas"></div>
+                <div class="form-group" style="grid-column: 1 / -1;"><label>Keterangan</label><input type="text" id="rekKeterangan" class="form-control" placeholder="Catatan penyebab selisih (jika ada)"></div>
+            </div>
+            <button type="button" class="btn-submit" style="width:auto; padding:12px 24px; margin-bottom:20px;" onclick="simpanRekonsiliasi()">SIMPAN HASIL REKONSILIASI</button>
+
+            <div class="table-container">
+                <table id="tbl_rekonsiliasi">
+                    <thead><tr><th>TANGGAL</th><th>SUMBER</th><th class="text-right">SALDO SISTEM</th><th class="text-right">SALDO FISIK</th><th class="text-right">SELISIH</th><th>DIPERIKSA OLEH</th><th>KETERANGAN</th><th class="text-center">AKSI</th></tr></thead>
+                    <tbody id="tbody_rekonsiliasi"><tr><td colspan="8" class="text-center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= AUDIT TRAIL ================= -->
+    <div id="audittrail" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>🕵️ AUDIT TRAIL / LOG AKTIVITAS</h2></div>
+            <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
+                Jejak setiap tambah/ubah/hapus data penting (transaksi, BSU, kategori, nasabah, dsb). Riwayat ini bersifat <b>append-only</b>
+                (tidak bisa diubah/dihapus lewat aplikasi), sehingga bisa dipakai sebagai bukti akuntabilitas.
+            </p>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                <select id="atFilterTabel" class="form-control" style="max-width:220px; padding:8px;" onchange="loadAuditTrail()">
+                    <option value="">-- Semua Tabel --</option>
+                    <option value="transaksi">Transaksi (Setoran/Penarikan)</option>
+                    <option value="bsu">BSU (Unit)</option>
+                    <option value="nasabah">Nasabah</option>
+                    <option value="kategori">Kategori/Harga</option>
+                    <option value="bantuan_hibah">Bantuan/Hibah</option>
+                    <option value="pembinaan_bsu">Pembinaan BSU</option>
+                    <option value="kejadian_darurat">Kejadian Darurat</option>
+                    <option value="alat">Alat/Inventaris</option>
+                    <option value="biaya_operasional">Biaya Operasional</option>
+                    <option value="pemeliharaan_investasi">Pemeliharaan/Investasi</option>
+                    <option value="neraca_pos">Pos Neraca Manual</option>
+                    <option value="periode_tutup_buku">Tutup Buku</option>
+                    <option value="rekonsiliasi_kas">Rekonsiliasi Kas</option>
+                </select>
+                <button class="btn-sync" style="padding:8px 16px;" onclick="loadAuditTrail()">🔄 Muat Ulang</button>
+                <span style="color:var(--text-muted); font-size:12px; margin-left:auto;">Menampilkan 300 aktivitas terbaru.</span>
+            </div>
+
+            <div class="table-container" style="max-height:600px; overflow-y:auto;">
+                <table id="tbl_audittrail">
+                    <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>WAKTU</th><th>TABEL</th><th>AKSI</th><th>OLEH</th><th>PERUBAHAN</th><th>KETERANGAN</th></tr></thead>
+                    <tbody id="tbody_audittrail"><tr><td colspan="6" class="text-center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= BACKUP DATA ================= -->
+    <div id="backupdata" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>💾 BACKUP DATA LENGKAP</h2></div>
+            <p style="color:var(--text-muted); font-size:14px;">
+                Mengunduh seluruh data mentah sistem (bukan hanya laporan tercetak) dalam satu file <b>JSON</b>: data BSU, nasabah, kategori,
+                seluruh transaksi, <b>penjualan ke off-taker</b>, bantuan/hibah, pembinaan, kejadian darurat, inventaris, biaya operasional,
+                pemeliharaan/investasi, status tutup buku, pos neraca manual, rekonsiliasi kas, dan audit trail — semuanya sudah tersimpan di
+                server (Supabase) sehingga tersinkron di semua perangkat. Kolom password (admin &amp; BSU) <b>disamarkan</b> demi keamanan.
+            </p>
+            <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:14px; margin-bottom:20px; font-size:13px; color:#92400e;">
+                ⚠️ Simpan file backup di tempat yang aman (Google Drive/komputer lain), dan lakukan backup secara rutin — disarankan minimal
+                <b>sekali seminggu</b> atau setiap sebelum melakukan Tutup Buku bulanan. Backup ini juga berguna sebagai cadangan jika suatu
+                saat perlu memindahkan/memulihkan data.
+            </div>
+            <button type="button" class="btn-submit" style="width:auto; padding:14px 28px; font-size:15px;" id="btnBackup" onclick="unduhBackupLengkap()">⬇️ UNDUH BACKUP LENGKAP (JSON)</button>
+            <p id="lblLastBackup" style="color:var(--text-muted); font-size:12px; margin-top:12px;"></p>
+        </div>
+    </div>
+
     <div id="lap_pembelian" class="content-section">
         <div class="panel">
             <div class="panel-header"><h2>📥 LAPORAN PEMBELIAN / SETORAN BSU</h2></div>
@@ -1101,6 +1291,12 @@
     </div>
 
     <div id="penjualan" class="content-section">
+        <div id="panelMigrasiPenjualan" class="panel" style="display:none; background:#fffbeb; border:1px solid #fde68a;">
+            <div class="panel-header"><h2 style="color:#92400e;">⬆️ MIGRASI DATA PENJUALAN LAMA KE SERVER</h2></div>
+            <p style="color:#92400e; font-size:13px;" id="txtMigrasiPenjualan">Memeriksa data lokal...</p>
+            <button type="button" class="btn-submit" style="width:auto; padding:12px 24px; background:linear-gradient(135deg,#f59e0b,#b45309);" id="btnMigrasiPenjualan" onclick="prosesMigrasiPenjualan()">⬆️ MIGRASIKAN SEKARANG</button>
+        </div>
+
         <div class="grid-2">
             <div class="panel">
                 <div class="panel-header"><h2>📤 CATAT PENJUALAN KE OFF-TAKER</h2></div>
@@ -1578,6 +1774,7 @@
     let globalTransaksi = [];
     let globalNasabah = []; 
     let globalKategori = [];
+    let globalPenjualan = []; // sumber: tabel `penjualan` di Supabase (dulu localStorage, sudah dimigrasikan)
 
     let lineChartInstance = null; 
     let barChartInstance = null; 
@@ -1971,6 +2168,7 @@
         let tgl = document.getElementById('editTrxTanggal').value;
 
         if(!tgl || !selMat.value || !berat) return alert('Lengkapi semua data setoran!');
+        if (cekPeringatanPeriodeTerkunci(tgl)) return;
 
         let form = { action: 'updateTransaksi', id: document.getElementById('editTrxId').value, tgl: tgl, jenis: selMat.value, berat: berat, total: berat * harga };
 
@@ -1982,6 +2180,8 @@
     }
 
     function hapusTrx(id) {
+        let t = globalTransaksi.find(x => x.id === id);
+        if (t && cekPeringatanPeriodeTerkunci(t.tgl)) return;
         if(!confirm('Yakin ingin menghapus data setoran ini?\nTindakan ini tidak bisa dibatalkan.')) return;
         postAksi({ action: 'deleteTransaksi', id: id }).then(res => { alert(res); loadDataPusat(); }).catch(e=>alert('Error: ' + e));
     }
@@ -2003,7 +2203,8 @@
         }
 
         if(!tgl || !bsuSelect.value || (!berat && total===0)) return alert('Harap lengkapi semua data transaksi!');
-        
+        if (cekPeringatanPeriodeTerkunci(tgl)) return;
+
         let btn = document.getElementById('btnSimpanTrx');
         btn.innerText = '⏳ MEMPROSES...'; btn.disabled = true;
 
@@ -2025,20 +2226,24 @@
         cekBeratMelebihiStok();
     }
 
-    // Data penjualan lama (sebelum fitur ini ada) mungkin belum punya field 'id'.
-    // Fungsi ini menambahkan id yang hilang sekali saja lalu menyimpannya kembali,
-    // supaya tombol Edit/Hapus & urutan "terbaru di atas" bisa berjalan konsisten.
+    // Dulu berfungsi menambal id yang hilang di localStorage. Sekarang data penjualan
+    // sudah sepenuhnya berasal dari tabel `penjualan` di Supabase (selalu punya id),
+    // jadi fungsi ini disederhanakan jadi accessor biasa. Nama fungsi TETAP dipertahankan
+    // supaya semua pemanggil lain di file ini tidak perlu diubah satu per satu.
     function getDataPenjualanNormalized() {
-        let data = ambilDataLokal(KEY_PENJUALAN);
-        let changed = false;
-        data.forEach((d, i) => { if(!d.id) { d.id = 'PJL-' + Date.now() + '-' + i; changed = true; } });
-        if(changed) simpanDataLokal(KEY_PENJUALAN, data);
-        return data;
+        return globalPenjualan;
+    }
+
+    function loadPenjualanData() {
+        return AdapterAPI.getPenjualanBundle().then(list => {
+            globalPenjualan = list || [];
+            return globalPenjualan;
+        }).catch(err => { console.error('Gagal memuat data penjualan:', err); return globalPenjualan; });
     }
 
     function simpanPenjualan() {
         let form = {
-            id: 'PJL-' + Date.now(),
+            id: genId('PJL'),
             tanggal: document.getElementById('jualTanggal').value, pembeli: document.getElementById('jualPembeli').value,
             material: document.getElementById('jualMaterial').value, berat: parseFloat(document.getElementById('jualBerat').value) || 0,
             harga: parseFloat(document.getElementById('jualHarga').value) || 0
@@ -2046,6 +2251,7 @@
         form.total = form.berat * form.harga;
 
         if(!form.tanggal || !form.pembeli || !form.material || !form.berat) return alert('Lengkapi form!');
+        if (cekPeringatanPeriodeTerkunci(form.tanggal)) return;
 
         let stok = getStokGudangMap();
         let sisaStok = stok[form.material] || 0;
@@ -2054,18 +2260,23 @@
             if(!lanjut) return;
         }
 
-        let data = getDataPenjualanNormalized(); data.push(form); simpanDataLokal(KEY_PENJUALAN, data);
-        
-        alert('Penjualan tersimpan!');
-        // Sengaja TIDAK mereset Tanggal & Off-taker, agar riwayat hari ini langsung
-        // terlihat sebagai konfirmasi bahwa input sudah masuk & terekap (sama seperti
-        // pola pada Transaksi / Setoran BSU).
-        document.getElementById('jualMaterial').value = '';
-        document.getElementById('jualBerat').value = '';
-        document.getElementById('jualHarga').value = '';
-        document.getElementById('jualTotal').value = 'Rp 0';
-        cekStokJual();
-        populateUI(); renderLapPenjualan('semua');
+        let btnSimpanJual = document.querySelector('#formPenjualan .btn-submit');
+        if (btnSimpanJual) { btnSimpanJual.disabled = true; btnSimpanJual.innerText = '⏳ Menyimpan...'; }
+
+        AdapterAPI.tambahPenjualan(form).then(res => {
+            alert(res);
+            if (String(res).startsWith('Gagal')) return;
+            // Sengaja TIDAK mereset Tanggal & Off-taker, agar riwayat hari ini langsung
+            // terlihat sebagai konfirmasi bahwa input sudah masuk & terekap (sama seperti
+            // pola pada Transaksi / Setoran BSU).
+            document.getElementById('jualMaterial').value = '';
+            document.getElementById('jualBerat').value = '';
+            document.getElementById('jualHarga').value = '';
+            document.getElementById('jualTotal').value = 'Rp 0';
+            cekStokJual();
+            return loadPenjualanData().then(() => { populateUI(); renderLapPenjualan('semua'); });
+        }).catch(e => alert('Gagal: ' + e))
+        .finally(() => { if (btnSimpanJual) { btnSimpanJual.disabled = false; btnSimpanJual.innerText = 'SIMPAN PENJUALAN'; } });
     }
 
     function renderRiwayatPenjualanHariIni() {
@@ -2076,7 +2287,7 @@
         let list = getDataPenjualanNormalized()
             .filter(d => isTanggalHariIni(d.tanggal))
             .slice()
-            .sort((a, b) => String(b.id).localeCompare(String(a.id))); // id mengandung timestamp -> urutan terbaru di atas
+            .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)); // terbaru diinput di atas
 
         let tglHariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
         if(counter) counter.innerText = `${list.length} penjualan tercatat • ${tglHariIni}`;
@@ -2143,20 +2354,30 @@
         let harga = parseFloat(document.getElementById('editJualHarga').value) || 0;
 
         if(!tanggal || !pembeli || !material || !berat) return alert('Lengkapi semua data penjualan!');
+        if (cekPeringatanPeriodeTerkunci(tanggal)) return;
+        if (data[idx].tanggal !== tanggal && cekPeringatanPeriodeTerkunci(data[idx].tanggal)) return;
 
-        data[idx] = { id: id, tanggal: tanggal, pembeli: pembeli, material: material, berat: berat, harga: harga, total: berat * harga };
-        simpanDataLokal(KEY_PENJUALAN, data);
+        let btnEditJual = document.getElementById('btnSimpanEditJual');
+        if (btnEditJual) { btnEditJual.disabled = true; btnEditJual.innerText = 'Menyimpan...'; }
 
-        alert('Perubahan penjualan disimpan!');
-        tutupModalEditPenjualan();
-        populateUI(); renderLapPenjualan('semua');
+        AdapterAPI.updatePenjualan({ id, tanggal, pembeli, material, berat, harga, total: berat * harga }).then(res => {
+            alert(res);
+            if (String(res).startsWith('Gagal')) return;
+            tutupModalEditPenjualan();
+            return loadPenjualanData().then(() => { populateUI(); renderLapPenjualan('semua'); });
+        }).catch(e => alert('Gagal: ' + e))
+        .finally(() => { if (btnEditJual) { btnEditJual.disabled = false; btnEditJual.innerText = 'SIMPAN PERUBAHAN'; } });
     }
 
     function hapusPenjualan(id) {
+        let d = getDataPenjualanNormalized().find(x => String(x.id) === String(id));
+        if (d && cekPeringatanPeriodeTerkunci(d.tanggal)) return;
         if(!confirm('Yakin ingin menghapus data penjualan ini?\nTindakan ini tidak bisa dibatalkan.')) return;
-        let data = getDataPenjualanNormalized().filter(x => String(x.id) !== String(id));
-        simpanDataLokal(KEY_PENJUALAN, data);
-        populateUI(); renderLapPenjualan('semua');
+        AdapterAPI.deletePenjualan(id).then(res => {
+            alert(res);
+            if (String(res).startsWith('Gagal')) return;
+            return loadPenjualanData().then(() => { populateUI(); renderLapPenjualan('semua'); });
+        }).catch(e => alert('Gagal: ' + e));
     }
 
     // =========================================
@@ -2430,7 +2651,7 @@
         else if(filterType === 'tgl') { bln=''; thn=''; } else if(filterType === 'bln') { tgl=''; thn=''; } else if(filterType === 'thn') { tgl=''; bln=''; }
 
         let html = ''; let totBerat = 0, totNominal = 0;
-        filterDataByDateRange(ambilDataLokal(KEY_PENJUALAN), 'tanggal', filterType, tgl, bln, thn).slice().sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(d => {
+        filterDataByDateRange(globalPenjualan, 'tanggal', filterType, tgl, bln, thn).slice().sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(d => {
             totBerat += parseFloat(d.berat)||0; totNominal += parseFloat(d.total)||0;
             html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:bold;">${d.pembeli}</td><td>${d.material}</td><td class="text-right">${parseFloat(d.berat).toLocaleString('id-ID')}</td><td class="text-right text-success fw-bold">Rp ${parseInt(d.total).toLocaleString('id-ID')}</td></tr>`;
         });
@@ -2449,7 +2670,7 @@
         filterDataByDateRange(globalTransaksi.filter(t => t.total > 0 && t.berat > 0), 'tgl', filterType, tgl, bln, thn).forEach(t => {
             let jns = t.jenis || 'Lainnya'; if(!stokMap[jns]) stokMap[jns] = {masuk:0, keluar:0}; stokMap[jns].masuk += parseFloat(t.berat)||0;
         });
-        filterDataByDateRange(ambilDataLokal(KEY_PENJUALAN), 'tanggal', filterType, tgl, bln, thn).forEach(t => {
+        filterDataByDateRange(globalPenjualan, 'tanggal', filterType, tgl, bln, thn).forEach(t => {
             let jns = t.material || 'Lainnya'; if(!stokMap[jns]) stokMap[jns] = {masuk:0, keluar:0}; stokMap[jns].keluar += parseFloat(t.berat)||0;
         });
 
@@ -2500,7 +2721,7 @@
     }
 
     function getDataKasIndukOtomatis() {
-        let entriMasuk = ambilDataLokal(KEY_PENJUALAN).map(d => ({ tanggalObj: uraikanTanggalInput(d.tanggal), tanggal: d.tanggal, jenis: 'masuk', kategori: 'Penjualan Sampah', keterangan: `${d.material || '-'} ke ${d.pembeli || '-'}`, nominal: parseFloat(d.total) || 0 }));
+        let entriMasuk = globalPenjualan.map(d => ({ tanggalObj: uraikanTanggalInput(d.tanggal), tanggal: d.tanggal, jenis: 'masuk', kategori: 'Penjualan Sampah', keterangan: `${d.material || '-'} ke ${d.pembeli || '-'}`, nominal: parseFloat(d.total) || 0 }));
         let entriHibah = (globalHibah || []).map(h => ({ tanggalObj: new Date(h.tanggal), tanggal: h.tanggal, jenis: 'masuk', kategori: 'Bantuan/Hibah', keterangan: (h.sumber || '-') + (h.keterangan ? ' - ' + h.keterangan : ''), nominal: parseFloat(h.jumlah) || 0 }));
         let entriKeluar = globalTransaksi.filter(t => (parseFloat(t.total) || 0) < 0 || t.jenis === 'Penarikan Tunai').map(t => ({ tanggalObj: uraikanTanggalInput(t.tgl), tanggal: t.tgl, jenis: 'keluar', kategori: 'Pembayaran ke BSU (Tarik Tabungan)', keterangan: 'Pencairan ke ' + (t.nama || '-'), nominal: Math.abs(parseFloat(t.total) || 0) }));
         let entriBiayaOp = (globalBiayaOp || []).map(b => ({ tanggalObj: new Date(b.tanggal), tanggal: b.tanggal, jenis: 'keluar', kategori: 'Biaya Operasional', keterangan: (b.jenis_biaya || '-') + (b.keterangan ? ' - ' + b.keterangan : ''), nominal: parseFloat(b.jumlah) || 0 }));
@@ -3302,6 +3523,7 @@
         if (!jumlah || jumlah <= 0) return alert('Jumlah penarikan harus lebih dari 0.');
         if (!tglInput) return alert('Tanggal penarikan wajib diisi.');
         if (!disetujui) return alert('Nama pengelola BSI yang menyetujui wajib diisi.');
+        if (cekPeringatanPeriodeTerkunci(tglInput)) return;
 
         let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
         let saldoSaatIni = hitungSaldoBsuSaatIni(namaBsu);
@@ -3311,7 +3533,7 @@
 
         let tglObj = new Date(tglInput + 'T' + new Date().toTimeString().slice(0, 5));
         let tglFormatted = tglObj.toLocaleDateString('id-ID') + ' ' + new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0');
-        let nomorTransaksi = 'TRX-' + tglInput.replace(/-/g, '') + '-' + String(Date.now()).slice(-4);
+        let nomorTransaksi = genId('TRX-' + tglInput.replace(/-/g, ''));
 
         let btn = document.getElementById('btnSimpanTarikBSU');
         btn.disabled = true; btn.innerText = 'Memproses...';
@@ -3693,7 +3915,7 @@
         let dalamPeriodeISO = (tglStr) => { let d = new Date(tglStr); return !isNaN(d) && d >= awal && d < akhir; };
 
         let totalSetoranKg = globalTransaksi.filter(t => t.total > 0 && t.berat > 0 && dalamPeriode(t.tgl)).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-        let totalPenjualanRp = ambilDataLokal(KEY_PENJUALAN).filter(d => dalamPeriode(d.tanggal)).reduce((a, d) => a + (parseFloat(d.total) || 0), 0);
+        let totalPenjualanRp = globalPenjualan.filter(d => dalamPeriode(d.tanggal)).reduce((a, d) => a + (parseFloat(d.total) || 0), 0);
 
         let kasData = getDataKasIndukOtomatis().filter(d => d.tanggalObj >= awal && d.tanggalObj < akhir);
         let kasMasuk = kasData.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
@@ -3760,7 +3982,7 @@
             let jns = t.jenis || 'Lainnya'; if (!stokMap[jns]) stokMap[jns] = { masuk: 0, keluar: 0 };
             stokMap[jns].masuk += parseFloat(t.berat) || 0;
         });
-        ambilDataLokal(KEY_PENJUALAN).forEach(d0 => {
+        globalPenjualan.forEach(d0 => {
             let d = uraikanTanggalInput(d0.tanggal);
             if (filterFn && (isNaN(d) || !filterFn(d))) return;
             let jns = d0.material || 'Lainnya'; if (!stokMap[jns]) stokMap[jns] = { masuk: 0, keluar: 0 };
@@ -3820,7 +4042,7 @@
 
     // ---- d. Hasil Penjualan ----
     function ambilDataDokPenjualan(bulanStr) {
-        let list = ambilDataLokal(KEY_PENJUALAN);
+        let list = globalPenjualan;
         if (bulanStr) {
             let [tahun, bulan] = bulanStr.split('-').map(Number);
             let awal = new Date(tahun, bulan - 1, 1), akhir = new Date(tahun, bulan, 1);
@@ -4562,18 +4784,414 @@
     }
 
     function loadDataTambahan() {
-        Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle()])
-        .then(([res, resInv, resDok]) => {
+        Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle()])
+        .then(([res, resInv, resDok, resJual]) => {
             globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
             globalHibah = res.hibah || [];
             globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
             globalPembinaan = resDok.pembinaan || []; globalDarurat = resDok.darurat || [];
+            globalPenjualan = resJual || [];
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
+            cekDataPenjualanLokalBelumMigrasi();
         }).catch(err => console.error("Gagal memuat data:", err));
     }
 
-    window.onload = function() { loadDataPusat(); };
+    // =========================================
+    // PETUGAS SESI (identitas untuk audit trail)
+    // =========================================
+    function tampilkanPetugasSesi() {
+        let nama = (typeof getPetugasSesi === 'function') ? getPetugasSesi() : '-';
+        let el = document.getElementById('lblPetugasSesi');
+        if (el) el.innerText = 'Petugas: ' + nama;
+    }
+    function gantiPetugasSesi() {
+        if (typeof resetPetugasSesi === 'function') { resetPetugasSesi(); tampilkanPetugasSesi(); }
+    }
+
+    // =========================================
+    // NERACA (POSISI ASET, KEWAJIBAN & MODAL)
+    // =========================================
+    let globalPeriodeTutup = [];
+    let globalNeracaPosManual = [];
+
+    // Kas & setara kas kumulatif dari awal data s.d. tanggal tertentu (inklusif).
+    function hitungSaldoKasKumulatif(sampaiTgl) {
+        let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
+        let data = getDataKasIndukOtomatis().filter(d => !isNaN(d.tanggalObj) && d.tanggalObj <= batas);
+        let masuk = data.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
+        let keluar = data.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
+        return masuk - keluar;
+    }
+
+    // Total tabungan BSU yang masih tersimpan di BSI (belum ditarik) = kewajiban BSI ke BSU.
+    function hitungTotalTabunganBsuBelumDitarik() {
+        let total = 0;
+        (globalNasabah || []).forEach(bsu => { total += Math.max(0, hitungSaldoBsuSaatIni(bsu.nama)); });
+        return total;
+    }
+
+    // Akumulasi nilai investasi alat/peralatan (nilai buku kotor, tanpa penyusutan) s.d. tanggal tertentu.
+    function hitungAkumulasiInvestasiAlat(sampaiTgl) {
+        let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
+        return (globalPemeliharaan || []).filter(p => p.jenis === 'Investasi Alat').filter(p => {
+            let d = new Date(p.tanggal); return !isNaN(d) && d <= batas;
+        }).reduce((a, p) => a + (parseFloat(p.biaya) || 0), 0);
+    }
+
+    function hitungDataNeraca(tglStr) {
+        let kas = hitungSaldoKasKumulatif(tglStr);
+        let aset_tetap_otomatis = hitungAkumulasiInvestasiAlat(tglStr);
+        let kewajiban_tabungan = hitungTotalTabunganBsuBelumDitarik();
+
+        let posManual = globalNeracaPosManual || [];
+        let by = (kat) => posManual.filter(p => p.kategori === kat);
+
+        let asetLancarManual = by('aset_lancar').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
+        let asetTetapManual = by('aset_tetap').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
+        let kewajibanManual = by('kewajiban').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
+        let modalManual = by('modal').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
+
+        let totalAset = kas + asetLancarManual + aset_tetap_otomatis + asetTetapManual;
+        let totalKewajiban = kewajiban_tabungan + kewajibanManual;
+        // Modal/laba ditahan = angka penyeimbang otomatis, supaya Aset = Kewajiban + Modal selalu terpenuhi.
+        let selisihPenyeimbang = totalAset - totalKewajiban - modalManual;
+
+        return {
+            kas, aset_tetap_otomatis, kewajiban_tabungan,
+            asetLancarManual, asetTetapManual, kewajibanManual, modalManual,
+            totalAset, totalKewajiban, totalModal: modalManual + selisihPenyeimbang,
+            selisihPenyeimbang, posManual
+        };
+    }
+
+    function renderNeraca() {
+        if (!document.getElementById('neracaTanggal').value) {
+            document.getElementById('neracaTanggal').value = new Date().toISOString().slice(0, 10);
+        }
+        let tgl = document.getElementById('neracaTanggal').value;
+        let n = hitungDataNeraca(tgl);
+        let rp = (v) => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+
+        document.getElementById('neracaCards').innerHTML = `
+            <div class="card card-green"><h3>Total Aset</h3><p>${rp(n.totalAset)}</p></div>
+            <div class="card card-red"><h3>Total Kewajiban</h3><p>${rp(n.totalKewajiban)}</p></div>
+            <div class="card card-blue"><h3>Total Modal</h3><p>${rp(n.totalModal)}</p></div>
+        `;
+
+        let baris = (nama, nilai, idPos) => `<tr>
+            <td>${nama}</td><td class="text-right" style="font-weight:700;">${rp(nilai)}</td>
+            <td class="text-center">${idPos ? `<button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPosNeraca('${escAttr(idPos)}')">🗑️</button>` : ''}</td>
+        </tr>`;
+
+        let htmlAset = baris('Kas &amp; Setara Kas (otomatis)', n.kas, null)
+            + n.posManual.filter(p => p.kategori === 'aset_lancar').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
+            + baris('Akumulasi Investasi Alat/Peralatan (otomatis, nilai buku kotor)', n.aset_tetap_otomatis, null)
+            + n.posManual.filter(p => p.kategori === 'aset_tetap').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
+            + `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL ASET</td><td class="text-right">${rp(n.totalAset)}</td><td></td></tr>`;
+        document.getElementById('tbody_neraca_aset').innerHTML = htmlAset;
+
+        let htmlKewajiban = baris('Tabungan BSU Belum Ditarik (otomatis)', n.kewajiban_tabungan, null)
+            + n.posManual.filter(p => p.kategori === 'kewajiban').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
+            + `<tr style="background:#fef2f2; font-weight:800;"><td>Subtotal Kewajiban</td><td class="text-right">${rp(n.totalKewajiban)}</td><td></td></tr>`
+            + n.posManual.filter(p => p.kategori === 'modal').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
+            + baris('Laba Ditahan / Selisih Penyeimbang (otomatis)', n.selisihPenyeimbang, null)
+            + `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL KEWAJIBAN + MODAL</td><td class="text-right">${rp(n.totalKewajiban + n.totalModal)}</td><td></td></tr>`;
+        document.getElementById('tbody_neraca_kewajiban').innerHTML = htmlKewajiban;
+    }
+
+    function loadNeracaPosManual(callback) {
+        AdapterAPI.getNeracaPosList().then(list => { globalNeracaPosManual = list || []; if (callback) callback(); renderNeraca(); })
+        .catch(() => { globalNeracaPosManual = []; if (callback) callback(); });
+    }
+
+    function simpanPosNeraca() {
+        let form = {
+            kategori: document.getElementById('nrcKategori').value,
+            nama_pos: document.getElementById('nrcNamaPos').value.trim(),
+            nilai: parseFloat(document.getElementById('nrcNilai').value) || 0,
+            tanggal: document.getElementById('nrcTanggal').value || null,
+            keterangan: document.getElementById('nrcKeterangan').value.trim() || null
+        };
+        if (!form.nama_pos) return alert('Nama pos wajib diisi.');
+        AdapterAPI.tambahPosNeraca(form).then(res => {
+            alert(res);
+            document.getElementById('nrcNamaPos').value = ''; document.getElementById('nrcNilai').value = '';
+            document.getElementById('nrcKeterangan').value = '';
+            loadNeracaPosManual();
+        }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function hapusPosNeraca(id) {
+        if (!confirm('Yakin ingin menghapus pos neraca manual ini?')) return;
+        AdapterAPI.deletePosNeraca(id).then(res => { alert(res); loadNeracaPosManual(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function cetakNeraca() {
+        let tgl = document.getElementById('neracaTanggal').value || new Date().toISOString().slice(0, 10);
+        let n = hitungDataNeraca(tgl);
+        let rp = (v) => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+        let rowsAset = [['Kas & Setara Kas (otomatis)', rp(n.kas)]]
+            .concat(n.posManual.filter(p => p.kategori === 'aset_lancar').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
+            .concat([['Akumulasi Investasi Alat/Peralatan (otomatis)', rp(n.aset_tetap_otomatis)]])
+            .concat(n.posManual.filter(p => p.kategori === 'aset_tetap').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
+            .concat([['TOTAL ASET', rp(n.totalAset)]]);
+        let rowsKewajibanModal = [['Tabungan BSU Belum Ditarik (otomatis)', rp(n.kewajiban_tabungan)]]
+            .concat(n.posManual.filter(p => p.kategori === 'kewajiban').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
+            .concat([['Subtotal Kewajiban', rp(n.totalKewajiban)]])
+            .concat(n.posManual.filter(p => p.kategori === 'modal').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
+            .concat([['Laba Ditahan / Selisih Penyeimbang (otomatis)', rp(n.selisihPenyeimbang)]])
+            .concat([['TOTAL KEWAJIBAN + MODAL', rp(n.totalKewajiban + n.totalModal)]]);
+
+        bukaPreviewDokumen('NERACA (POSISI ASET, KEWAJIBAN & MODAL)', 'Per tanggal: ' + formatTglTabel(tgl), [
+            { heading: 'ASET', headers: ['Pos', 'Nilai'], rows: rowsAset },
+            { heading: 'KEWAJIBAN & MODAL', headers: ['Pos', 'Nilai'], rows: rowsKewajibanModal },
+            { text: 'Catatan: Baris "Laba Ditahan / Selisih Penyeimbang" dihitung otomatis agar Neraca selalu seimbang. Aset tetap dicatat sebesar akumulasi biaya investasi (nilai buku kotor, tanpa penyusutan).' }
+        ]);
+    }
+
+    // =========================================
+    // TUTUP BUKU / KONTROL PERIODE
+    // =========================================
+    function loadTutupBuku() {
+        if (!document.getElementById('tutupBukuBulan').value) {
+            let now = new Date();
+            document.getElementById('tutupBukuBulan').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+        AdapterAPI.getPeriodeList().then(list => { globalPeriodeTutup = list || []; renderTutupBukuList(); })
+        .catch(() => { document.getElementById('tbody_tutupbuku').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Gagal memuat data. Pastikan migrasi schema_upgrade.sql sudah dijalankan.</td></tr>'; });
+    }
+
+    const namaBulanId = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+    function renderTutupBukuList() {
+        let tbody = document.getElementById('tbody_tutupbuku');
+        if (!globalPeriodeTutup.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada periode yang pernah ditutup buku.</td></tr>'; return; }
+        tbody.innerHTML = globalPeriodeTutup.map(p => {
+            let statusBadge = p.status === 'tertutup'
+                ? `<span style="background:#fee2e2; color:#991b1b; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:800;">🔒 TERTUTUP</span>`
+                : `<span style="background:#dcfce7; color:#166534; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:800;">🔓 TERBUKA</span>`;
+            let aksi = p.status === 'tertutup'
+                ? `<button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#fef3c7; color:#92400e; border-color:#fcd34d;" onclick="prosesBukaKembaliBuku(${p.tahun}, ${p.bulan})">🔓 Buka Kembali</button>`
+                : `<button class="btn-sync" style="padding:5px 10px; font-size:11px;" onclick="prosesTutupBukuSpesifik(${p.tahun}, ${p.bulan})">🔒 Tutup</button>`;
+            return `<tr>
+                <td style="font-weight:700;">${namaBulanId[p.bulan - 1]} ${p.tahun}</td>
+                <td>${statusBadge}</td>
+                <td>${p.ditutup_oleh || '-'}</td>
+                <td>${p.ditutup_pada ? new Date(p.ditutup_pada).toLocaleString('id-ID') : '-'}</td>
+                <td>${p.catatan || '-'}</td>
+                <td class="text-center">${aksi}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function prosesTutupBuku() {
+        let bulanStr = document.getElementById('tutupBukuBulan').value;
+        if (!bulanStr) return alert('Pilih bulan terlebih dahulu.');
+        let [tahun, bulan] = bulanStr.split('-').map(Number);
+        prosesTutupBukuSpesifik(tahun, bulan);
+    }
+
+    function prosesTutupBukuSpesifik(tahun, bulan) {
+        let label = namaBulanId[bulan - 1] + ' ' + tahun;
+        if (!confirm(`Yakin ingin MENUTUP BUKU periode ${label}?\n\nSetelah ditutup, transaksi di bulan ini tidak bisa lagi ditambah/diubah/dihapus sampai dibuka kembali.`)) return;
+        let catatan = prompt('Catatan tutup buku (opsional):') || '';
+        AdapterAPI.tutupBuku({ tahun, bulan, catatan }).then(res => { alert(res); loadTutupBuku(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function prosesBukaKembaliBuku(tahun, bulan) {
+        let label = namaBulanId[bulan - 1] + ' ' + tahun;
+        if (!confirm(`⚠️ Yakin ingin MEMBUKA KEMBALI periode ${label} yang sudah tutup buku?\n\nIni akan mengizinkan transaksi di bulan tsb diubah/dihapus lagi. Pastikan alasannya jelas (misal: koreksi data).`)) return;
+        let catatan = prompt('Alasan membuka kembali periode ini (wajib untuk jejak audit):') || '';
+        AdapterAPI.bukaKembaliBuku({ tahun, bulan, catatan }).then(res => { alert(res); loadTutupBuku(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    // Dipanggil dari form transaksi (opsional, peringatan dini di sisi client sebelum ke server)
+    function cekPeringatanPeriodeTerkunci(tglStr) {
+        if (!tglStr || !globalPeriodeTutup || !globalPeriodeTutup.length) return false;
+        let d = uraikanTanggalInput(tglStr);
+        if (isNaN(d)) return false;
+        let p = globalPeriodeTutup.find(x => x.tahun === d.getFullYear() && x.bulan === (d.getMonth() + 1));
+        if (p && p.status === 'tertutup') {
+            alert(`Periode ${namaBulanId[p.bulan - 1]} ${p.tahun} sudah TUTUP BUKU. Transaksi dengan tanggal ini tidak bisa disimpan.`);
+            return true;
+        }
+        return false;
+    }
+
+    // =========================================
+    // REKONSILIASI KAS / BANK
+    // =========================================
+    function hitungSaldoSistemRekon() {
+        let tgl = document.getElementById('rekTanggal').value;
+        if (!tgl) return;
+        document.getElementById('rekSaldoSistem').value = Math.round(hitungSaldoKasKumulatif(tgl));
+    }
+
+    function loadRekonsiliasi() {
+        if (!document.getElementById('rekTanggal').value) {
+            document.getElementById('rekTanggal').value = new Date().toISOString().slice(0, 10);
+            hitungSaldoSistemRekon();
+        }
+        AdapterAPI.getRekonsiliasiList().then(list => renderRekonsiliasiList(list))
+        .catch(() => { document.getElementById('tbody_rekonsiliasi').innerHTML = '<tr><td colspan="8" class="text-center text-muted">Gagal memuat data. Pastikan migrasi schema_upgrade.sql sudah dijalankan.</td></tr>'; });
+    }
+
+    function renderRekonsiliasiList(list) {
+        let tbody = document.getElementById('tbody_rekonsiliasi');
+        if (!list || !list.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada riwayat rekonsiliasi.</td></tr>'; return; }
+        tbody.innerHTML = list.map(r => {
+            let selisih = (parseFloat(r.saldo_fisik) || 0) - (parseFloat(r.saldo_sistem) || 0);
+            let cocok = Math.abs(selisih) < 1;
+            let badge = cocok
+                ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:800;">✓ COCOK</span>`
+                : `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:800;">⚠ SELISIH</span>`;
+            return `<tr>
+                <td>${formatTglTabel(r.tanggal)}</td><td>${r.sumber || '-'}</td>
+                <td class="text-right">Rp ${Math.round(r.saldo_sistem || 0).toLocaleString('id-ID')}</td>
+                <td class="text-right">Rp ${Math.round(r.saldo_fisik || 0).toLocaleString('id-ID')}</td>
+                <td class="text-right" style="font-weight:800; color:${cocok ? '#166534' : '#991b1b'};">${selisih >= 0 ? '+' : ''}Rp ${Math.round(selisih).toLocaleString('id-ID')} ${badge}</td>
+                <td>${r.diperiksa_oleh || '-'}</td><td>${r.keterangan || '-'}</td>
+                <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusRekonsiliasi('${escAttr(r.id)}')">🗑️</button></td>
+            </tr>`;
+        }).join('');
+    }
+
+    function simpanRekonsiliasi() {
+        let form = {
+            tanggal: document.getElementById('rekTanggal').value,
+            sumber: document.getElementById('rekSumber').value,
+            saldo_sistem: parseFloat(document.getElementById('rekSaldoSistem').value) || 0,
+            saldo_fisik: parseFloat(document.getElementById('rekSaldoFisik').value) || 0,
+            diperiksa_oleh: document.getElementById('rekDiperiksaOleh').value.trim(),
+            keterangan: document.getElementById('rekKeterangan').value.trim()
+        };
+        if (!form.tanggal) return alert('Tanggal pemeriksaan wajib diisi.');
+        AdapterAPI.tambahRekonsiliasi(form).then(res => {
+            alert(res);
+            document.getElementById('rekSaldoFisik').value = ''; document.getElementById('rekKeterangan').value = '';
+            loadRekonsiliasi();
+        }).catch(e => alert('Gagal: ' + e));
+    }
+
+    function hapusRekonsiliasi(id) {
+        if (!confirm('Yakin ingin menghapus catatan rekonsiliasi ini?')) return;
+        AdapterAPI.deleteRekonsiliasi(id).then(res => { alert(res); loadRekonsiliasi(); }).catch(e => alert('Gagal: ' + e));
+    }
+
+    // =========================================
+    // AUDIT TRAIL / LOG AKTIVITAS
+    // =========================================
+    function loadAuditTrail() {
+        let tabel = document.getElementById('atFilterTabel').value;
+        document.getElementById('tbody_audittrail').innerHTML = '<tr><td colspan="6" class="text-center">Memuat data...</td></tr>';
+        AdapterAPI.getAuditLog({ tabel: tabel || undefined, limit: 300 }).then(list => renderAuditTrail(list))
+        .catch(() => { document.getElementById('tbody_audittrail').innerHTML = '<tr><td colspan="6" class="text-center text-muted">Gagal memuat data. Pastikan migrasi schema_upgrade.sql sudah dijalankan.</td></tr>'; });
+    }
+
+    function ringkasPerubahanAudit(entri) {
+        if (entri.aksi === 'insert') return '<span style="color:#166534;">+ Data baru ditambahkan</span>';
+        if (entri.aksi === 'delete') return '<span style="color:#991b1b;">− Data dihapus</span>';
+        // update: tampilkan field yang berubah saja
+        let lama = entri.data_lama || {}, baru = entri.data_baru || {};
+        let semuaKey = Array.from(new Set([...Object.keys(lama), ...Object.keys(baru)]));
+        let perubahan = semuaKey.filter(k => k !== 'created_at' && String(lama[k]) !== String(baru[k]))
+            .map(k => `<div><b>${k}</b>: <span style="color:#991b1b; text-decoration:line-through;">${lama[k] ?? '-'}</span> → <span style="color:#166534;">${baru[k] ?? '-'}</span></div>`).join('');
+        return perubahan || '<span style="color:var(--text-muted);">(tidak ada perubahan nilai terdeteksi)</span>';
+    }
+
+    function renderAuditTrail(list) {
+        let tbody = document.getElementById('tbody_audittrail');
+        if (!list || !list.length) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada aktivitas tercatat.</td></tr>'; return; }
+        let warnaAksi = { insert: '#166534', update: '#92400e', delete: '#991b1b' };
+        let labelAksi = { insert: '➕ TAMBAH', update: '✏️ UBAH', delete: '🗑️ HAPUS' };
+        tbody.innerHTML = list.map(e => `<tr>
+            <td style="white-space:nowrap;">${new Date(e.waktu).toLocaleString('id-ID')}</td>
+            <td style="font-weight:700;">${e.tabel}</td>
+            <td style="color:${warnaAksi[e.aksi] || '#334155'}; font-weight:800;">${labelAksi[e.aksi] || e.aksi}</td>
+            <td>${e.oleh || '-'}</td>
+            <td style="font-size:11.5px; max-width:360px;">${ringkasPerubahanAudit(e)}</td>
+            <td>${e.keterangan || '-'}</td>
+        </tr>`).join('');
+    }
+
+    // =========================================
+    // BACKUP DATA LENGKAP
+    // =========================================
+    function unduhBackupLengkap() {
+        let btn = document.getElementById('btnBackup');
+        btn.disabled = true; btn.innerText = '⏳ Menyiapkan backup...';
+        AdapterAPI.exportFullBackup().then(data => {
+            // Data penjualan ke off-taker sudah tersimpan di Supabase (field "penjualan" di
+            // atas) sejak fitur migrasi ditambahkan. Sebagai jaring pengaman, jika perangkat
+            // ini KEBETULAN masih menyimpan sisa data lama di localStorage yang BELUM sempat
+            // dimigrasikan (lihat panel migrasi di menu Penjualan ke Off-taker), sertakan juga
+            // di sini supaya tidak ada data yang tercecer/hilang.
+            let sisaLokal = ambilDataLokal(KEY_PENJUALAN);
+            if (sisaLokal && sisaLokal.length) {
+                data.penjualan_lokal_belum_dimigrasi = sisaLokal;
+                data.meta.catatan += ` PERHATIAN: ditemukan ${sisaLokal.length} baris data penjualan lama di localStorage perangkat ini yang TAMPAKNYA BELUM dimigrasikan ke server (lihat panel migrasi di menu "Penjualan ke Off-taker"). Baris tsb disertakan terpisah di field "penjualan_lokal_belum_dimigrasi".`;
+            }
+            let blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            let stamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+            a.href = url; a.download = 'backup_banksampah_' + stamp + '.json';
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            let now = new Date().toLocaleString('id-ID');
+            localStorage.setItem('LAST_BACKUP_AT', now);
+            document.getElementById('lblLastBackup').innerText = '✅ Backup terakhir diunduh: ' + now;
+        }).catch(e => alert('Gagal membuat backup: ' + e))
+        .finally(() => { btn.disabled = false; btn.innerText = '⬇️ UNDUH BACKUP LENGKAP (JSON)'; });
+    }
+
+    // =========================================
+    // MIGRASI DATA PENJUALAN LAMA (localStorage -> Supabase)
+    // =========================================
+    function cekDataPenjualanLokalBelumMigrasi() {
+        let panel = document.getElementById('panelMigrasiPenjualan');
+        if (!panel) return;
+        let sisaLokal = ambilDataLokal(KEY_PENJUALAN);
+        if (!sisaLokal || !sisaLokal.length) { panel.style.display = 'none'; return; }
+        panel.style.display = 'block';
+        document.getElementById('txtMigrasiPenjualan').innerHTML =
+            `Ditemukan <b>${sisaLokal.length} baris</b> data penjualan lama yang masih tersimpan di penyimpanan lokal (localStorage) perangkat/browser ini — ` +
+            `belum tersinkron ke server. Data ini <b>hanya ada di perangkat ini saja</b> dan akan hilang jika cache browser dibersihkan. ` +
+            `Klik tombol di bawah untuk memindahkannya ke server Supabase (aman dijalankan berkali-kali, tidak akan terduplikasi).`;
+    }
+
+    function prosesMigrasiPenjualan() {
+        let sisaLokal = ambilDataLokal(KEY_PENJUALAN);
+        if (!sisaLokal || !sisaLokal.length) { alert('Tidak ada data lokal yang perlu dimigrasikan.'); cekDataPenjualanLokalBelumMigrasi(); return; }
+        if (!confirm(`Migrasikan ${sisaLokal.length} baris data penjualan lama ke server Supabase sekarang?\n\nSetelah berhasil, data lokal di perangkat ini akan diarsipkan (tidak langsung dihapus, sebagai jaga-jaga).`)) return;
+
+        let btn = document.getElementById('btnMigrasiPenjualan');
+        btn.disabled = true; btn.innerText = '⏳ Memigrasikan...';
+
+        AdapterAPI.importPenjualanBatch(sisaLokal).then(res => {
+            if (!res.ok) { alert('Gagal migrasi: ' + res.error); return; }
+            // Arsipkan (bukan hapus langsung) data lokal lama sebagai jaring pengaman, supaya
+            // masih bisa ditelusuri manual kalau ternyata ada yang perlu dicek ulang.
+            localStorage.setItem(KEY_PENJUALAN + '_arsip_termigrasi_' + Date.now(), JSON.stringify(sisaLokal));
+            localStorage.removeItem(KEY_PENJUALAN);
+            alert(`✅ Berhasil memigrasikan ${res.jumlah} baris data penjualan ke server.\n\nData lokal lama sudah diarsipkan (bukan dihapus permanen) di localStorage perangkat ini dengan awalan kunci "bsi_data_penjualan_arsip_termigrasi_", untuk jaga-jaga.`);
+            return loadPenjualanData().then(() => { populateUI(); renderLapPenjualan('semua'); cekDataPenjualanLokalBelumMigrasi(); });
+        }).catch(e => alert('Gagal migrasi: ' + e))
+        .finally(() => { btn.disabled = false; btn.innerText = '⬆️ MIGRASIKAN SEKARANG'; });
+    }
+
+    window.onload = function() {
+        loadDataPusat();
+        tampilkanPetugasSesi();
+        // Pre-load daftar pos neraca manual & status tutup buku di latar belakang (tanpa
+        // langsung merender), supaya siap dipakai ketika tab terkait dibuka oleh pengguna,
+        // dan supaya pengecekan periode-terkunci di form transaksi aktif sejak awal.
+        AdapterAPI.getNeracaPosList().then(list => { globalNeracaPosManual = list || []; }).catch(() => {});
+        loadTutupBuku();
+        let lastBackup = localStorage.getItem('LAST_BACKUP_AT');
+        if (lastBackup && document.getElementById('lblLastBackup')) document.getElementById('lblLastBackup').innerText = 'Backup terakhir diunduh: ' + lastBackup;
+    };
   </script>
 </body>
 </html>

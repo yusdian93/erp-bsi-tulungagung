@@ -1,103 +1,115 @@
 -- =====================================================================
--- SKEMA DATABASE — Sistem Bank Sampah Induk & Unit
--- Pengganti Google Sheets, dijalankan di Supabase (PostgreSQL)
--- Cara pakai: buka Supabase Dashboard -> SQL Editor -> paste semua isi
--- file ini -> klik RUN.
+-- MIGRASI TAMBAHAN — Kontrol Periode, Audit Trail, Neraca, Rekonsiliasi
+-- Jalankan file ini SETELAH schema.sql (skema awal) sudah ada di project
+-- Supabase Anda. Aman dijalankan berkali-kali (idempotent).
+-- Cara pakai: Supabase Dashboard -> SQL Editor -> paste semua isi file
+-- ini -> klik RUN.
 -- =====================================================================
 
--- 1. AKUN ADMIN PUSAT (BSI)
--- Baris tunggal (id selalu 1) yang menyimpan kredensial login Admin Pusat.
-create table if not exists admin (
-  id smallint primary key default 1 check (id = 1),
-  username text not null default 'admin',
-  password text not null default 'admin123'
-);
-insert into admin (id, username, password)
-  values (1, 'admin', 'admin123')
-  on conflict (id) do nothing;
-
--- 2. BANK SAMPAH UNIT (BSU)
--- Dulu tersebar sebagai baris di sheet "Nasabah" (level BSI).
-create table if not exists bsu (
-  id text primary key,
-  password text not null,
-  nama text not null,
-  ketua text,
-  hp text,
-  jumlah_pengurus int default 0,
-  kecamatan text,
-  desa text,
-  alamat text,
-  koordinat text,
-  created_at timestamptz default now()
-);
-
--- 3. NASABAH (warga yang menyetor ke satu BSU tertentu)
-create table if not exists nasabah (
-  id text primary key,
-  id_unit text not null references bsu(id) on delete cascade,
-  nama text not null,
-  hp text,
-  created_at timestamptz default now()
-);
-
--- 4. KATEGORI / HARGA MATERIAL
-create table if not exists kategori (
+-- 7. TUTUP BUKU / KONTROL PERIODE
+-- Satu baris per (tahun, bulan). Jika status = 'tertutup', semua transaksi
+-- (di tabel `transaksi`) dengan tanggal jatuh pada bulan tsb TIDAK BOLEH
+-- ditambah/diubah/dihapus lagi lewat aplikasi (dicek di supabase-adapter.js).
+create table if not exists periode_tutup_buku (
   id bigserial primary key,
-  jenis_material text not null,
-  nama_kategori text not null,
-  harga numeric not null default 0
+  tahun int not null,
+  bulan int not null check (bulan between 1 and 12),
+  status text not null default 'terbuka' check (status in ('terbuka','tertutup')),
+  ditutup_oleh text,
+  ditutup_pada timestamptz,
+  dibuka_oleh text,
+  dibuka_pada timestamptz,
+  catatan text,
+  created_at timestamptz default now(),
+  unique (tahun, bulan)
 );
 
--- 5. TRANSAKSI (setoran & penarikan saldo)
--- Satu tabel dipakai untuk 2 level, dibedakan kolom "level":
---   'unit_ke_induk'   -> BSU menyetor ke BSI (nama = nama BSU)
---   'nasabah_ke_unit' -> Nasabah menyetor ke BSU (nama = nama nasabah)
-create table if not exists transaksi (
+-- 8. AUDIT TRAIL / LOG AKTIVITAS
+-- Mencatat setiap insert/update/delete pada data transaksional penting.
+-- Sengaja dibuat APPEND-ONLY (lihat kebijakan RLS di bawah): tidak ada
+-- policy update/delete untuk tabel ini, sehingga jejak audit tidak bisa
+-- diubah/dihapus lewat aplikasi maupun langsung lewat anon key.
+create table if not exists audit_log (
+  id bigserial primary key,
+  waktu timestamptz not null default now(),
+  tabel text not null,
+  record_id text not null,
+  aksi text not null check (aksi in ('insert','update','delete')),
+  oleh text,
+  data_lama jsonb,
+  data_baru jsonb,
+  keterangan text
+);
+create index if not exists idx_audit_tabel on audit_log(tabel);
+create index if not exists idx_audit_waktu on audit_log(waktu desc);
+create index if not exists idx_audit_record on audit_log(record_id);
+
+-- 9. POS NERACA MANUAL
+-- Untuk item aset/kewajiban/modal yang tidak bisa dihitung otomatis dari
+-- data transaksi yang sudah ada (misal: modal awal pendirian, aset tanah/
+-- bangunan, utang bank, dsb). Pos yang bisa dihitung otomatis (kas & setara
+-- kas, tabungan BSU yang belum ditarik, akumulasi investasi alat) TIDAK
+-- perlu dimasukkan manual di sini — sudah otomatis ditampilkan di Neraca.
+create table if not exists neraca_pos (
   id text primary key,
-  id_unit text references bsu(id) on delete cascade,
-  level text not null check (level in ('unit_ke_induk','nasabah_ke_unit')),
-  nama text not null,
-  tgl text not null,
-  jenis text,
-  berat numeric default 0,
-  total numeric default 0,
+  kategori text not null check (kategori in ('aset_lancar','aset_tetap','kewajiban','modal')),
+  nama_pos text not null,
+  nilai numeric not null default 0,
+  tanggal text,
+  keterangan text,
   created_at timestamptz default now()
 );
-create index if not exists idx_transaksi_unit on transaksi(id_unit);
-create index if not exists idx_transaksi_level on transaksi(level);
 
--- 6. PENJUALAN KE OFF-TAKER (dulu hanya di localStorage — sekarang di server)
-create table if not exists penjualan (
+-- 10. REKONSILIASI KAS / BANK
+-- Mencocokkan saldo menurut sistem (hasil hitung otomatis dari catatan
+-- transaksi) dengan saldo fisik riil (hitung tunai / mutasi rekening koran)
+-- pada tanggal tertentu.
+create table if not exists rekonsiliasi_kas (
   id text primary key,
   tanggal text not null,
-  pembeli text,
-  material text,
-  berat numeric default 0,
-  harga numeric default 0,
-  total numeric default 0,
+  sumber text not null default 'Kas Tunai',
+  saldo_sistem numeric not null default 0,
+  saldo_fisik numeric not null default 0,
+  selisih numeric generated always as (saldo_fisik - saldo_sistem) stored,
+  keterangan text,
+  diperiksa_oleh text,
   created_at timestamptz default now()
 );
+create index if not exists idx_rekon_tanggal on rekonsiliasi_kas(tanggal);
 
 -- =====================================================================
 -- ROW LEVEL SECURITY
--- Catatan keamanan: aplikasi ini murni frontend statis (tanpa server
--- sendiri), sama seperti kondisi sekarang dengan Google Apps Script yang
--- juga "exec" publik. Supaya app tetap bisa membaca/menulis lewat
--- anon key, RLS dibuka permisif. ini SETARA dengan level keamanan
--- Apps Script sebelumnya, TAPI idealnya ke depan login memakai
--- Supabase Auth + Edge Function agar password tidak lewat REST biasa.
 -- =====================================================================
-alter table admin enable row level security;
-alter table bsu enable row level security;
-alter table nasabah enable row level security;
-alter table kategori enable row level security;
-alter table transaksi enable row level security;
-alter table penjualan enable row level security;
+alter table periode_tutup_buku enable row level security;
+alter table audit_log enable row level security;
+alter table neraca_pos enable row level security;
+alter table rekonsiliasi_kas enable row level security;
 
-create policy "allow all admin" on admin for all using (true) with check (true);
-create policy "allow all bsu" on bsu for all using (true) with check (true);
-create policy "allow all nasabah" on nasabah for all using (true) with check (true);
-create policy "allow all kategori" on kategori for all using (true) with check (true);
-create policy "allow all transaksi" on transaksi for all using (true) with check (true);
-create policy "allow all penjualan" on penjualan for all using (true) with check (true);
+-- periode_tutup_buku & neraca_pos & rekonsiliasi_kas: perlu CRUD penuh dari
+-- aplikasi (setara dengan tabel-tabel lain di schema.sql yang sudah ada).
+drop policy if exists "allow all periode_tutup_buku" on periode_tutup_buku;
+create policy "allow all periode_tutup_buku" on periode_tutup_buku for all using (true) with check (true);
+
+drop policy if exists "allow all neraca_pos" on neraca_pos;
+create policy "allow all neraca_pos" on neraca_pos for all using (true) with check (true);
+
+drop policy if exists "allow all rekonsiliasi_kas" on rekonsiliasi_kas;
+create policy "allow all rekonsiliasi_kas" on rekonsiliasi_kas for all using (true) with check (true);
+
+-- audit_log: SENGAJA hanya dibuka untuk INSERT dan SELECT saja.
+-- Tidak ada policy UPDATE/DELETE -> ditolak otomatis oleh RLS, sehingga
+-- riwayat audit tidak bisa dirusak/dihapus oleh siapa pun lewat anon key.
+drop policy if exists "audit_log insert" on audit_log;
+create policy "audit_log insert" on audit_log for insert with check (true);
+drop policy if exists "audit_log select" on audit_log;
+create policy "audit_log select" on audit_log for select using (true);
+
+-- =====================================================================
+-- CATATAN KEAMANAN (tidak wajib dijalankan, sekadar pengingat):
+-- Kebijakan "allow all" di atas mengikuti gaya permisif yang sama dengan
+-- schema.sql aslinya (RLS terbuka lewat anon key). Ini SETARA dengan level
+-- keamanan yang sudah ada sebelumnya di aplikasi, bukan pengurangan.
+-- Untuk pengerasan keamanan menyeluruh (memisahkan akses admin pusat vs
+-- BSU, menyembunyikan kolom password, dsb) diperlukan migrasi terpisah ke
+-- Supabase Auth + Edge Function, di luar cakupan perubahan pencatatan ini.
+-- =====================================================================

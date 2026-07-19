@@ -538,11 +538,55 @@
             judulApp.innerText = "BANK SAMPAH UNIT " + CURRENT_UNIT_NAMA.toUpperCase();
         }
         document.querySelector('.app-subtitle').innerHTML = `<i class="bi bi-geo-alt-fill text-danger me-1"></i> KODE REGISTRASI: ${CURRENT_UNIT_ID}`;
-        
+
+        // Identitas otomatis untuk audit trail (supaya petugas BSU tidak perlu diminta
+        // mengetik nama manual berulang-ulang -> dipakai sebagai "oleh" di audit_log).
+        try {
+            if (!sessionStorage.getItem('NAMA_PETUGAS_SESI')) {
+                sessionStorage.setItem('NAMA_PETUGAS_SESI', 'BSU ' + CURRENT_UNIT_NAMA);
+            }
+        } catch (e) {}
+
         // Panggil database
         loadDataDatabase();
     }
     // ==========================================================
+
+    // === KONTROL PERIODE (TUTUP BUKU) — peringatan dini di sisi client ===
+    // Pengecekan yang sesungguhnya (mengikat) tetap dilakukan di supabase-adapter.js
+    // setiap kali AdapterAPI.tambahTransaksiUnit() dipanggil, sehingga tidak bisa
+    // dilewati walau peringatan di client ini gagal/di-skip.
+    let globalPeriodeTutupUnit = [];
+    const namaBulanIdUnit = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+    if (CURRENT_UNIT_ID && CURRENT_UNIT_ID !== 'PUSAT') {
+        AdapterAPI.getPeriodeList().then(list => { globalPeriodeTutupUnit = list || []; }).catch(() => {});
+    }
+    function cekPeringatanPeriodeTerkunci(tglStr) {
+        if (!tglStr || !globalPeriodeTutupUnit.length) return false;
+        let s = String(tglStr).trim();
+        let d;
+        let iso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+        if (iso) {
+            d = new Date(parseInt(iso[1], 10), parseInt(iso[2], 10) - 1, parseInt(iso[3], 10));
+        } else if (s.includes('/')) {
+            // Format lokal id-ID yang dipakai unit.html: "D/M/YYYY HH:mm" atau "DD/MM/YYYY"
+            let parts = s.split(' ')[0].split('/');
+            let a = parseInt(parts[0], 10), b = parseInt(parts[1], 10), y = parseInt(parts[2], 10);
+            if (y < 100) y += 2000;
+            let day, month;
+            if (a > 12) { day = a; month = b; } else if (b > 12) { day = b; month = a; } else { day = a; month = b; }
+            d = new Date(y, month - 1, day);
+        } else {
+            d = new Date(s);
+        }
+        if (isNaN(d.getTime())) return false;
+        let p = globalPeriodeTutupUnit.find(x => x.tahun === d.getFullYear() && x.bulan === (d.getMonth() + 1));
+        if (p && p.status === 'tertutup') {
+            alert(`Periode ${namaBulanIdUnit[p.bulan - 1]} ${p.tahun} sudah TUTUP BUKU oleh Admin Pusat. Transaksi dengan tanggal ini tidak bisa disimpan. Hubungi Admin Pusat jika perlu koreksi.`);
+            return true;
+        }
+        return false;
+    }
 
     let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = []; 
     let masterNasabah = []; let masterTransaksi = [];
@@ -786,7 +830,7 @@
         if(nama === '') return alert("Nama tidak boleh kosong!");
         let btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.disabled = true; btnSubmit.innerHTML = 'Menyimpan...';
-        AdapterAPI.tambahNasabah({ id: 'NSB-' + String(Date.now()).slice(-5), id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
+        AdapterAPI.tambahNasabah({ id: genId('NSB'), id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
             .then(() => { alert('Berhasil! Data nasabah telah direkam.'); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
             .catch(error => alert('Gagal menyimpan.'))
             .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data Nasabah'; });
@@ -888,11 +932,12 @@
 
         let now = new Date();
         let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        let kelompokId = semuaItem.length > 1 ? ('GRP-' + Date.now()) : null;
+        if (cekPeringatanPeriodeTerkunci(tgl)) return;
+        let kelompokId = semuaItem.length > 1 ? genId('GRP') : null;
 
         let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...';
         Promise.all(semuaItem.map((item, i) =>
-            AdapterAPI.tambahTransaksiUnit({ id: Date.now() + '-' + i, id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: item.jenis, berat: item.berat, total: item.total, kelompok_id: kelompokId })
+            AdapterAPI.tambahTransaksiUnit({ id: genId('TRX'), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: item.jenis, berat: item.berat, total: item.total, kelompok_id: kelompokId })
         )).then(() => {
             alert(`Setoran Berhasil disimpan (${semuaItem.length} jenis material)! Struk bisa dicetak/dikirim WA di tabel Riwayat Transaksi di bawah.`);
             keranjangSetor = [];
@@ -1022,8 +1067,9 @@
         let saldoTersedia = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => saldoTersedia += t.total);
         if (nominal > saldoTersedia) return alert(`Gagal: Maksimal penarikan Rp ${saldoTersedia.toLocaleString('id-ID')}`);
         let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        if (cekPeringatanPeriodeTerkunci(tgl)) return;
         let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true;
-        AdapterAPI.tambahTransaksiUnit({ id: Date.now(), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: 'Penarikan Tunai', berat: 0, total: -nominal })
+        AdapterAPI.tambahTransaksiUnit({ id: genId('TRX'), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: 'Penarikan Tunai', berat: 0, total: -nominal })
             .then(response => { alert(`Penarikan sukses.`); document.getElementById('formTarikSaldo').reset(); loadDataDatabase(); })
             .finally(() => btnSubmit.disabled = false);
     }
