@@ -884,8 +884,9 @@
         return url;
     }
 
-    function cetakQrUnitSaya() {
-        if (typeof QRCode === 'undefined' || typeof window.jspdf === 'undefined') return alert('Pustaka QR/PDF belum siap, coba lagi sesaat.');
+    async function cetakQrUnitSaya() {
+        try { await pastikanLibraryQrPdfSiap(); }
+        catch (e) { return alert(e.message); }
         let url = urlCekSaldo(CURRENT_UNIT_ID, null);
         QRCode.toDataURL(url, { width: 500, margin: 1 }, function (err, dataUrl) {
             if (err) return alert('Gagal membuat QR: ' + err);
@@ -915,8 +916,9 @@
         });
     }
 
-    function cetakQrNasabah(idNasabah, namaNasabah) {
-        if (typeof QRCode === 'undefined' || typeof window.jspdf === 'undefined') return alert('Pustaka QR/PDF belum siap, coba lagi sesaat.');
+    async function cetakQrNasabah(idNasabah, namaNasabah) {
+        try { await pastikanLibraryQrPdfSiap(); }
+        catch (e) { return alert(e.message); }
         let url = urlCekSaldo(CURRENT_UNIT_ID, idNasabah);
         QRCode.toDataURL(url, { width: 400, margin: 1 }, function (err, dataUrl) {
             if (err) return alert('Gagal membuat QR: ' + err);
@@ -942,7 +944,8 @@
     // Cetak kartu QR untuk SEMUA nasabah sekaligus, disusun 2 kolom x 4 baris per
     // halaman A4 -- siap dipotong jadi kartu per nasabah.
     async function cetakSemuaQrNasabah() {
-        if (typeof QRCode === 'undefined' || typeof window.jspdf === 'undefined') return alert('Pustaka QR/PDF belum siap, coba lagi sesaat.');
+        try { await pastikanLibraryQrPdfSiap(); }
+        catch (e) { return alert(e.message); }
         if (!dataNasabah || !dataNasabah.length) return alert('Belum ada data nasabah.');
         if (!confirm(`Membuat PDF berisi kartu QR untuk ${dataNasabah.length} nasabah. Lanjutkan?`)) return;
 

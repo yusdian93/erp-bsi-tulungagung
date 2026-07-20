@@ -3906,9 +3906,9 @@
     // Membuat & mengunduh PDF berisi QR "Cek Saldo Mandiri" untuk sebuah Bank Sampah
     // Unit. QR ini dibuat sepenuhnya di browser (client-side), tidak dikirim ke
     // pihak ketiga mana pun. Cocok dicetak & ditempel di lokasi BSU.
-    function cetakQrUnit(idUnit, namaUnit) {
-        if (typeof QRCode === 'undefined') return alert('Pustaka QR Code belum siap, coba lagi sesaat.');
-        if (typeof window.jspdf === 'undefined') return alert('Pustaka PDF belum siap, coba lagi sesaat.');
+    async function cetakQrUnit(idUnit, namaUnit) {
+        try { await pastikanLibraryQrPdfSiap(); }
+        catch (e) { return alert(e.message); }
 
         let base = window.location.href.replace(/[^/]*$/, '');
         let url = base + 'cek-saldo.html?unit=' + encodeURIComponent(idUnit);

@@ -128,6 +128,57 @@ async function logAudit(tabel, record_id, aksi, data_lama, data_baru, keterangan
   } catch (e) { console.warn('Gagal mencatat audit log (' + tabel + '/' + aksi + '):', e); }
 }
 
+// ================== UTIL: MUAT PUSTAKA QR/PDF (DENGAN PERCOBAAN ULANG & CDN CADANGAN) ==================
+// Dipakai fitur cetak QR "Cek Saldo Mandiri" di induk.html & unit.html. Kalau
+// script <head> gagal/telat termuat (koneksi lambat, CDN sempat diblokir jaringan,
+// dll), pemeriksaan lama langsung menyerah ("belum siap") tanpa mencoba lagi.
+// Fungsi ini memuat ulang secara dinamis SAAT tombol cetak diklik, mencoba
+// beberapa CDN cadangan kalau CDN utama gagal, dengan pesan error yang jelas
+// kalau memang semuanya gagal (bukan cuma "belum siap").
+function muatScriptSekali(src) {
+  return new Promise((resolve, reject) => {
+    // Sengaja SELALU membuat elemen <script> baru untuk percobaan ini (bukan
+    // mencoba mendeteksi/reuse tag lama), supaya tidak pernah menunggu event
+    // load/error dari tag sebelumnya yang mungkin sudah gagal & event-nya sudah
+    // lewat (tidak akan pernah terpicu lagi kalau baru dipasangi listener
+    // belakangan). Kedua pustaka (qrcode & jsPDF) aman dimuat berkali-kali.
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('Gagal memuat: ' + src));
+    document.head.appendChild(s);
+  });
+}
+async function muatDenganCadangan(daftarUrl) {
+  let errTerakhir;
+  for (const url of daftarUrl) {
+    try { await muatScriptSekali(url); return; } catch (e) { errTerakhir = e; }
+  }
+  throw errTerakhir || new Error('Semua sumber gagal dimuat.');
+}
+async function pastikanLibraryQrPdfSiap() {
+  const tugas = [];
+  if (typeof QRCode === 'undefined') {
+    tugas.push(muatDenganCadangan([
+      'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+      'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js'
+    ]));
+  }
+  if (typeof window.jspdf === 'undefined') {
+    tugas.push(muatDenganCadangan([
+      'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
+      'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js'
+    ]));
+  }
+  if (!tugas.length) return true;
+  try {
+    await Promise.all(tugas);
+    return true;
+  } catch (e) {
+    throw new Error('Gagal memuat pustaka QR/PDF, kemungkinan karena koneksi internet atau jaringan yang memblokir CDN. Periksa koneksi Anda lalu coba lagi. (' + e.message + ')');
+  }
+}
+
 // ================== UTIL: RESTORE DATA DARI BACKUP ==================
 // Tabel-tabel yang bisa di-restore langsung dengan pola upsert-per-id biasa
 // (primary key kolom "id", tanpa constraint unik lain yang perlu ditangani
