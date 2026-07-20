@@ -1164,15 +1164,15 @@
     }
 
 
-    // Guard supaya tombol tidak bisa diklik dobel selagi proses (kecil kemungkinan
-    // perlu, karena sekarang semua langkah sinkron/instan, tapi tetap dijaga).
+    // Guard supaya tombol tidak bisa diklik dobel selagi proses.
     let sedangProsesKartu = false;
+    // Menyimpan kartu yang sedang di-preview, dipakai saat tombol "Kirim ke
+    // WhatsApp" / "Unduh JPG Saja" di modal preview diklik.
+    let kartuPreviewState = null;
 
-    // Membuat kartu, LANGSUNG mengunduhnya sebagai JPG, lalu membuka chat WhatsApp
-    // nasabah tsb (kalau nomor HP-nya terdaftar) supaya tinggal lampirkan file yang
-    // baru saja terunduh. Sengaja TIDAK memakai navigator.share() lagi -- terbukti
-    // tidak stabil/lambat di sebagian perangkat. Alur unduh+buka-WA manual ini lebih
-    // sederhana dan jauh lebih cepat & pasti berhasil di semua perangkat/browser.
+    // Membuat kartu, lalu MENAMPILKAN PREVIEW-nya dulu di dalam aplikasi (modal)
+    // supaya bisa diperiksa sebelum dikirim. Pengiriman ke WhatsApp/unduh baru
+    // terjadi setelah pengguna menekan tombol aksi di modal preview.
     function unduhKartuNasabah(idNasabah, btnEl) {
         if (sedangProsesKartu) return;
         let n = dataNasabah.find(x => String(x.id) === String(idNasabah));
@@ -1183,39 +1183,62 @@
         if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
 
         try {
+            let canvas = generateKartuNasabah(n);
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.92);
             let namaFile = 'Kartu_' + String(n.nama).replace(/[^a-zA-Z0-9]/g, '_') + '_' + n.id + '.jpg';
-            let hpTujuan = n.hp ? String(n.hp).trim().replace(/[^0-9]/g, '') : '';
-            let jendelaWa = null;
 
-            // Buka jendela WhatsApp LEBIH DULU, LANGSUNG di sini (tanpa setTimeout/
-            // jeda apa pun) -- browser (terutama di HP) hanya mengizinkan window.open()
-            // kalau dipanggil PERSIS di dalam aksi klik pengguna. Kalau ditunda
-            // (misal lewat setTimeout), popup-nya diblokir diam-diam.
+            let hpTujuan = n.hp ? String(n.hp).trim().replace(/[^0-9]/g, '') : '';
             if (hpTujuan) {
                 if (hpTujuan.startsWith('8')) hpTujuan = '62' + hpTujuan;
                 else if (hpTujuan.startsWith('0')) hpTujuan = '62' + hpTujuan.substring(1);
-                let pesan = `Halo ${n.nama}, berikut kartu tabungan sampah Anda di ${CURRENT_UNIT_NAMA}. Mohon lampirkan file "${namaFile}" yang baru saja terunduh ya 🙏`;
-                jendelaWa = window.open(`https://wa.me/${hpTujuan}?text=${encodeURIComponent(pesan)}`, '_blank');
             }
 
-            // Baru generate & unduh kartunya setelah jendela WA dibuka.
-            let canvas = generateKartuNasabah(n);
-            let dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-            let a = document.createElement('a');
-            a.href = dataUrl; a.download = namaFile;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-
-            if (!hpTujuan) {
-                alert('Kartu berhasil diunduh (' + namaFile + '). Nomor HP nasabah ini belum terdaftar, jadi chat WA tidak bisa dibuka otomatis -- silakan kirim manual.');
-            } else if (!jendelaWa) {
-                alert('Kartu berhasil diunduh (' + namaFile + '), tapi browser memblokir jendela WhatsApp otomatis. Silakan izinkan pop-up untuk situs ini di pengaturan browser, atau buka WhatsApp secara manual lalu lampirkan file yang baru terunduh.');
-            }
+            kartuPreviewState = { dataUrl, namaFile, hpTujuan, nama: n.nama, unit: CURRENT_UNIT_NAMA };
+            document.getElementById('previewKartuImg').src = dataUrl;
+            document.getElementById('modalPreviewKartu').style.display = 'flex';
         } catch (e) {
             alert('Gagal membuat kartu: ' + (e && e.message ? e.message : e));
         } finally {
             sedangProsesKartu = false;
             if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = iconAsli; }
         }
+    }
+
+    function tutupPreviewKartu() {
+        document.getElementById('modalPreviewKartu').style.display = 'none';
+        kartuPreviewState = null;
+    }
+
+    function unduhKartuSaja() {
+        if (!kartuPreviewState) return;
+        let a = document.createElement('a');
+        a.href = kartuPreviewState.dataUrl; a.download = kartuPreviewState.namaFile;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    // Dipanggil dari tombol di modal preview -- ini KLIK PENGGUNA LANGSUNG yang
+    // baru, jadi window.open() di sini tetap aman dari popup blocker (beda dengan
+    // kalau dipanggil lewat setTimeout/proses tertunda).
+    function kirimKartuKeWA() {
+        if (!kartuPreviewState) return;
+        let { dataUrl, namaFile, hpTujuan, nama, unit } = kartuPreviewState;
+
+        let jendelaWa = null;
+        if (hpTujuan) {
+            let pesan = `Halo ${nama}, berikut kartu tabungan sampah Anda di ${unit}. Mohon lampirkan file "${namaFile}" yang baru saja terunduh ya 🙏`;
+            jendelaWa = window.open(`https://wa.me/${hpTujuan}?text=${encodeURIComponent(pesan)}`, '_blank');
+        }
+
+        let a = document.createElement('a');
+        a.href = dataUrl; a.download = namaFile;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+        if (!hpTujuan) {
+            alert('Kartu berhasil diunduh (' + namaFile + '). Nomor HP nasabah ini belum terdaftar, jadi chat WA tidak bisa dibuka otomatis -- silakan kirim manual.');
+        } else if (!jendelaWa) {
+            alert('Kartu berhasil diunduh (' + namaFile + '), tapi browser memblokir jendela WhatsApp otomatis. Silakan izinkan pop-up untuk situs ini di pengaturan browser, atau buka WhatsApp secara manual lalu lampirkan file yang baru terunduh.');
+        }
+        tutupPreviewKartu();
     }
 
     function cetakQrNasabah(idNasabah, namaNasabah) {
@@ -1646,6 +1669,21 @@
         updateLaporan();
     }
 </script>
+
+<!-- ===== MODAL PREVIEW KARTU DIGITAL ===== -->
+<div id="modalPreviewKartu" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:9999; align-items:center; justify-content:center; padding:18px;">
+    <div style="background:#fff; border-radius:18px; padding:22px; max-width:460px; width:100%; text-align:center; max-height:92vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+        <h5 class="fw-bold mb-1" style="color:var(--primary-dark);"><i class="bi bi-credit-card-2-front me-2"></i>Preview Kartu Digital</h5>
+        <p class="text-muted small mb-3">Periksa dulu tampilan kartunya sebelum dikirim.</p>
+        <img id="previewKartuImg" src="" style="width:100%; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,0.18);">
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-success btn-lg" onclick="kirimKartuKeWA()"><i class="bi bi-whatsapp me-2"></i>Kirim ke WhatsApp</button>
+            <button class="btn btn-outline-secondary" onclick="unduhKartuSaja()"><i class="bi bi-download me-2"></i>Unduh JPG Saja</button>
+            <button class="btn btn-light text-muted" onclick="tutupPreviewKartu()">Batal</button>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
