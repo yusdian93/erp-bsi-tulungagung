@@ -1070,59 +1070,32 @@
     // menghadap arah rotasiRad, sepanjang "panjang" dan lebar "lebar".
     // Menggambar tekstur titik halftone (kotak x,y,w,h) yang memudar dari sudut
     // (x,y) ke arah dalam -- dipakai sebagai ornamen tekstur pojok kartu.
-    function gambarHalftone(ctx, x, y, w, h, spacing, warna) {
+    // Menggambar tekstur garis diagonal tipis berulang (kesan modern/minimalis)
+    // di seluruh latar kartu.
+    function gambarGridTipis(ctx, W, H, warna, alpha) {
         ctx.save();
-        ctx.fillStyle = warna;
-        for (let yy = y; yy < y + h; yy += spacing) {
-            for (let xx = x; xx < x + w; xx += spacing) {
-                let jarak = Math.hypot(xx - x, yy - y) / Math.max(w, h);
-                let r = Math.max(0.4, 2.3 * (1 - jarak));
-                if (r <= 0.4) continue;
-                ctx.beginPath(); ctx.arc(xx, yy, r, 0, Math.PI * 2); ctx.fill();
-            }
-        }
-        ctx.restore();
-    }
-
-    // Menggambar pita-pita gelombang biru mengalir di latar kartu (kesan modern/
-    // dinamis), plus tekstur garis tipis bergelombang sebagai detail tambahan.
-    function gambarPitaGelombang(ctx, W, H) {
-        ctx.save();
-        ctx.fillStyle = 'rgba(125,211,252,0.30)';
-        ctx.beginPath();
-        ctx.moveTo(-60, H * 0.74);
-        ctx.bezierCurveTo(W * 0.22, H * 0.52, W * 0.42, H * 0.98, W * 0.66, H * 0.58);
-        ctx.bezierCurveTo(W * 0.80, H * 0.36, W * 0.64, H * 0.12, W * 0.53, H * 0.02);
-        ctx.lineTo(W * 0.47, H * 0.08);
-        ctx.bezierCurveTo(W * 0.58, H * 0.22, W * 0.70, H * 0.42, W * 0.60, H * 0.60);
-        ctx.bezierCurveTo(W * 0.40, H * 0.90, W * 0.20, H * 0.60, -60, H * 0.84);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.fillStyle = 'rgba(56,189,248,0.22)';
-        ctx.beginPath();
-        ctx.moveTo(-60, H * 0.88);
-        ctx.bezierCurveTo(W * 0.28, H * 0.64, W * 0.48, H * 1.05, W * 0.74, H * 0.66);
-        ctx.bezierCurveTo(W * 0.88, H * 0.42, W * 0.73, H * 0.18, W * 0.60, H * 0.05);
-        ctx.lineTo(W * 0.55, H * 0.11);
-        ctx.bezierCurveTo(W * 0.68, H * 0.28, W * 0.80, H * 0.48, W * 0.68, H * 0.68);
-        ctx.bezierCurveTo(W * 0.46, H * 0.98, W * 0.26, H * 0.70, -60, H * 0.97);
-        ctx.closePath();
-        ctx.fill();
-
-        ctx.strokeStyle = 'rgba(255,255,255,0.07)'; ctx.lineWidth = 1;
-        for (let i = 0; i < 12; i++) {
-            let yOff = H * 0.30 + i * 11;
+        ctx.globalAlpha = alpha; ctx.strokeStyle = warna; ctx.lineWidth = 1;
+        for (let x = -H; x < W + H; x += 34) {
             ctx.beginPath();
-            ctx.moveTo(W * 0.28, yOff);
-            ctx.bezierCurveTo(W * 0.42, yOff - 18, W * 0.54, yOff + 22, W * 0.74, yOff - 10);
+            ctx.moveTo(x, 0); ctx.lineTo(x + H, H);
             ctx.stroke();
         }
         ctx.restore();
     }
 
-    // Menggambar ikon contactless/nirsentuh (garis lengkung bertingkat) di
-    // sebelah kanan chip, gaya kartu bank modern.
+    // Menggambar cincin aksen emas tipis (dekoratif, kesan modern/premium) yang
+    // sebagian keluar dari tepi kartu.
+    function gambarCincinAksen(ctx, cx, cy, warna) {
+        ctx.save();
+        ctx.strokeStyle = warna; ctx.lineWidth = 1.6;
+        [130, 190, 250].forEach((r, i) => {
+            ctx.globalAlpha = 0.22 - i * 0.05;
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+        });
+        ctx.restore();
+    }
+
+    // Menggambar ikon contactless/nirsentuh (garis lengkung bertingkat).
     function gambarIkonContactless(ctx, x, y, warna) {
         ctx.save();
         ctx.strokeStyle = warna; ctx.lineCap = 'round'; ctx.lineWidth = 4.5;
@@ -1137,9 +1110,9 @@
 
     // Membuat kartu SECARA SINKRON (tidak ada proses tunggu/async apa pun) --
     // QR digambar langsung dari elemen <canvas> yang dibuat QRCode.js, tanpa
-    // bolak-balik lewat data URL + objek Image (langkah itulah yang bikin lambat/
-    // terasa lemot sebelumnya). Kalau gagal, akan throw Error biasa (bukan Promise).
-    // Tema: NAVY BLUE modern + blob terang untuk chip/QR + pita gelombang + logo DLH.
+    // bolak-balik lewat data URL + objek Image. Kalau gagal, akan throw Error
+    // biasa (bukan Promise).
+    // Tema: NAVY BLUE modern-minimalis + chip & aksen EMAS + panel kaca transparan.
     function generateKartuNasabah(n) {
         let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
 
@@ -1154,41 +1127,42 @@
         let canvas = document.createElement('canvas');
         canvas.width = W; canvas.height = H;
         let ctx = canvas.getContext('2d');
+        const EMAS = '#d4af37', EMAS_TERANG = '#f3d878';
 
         // --- bidang kartu (sudut membulat) ---
         pathRoundRect(ctx, 0, 0, W, H, 44);
         ctx.save(); ctx.clip();
 
-        // --- latar navy biru gradasi ---
+        // --- latar navy minimalis ---
         let grad = ctx.createLinearGradient(0, 0, W, H);
-        grad.addColorStop(0, '#0a1440');
-        grad.addColorStop(0.5, '#122a6b');
-        grad.addColorStop(1, '#1e40af');
+        grad.addColorStop(0, '#0a0e27');
+        grad.addColorStop(0.5, '#111a3d');
+        grad.addColorStop(1, '#1b2a5e');
         ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
 
-        // --- tekstur titik halftone (pojok kiri atas & kanan bawah) ---
-        gambarHalftone(ctx, 0, 0, 300, 170, 15, 'rgba(255,255,255,0.20)');
-        gambarHalftone(ctx, W - 260, H - 150, 260, 150, 15, 'rgba(255,255,255,0.10)');
+        // tekstur grid diagonal tipis + cincin aksen emas dekoratif (pojok kanan atas)
+        gambarGridTipis(ctx, W, H, '#ffffff', 0.035);
+        gambarCincinAksen(ctx, W - 40, -20, EMAS_TERANG);
 
-        // --- pita gelombang dekoratif ---
-        gambarPitaGelombang(ctx, W, H);
+        // --- bingkai tipis emas di seluruh tepi kartu ---
+        ctx.strokeStyle = 'rgba(212,175,55,0.55)'; ctx.lineWidth = 2;
+        pathRoundRect(ctx, 9, 9, W - 18, H - 18, 36); ctx.stroke();
 
-        // --- blob terang di kanan (tempat chip + QR) ---
-        let blobCx = W * 0.805, blobCy = H * 0.30, blobR = 430;
-        let blobGrad = ctx.createRadialGradient(blobCx - 120, blobCy - 120, 40, blobCx, blobCy, blobR);
-        blobGrad.addColorStop(0, '#ffffff');
-        blobGrad.addColorStop(1, '#dbeafe');
-        ctx.fillStyle = blobGrad;
-        ctx.beginPath(); ctx.arc(blobCx, blobCy, blobR, 0, Math.PI * 2); ctx.fill();
+        // --- panel kaca transparan di kanan (tempat chip + QR) ---
+        let panelX = W * 0.615, panelY = 40, panelW = W - panelX - 40, panelH = H - 80;
+        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        pathRoundRect(ctx, panelX, panelY, panelW, panelH, 26); ctx.fill();
+        ctx.strokeStyle = 'rgba(212,175,55,0.35)'; ctx.lineWidth = 1.5;
+        pathRoundRect(ctx, panelX, panelY, panelW, panelH, 26); ctx.stroke();
 
-        // --- chip metalik + ikon contactless (di dalam blob) ---
-        let chipX = W - 300, chipY = 66, chipW = 78, chipH = 56;
+        // --- chip EMAS + ikon contactless (di dalam panel) ---
+        let chipX = panelX + 28, chipY = panelY + 28, chipW = 78, chipH = 56;
         let chipGrad = ctx.createLinearGradient(chipX, chipY, chipX + chipW, chipY + chipH);
-        chipGrad.addColorStop(0, '#f1f5f9'); chipGrad.addColorStop(0.45, '#cbd5e1');
-        chipGrad.addColorStop(0.55, '#94a3b8'); chipGrad.addColorStop(1, '#e2e8f0');
+        chipGrad.addColorStop(0, '#fdf1c8'); chipGrad.addColorStop(0.45, EMAS_TERANG);
+        chipGrad.addColorStop(0.55, EMAS); chipGrad.addColorStop(1, '#b8901f');
         ctx.fillStyle = chipGrad;
         pathRoundRect(ctx, chipX, chipY, chipW, chipH, 10); ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0,0,0,0.28)'; ctx.lineWidth = 1.5;
         pathRoundRect(ctx, chipX, chipY, chipW, chipH, 10); ctx.stroke();
         ctx.beginPath();
         ctx.moveTo(chipX + chipW * 0.35, chipY); ctx.lineTo(chipX + chipW * 0.35, chipY + chipH);
@@ -1196,28 +1170,28 @@
         ctx.moveTo(chipX, chipY + chipH * 0.5); ctx.lineTo(chipX + chipW, chipY + chipH * 0.5);
         pathRoundRect(ctx, chipX + chipW * 0.35, chipY + chipH * 0.22, chipW * 0.3, chipH * 0.56, 4);
         ctx.stroke();
-        gambarIkonContactless(ctx, chipX + chipW + 48, chipY + chipH / 2, 'rgba(30,64,175,0.75)');
+        gambarIkonContactless(ctx, chipX + chipW + 46, chipY + chipH / 2, EMAS_TERANG);
 
-        // --- kotak putih QR (di dalam blob, di bawah chip) ---
-        let qrBox = 190, qrX = W - qrBox - 112, qrY = 208;
+        // --- kotak putih QR (di dalam panel, di bawah chip) ---
+        let qrBox = panelW - 56, qrX = panelX + 28, qrY = chipY + chipH + 30;
         ctx.fillStyle = '#ffffff';
-        pathRoundRect(ctx, qrX - 10, qrY - 10, qrBox + 20, qrBox + 20, 16); ctx.fill();
-        ctx.strokeStyle = 'rgba(30,64,175,0.15)'; ctx.lineWidth = 2;
-        pathRoundRect(ctx, qrX - 10, qrY - 10, qrBox + 20, qrBox + 20, 16); ctx.stroke();
+        pathRoundRect(ctx, qrX - 8, qrY - 8, qrBox + 16, qrBox + 16, 16); ctx.fill();
+        ctx.strokeStyle = 'rgba(212,175,55,0.5)'; ctx.lineWidth = 2;
+        pathRoundRect(ctx, qrX - 8, qrY - 8, qrBox + 16, qrBox + 16, 16); ctx.stroke();
         ctx.drawImage(qrCanvasSrc, qrX, qrY, qrBox, qrBox);
         ctx.textAlign = 'center';
-        ctx.font = '700 15px Arial, sans-serif';
-        ctx.fillStyle = '#1e40af';
-        ctx.fillText('Scan cek saldo', qrX + qrBox / 2, qrY + qrBox + 32);
+        ctx.font = '700 14px Arial, sans-serif';
+        ctx.fillStyle = EMAS_TERANG;
+        ctx.fillText('Scan cek saldo', panelX + panelW / 2, qrY + qrBox + 30);
         ctx.textAlign = 'left';
 
-        // --- header kiri: accent bar + BANK SAMPAH + nama tempat ---
-        ctx.fillStyle = '#38bdf8';
+        // --- header kiri: accent bar emas + BANK SAMPAH + nama tempat ---
+        ctx.fillStyle = EMAS_TERANG;
         pathRoundRect(ctx, 56, 52, 6, 42, 3); ctx.fill();
         ctx.fillStyle = '#ffffff';
         ctx.font = '800 33px Arial, sans-serif';
         ctx.fillText('BANK SAMPAH', 78, 84);
-        ctx.fillStyle = '#38bdf8';
+        ctx.fillStyle = EMAS_TERANG;
         ctx.font = '800 23px Arial, sans-serif';
         ctx.fillText(tempatUnitUntukKartu().toUpperCase(), 78, 114);
 
@@ -1228,13 +1202,14 @@
         ctx.fillStyle = '#ffffff';
         ctx.font = '700 25px Arial, sans-serif';
         ctx.fillText(prefixId, 56, 232);
-        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(212,175,55,0.55)'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(128, 198); ctx.lineTo(128, 236); ctx.stroke();
         ctx.font = '800 40px "Courier New", monospace';
+        ctx.fillStyle = '#ffffff';
         ctx.fillText(angkaId, 150, 235);
 
-        // garis tipis pemisah di bawah ID
-        ctx.strokeStyle = 'rgba(255,255,255,0.28)'; ctx.lineWidth = 1.5;
+        // garis tipis emas pemisah di bawah ID
+        ctx.strokeStyle = 'rgba(212,175,55,0.4)'; ctx.lineWidth = 1.5;
         ctx.beginPath(); ctx.moveTo(56, 258); ctx.lineTo(560, 258); ctx.stroke();
 
         // --- nama nasabah ---
@@ -1242,19 +1217,21 @@
         ctx.font = '800 33px Arial, sans-serif';
         ctx.fillText(String(n.nama || '-').toUpperCase(), 56, 312);
 
-        // --- nomor HP (ikon telepon bulat + teks) ---
+        // --- nomor HP (ikon telepon bulat emas + teks) ---
         let telX = 74, telY = 362;
-        ctx.fillStyle = '#2563eb';
+        let telGrad = ctx.createLinearGradient(telX - 21, telY - 21, telX + 21, telY + 21);
+        telGrad.addColorStop(0, EMAS_TERANG); telGrad.addColorStop(1, EMAS);
+        ctx.fillStyle = telGrad;
         ctx.beginPath(); ctx.arc(telX, telY, 21, 0, Math.PI * 2); ctx.fill();
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.font = '20px Arial, sans-serif';
-        ctx.fillStyle = '#ffffff';
+        ctx.fillStyle = '#1b1400';
         ctx.fillText('\u260E', telX, telY + 1);
         ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
 
         let noHp = n.hp ? String(n.hp).trim() : '-'; if (noHp.startsWith('8')) noHp = '0' + noHp;
         ctx.font = '600 14px Arial, sans-serif';
-        ctx.fillStyle = '#7dd3fc';
+        ctx.fillStyle = EMAS_TERANG;
         ctx.fillText('NOMOR HP TERDAFTAR', telX + 34, telY - 5);
         ctx.font = '700 21px Arial, sans-serif';
         ctx.fillStyle = '#ffffff';
@@ -1265,26 +1242,26 @@
         if (logoDlhImg && logoDlhImg.complete && logoDlhImg.naturalWidth > 0) {
             ctx.drawImage(logoDlhImg, logoX, logoY, logoSize, logoSize);
         } else {
-            ctx.fillStyle = 'rgba(255,255,255,0.12)';
+            ctx.fillStyle = 'rgba(255,255,255,0.10)';
             pathRoundRect(ctx, logoX, logoY, logoSize, logoSize, 10); ctx.fill();
         }
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(212,175,55,0.4)'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(logoX + logoSize + 16, logoY + 2); ctx.lineTo(logoX + logoSize + 16, logoY + logoSize - 2); ctx.stroke();
 
         ctx.font = '700 18px Arial, sans-serif';
         ctx.fillStyle = '#ffffff';
         ctx.fillText('Dinas Lingkungan Hidup', logoX + logoSize + 32, logoY + 26);
         ctx.font = '600 14px Arial, sans-serif';
-        ctx.fillStyle = '#7dd3fc';
+        ctx.fillStyle = EMAS_TERANG;
         ctx.fillText('Kabupaten Tulungagung', logoX + logoSize + 32, logoY + 48);
 
         // --- footer kanan: TABUNGAN SAMPAH ---
-        ctx.fillStyle = '#38bdf8';
+        ctx.fillStyle = EMAS_TERANG;
         pathRoundRect(ctx, W - 208, H - 96, 5, 58, 3); ctx.fill();
         ctx.font = '800 25px Arial, sans-serif';
         ctx.fillStyle = '#ffffff';
         ctx.fillText('TABUNGAN', W - 192, H - 64);
-        ctx.fillStyle = '#38bdf8';
+        ctx.fillStyle = EMAS_TERANG;
         ctx.fillText('SAMPAH', W - 192, H - 36);
 
         ctx.restore(); // lepas clip bidang kartu
@@ -1292,83 +1269,6 @@
         return canvas;
     }
 
-
-
-    // Guard supaya tombol tidak bisa diklik dobel selagi proses.
-    let sedangProsesKartu = false;
-    // Menyimpan kartu yang sedang di-preview, dipakai saat tombol "Kirim ke
-    // WhatsApp" / "Unduh JPG Saja" di modal preview diklik.
-    let kartuPreviewState = null;
-
-    // Membuat kartu, lalu MENAMPILKAN PREVIEW-nya dulu di dalam aplikasi (modal)
-    // supaya bisa diperiksa sebelum dikirim. Pengiriman ke WhatsApp/unduh baru
-    // terjadi setelah pengguna menekan tombol aksi di modal preview.
-    function unduhKartuNasabah(idNasabah, btnEl) {
-        if (sedangProsesKartu) return;
-        let n = dataNasabah.find(x => String(x.id) === String(idNasabah));
-        if (!n) return alert('Data nasabah tidak ditemukan.');
-
-        sedangProsesKartu = true;
-        let iconAsli = btnEl ? btnEl.innerHTML : null;
-        if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
-
-        try {
-            let canvas = generateKartuNasabah(n);
-            let dataUrl = canvas.toDataURL('image/jpeg', 0.92);
-            let namaFile = 'Kartu_' + String(n.nama).replace(/[^a-zA-Z0-9]/g, '_') + '_' + n.id + '.jpg';
-
-            let hpTujuan = n.hp ? String(n.hp).trim().replace(/[^0-9]/g, '') : '';
-            if (hpTujuan) {
-                if (hpTujuan.startsWith('8')) hpTujuan = '62' + hpTujuan;
-                else if (hpTujuan.startsWith('0')) hpTujuan = '62' + hpTujuan.substring(1);
-            }
-
-            kartuPreviewState = { dataUrl, namaFile, hpTujuan, nama: n.nama, unit: CURRENT_UNIT_NAMA };
-            document.getElementById('previewKartuImg').src = dataUrl;
-            document.getElementById('modalPreviewKartu').style.display = 'flex';
-        } catch (e) {
-            alert('Gagal membuat kartu: ' + (e && e.message ? e.message : e));
-        } finally {
-            sedangProsesKartu = false;
-            if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = iconAsli; }
-        }
-    }
-
-    function tutupPreviewKartu() {
-        document.getElementById('modalPreviewKartu').style.display = 'none';
-        kartuPreviewState = null;
-    }
-
-    function unduhKartuSaja() {
-        if (!kartuPreviewState) return;
-        let a = document.createElement('a');
-        a.href = kartuPreviewState.dataUrl; a.download = kartuPreviewState.namaFile;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
-
-    // Fallback saat perangkat TIDAK mendukung Web Share dengan file (umumnya
-    // komputer): buka chat WA ke nomor nasabah (otomatis terpilih) + unduh
-    // gambarnya, tinggal dilampirkan manual.
-    function kirimViaWaMeDanUnduh() {
-        let { dataUrl, namaFile, hpTujuan, nama, unit } = kartuPreviewState;
-
-        let jendelaWa = null;
-        if (hpTujuan) {
-            let pesan = `Halo ${nama}, berikut kartu tabungan sampah Anda di ${unit} `;
-            jendelaWa = window.open(`https://wa.me/${hpTujuan}?text=${encodeURIComponent(pesan)}`, '_blank');
-        }
-
-        let a = document.createElement('a');
-        a.href = dataUrl; a.download = namaFile;
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-
-        if (!hpTujuan) {
-            alert('Kartu berhasil diunduh (' + namaFile + '). Nomor HP nasabah ini belum terdaftar, jadi chat WA tidak bisa dibuka otomatis -- silakan kirim manual.');
-        } else if (!jendelaWa) {
-            alert('Kartu berhasil diunduh (' + namaFile + '), tapi browser memblokir jendela WhatsApp otomatis. Silakan izinkan pop-up untuk situs ini di pengaturan browser, atau buka WhatsApp secara manual lalu lampirkan file yang baru terunduh.');
-        }
-        tutupPreviewKartu();
-    }
 
     // Guard supaya navigator.share() tidak pernah dipanggil bertumpuk (dobel-klik).
     let sedangKirimKartu = false;
