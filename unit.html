@@ -909,7 +909,7 @@
             tbody.innerHTML += `<tr><td class="align-middle" style="font-family:monospace; font-weight:700; color:#475569; letter-spacing:0.5px;">${n.id}</td>
                 <td class="align-middle fw-bold" style="color: var(--primary-dark);">${n.nama}</td><td class="align-middle text-muted">${noHp}</td>
                 <td class="text-center align-middle" style="white-space:nowrap;"><button class="btn btn-sm btn-outline-secondary py-1 px-2 me-2" title="Cetak QR Saja" onclick="cetakQrNasabah('${n.id}', '${(n.nama||'').replace(/'/g,"\\'")}')"><i class="bi bi-qr-code"></i></button>
-                <button class="btn btn-sm btn-outline-success py-1 px-2 me-2" title="Kartu Digital (kirim WA)" onclick="unduhKartuNasabah('${n.id}')"><i class="bi bi-credit-card-2-front"></i></button>
+                <button class="btn btn-sm btn-outline-success py-1 px-2 me-2" title="Kartu Digital (kirim WA)" onclick="unduhKartuNasabah('${n.id}', this)"><i class="bi bi-credit-card-2-front"></i></button>
                 <button class="btn btn-sm btn-outline-primary py-1 px-2 me-2" onclick="editNasabah('${n.id}')"><i class="bi bi-pencil-square"></i></button>
                 <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusNasabah('${n.id}')"><i class="bi bi-trash3"></i></button></td></tr>`;
         });
@@ -1089,12 +1089,22 @@
         });
     }
 
+    // Guard supaya navigator.share() TIDAK pernah dipanggil bertumpuk (dobel-klik,
+    // atau proses sebelumnya belum selesai) -- browser akan menolak dengan error
+    // "An earlier share has not yet completed" kalau ini dilanggar.
+    let sedangProsesKartu = false;
+
     // Membuat kartu lalu langsung membuka menu Bagikan (kalau didukung, mis. di HP --
     // WhatsApp akan muncul sebagai salah satu pilihan), atau mengunduh sebagai JPG
     // kalau perangkat/browser tidak mendukung Web Share API (mis. di komputer).
-    async function unduhKartuNasabah(idNasabah) {
+    async function unduhKartuNasabah(idNasabah, btnEl) {
+        if (sedangProsesKartu) return; // abaikan klik susulan selama masih proses
         let n = dataNasabah.find(x => String(x.id) === String(idNasabah));
         if (!n) return alert('Data nasabah tidak ditemukan.');
+
+        sedangProsesKartu = true;
+        let iconAsli = btnEl ? btnEl.innerHTML : null;
+        if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
 
         try {
             let canvas = await generateKartuNasabah(n);
@@ -1124,8 +1134,12 @@
                 }
             }
         } catch (e) {
-            if (e && e.name === 'AbortError') return; // pengguna membatalkan menu Bagikan, tidak perlu alert
-            alert('Gagal membuat/mengirim kartu: ' + (e && e.message ? e.message : e));
+            if (e && e.name === 'AbortError') { /* pengguna membatalkan menu Bagikan, tidak perlu alert */ }
+            else if (e && e.name === 'InvalidStateError') { alert('Proses sebelumnya masih berjalan, coba lagi sesaat.'); }
+            else { alert('Gagal membuat/mengirim kartu: ' + (e && e.message ? e.message : e)); }
+        } finally {
+            sedangProsesKartu = false;
+            if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = iconAsli; }
         }
     }
 
