@@ -837,18 +837,22 @@
     }
 
     // =========================================
-    // ID OTOMATIS NASABAH: 3 huruf awal (dari nama BSU, prefiks "BSU " dibuang)
-    // + 5 digit angka urut per-unit. ID ini (dikombinasikan dengan No. HP) dipakai
-    // untuk pencarian saldo mandiri lewat QR (lihat cek-saldo.html).
+    // ID OTOMATIS NASABAH: 3 huruf awal (dari nama Desa/Kelurahan BSU, kata
+    // "Kelurahan"/"Desa" di depannya dibuang) + 5 digit angka urut per-unit.
+    // Total 8 karakter, contoh: Kelurahan Tamanan -> tam00001, tam00002, dst.
+    // ID ini (dikombinasikan dengan No. HP) dipakai untuk pencarian saldo mandiri
+    // lewat QR (lihat cek-saldo.html).
     // =========================================
     function generateIdNasabahOtomatis() {
-        let namaBersih = String(CURRENT_UNIT_NAMA || 'BSU').replace(/^bsu\s*[-:]?\s*/i, '').trim();
-        let hurufSaja = namaBersih.replace(/[^a-zA-Z]/g, '').toUpperCase();
-        let prefix = (hurufSaja + 'XXX').slice(0, 3);
+        let desaUnit = (dataUnit && dataUnit[0] && dataUnit[0].desa) ? String(dataUnit[0].desa).trim() : '';
+        let sumber = desaUnit || String(CURRENT_UNIT_NAMA || 'unit').replace(/^bsu\s*[-:]?\s*/i, '');
+        let sumberBersih = sumber.replace(/^(kelurahan|kel\.?|desa|ds\.?)\s+/i, '').trim();
+        let hurufSaja = sumberBersih.replace(/[^a-zA-Z]/g, '').toLowerCase();
+        let prefix = (hurufSaja + 'xxx').slice(0, 3);
 
         let maxNum = 0;
         (dataNasabah || []).forEach(n => {
-            let m = String(n.id || '').match(new RegExp('^' + prefix + '(\\d{5})$'));
+            let m = String(n.id || '').match(new RegExp('^' + prefix + '(\\d{5})$', 'i'));
             if (m) { let num = parseInt(m[1], 10); if (num > maxNum) maxNum = num; }
         });
         let nomorBaru = String(maxNum + 1).padStart(5, '0');
