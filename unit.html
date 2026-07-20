@@ -1269,6 +1269,89 @@
         return canvas;
     }
 
+    // Guard supaya tombol tidak bisa diklik dobel selagi proses.
+    let sedangProsesKartu = false;
+    // Menyimpan kartu yang sedang di-preview, dipakai saat tombol "Kirim ke
+    // WhatsApp" / "Unduh JPG Saja" di modal preview diklik.
+    let kartuPreviewState = null;
+
+    // Membuat kartu, lalu MENAMPILKAN PREVIEW-nya dulu di dalam aplikasi (modal)
+    // supaya bisa diperiksa sebelum dikirim. Pengiriman ke WhatsApp/unduh baru
+    // terjadi setelah pengguna menekan tombol aksi di modal preview.
+    function unduhKartuNasabah(idNasabah, btnEl) {
+        if (sedangProsesKartu) return;
+        let n = dataNasabah.find(x => String(x.id) === String(idNasabah));
+        if (!n) return alert('Data nasabah tidak ditemukan.');
+
+        sedangProsesKartu = true;
+        let iconAsli = btnEl ? btnEl.innerHTML : null;
+        if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+
+        try {
+            let canvas = generateKartuNasabah(n);
+            let dataUrl;
+            try {
+                dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            } catch (errCanvas) {
+                // Terjadi kalau canvas "tainted" (mis. dibuka lewat file:// di komputer,
+                // bukan lewat alamat website sesungguhnya -- browser membatasi ekspor
+                // canvas yang memuat gambar lokal dari origin "file:" yang dianggap unik).
+                throw new Error('Gagal mengekspor gambar kartu. Kalau Anda membuka halaman ini dengan cara dobel-klik file (alamatnya diawali "file:///"), coba akses lewat alamat website yang sesungguhnya (https://nabungsampah.id/...) -- bukan dari file lokal di komputer.');
+            }
+            let namaFile = 'Kartu_' + String(n.nama).replace(/[^a-zA-Z0-9]/g, '_') + '_' + n.id + '.jpg';
+
+            let hpTujuan = n.hp ? String(n.hp).trim().replace(/[^0-9]/g, '') : '';
+            if (hpTujuan) {
+                if (hpTujuan.startsWith('8')) hpTujuan = '62' + hpTujuan;
+                else if (hpTujuan.startsWith('0')) hpTujuan = '62' + hpTujuan.substring(1);
+            }
+
+            kartuPreviewState = { dataUrl, namaFile, hpTujuan, nama: n.nama, unit: CURRENT_UNIT_NAMA };
+            document.getElementById('previewKartuImg').src = dataUrl;
+            document.getElementById('modalPreviewKartu').style.display = 'flex';
+        } catch (e) {
+            alert('Gagal membuat kartu: ' + (e && e.message ? e.message : e));
+        } finally {
+            sedangProsesKartu = false;
+            if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = iconAsli; }
+        }
+    }
+
+    function tutupPreviewKartu() {
+        document.getElementById('modalPreviewKartu').style.display = 'none';
+        kartuPreviewState = null;
+    }
+
+    function unduhKartuSaja() {
+        if (!kartuPreviewState) return;
+        let a = document.createElement('a');
+        a.href = kartuPreviewState.dataUrl; a.download = kartuPreviewState.namaFile;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    // Fallback saat perangkat TIDAK mendukung Web Share dengan file (umumnya
+    // komputer): buka chat WA ke nomor nasabah (otomatis terpilih) + unduh
+    // gambarnya, tinggal dilampirkan manual.
+    function kirimViaWaMeDanUnduh() {
+        let { dataUrl, namaFile, hpTujuan, nama, unit } = kartuPreviewState;
+
+        let jendelaWa = null;
+        if (hpTujuan) {
+            let pesan = `Halo ${nama}, berikut kartu tabungan sampah Anda di ${unit} `;
+            jendelaWa = window.open(`https://wa.me/${hpTujuan}?text=${encodeURIComponent(pesan)}`, '_blank');
+        }
+
+        let a = document.createElement('a');
+        a.href = dataUrl; a.download = namaFile;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+        if (!hpTujuan) {
+            alert('Kartu berhasil diunduh (' + namaFile + '). Nomor HP nasabah ini belum terdaftar, jadi chat WA tidak bisa dibuka otomatis -- silakan kirim manual.');
+        } else if (!jendelaWa) {
+            alert('Kartu berhasil diunduh (' + namaFile + '), tapi browser memblokir jendela WhatsApp otomatis. Silakan izinkan pop-up untuk situs ini di pengaturan browser, atau buka WhatsApp secara manual lalu lampirkan file yang baru terunduh.');
+        }
+        tutupPreviewKartu();
+    }
 
     // Guard supaya navigator.share() tidak pernah dipanggil bertumpuk (dobel-klik).
     let sedangKirimKartu = false;
