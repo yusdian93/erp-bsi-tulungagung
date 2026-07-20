@@ -992,49 +992,54 @@
         ctx.closePath();
     }
 
-    // Menggambar satu motif batik "Kawung" sederhana (4 elips saling tumpang
-    // tindih membentuk kelopak) di titik (cx, cy) dengan jari-jari r -- dipakai
-    // sebagai ornamen tekstur khas Indonesia yang berulang di latar kartu.
-    function gambarMotifKawung(ctx, cx, cy, r) {
+    // Membersihkan kata "BSU" (utuh, tidak termasuk kalau menyatu dengan huruf
+    // lain) dari nama unit khusus untuk ditampilkan di kartu -- data aslinya di
+    // database TIDAK diubah, ini cuma untuk teks yang tercetak di kartu.
+    function namaUnitTanpaBSU() {
+        return String(CURRENT_UNIT_NAMA || '').replace(/\bBSU\b/gi, '').replace(/\s+/g, ' ').trim();
+    }
+
+    // Menggambar satu bentuk "daun" (petal/leaf) memanjang di titik (cx, cy),
+    // menghadap arah rotasiRad, sepanjang "panjang" dan lebar "lebar".
+    function gambarDaun(ctx, cx, cy, panjang, lebar, rotasiRad, warna) {
         ctx.save();
         ctx.translate(cx, cy);
-        for (let i = 0; i < 4; i++) {
-            ctx.rotate(Math.PI / 2);
-            ctx.beginPath();
-            ctx.ellipse(0, -r * 0.62, r * 0.62, r * 0.9, 0, 0, Math.PI * 2);
-            ctx.fill();
-        }
-        ctx.beginPath(); ctx.arc(0, 0, r * 0.32, 0, Math.PI * 2); ctx.fill();
+        ctx.rotate(rotasiRad);
+        ctx.fillStyle = warna;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.bezierCurveTo(lebar, -panjang * 0.35, lebar, -panjang * 0.8, 0, -panjang);
+        ctx.bezierCurveTo(-lebar, -panjang * 0.8, -lebar, -panjang * 0.35, 0, 0);
+        ctx.closePath();
+        ctx.fill();
         ctx.restore();
     }
 
-    // Menaburkan motif Kawung berulang (grid selang-seling) di area kartu sebagai
-    // tekstur batik yang halus/samar, tidak mengganggu keterbacaan teks.
-    function gambarTeksturBatik(ctx, W, H, warna, alpha) {
+    // Menggambar ikon contactless/nirsentuh (garis lengkung bertingkat) di
+    // sebelah kanan chip, gaya kartu bank modern.
+    function gambarIkonContactless(ctx, x, y, warna) {
         ctx.save();
-        ctx.globalAlpha = alpha;
-        ctx.fillStyle = warna;
-        let jarak = 92, r = 26;
-        for (let y = -r; y < H + r; y += jarak) {
-            for (let x = -r; x < W + r; x += jarak) {
-                let offset = (Math.round(y / jarak) % 2 === 0) ? 0 : jarak / 2;
-                gambarMotifKawung(ctx, x + offset, y, r);
+        ctx.strokeStyle = warna; ctx.lineCap = 'round'; ctx.lineWidth = 4.5;
+        for (let i = 0; i < 3; i++) {
+            let r = 10 + i * 9;
+            ctx.beginPath();
+            ctx.arc(x, y, r, -0.62, 0.62);
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    // Menaburkan cincin lingkaran tipis berulang sebagai tekstur latar halus
+    // (senada motif cincin samar pada kartu bank modern).
+    function gambarTeksturCincin(ctx, W, H, warna, alpha) {
+        ctx.save();
+        ctx.globalAlpha = alpha; ctx.strokeStyle = warna; ctx.lineWidth = 1.4;
+        let pusat = [[W * 0.72, H * 0.38], [W * 0.30, H * 0.72]];
+        pusat.forEach(([cx, cy]) => {
+            for (let r = 40; r <= 260; r += 34) {
+                ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
             }
-        }
-        ctx.restore();
-    }
-
-    // Menggambar pinggiran hias ala batik (deretan belah ketupat kecil berulang)
-    // di sepanjang tepi bawah kartu.
-    function gambarPinggiranBatik(ctx, W, H, warna) {
-        ctx.save();
-        ctx.fillStyle = warna;
-        let y = H - 20, ukuran = 7, jarak = 22;
-        for (let x = 30; x < W - 30; x += jarak) {
-            ctx.beginPath();
-            ctx.moveTo(x, y - ukuran); ctx.lineTo(x + ukuran, y); ctx.lineTo(x, y + ukuran); ctx.lineTo(x - ukuran, y);
-            ctx.closePath(); ctx.fill();
-        }
+        });
         ctx.restore();
     }
 
@@ -1042,7 +1047,7 @@
     // QR digambar langsung dari elemen <canvas> yang dibuat QRCode.js, tanpa
     // bolak-balik lewat data URL + objek Image (langkah itulah yang bikin lambat/
     // terasa lemot sebelumnya). Kalau gagal, akan throw Error biasa (bukan Promise).
-    // Tema: GOLD modern + chip metalik + ornamen batik khas Indonesia (motif Kawung).
+    // Tema: GOLD cerah + motif daun oranye + chip metalik + ikon contactless.
     function generateKartuNasabah(n) {
         let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
 
@@ -1062,101 +1067,102 @@
         pathRoundRect(ctx, 0, 0, W, H, 44);
         ctx.save(); ctx.clip();
 
-        // --- latar gradasi gold mewah: gelap keemasan (kiri/atas) -> emas terang (kanan/bawah) ---
-        let grad = ctx.createLinearGradient(0, 0, W, H);
-        grad.addColorStop(0, '#1a1207');
-        grad.addColorStop(0.32, '#5c3d0a');
-        grad.addColorStop(0.62, '#b8860b');
-        grad.addColorStop(0.85, '#e0b03d');
-        grad.addColorStop(1, '#f5d576');
+        // --- latar gold cerah (kuning keemasan merata, senada referensi) ---
+        let grad = ctx.createLinearGradient(0, 0, W, H * 0.5);
+        grad.addColorStop(0, '#ffd54a');
+        grad.addColorStop(0.55, '#fdc02e');
+        grad.addColorStop(1, '#f9a825');
         ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
 
-        // hiasan lingkaran transparan (kesan mewah/modern)
-        ctx.globalAlpha = 0.10; ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.arc(W - 60, 40, 230, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 0.06;
-        ctx.beginPath(); ctx.arc(70, H - 10, 170, 0, Math.PI * 2); ctx.fill();
-        ctx.globalAlpha = 1;
+        // tekstur cincin tipis (kesan modern/halus)
+        gambarTeksturCincin(ctx, W, H, '#f57f17', 0.16);
 
-        // --- ornamen batik Kawung (tekstur halus di seluruh latar) ---
-        gambarTeksturBatik(ctx, W, H, '#000000', 0.055);
-        gambarTeksturBatik(ctx, W, H, '#ffffff', 0.035);
+        // --- motif daun oranye bertumpuk, memenuhi sisi kanan-bawah kartu ---
+        gambarDaun(ctx, W * 0.62, H + 40, H * 0.98, H * 0.40, Math.PI * 0.02, '#e64a19');
+        gambarDaun(ctx, W * 0.80, H + 30, H * 1.05, H * 0.42, -Math.PI * 0.05, '#f4511e');
+        gambarDaun(ctx, W * 0.95, H + 20, H * 1.10, H * 0.46, -Math.PI * 0.12, '#fb8c00');
 
-        // --- header ---
-        ctx.fillStyle = 'rgba(255,255,255,0.97)';
-        ctx.font = '700 30px Arial, sans-serif';
-        ctx.fillText('BANK SAMPAH ' + String(CURRENT_UNIT_NAMA || '').toUpperCase(), 56, 72);
-        ctx.font = '400 19px Arial, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.72)';
-        ctx.fillText('KARTU TABUNGAN NASABAH', 56, 100);
+        // --- header (nama unit, warna gelap kontras di atas gold) ---
+        let namaUnitBersih = namaUnitTanpaBSU();
+        ctx.fillStyle = '#3e2c00';
+        ctx.font = '700 27px Arial, sans-serif';
+        ctx.fillText('BANK SAMPAH', 56, 66);
+        ctx.font = '700 25px Arial, sans-serif';
+        ctx.fillStyle = '#5c4400';
+        ctx.fillText(namaUnitBersih.toUpperCase(), 56, 96);
 
-        // --- chip metalik (silver/platinum, kontras elegan dengan latar gold) ---
-        let chipX = 56, chipY = 140, chipW = 78, chipH = 56;
+        // --- chip metalik + ikon contactless (kanan atas) ---
+        let chipX = W - 240, chipY = 56, chipW = 78, chipH = 56;
         let chipGrad = ctx.createLinearGradient(chipX, chipY, chipX + chipW, chipY + chipH);
         chipGrad.addColorStop(0, '#f1f5f9'); chipGrad.addColorStop(0.45, '#cbd5e1');
         chipGrad.addColorStop(0.55, '#94a3b8'); chipGrad.addColorStop(1, '#e2e8f0');
         ctx.fillStyle = chipGrad;
         pathRoundRect(ctx, chipX, chipY, chipW, chipH, 10); ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.3)'; ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1.5;
         pathRoundRect(ctx, chipX, chipY, chipW, chipH, 10); ctx.stroke();
-        // garis-garis kontak chip (gaya EMV)
-        ctx.strokeStyle = 'rgba(0,0,0,0.28)'; ctx.lineWidth = 1.5;
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1.5;
         ctx.beginPath();
         ctx.moveTo(chipX + chipW * 0.35, chipY); ctx.lineTo(chipX + chipW * 0.35, chipY + chipH);
         ctx.moveTo(chipX + chipW * 0.65, chipY); ctx.lineTo(chipX + chipW * 0.65, chipY + chipH);
         ctx.moveTo(chipX, chipY + chipH * 0.5); ctx.lineTo(chipX + chipW, chipY + chipH * 0.5);
         pathRoundRect(ctx, chipX + chipW * 0.35, chipY + chipH * 0.22, chipW * 0.3, chipH * 0.56, 4);
         ctx.stroke();
+        gambarIkonContactless(ctx, chipX + chipW + 44, chipY + chipH / 2, 'rgba(62,44,0,0.55)');
 
-        // --- ID (gaya nomor kartu, warna gelap "embossed" di atas gold) ---
+        // --- kotak putih QR (kanan, di bawah chip) ---
+        let qrBox = 150, qrX = W - qrBox - 66, qrY = 150;
+        ctx.fillStyle = '#ffffff';
+        pathRoundRect(ctx, qrX - 8, qrY - 8, qrBox + 16, qrBox + 16, 14); ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)'; ctx.lineWidth = 2;
+        pathRoundRect(ctx, qrX - 8, qrY - 8, qrBox + 16, qrBox + 16, 14); ctx.stroke();
+        ctx.drawImage(qrCanvasSrc, qrX, qrY, qrBox, qrBox);
+        ctx.textAlign = 'center';
+        ctx.font = '600 12px Arial, sans-serif';
+        ctx.fillStyle = '#3e2c00';
+        ctx.fillText('Scan cek saldo', qrX + qrBox / 2, qrY + qrBox + 26);
+        ctx.textAlign = 'left';
+
+        // --- ID (gaya nomor kartu, gelap "embossed" di atas gold) ---
         let idStr = String(n.id || '').toUpperCase();
         let idFormatted = idStr.length >= 4 ? (idStr.slice(0, 3) + '  ' + idStr.slice(3)) : idStr;
-        ctx.fillStyle = '#fffdf5';
-        ctx.font = '700 46px "Courier New", monospace';
-        ctx.shadowColor = 'rgba(0,0,0,0.35)'; ctx.shadowBlur = 3; ctx.shadowOffsetY = 2;
-        ctx.fillText(idFormatted, 56, 258);
-        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+        ctx.fillStyle = '#3e2c00';
+        ctx.font = '700 42px "Courier New", monospace';
+        ctx.fillText(idFormatted, 56, 270);
 
         // --- nama nasabah ---
-        ctx.font = '700 32px Arial, sans-serif';
-        ctx.fillStyle = '#ffffff';
-        ctx.fillText(String(n.nama || '-').toUpperCase(), 56, 322);
+        ctx.font = '700 34px Arial, sans-serif';
+        ctx.fillStyle = '#241a00';
+        ctx.fillText(String(n.nama || '-').toUpperCase(), 56, 336);
 
         // --- nomor HP ---
         let noHp = n.hp ? String(n.hp).trim() : '-'; if (noHp.startsWith('8')) noHp = '0' + noHp;
         ctx.font = '400 15px Arial, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.72)';
-        ctx.fillText('NOMOR HP TERDAFTAR', 56, 372);
+        ctx.fillStyle = 'rgba(62,44,0,0.75)';
+        ctx.fillText('NOMOR HP TERDAFTAR', 56, 384);
         ctx.font = '600 23px Arial, sans-serif';
-        ctx.fillStyle = '#fffdf5';
-        ctx.fillText(noHp, 56, 402);
+        ctx.fillStyle = '#241a00';
+        ctx.fillText(noHp, 56, 414);
 
-        // --- footer ---
-        ctx.font = '400 14px Arial, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.6)';
-        ctx.fillText('Dinas Lingkungan Hidup Kabupaten Tulungagung', 56, H - 40);
+        // --- footer (diperbesar sesuai permintaan) & lencana "Tabungan Gold" di atas daun ---
+        ctx.font = '600 18px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fillText('Dinas Lingkungan Hidup', 56, H - 66);
+        ctx.fillText('Kabupaten Tulungagung', 56, H - 40);
 
-        // --- pinggiran hias batik (belah ketupat) di tepi bawah ---
-        gambarPinggiranBatik(ctx, W, H, 'rgba(255,255,255,0.22)');
-
-        // --- kotak putih QR (kanan atas), digambar LANGSUNG dari canvas QR (sinkron) ---
-        let qrBox = 190, qrX = W - qrBox - 66, qrY = 56;
-        ctx.fillStyle = '#fffdf7';
-        pathRoundRect(ctx, qrX - 10, qrY - 10, qrBox + 20, qrBox + 20, 16); ctx.fill();
-        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 2;
-        pathRoundRect(ctx, qrX - 10, qrY - 10, qrBox + 20, qrBox + 20, 16); ctx.stroke();
-        ctx.drawImage(qrCanvasSrc, qrX, qrY, qrBox, qrBox);
-
-        ctx.textAlign = 'center';
-        ctx.font = '400 13.5px Arial, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.85)';
-        ctx.fillText('Scan untuk cek saldo', qrX + qrBox / 2, qrY + qrBox + 28);
+        ctx.textAlign = 'right';
+        ctx.font = 'italic 700 30px Arial, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Tabungan', W - 56, H - 66);
+        ctx.font = '600 20px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+        ctx.fillText('Gold', W - 56, H - 38);
         ctx.textAlign = 'left';
 
         ctx.restore(); // lepas clip bidang kartu
         document.body.removeChild(temp);
         return canvas;
     }
+
 
     // Guard supaya tombol tidak bisa diklik dobel selagi proses (kecil kemungkinan
     // perlu, karena sekarang semua langkah sinkron/instan, tapi tetap dijaga).
