@@ -495,6 +495,19 @@ const AdapterAPI = {
     logAudit('nasabah', id, 'delete', lama || null, null);
     return 'Sukses dihapus';
   },
+  // Mengubah ID (primary key) nasabah lama -> format baru (3 huruf desa + 5
+  // angka). Dipakai fitur migrasi satu-kali di unit.html untuk menyeragamkan
+  // ID nasabah yang didaftarkan sebelum fitur ID otomatis dibuat. Aman karena
+  // tidak ada tabel lain yang mereferensikan nasabah.id lewat foreign key
+  // (transaksi dikaitkan lewat kecocokan nama, bukan id).
+  async updateIdNasabah(idLama, idBaru) {
+    const { data: lama } = await sb.from('nasabah').select('*').eq('id', idLama).maybeSingle();
+    if (!lama) return 'Gagal: Data nasabah tidak ditemukan.';
+    const { error } = await sb.from('nasabah').update({ id: idBaru }).eq('id', idLama);
+    if (error) return 'Gagal: ' + error.message;
+    logAudit('nasabah', idBaru, 'update', lama, { ...lama, id: idBaru }, 'Migrasi format ID dari ' + idLama + ' ke ' + idBaru);
+    return 'Sukses';
+  },
 
   async tambahTransaksiUnit({ id, id_unit, tgl, nama, jenis, berat, total, kelompok_id, oleh }) {
     const kunci = await cekPeriodeTerkunci(tgl);
