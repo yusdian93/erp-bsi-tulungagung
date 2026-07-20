@@ -10,6 +10,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-adapter.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         :root {
@@ -157,6 +159,7 @@
             <div class="text-center mt-4 mb-5">
                 <h4 class="app-title" id="judul-app-bsu">BANK SAMPAH UNIT</h4>
                 <h6 class="app-subtitle">"Dengan Memilah Sampah, Kita Ubah yang Terbuang Menjadi Bernilai"</h6>
+                <button type="button" class="btn btn-sm mt-2" style="border-radius:20px; background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; font-weight:700; padding:6px 16px;" onclick="cetakQrUnitSaya()">🔲 Cetak QR Cek Saldo (untuk dipasang di lokasi)</button>
             
                 <div id="area-filter-bsi" class="mt-4 mx-auto" style="max-width: 450px; display: none;">
                     <div class="input-group shadow-sm" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--primary-main);">
@@ -254,6 +257,7 @@
                         </form>
                         <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
                         <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-people me-2 text-success"></i>Daftar Anggota Terdaftar</h5>
+                        <button type="button" class="btn btn-sm mb-3" style="border-radius:20px; background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; font-weight:700;" onclick="cetakSemuaQrNasabah()">🔲 Cetak Semua QR Nasabah (Kartu)</button>
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead><tr><th>Nama Lengkap</th><th>Nomor WA</th><th class="text-center">Manajemen</th></tr></thead>
@@ -862,9 +866,124 @@
         dataNasabah.forEach(n => {
             let noHp = n.hp ? String(n.hp).trim() : '-'; if (noHp.startsWith('8')) { noHp = '0' + noHp; }
             tbody.innerHTML += `<tr><td class="align-middle fw-bold" style="color: var(--primary-dark);">${n.nama}</td><td class="align-middle text-muted">${noHp}</td>
-                <td class="text-center align-middle"><button class="btn btn-sm btn-outline-primary py-1 px-2 me-2" onclick="editNasabah('${n.id}')"><i class="bi bi-pencil-square"></i></button>
+                <td class="text-center align-middle"><button class="btn btn-sm btn-outline-secondary py-1 px-2 me-2" title="Cetak QR Nasabah Ini" onclick="cetakQrNasabah('${n.id}', '${(n.nama||'').replace(/'/g,"\\'")}')"><i class="bi bi-qr-code"></i></button>
+                <button class="btn btn-sm btn-outline-primary py-1 px-2 me-2" onclick="editNasabah('${n.id}')"><i class="bi bi-pencil-square"></i></button>
                 <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusNasabah('${n.id}')"><i class="bi bi-trash3"></i></button></td></tr>`;
         });
+    }
+
+    // =========================================
+    // CETAK QR "CEK SALDO MANDIRI" (dibuat sepenuhnya di browser, tidak dikirim ke
+    // pihak ketiga mana pun). Dua bentuk: QR Unit (dipasang di lokasi, nasabah cari
+    // nomor HP sendiri) dan QR pribadi per Nasabah (kartu, langsung ke saldonya).
+    // =========================================
+    function urlCekSaldo(idUnit, idNasabah) {
+        let base = window.location.href.replace(/[^/]*$/, '');
+        let url = base + 'cek-saldo.html?unit=' + encodeURIComponent(idUnit);
+        if (idNasabah) url += '&nasabah=' + encodeURIComponent(idNasabah);
+        return url;
+    }
+
+    function cetakQrUnitSaya() {
+        if (typeof QRCode === 'undefined' || typeof window.jspdf === 'undefined') return alert('Pustaka QR/PDF belum siap, coba lagi sesaat.');
+        let url = urlCekSaldo(CURRENT_UNIT_ID, null);
+        QRCode.toDataURL(url, { width: 500, margin: 1 }, function (err, dataUrl) {
+            if (err) return alert('Gagal membuat QR: ' + err);
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            let pageW = doc.internal.pageSize.getWidth();
+            let y = 22;
+            doc.setFont(undefined, 'bold'); doc.setFontSize(15);
+            doc.text('CEK SALDO TABUNGAN SAMPAH', pageW / 2, y, { align: 'center' }); y += 8;
+            doc.setFont(undefined, 'normal'); doc.setFontSize(11.5);
+            doc.text('Bank Sampah Unit: ' + CURRENT_UNIT_NAMA, pageW / 2, y, { align: 'center' }); y += 16;
+            let qrSize = 95;
+            doc.addImage(dataUrl, 'PNG', (pageW - qrSize) / 2, y, qrSize, qrSize);
+            y += qrSize + 14;
+            doc.setFont(undefined, 'bold'); doc.setFontSize(11.5);
+            doc.text('Cara Cek Saldo:', pageW / 2, y, { align: 'center' }); y += 7.5;
+            doc.setFont(undefined, 'normal'); doc.setFontSize(10);
+            [
+                '1. Buka Kamera / aplikasi scan QR di HP Anda',
+                '2. Arahkan ke kode QR di atas',
+                '3. Masukkan nomor HP yang terdaftar di Bank Sampah Unit ini',
+                '4. Saldo & rincian tabungan sampah Anda akan langsung tampil'
+            ].forEach(l => { doc.text(l, pageW / 2, y, { align: 'center' }); y += 6; });
+            doc.setFontSize(8.5); doc.setTextColor(140);
+            doc.text('Dinas Lingkungan Hidup Kabupaten Tulungagung', pageW / 2, 285, { align: 'center' });
+            doc.save('QR_CekSaldo_' + String(CURRENT_UNIT_NAMA).replace(/[^a-z0-9]/gi, '_') + '.pdf');
+        });
+    }
+
+    function cetakQrNasabah(idNasabah, namaNasabah) {
+        if (typeof QRCode === 'undefined' || typeof window.jspdf === 'undefined') return alert('Pustaka QR/PDF belum siap, coba lagi sesaat.');
+        let url = urlCekSaldo(CURRENT_UNIT_ID, idNasabah);
+        QRCode.toDataURL(url, { width: 400, margin: 1 }, function (err, dataUrl) {
+            if (err) return alert('Gagal membuat QR: ' + err);
+            const { jsPDF } = window.jspdf;
+            let doc = new jsPDF({ unit: 'mm', format: 'a4' });
+            let pageW = doc.internal.pageSize.getWidth();
+            let y = 25;
+            doc.setFont(undefined, 'bold'); doc.setFontSize(14);
+            doc.text('KARTU CEK SALDO TABUNGAN SAMPAH', pageW / 2, y, { align: 'center' }); y += 9;
+            doc.setFont(undefined, 'normal'); doc.setFontSize(11);
+            doc.text(CURRENT_UNIT_NAMA, pageW / 2, y, { align: 'center' }); y += 14;
+            let qrSize = 80;
+            doc.addImage(dataUrl, 'PNG', (pageW - qrSize) / 2, y, qrSize, qrSize);
+            y += qrSize + 10;
+            doc.setFont(undefined, 'bold'); doc.setFontSize(13);
+            doc.text(namaNasabah, pageW / 2, y, { align: 'center' }); y += 10;
+            doc.setFont(undefined, 'normal'); doc.setFontSize(9.5);
+            doc.text('Scan QR ini lalu masukkan nomor HP Anda untuk melihat saldo tabungan sampah.', pageW / 2, y, { align: 'center', maxWidth: pageW - 40 });
+            doc.save('QR_' + namaNasabah.replace(/[^a-z0-9]/gi, '_') + '.pdf');
+        });
+    }
+
+    // Cetak kartu QR untuk SEMUA nasabah sekaligus, disusun 2 kolom x 4 baris per
+    // halaman A4 -- siap dipotong jadi kartu per nasabah.
+    async function cetakSemuaQrNasabah() {
+        if (typeof QRCode === 'undefined' || typeof window.jspdf === 'undefined') return alert('Pustaka QR/PDF belum siap, coba lagi sesaat.');
+        if (!dataNasabah || !dataNasabah.length) return alert('Belum ada data nasabah.');
+        if (!confirm(`Membuat PDF berisi kartu QR untuk ${dataNasabah.length} nasabah. Lanjutkan?`)) return;
+
+        const { jsPDF } = window.jspdf;
+        let doc = new jsPDF({ unit: 'mm', format: 'a4' });
+        let pageW = doc.internal.pageSize.getWidth(), pageH = doc.internal.pageSize.getHeight();
+        let kolom = 2, baris = 4, marginL = 12, marginT = 14;
+        let cardW = (pageW - marginL * 2) / kolom, cardH = (pageH - marginT * 2) / baris;
+        let i = 0;
+
+        for (const n of dataNasabah) {
+            let posDiHalaman = i % (kolom * baris);
+            if (i > 0 && posDiHalaman === 0) doc.addPage();
+            let kol = posDiHalaman % kolom, brs = Math.floor(posDiHalaman / kolom);
+            let x0 = marginL + kol * cardW, y0 = marginT + brs * cardH;
+
+            doc.setDrawColor(200); doc.roundedRect(x0 + 3, y0 + 3, cardW - 6, cardH - 6, 2, 2);
+
+            let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
+            let dataUrl = await new Promise(res => QRCode.toDataURL(url, { width: 300, margin: 1 }, (err, d) => res(err ? null : d)));
+
+            let cx = x0 + cardW / 2;
+            let ty = y0 + 10;
+            doc.setFont(undefined, 'bold'); doc.setFontSize(8);
+            doc.text(CURRENT_UNIT_NAMA, cx, ty, { align: 'center', maxWidth: cardW - 12 }); ty += 5;
+
+            if (dataUrl) {
+                let qrSize = Math.min(cardW, cardH) * 0.45;
+                doc.addImage(dataUrl, 'PNG', cx - qrSize / 2, ty, qrSize, qrSize);
+                ty += qrSize + 5;
+            }
+
+            doc.setFont(undefined, 'bold'); doc.setFontSize(9);
+            doc.text(n.nama, cx, ty, { align: 'center', maxWidth: cardW - 10 }); ty += 4.5;
+            doc.setFont(undefined, 'normal'); doc.setFontSize(6.5); doc.setTextColor(120);
+            doc.text('Scan untuk cek saldo tabungan sampah', cx, ty, { align: 'center', maxWidth: cardW - 12 });
+            doc.setTextColor(0);
+
+            i++;
+        }
+        doc.save('QR_Semua_Nasabah_' + String(CURRENT_UNIT_NAMA).replace(/[^a-z0-9]/gi, '_') + '.pdf');
     }
 
     function updateDropdownNasabah(dropdownId) {

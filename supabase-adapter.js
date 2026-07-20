@@ -813,5 +813,71 @@ const AdapterAPI = {
 
     logAudit('SYSTEM', 'RESTORE-TOTAL-' + Date.now(), 'delete', null, { ringkasan: laporan }, 'RESTORE TOTAL (hapus semua & ganti dari backup) oleh ' + getPetugasSesi());
     return laporan;
+  },
+
+  // ================== CEK SALDO MANDIRI (HALAMAN PUBLIK cek-saldo.html) ==================
+  // Dipakai oleh nasabah lewat scan QR, TANPA login. Sengaja hanya mengembalikan
+  // field yang aman ditampilkan ke publik (bukan seluruh baris tabel bsu/nasabah).
+
+  // Daftar nama unit saja (untuk dropdown pilih unit di halaman cek saldo, kalau
+  // nasabah membuka halamannya langsung tanpa scan QR / parameter URL kosong).
+  async getDaftarUnitPublik() {
+    const { data, error } = await sb.from('bsu').select('id, nama').order('nama');
+    if (error) return [];
+    return data || [];
+  },
+
+  // Info dasar unit (nama & lokasi saja) untuk ditampilkan di halaman cek saldo.
+  async getInfoUnitPublik(idUnit) {
+    const { data, error } = await sb.from('bsu').select('id, nama, desa, kecamatan').eq('id', idUnit).maybeSingle();
+    if (error || !data) return null;
+    return data;
+  },
+
+  // Nama nasabah saja (untuk layar konfirmasi "Halo, [nama], ini Anda?" pada QR
+  // pribadi) -- TIDAK mengembalikan HP atau saldo, supaya id_nasabah yang mungkin
+  // difoto/disebar dari QR tidak otomatis membocorkan data finansialnya.
+  async getInfoNasabahRingkas(idUnit, idNasabah) {
+    const { data, error } = await sb.from('nasabah').select('id, nama').eq('id_unit', idUnit).eq('id', idNasabah).maybeSingle();
+    if (error || !data) return null;
+    return data;
+  },
+
+  // Pengecekan saldo sesungguhnya -- WAJIB nomor HP cocok persis dengan yang
+  // terdaftar (baik mode QR Unit maupun QR pribadi per nasabah). idNasabah bersifat
+  // opsional: kalau diisi (mode QR pribadi), pencarian dipersempit ke nasabah itu
+  // saja; kalau kosong (mode QR Unit), semua nasabah di unit tsb dengan HP yang
+  // cocok akan dikembalikan (biasanya 1, tapi bisa lebih dari 1 kalau ada anggota
+  // keluarga terdaftar dengan HP yang sama).
+  async cekSaldoNasabahPublik({ idUnit, nomorHp, idNasabah }) {
+    if (!idUnit || !nomorHp) return { ok: false, error: 'Data tidak lengkap.' };
+    const hpBersih = String(nomorHp).trim();
+    if (!hpBersih) return { ok: false, error: 'Nomor HP wajib diisi.' };
+
+    let q = sb.from('nasabah').select('*').eq('id_unit', idUnit).eq('hp', hpBersih);
+    if (idNasabah) q = q.eq('id', idNasabah);
+    const { data: nasabahList, error } = await q;
+    if (error) return { ok: false, error: error.message };
+    if (!nasabahList || !nasabahList.length) {
+      return { ok: false, error: 'Nomor HP tidak cocok dengan data yang terdaftar. Pastikan nomor HP sesuai yang didaftarkan di Bank Sampah Unit (hubungi petugas kalau nomor HP Anda berubah).' };
+    }
+
+    const unitInfo = await this.getInfoUnitPublik(idUnit);
+
+    // Catatan: transaksi dikaitkan ke nasabah lewat kecocokan NAMA (bukan id nasabah),
+    // konsisten dengan cara kerja unit.html yang sudah ada. Kalau ada 2 nasabah dengan
+    // nama PERSIS SAMA di satu unit, riwayat keduanya akan tergabung -- ini keterbatasan
+    // data model lama, bukan sesuatu yang baru dari fitur ini.
+    const hasil = [];
+    for (const n of nasabahList) {
+      const { data: trx } = await sb.from('transaksi').select('id, tgl, jenis, berat, total, created_at')
+        .eq('id_unit', idUnit).eq('level', 'nasabah_ke_unit').eq('nama', n.nama)
+        .order('created_at', { ascending: false });
+      const rows = trx || [];
+      const saldo = rows.reduce((a, t) => a + (parseFloat(t.total) || 0), 0);
+      const totalBeratSetor = rows.filter(t => (parseFloat(t.total) || 0) >= 0).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
+      hasil.push({ nasabah: { id: n.id, nama: n.nama }, saldo, totalBeratSetor, riwayat: rows });
+    }
+    return { ok: true, unit: unitInfo, data: hasil };
   }
 };
