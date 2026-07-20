@@ -1047,6 +1047,19 @@
         return String(CURRENT_UNIT_NAMA || '').replace(/\bBSU\b/gi, '').replace(/\s+/g, ' ').trim();
     }
 
+    // Nama tempat (Kelurahan/Desa) untuk header kartu, dengan kata "Kelurahan"/
+    // "Desa" tetap ditampilkan. Diambil dari field Desa data BSU kalau ada; kalau
+    // sumbernya belum diawali kata administratif, "Kelurahan" ditambahkan di
+    // depan sebagai default.
+    function tempatUnitUntukKartu() {
+        let desaUnit = (dataUnit && dataUnit[0] && dataUnit[0].desa) ? String(dataUnit[0].desa).trim() : '';
+        let sumber = desaUnit || namaUnitTanpaBSU();
+        if (!/^(kelurahan|kel\.?|desa|ds\.?)\s+/i.test(sumber)) {
+            sumber = 'Kelurahan ' + sumber;
+        }
+        return sumber;
+    }
+
     // Menggambar satu bentuk "daun" (petal/leaf) memanjang di titik (cx, cy),
     // menghadap arah rotasiRad, sepanjang "panjang" dan lebar "lebar".
     function gambarDaun(ctx, cx, cy, panjang, lebar, rotasiRad, warna) {
@@ -1131,13 +1144,13 @@
         gambarDaun(ctx, W * 0.95, H + 20, H * 1.10, H * 0.46, -Math.PI * 0.12, '#fb8c00');
 
         // --- header (nama unit, warna gelap kontras di atas gold) ---
-        let namaUnitBersih = namaUnitTanpaBSU();
+        let tempatUnit = tempatUnitUntukKartu();
         ctx.fillStyle = '#3e2c00';
         ctx.font = '700 27px Arial, sans-serif';
-        ctx.fillText('BANK SAMPAH', 56, 66);
+        ctx.fillText('BANK SAMPAH UNIT', 56, 66);
         ctx.font = '700 25px Arial, sans-serif';
         ctx.fillStyle = '#5c4400';
-        ctx.fillText(namaUnitBersih.toUpperCase(), 56, 96);
+        ctx.fillText(tempatUnit.toUpperCase(), 56, 96);
 
         // --- chip metalik + ikon contactless (kanan atas) ---
         let chipX = W - 240, chipY = 56, chipW = 78, chipH = 56;
@@ -1191,9 +1204,9 @@
         ctx.fillStyle = '#241a00';
         ctx.fillText(noHp, 56, 414);
 
-        // --- footer (diperbesar sesuai permintaan) & lencana "Tabungan Gold" di atas daun ---
+        // --- footer (diperbesar, warna hitam) & lencana "Tabungan Sampah" di atas daun ---
         ctx.font = '600 18px Arial, sans-serif';
-        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.fillStyle = '#000000';
         ctx.fillText('Dinas Lingkungan Hidup', 56, H - 66);
         ctx.fillText('Kabupaten Tulungagung', 56, H - 40);
 
@@ -1203,7 +1216,7 @@
         ctx.fillText('Tabungan', W - 56, H - 66);
         ctx.font = '600 20px Arial, sans-serif';
         ctx.fillStyle = 'rgba(255,255,255,0.9)';
-        ctx.fillText('Gold', W - 56, H - 38);
+        ctx.fillText('Sampah', W - 56, H - 38);
         ctx.textAlign = 'left';
 
         ctx.restore(); // lepas clip bidang kartu
