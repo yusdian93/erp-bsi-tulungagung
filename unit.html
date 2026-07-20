@@ -140,7 +140,7 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
                         <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
-                        <li class="nav-link nav-btn" onclick="showTab('nasabah', this)"><i class="bi bi-people me-2"></i>Nasabah</li>
+                        <li class="nav-link nav-btn" onclick="showTab('nasabah', this); siapkanIdNasabahBaru();"><i class="bi bi-people me-2"></i>Nasabah</li>
                         <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down me-2"></i>Setor Sampah</li>
                         <li class="nav-link nav-btn" onclick="showTab('stock', this)"><i class="bi bi-boxes me-2"></i>Stock Sampah</li>
                         <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2 me-2"></i>Cek Saldo</li>
@@ -256,6 +256,10 @@
                     <div class="card p-4 p-md-5">
                         <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-person-plus me-2 text-success"></i>Registrasi Nasabah Baru</h5>
                         <form id="formNasabah" onsubmit="simpanNasabah(event)">
+                            <div class="mb-4">
+                                <label>ID Nasabah <span class="text-muted" style="font-weight:400; font-size:12px;">(otomatis, dipakai bersama No. HP untuk cek saldo via QR)</span></label>
+                                <input type="text" id="idNasabahOtomatis" class="form-control" readonly style="background:#f1f5f9; font-family:monospace; font-weight:700; letter-spacing:0.5px;">
+                            </div>
                             <div class="mb-4"><label>Nama Lengkap (Sesuai KTP)</label><input type="text" id="namaNasabah" class="form-control" required></div>
                             <div class="mb-4"><label>Nomor WhatsApp Aktif</label><input type="text" id="hpNasabah" class="form-control" placeholder="Contoh: 08123456789" required></div>
                             <button type="submit" class="btn btn-success w-100 py-3"><i class="bi bi-save me-2"></i>Simpan Data Nasabah</button>
@@ -832,17 +836,45 @@
         dataDisaring.forEach(k => { selNama.innerHTML += `<option value="${k.harga}">${k.nama_kategori} (Rp ${parseInt(k.harga).toLocaleString('id-ID')} / Kg)</option>`; });
     }
 
+    // =========================================
+    // ID OTOMATIS NASABAH: 3 huruf awal (dari nama BSU, prefiks "BSU " dibuang)
+    // + 5 digit angka urut per-unit. ID ini (dikombinasikan dengan No. HP) dipakai
+    // untuk pencarian saldo mandiri lewat QR (lihat cek-saldo.html).
+    // =========================================
+    function generateIdNasabahOtomatis() {
+        let namaBersih = String(CURRENT_UNIT_NAMA || 'BSU').replace(/^bsu\s*[-:]?\s*/i, '').trim();
+        let hurufSaja = namaBersih.replace(/[^a-zA-Z]/g, '').toUpperCase();
+        let prefix = (hurufSaja + 'XXX').slice(0, 3);
+
+        let maxNum = 0;
+        (dataNasabah || []).forEach(n => {
+            let m = String(n.id || '').match(new RegExp('^' + prefix + '(\\d{5})$'));
+            if (m) { let num = parseInt(m[1], 10); if (num > maxNum) maxNum = num; }
+        });
+        let nomorBaru = String(maxNum + 1).padStart(5, '0');
+        return prefix + nomorBaru;
+    }
+
+    function siapkanIdNasabahBaru() {
+        let el = document.getElementById('idNasabahOtomatis');
+        if (el) el.value = generateIdNasabahOtomatis();
+    }
+
     function simpanNasabah(e) {
         e.preventDefault();
         let nama = document.getElementById('namaNasabah').value.trim();
         let hp = document.getElementById('hpNasabah').value.trim();
         if(nama === '') return alert("Nama tidak boleh kosong!");
+        // Generate ulang ID tepat sebelum simpan (bukan cuma pakai nilai yang tampil
+        // di form), supaya tetap akurat walau data nasabah sempat berubah sejak form
+        // dibuka (mis. ada nasabah lain ditambahkan di tab/perangkat lain).
+        let idBaru = generateIdNasabahOtomatis();
         let btnSubmit = e.target.querySelector('button[type="submit"]');
         btnSubmit.disabled = true; btnSubmit.innerHTML = 'Menyimpan...';
-        AdapterAPI.tambahNasabah({ id: genId('NSB'), id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
-            .then(() => { alert('Berhasil! Data nasabah telah direkam.'); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
+        AdapterAPI.tambahNasabah({ id: idBaru, id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
+            .then(() => { alert('Berhasil! Data nasabah telah direkam dengan ID: ' + idBaru); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
             .catch(error => alert('Gagal menyimpan.'))
-            .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data Nasabah'; });
+            .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data Nasabah'; siapkanIdNasabahBaru(); });
     }
 
     function editNasabah(id) {
