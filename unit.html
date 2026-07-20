@@ -992,113 +992,115 @@
         ctx.closePath();
     }
 
+    // Membuat kartu SECARA SINKRON (tidak ada proses tunggu/async apa pun) --
+    // QR digambar langsung dari elemen <canvas> yang dibuat QRCode.js, tanpa
+    // bolak-balik lewat data URL + objek Image (langkah itulah yang bikin lambat/
+    // terasa lemot sebelumnya). Kalau gagal, akan throw Error biasa (bukan Promise).
     function generateKartuNasabah(n) {
-        return new Promise((resolve, reject) => {
-            try {
-                let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
-                let qrDataUrl = buatQrDataUrl(url, 320);
-                if (!qrDataUrl) return reject(new Error('Gagal membuat QR.'));
+        let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
 
-                let W = 1050, H = 650;
-                let canvas = document.createElement('canvas');
-                canvas.width = W; canvas.height = H;
-                let ctx = canvas.getContext('2d');
+        let temp = document.createElement('div');
+        temp.style.position = 'fixed'; temp.style.left = '-9999px'; temp.style.top = '-9999px';
+        document.body.appendChild(temp);
+        new QRCode(temp, { text: url, width: 320, height: 320, correctLevel: QRCode.CorrectLevel.M });
+        let qrCanvasSrc = temp.querySelector('canvas');
+        if (!qrCanvasSrc) { document.body.removeChild(temp); throw new Error('Gagal membuat QR.'); }
 
-                // --- bidang kartu (sudut membulat) ---
-                pathRoundRect(ctx, 0, 0, W, H, 44);
-                ctx.save(); ctx.clip();
+        let W = 1050, H = 650;
+        let canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        let ctx = canvas.getContext('2d');
 
-                // --- latar gradasi elegan (hijau tua, senada warna aplikasi) ---
-                let grad = ctx.createLinearGradient(0, 0, W, H);
-                grad.addColorStop(0, '#0f766e');
-                grad.addColorStop(0.55, '#064e3b');
-                grad.addColorStop(1, '#022c22');
-                ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+        // --- bidang kartu (sudut membulat) ---
+        pathRoundRect(ctx, 0, 0, W, H, 44);
+        ctx.save(); ctx.clip();
 
-                // hiasan lingkaran transparan (kesan mewah/modern)
-                ctx.globalAlpha = 0.09; ctx.fillStyle = '#ffffff';
-                ctx.beginPath(); ctx.arc(W - 60, 40, 230, 0, Math.PI * 2); ctx.fill();
-                ctx.beginPath(); ctx.arc(70, H - 20, 170, 0, Math.PI * 2); ctx.fill();
-                ctx.globalAlpha = 1;
+        // --- latar gradasi elegan (hijau tua, senada warna aplikasi) ---
+        let grad = ctx.createLinearGradient(0, 0, W, H);
+        grad.addColorStop(0, '#0f766e');
+        grad.addColorStop(0.55, '#064e3b');
+        grad.addColorStop(1, '#022c22');
+        ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
 
-                // --- header ---
-                ctx.fillStyle = 'rgba(255,255,255,0.95)';
-                ctx.font = '700 30px Arial, sans-serif';
-                ctx.fillText('BANK SAMPAH ' + String(CURRENT_UNIT_NAMA || '').toUpperCase(), 56, 72);
-                ctx.font = '400 19px Arial, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.fillText('KARTU TABUNGAN NASABAH', 56, 100);
+        // hiasan lingkaran transparan (kesan mewah/modern)
+        ctx.globalAlpha = 0.09; ctx.fillStyle = '#ffffff';
+        ctx.beginPath(); ctx.arc(W - 60, 40, 230, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(70, H - 20, 170, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 1;
 
-                // --- chip emas (dekoratif, seperti kartu bank) ---
-                let chipX = 56, chipY = 140, chipW = 74, chipH = 54;
-                let chipGrad = ctx.createLinearGradient(chipX, chipY, chipX + chipW, chipY + chipH);
-                chipGrad.addColorStop(0, '#fde68a'); chipGrad.addColorStop(1, '#d97706');
-                ctx.fillStyle = chipGrad;
-                pathRoundRect(ctx, chipX, chipY, chipW, chipH, 9); ctx.fill();
-                ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.moveTo(chipX + chipW / 2, chipY); ctx.lineTo(chipX + chipW / 2, chipY + chipH);
-                ctx.moveTo(chipX, chipY + chipH / 2); ctx.lineTo(chipX + chipW, chipY + chipH / 2);
-                ctx.stroke();
+        // --- header ---
+        ctx.fillStyle = 'rgba(255,255,255,0.95)';
+        ctx.font = '700 30px Arial, sans-serif';
+        ctx.fillText('BANK SAMPAH ' + String(CURRENT_UNIT_NAMA || '').toUpperCase(), 56, 72);
+        ctx.font = '400 19px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText('KARTU TABUNGAN NASABAH', 56, 100);
 
-                // --- ID (gaya nomor kartu) ---
-                let idStr = String(n.id || '').toUpperCase();
-                let idFormatted = idStr.length >= 4 ? (idStr.slice(0, 3) + '  ' + idStr.slice(3)) : idStr;
-                ctx.fillStyle = '#ffffff';
-                ctx.font = '700 46px "Courier New", monospace';
-                ctx.fillText(idFormatted, 56, 258);
+        // --- chip emas (dekoratif, seperti kartu bank) ---
+        let chipX = 56, chipY = 140, chipW = 74, chipH = 54;
+        let chipGrad = ctx.createLinearGradient(chipX, chipY, chipX + chipW, chipY + chipH);
+        chipGrad.addColorStop(0, '#fde68a'); chipGrad.addColorStop(1, '#d97706');
+        ctx.fillStyle = chipGrad;
+        pathRoundRect(ctx, chipX, chipY, chipW, chipH, 9); ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(chipX + chipW / 2, chipY); ctx.lineTo(chipX + chipW / 2, chipY + chipH);
+        ctx.moveTo(chipX, chipY + chipH / 2); ctx.lineTo(chipX + chipW, chipY + chipH / 2);
+        ctx.stroke();
 
-                // --- nama nasabah ---
-                ctx.font = '700 32px Arial, sans-serif';
-                ctx.fillText(String(n.nama || '-').toUpperCase(), 56, 322);
+        // --- ID (gaya nomor kartu) ---
+        let idStr = String(n.id || '').toUpperCase();
+        let idFormatted = idStr.length >= 4 ? (idStr.slice(0, 3) + '  ' + idStr.slice(3)) : idStr;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '700 46px "Courier New", monospace';
+        ctx.fillText(idFormatted, 56, 258);
 
-                // --- nomor HP ---
-                let noHp = n.hp ? String(n.hp).trim() : '-'; if (noHp.startsWith('8')) noHp = '0' + noHp;
-                ctx.font = '400 15px Arial, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.6)';
-                ctx.fillText('NOMOR HP TERDAFTAR', 56, 372);
-                ctx.font = '600 23px Arial, sans-serif';
-                ctx.fillStyle = '#ffffff';
-                ctx.fillText(noHp, 56, 402);
+        // --- nama nasabah ---
+        ctx.font = '700 32px Arial, sans-serif';
+        ctx.fillText(String(n.nama || '-').toUpperCase(), 56, 322);
 
-                // --- footer ---
-                ctx.font = '400 14px Arial, sans-serif';
-                ctx.fillStyle = 'rgba(255,255,255,0.5)';
-                ctx.fillText('Dinas Lingkungan Hidup Kabupaten Tulungagung', 56, H - 40);
+        // --- nomor HP ---
+        let noHp = n.hp ? String(n.hp).trim() : '-'; if (noHp.startsWith('8')) noHp = '0' + noHp;
+        ctx.font = '400 15px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillText('NOMOR HP TERDAFTAR', 56, 372);
+        ctx.font = '600 23px Arial, sans-serif';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(noHp, 56, 402);
 
-                // --- kotak putih QR (kanan atas) ---
-                let qrImg = new Image();
-                qrImg.onload = () => {
-                    let qrBox = 190, qrX = W - qrBox - 66, qrY = 56;
-                    ctx.fillStyle = '#ffffff';
-                    pathRoundRect(ctx, qrX - 10, qrY - 10, qrBox + 20, qrBox + 20, 16); ctx.fill();
-                    ctx.drawImage(qrImg, qrX, qrY, qrBox, qrBox);
+        // --- footer ---
+        ctx.font = '400 14px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillText('Dinas Lingkungan Hidup Kabupaten Tulungagung', 56, H - 40);
 
-                    ctx.textAlign = 'center';
-                    ctx.font = '400 13.5px Arial, sans-serif';
-                    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-                    ctx.fillText('Scan untuk cek saldo', qrX + qrBox / 2, qrY + qrBox + 28);
-                    ctx.textAlign = 'left';
+        // --- kotak putih QR (kanan atas), digambar LANGSUNG dari canvas QR (sinkron) ---
+        let qrBox = 190, qrX = W - qrBox - 66, qrY = 56;
+        ctx.fillStyle = '#ffffff';
+        pathRoundRect(ctx, qrX - 10, qrY - 10, qrBox + 20, qrBox + 20, 16); ctx.fill();
+        ctx.drawImage(qrCanvasSrc, qrX, qrY, qrBox, qrBox);
 
-                    ctx.restore(); // lepas clip bidang kartu
-                    resolve(canvas);
-                };
-                qrImg.onerror = () => { ctx.restore(); reject(new Error('Gagal memuat gambar QR.')); };
-                qrImg.src = qrDataUrl;
-            } catch (e) { reject(e); }
-        });
+        ctx.textAlign = 'center';
+        ctx.font = '400 13.5px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.75)';
+        ctx.fillText('Scan untuk cek saldo', qrX + qrBox / 2, qrY + qrBox + 28);
+        ctx.textAlign = 'left';
+
+        ctx.restore(); // lepas clip bidang kartu
+        document.body.removeChild(temp);
+        return canvas;
     }
 
-    // Guard supaya navigator.share() TIDAK pernah dipanggil bertumpuk (dobel-klik,
-    // atau proses sebelumnya belum selesai) -- browser akan menolak dengan error
-    // "An earlier share has not yet completed" kalau ini dilanggar.
+    // Guard supaya tombol tidak bisa diklik dobel selagi proses (kecil kemungkinan
+    // perlu, karena sekarang semua langkah sinkron/instan, tapi tetap dijaga).
     let sedangProsesKartu = false;
 
-    // Membuat kartu lalu langsung membuka menu Bagikan (kalau didukung, mis. di HP --
-    // WhatsApp akan muncul sebagai salah satu pilihan), atau mengunduh sebagai JPG
-    // kalau perangkat/browser tidak mendukung Web Share API (mis. di komputer).
-    async function unduhKartuNasabah(idNasabah, btnEl) {
-        if (sedangProsesKartu) return; // abaikan klik susulan selama masih proses
+    // Membuat kartu, LANGSUNG mengunduhnya sebagai JPG, lalu membuka chat WhatsApp
+    // nasabah tsb (kalau nomor HP-nya terdaftar) supaya tinggal lampirkan file yang
+    // baru saja terunduh. Sengaja TIDAK memakai navigator.share() lagi -- terbukti
+    // tidak stabil/lambat di sebagian perangkat. Alur unduh+buka-WA manual ini lebih
+    // sederhana dan jauh lebih cepat & pasti berhasil di semua perangkat/browser.
+    function unduhKartuNasabah(idNasabah, btnEl) {
+        if (sedangProsesKartu) return;
         let n = dataNasabah.find(x => String(x.id) === String(idNasabah));
         if (!n) return alert('Data nasabah tidak ditemukan.');
 
@@ -1107,36 +1109,35 @@
         if (btnEl) { btnEl.disabled = true; btnEl.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
 
         try {
-            let canvas = await generateKartuNasabah(n);
-            let blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', 0.92));
-            if (!blob) throw new Error('Gagal membuat file gambar.');
             let namaFile = 'Kartu_' + String(n.nama).replace(/[^a-zA-Z0-9]/g, '_') + '_' + n.id + '.jpg';
-            let file = new File([blob], namaFile, { type: 'image/jpeg' });
+            let hpTujuan = n.hp ? String(n.hp).trim().replace(/[^0-9]/g, '') : '';
+            let jendelaWa = null;
 
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                await navigator.share({ files: [file], title: 'Kartu Tabungan Sampah', text: 'Kartu tabungan sampah untuk ' + n.nama });
-            } else {
-                let urlObj = URL.createObjectURL(blob);
-                let a = document.createElement('a');
-                a.href = urlObj; a.download = namaFile;
-                document.body.appendChild(a); a.click(); document.body.removeChild(a);
-                URL.revokeObjectURL(urlObj);
+            // Buka jendela WhatsApp LEBIH DULU, LANGSUNG di sini (tanpa setTimeout/
+            // jeda apa pun) -- browser (terutama di HP) hanya mengizinkan window.open()
+            // kalau dipanggil PERSIS di dalam aksi klik pengguna. Kalau ditunda
+            // (misal lewat setTimeout), popup-nya diblokir diam-diam.
+            if (hpTujuan) {
+                if (hpTujuan.startsWith('8')) hpTujuan = '62' + hpTujuan;
+                else if (hpTujuan.startsWith('0')) hpTujuan = '62' + hpTujuan.substring(1);
+                let pesan = `Halo ${n.nama}, berikut kartu tabungan sampah Anda di ${CURRENT_UNIT_NAMA}. Mohon lampirkan file "${namaFile}" yang baru saja terunduh ya 🙏`;
+                jendelaWa = window.open(`https://wa.me/${hpTujuan}?text=${encodeURIComponent(pesan)}`, '_blank');
+            }
 
-                // Di komputer (tanpa Web Share API), WhatsApp Web tidak bisa menerima
-                // lampiran file langsung dari link -- jadi kartu diunduh dulu (di atas),
-                // lalu chat WA nasabah dibuka supaya tinggal tarik/lampirkan filenya.
-                let hpTujuan = n.hp ? String(n.hp).trim().replace(/[^0-9]/g, '') : '';
-                if (hpTujuan) {
-                    if (hpTujuan.startsWith('8')) hpTujuan = '62' + hpTujuan;
-                    else if (hpTujuan.startsWith('0')) hpTujuan = '62' + hpTujuan.substring(1);
-                    let pesan = `Halo ${n.nama}, berikut kartu tabungan sampah Anda di ${CURRENT_UNIT_NAMA}. Mohon lampirkan file "${namaFile}" yang baru saja terunduh ya 🙏`;
-                    setTimeout(() => window.open(`https://wa.me/${hpTujuan}?text=${encodeURIComponent(pesan)}`, '_blank'), 400);
-                }
+            // Baru generate & unduh kartunya setelah jendela WA dibuka.
+            let canvas = generateKartuNasabah(n);
+            let dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+            let a = document.createElement('a');
+            a.href = dataUrl; a.download = namaFile;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+
+            if (!hpTujuan) {
+                alert('Kartu berhasil diunduh (' + namaFile + '). Nomor HP nasabah ini belum terdaftar, jadi chat WA tidak bisa dibuka otomatis -- silakan kirim manual.');
+            } else if (!jendelaWa) {
+                alert('Kartu berhasil diunduh (' + namaFile + '), tapi browser memblokir jendela WhatsApp otomatis. Silakan izinkan pop-up untuk situs ini di pengaturan browser, atau buka WhatsApp secara manual lalu lampirkan file yang baru terunduh.');
             }
         } catch (e) {
-            if (e && e.name === 'AbortError') { /* pengguna membatalkan menu Bagikan, tidak perlu alert */ }
-            else if (e && e.name === 'InvalidStateError') { alert('Proses sebelumnya masih berjalan, coba lagi sesaat.'); }
-            else { alert('Gagal membuat/mengirim kartu: ' + (e && e.message ? e.message : e)); }
+            alert('Gagal membuat kartu: ' + (e && e.message ? e.message : e));
         } finally {
             sedangProsesKartu = false;
             if (btnEl) { btnEl.disabled = false; btnEl.innerHTML = iconAsli; }
