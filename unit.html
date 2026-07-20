@@ -1243,6 +1243,13 @@
 
             kartuPreviewState = { dataUrl, namaFile, hpTujuan, nama: n.nama, unit: CURRENT_UNIT_NAMA };
             document.getElementById('previewKartuImg').src = dataUrl;
+
+            // Tombol "Bagikan Langsung" cuma berguna di perangkat yang mendukung Web
+            // Share API dengan file (umumnya HP/tablet modern) -- disembunyikan di
+            // komputer/browser yang tidak mendukungnya supaya tidak membingungkan.
+            let btnBagikan = document.getElementById('btnBagikanLangsung');
+            if (btnBagikan) btnBagikan.style.display = (navigator.share && navigator.canShare) ? '' : 'none';
+
             document.getElementById('modalPreviewKartu').style.display = 'flex';
         } catch (e) {
             alert('Gagal membuat kartu: ' + (e && e.message ? e.message : e));
@@ -1287,6 +1294,42 @@
             alert('Kartu berhasil diunduh (' + namaFile + '), tapi browser memblokir jendela WhatsApp otomatis. Silakan izinkan pop-up untuk situs ini di pengaturan browser, atau buka WhatsApp secara manual lalu lampirkan file yang baru terunduh.');
         }
         tutupPreviewKartu();
+    }
+
+    // Guard supaya navigator.share() tidak pernah dipanggil bertumpuk (dobel-klik).
+    let sedangBagikanKartu = false;
+
+    // Alternatif "Kirim ke WhatsApp": memakai Web Share API bawaan HP supaya
+    // gambar SUDAH OTOMATIS TERLAMPIR saat WhatsApp terbuka -- tapi sebagai
+    // gantinya, WA akan minta Anda pilih sendiri kontak tujuannya (keterbatasan
+    // dari pihak WhatsApp/browser, bukan dari aplikasi ini -- lihat penjelasan
+    // di chat). Cuma tampil di perangkat yang mendukung (umumnya HP/tablet).
+    async function bagikanKartuLangsung() {
+        if (sedangBagikanKartu || !kartuPreviewState) return;
+        let { dataUrl, namaFile, nama } = kartuPreviewState;
+
+        sedangBagikanKartu = true;
+        let btn = document.getElementById('btnBagikanLangsung');
+        let iconAsli = btn ? btn.innerHTML : null;
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+
+        try {
+            let blob = await (await fetch(dataUrl)).blob();
+            let file = new File([blob], namaFile, { type: 'image/jpeg' });
+            if (!navigator.canShare || !navigator.canShare({ files: [file] })) {
+                alert('Perangkat/browser ini tidak mendukung fitur Bagikan Langsung. Gunakan tombol "Kirim ke WhatsApp" atau "Unduh JPG Saja" sebagai gantinya.');
+                return;
+            }
+            await navigator.share({ files: [file], title: 'Kartu Tabungan Sampah', text: 'Kartu tabungan sampah untuk ' + nama });
+            tutupPreviewKartu();
+        } catch (e) {
+            if (e && e.name === 'AbortError') { /* dibatalkan pengguna, tidak perlu alert */ }
+            else if (e && e.name === 'InvalidStateError') { alert('Proses berbagi sebelumnya masih berjalan, coba lagi sesaat.'); }
+            else { alert('Gagal membagikan kartu: ' + (e && e.message ? e.message : e)); }
+        } finally {
+            sedangBagikanKartu = false;
+            if (btn) { btn.disabled = false; btn.innerHTML = iconAsli; }
+        }
     }
 
     function cetakQrNasabah(idNasabah, namaNasabah) {
@@ -1726,6 +1769,9 @@
         <img id="previewKartuImg" src="" style="width:100%; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,0.18);">
         <div class="d-grid gap-2 mt-4">
             <button class="btn btn-success btn-lg" onclick="kirimKartuKeWA()"><i class="bi bi-whatsapp me-2"></i>Kirim ke WhatsApp</button>
+            <p class="text-muted mb-1" style="font-size:11px;">↑ Langsung buka chat ke nomor nasabah ini. Gambar terunduh, tinggal lampirkan (2x ketuk).</p>
+            <button class="btn" id="btnBagikanLangsung" style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; font-weight:600;" onclick="bagikanKartuLangsung()"><i class="bi bi-share-fill me-2"></i>Bagikan Langsung (via HP)</button>
+            <p class="text-muted mb-1" style="font-size:11px;">↑ Gambar sudah otomatis siap kirim, tinggal pilih kontaknya sendiri di WhatsApp.</p>
             <button class="btn btn-outline-secondary" onclick="unduhKartuSaja()"><i class="bi bi-download me-2"></i>Unduh JPG Saja</button>
             <button class="btn btn-light text-muted" onclick="tutupPreviewKartu()">Batal</button>
         </div>
