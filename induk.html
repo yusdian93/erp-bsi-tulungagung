@@ -368,7 +368,7 @@
                 </button>
                 <div class="nav-group-items">
                     <button class="nav-btn" data-label="Data BSU" data-group="grp-kemitraan" onclick="pindahTab('datasu', this)"><span class="nav-ic">🏢</span> Data BSU</button>
-                    <button class="nav-btn" data-label="Registrasi BSU Baru" data-group="grp-kemitraan" onclick="pindahTab('daftar', this)"><span class="nav-ic">➕</span> Registrasi BSU Baru</button>
+                    <button class="nav-btn" data-label="Registrasi BSU Baru" data-group="grp-kemitraan" onclick="pindahTab('daftar', this); siapkanIdBsuBaru();"><span class="nav-ic">➕</span> Registrasi BSU Baru</button>
                     <button class="nav-btn" data-label="Monitoring Aktivitas BSU" data-group="grp-kemitraan" onclick="pindahTab('monitoring', this)"><span class="nav-ic">🔍</span> Monitoring Aktivitas BSU</button>
                 </div>
             </div>
@@ -1717,6 +1717,10 @@
             <div class="panel">
                 <div class="panel-header"><h2>➕ FORM REGISTRASI BSU BARU</h2></div>
                 <form id="formRegistrasiBsu" style="margin-top:10px;" onsubmit="return false;">
+                    <div class="form-group">
+                        <label>ID Register <span class="text-muted" style="font-weight:400; font-size:12px;">(otomatis)</span></label>
+                        <input type="text" id="regIdOtomatis" class="form-control" readonly style="background:#f1f5f9; font-family:monospace; font-weight:700; letter-spacing:0.5px;">
+                    </div>
                     <div class="form-group"><label>Nama BSU</label><input type="text" id="regNama" class="form-control" placeholder="Contoh: BSU Berkah Jaya" required></div>
                     <div class="form-group"><label>Kata Sandi</label><input type="text" id="regPassword" class="form-control" placeholder="Contoh: bsu123" required></div>
                     <div class="form-group"><label>Nama Ketua</label><input type="text" id="regKetua" class="form-control" placeholder="Nama Lengkap Ketua" required></div>
@@ -2845,9 +2849,27 @@
     // =========================================
     // MODUL REGISTRASI BSU & MONITORING AKTIVITAS
     // =========================================
+    // ID Register BSU otomatis: "BSU-" + 5 angka acak, dicek dulu supaya tidak
+    // bentrok dengan ID yang sudah ada.
+    function generateIdBsuOtomatis() {
+        let existingIds = new Set((globalNasabah || []).map(n => String(n.id)));
+        let id;
+        do {
+            let angka = String(Math.floor(10000 + Math.random() * 90000));
+            id = 'BSU-' + angka;
+        } while (existingIds.has(id));
+        return id;
+    }
+
+    function siapkanIdBsuBaru() {
+        let el = document.getElementById('regIdOtomatis');
+        if (el) el.value = generateIdBsuOtomatis();
+    }
+
     function simpanBsuBaru() {
         let form = {
             action: 'tambahUnit',
+            id: generateIdBsuOtomatis(),
             nama: document.getElementById('regNama').value,
             password: document.getElementById('regPassword').value,
             ketua: document.getElementById('regKetua').value,
@@ -2865,8 +2887,8 @@
         btn.innerText = '⏳ MENYIMPAN...'; btn.disabled = true;
 
         postAksi(form)
-        .then(res=>{ alert('Sukses mendaftarkan BSU Baru!'); document.getElementById('formRegistrasiBsu').reset(); loadDataPusat(); })
-        .catch(e=>alert('Error: ' + e)).finally(()=>{ btn.innerText = 'DAFTARKAN BSU'; btn.disabled = false; });
+        .then(res=>{ alert('Sukses mendaftarkan BSU Baru dengan ID: ' + form.id); document.getElementById('formRegistrasiBsu').reset(); loadDataPusat(); })
+        .catch(e=>alert('Error: ' + e)).finally(()=>{ btn.innerText = 'DAFTARKAN BSU'; btn.disabled = false; siapkanIdBsuBaru(); });
     }
 
     function ambilLokasiRegistrasi() {

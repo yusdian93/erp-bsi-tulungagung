@@ -410,12 +410,12 @@ const AdapterAPI = {
 
   // ---- BSU (unit) ----
   async tambahUnit(form) {
-    const id = 'BSU-' + genId();
-    const row = { id, ...form };
+    const id = form.id || ('BSU-' + genId());
+    const row = { ...form, id };
     const { error } = await sb.from('bsu').insert(row);
     if (error) return 'Gagal: ' + error.message;
     const { password, ...rowTanpaPassword } = row;
-    logAudit('bsu', id, 'insert', null, rowTanpaPassword);
+    logAudit('bsu', row.id, 'insert', null, rowTanpaPassword);
     return 'Sukses mendaftarkan BSU';
   },
   async updateUnit(form) {
