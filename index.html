@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portal Login - Sistem Bank Sampah Tulungagung</title>
+    <meta name="theme-color" content="#073B32">
+    <title>Portal Bank Sampah | DLH Tulungagung</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,101 +12,339 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-adapter.js" defer></script>
 
+    
     <style>
-        body { 
-            background: linear-gradient(135deg, #CBD5E1 0%, #94A3B8 100%); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --green-950:#041F1A;
+            --green-900:#073B32;
+            --green-700:#0B7156;
+            --green-600:#0E8A67;
+            --gold:#C99A3D;
+            --gold-soft:#F3E2B9;
+            --ink:#071A17;
+            --muted:#667B75;
+            --line:#DCE7E2;
         }
-
-        .login-card {
-            background: rgba(255, 255, 255, 0.90);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            padding: 40px;
-            width: 100%;
-            max-width: 450px;
+        * { box-sizing:border-box; }
+        body {
+            min-height:100vh;
+            margin:0;
+            padding:26px;
+            display:grid;
+            place-items:center;
+            font-family:'Plus Jakarta Sans',sans-serif;
+            color:var(--ink);
+            background:
+                radial-gradient(circle at 8% 4%, rgba(201,154,61,.20), transparent 25rem),
+                radial-gradient(circle at 94% 88%, rgba(14,138,103,.18), transparent 28rem),
+                linear-gradient(145deg,#F8FAF8,#EAF1ED);
+            overflow-x:hidden;
         }
+        body::before {
+            content:"";
+            position:fixed;
+            inset:0;
+            z-index:-1;
+            opacity:.35;
+            background-image:
+                linear-gradient(rgba(7,59,50,.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(7,59,50,.03) 1px, transparent 1px);
+            background-size:34px 34px;
+            mask-image:linear-gradient(to bottom,black,transparent 78%);
+        }
+        .login-shell {
+            width:min(1080px,100%);
+            min-height:650px;
+            display:grid;
+            grid-template-columns:1.08fr .92fr;
+            overflow:hidden;
+            border-radius:32px;
+            border:1px solid rgba(7,59,50,.10);
+            background:#fff;
+            box-shadow:0 35px 90px rgba(4,40,32,.18);
+        }
+        .brand-panel {
+            position:relative;
+            overflow:hidden;
+            padding:54px;
+            display:flex;
+            flex-direction:column;
+            justify-content:space-between;
+            color:#fff;
+            background:
+                radial-gradient(circle at 82% 10%, rgba(226,190,113,.28), transparent 14rem),
+                radial-gradient(circle at 20% 100%, rgba(39,169,122,.25), transparent 20rem),
+                linear-gradient(145deg,#041F1A,#073B32 52%,#0A5B48);
+        }
+        .brand-panel::before {
+            content:"";
+            position:absolute;
+            width:330px;height:330px;
+            right:-140px;top:-130px;
+            border:1px solid rgba(255,255,255,.09);
+            border-radius:50%;
+            box-shadow:0 0 0 45px rgba(255,255,255,.025),0 0 0 92px rgba(255,255,255,.017);
+        }
+        .brand-panel::after {
+            content:"";
+            position:absolute;
+            left:0;right:0;top:0;height:3px;
+            background:linear-gradient(90deg,transparent,#E7C77E,transparent);
+        }
+        .brand-lockup,.brand-copy,.feature-list { position:relative;z-index:2; }
+        .brand-lockup {
+            display:flex;
+            align-items:center;
+            gap:18px;
+        }
+        .logo-shell {
+            width:92px;height:92px;
+            display:grid;place-items:center;
+            border-radius:24px;
+            background:linear-gradient(145deg,#fff,#EAF2EE);
+            border:1px solid rgba(255,255,255,.75);
+            box-shadow:0 16px 35px rgba(0,0,0,.22),inset 0 1px #fff;
+        }
+        .logo-shell img { width:82px;height:82px;object-fit:contain; }
+        .brand-kicker {
+            color:rgba(255,255,255,.62);
+            font-size:.73rem;
+            font-weight:800;
+            letter-spacing:2px;
+            text-transform:uppercase;
+        }
+        .brand-name {
+            margin-top:5px;
+            color:#fff;
+            font-size:1.3rem;
+            font-weight:800;
+            letter-spacing:-.35px;
+        }
+        .brand-dept { color:var(--gold-soft);font-size:.74rem;font-weight:700;margin-top:5px; }
+        .brand-copy h1 {
+            margin:0 0 16px;
+            font-size:clamp(2rem,4vw,3.5rem);
+            line-height:1.03;
+            letter-spacing:-2px;
+            font-weight:800;
+        }
+        .brand-copy p {
+            max-width:500px;
+            margin:0;
+            color:rgba(255,255,255,.68);
+            font-size:.96rem;
+            line-height:1.75;
+        }
+        .feature-list {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:12px;
+        }
+        .feature-item {
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:12px 13px;
+            border-radius:14px;
+            color:rgba(255,255,255,.77);
+            background:rgba(255,255,255,.055);
+            border:1px solid rgba(255,255,255,.08);
+            font-size:.76rem;
+            font-weight:700;
+        }
+        .feature-item i { color:var(--gold-soft);font-size:1rem; }
 
+        .form-panel {
+            padding:54px 50px;
+            display:flex;
+            flex-direction:column;
+            justify-content:center;
+            background:
+                radial-gradient(circle at 100% 0%,rgba(11,113,86,.07),transparent 16rem),
+                #fff;
+        }
+        .form-eyebrow {
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            width:max-content;
+            padding:7px 11px;
+            border-radius:999px;
+            background:#EDF7F3;
+            color:var(--green-700);
+            border:1px solid #D5EBE2;
+            font-size:.7rem;
+            font-weight:800;
+            letter-spacing:1px;
+            text-transform:uppercase;
+        }
+        .form-panel h2 {
+            margin:19px 0 7px;
+            font-size:2rem;
+            font-weight:800;
+            letter-spacing:-1px;
+        }
+        .form-lead {
+            margin:0 0 30px;
+            color:var(--muted);
+            font-size:.9rem;
+            line-height:1.65;
+        }
+        label {
+            color:#173B33;
+            font-size:.81rem;
+            font-weight:800;
+            margin-bottom:8px;
+        }
+        .input-group {
+            overflow:hidden;
+            border:1px solid var(--line);
+            border-radius:14px;
+            background:#FBFCFB;
+            transition:.25s;
+        }
+        .input-group:focus-within {
+            border-color:var(--green-600);
+            box-shadow:0 0 0 4px rgba(14,138,103,.10);
+            background:#fff;
+        }
+        .input-group-text,.form-control {
+            min-height:52px;
+            border:0 !important;
+            background:transparent !important;
+        }
+        .input-group-text { color:#80938D !important;padding:0 15px; }
         .form-control {
-            border-radius: 12px;
-            padding: 14px 18px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border: 1px solid #CBD5E1;
-            font-weight: 500;
+            padding:13px 8px;
+            color:var(--ink);
+            font-size:.91rem;
+            font-weight:600;
+            box-shadow:none !important;
         }
-
-        .form-control:focus {
-            border-color: #0284C7;
-            box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
-        }
-
+        .form-control::placeholder { color:#A0AFAA; }
         .btn-primary {
-            background: linear-gradient(135deg, #0284C7, #0F172A);
-            border: none;
-            border-radius: 12px;
-            padding: 14px;
-            font-weight: 700;
-            letter-spacing: 0.5px;
-            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.25);
-            transition: 0.3s;
+            min-height:52px;
+            border:0;
+            border-radius:14px;
+            background:linear-gradient(135deg,#0E8A67,#075542);
+            box-shadow:0 12px 25px rgba(7,85,66,.24);
+            font-weight:800;
+            letter-spacing:.55px;
+            transition:.25s;
         }
-
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 20px rgba(2, 132, 199, 0.35);
+            transform:translateY(-2px);
+            background:linear-gradient(135deg,#10966F,#064B3B);
+            box-shadow:0 17px 32px rgba(7,85,66,.30);
         }
-        
-        .input-group-text {
-            border-radius: 12px 0 0 12px;
+        .security-note {
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            margin-top:22px;
+            padding:13px 14px;
+            border-radius:14px;
+            color:#60756F;
+            background:#F5F8F6;
+            border:1px solid #E4ECE8;
+            font-size:.73rem;
+            line-height:1.55;
+        }
+        .security-note i { color:var(--green-700);font-size:1rem;margin-top:1px; }
+        .footer-note {
+            margin-top:28px;
+            color:#81918C;
+            font-size:.7rem;
+            font-weight:600;
+            text-align:center;
+        }
+        :focus-visible { outline:3px solid rgba(201,154,61,.55);outline-offset:2px; }
+
+        @media(max-width:900px){
+            body{padding:14px;}
+            .login-shell{grid-template-columns:1fr;min-height:auto;border-radius:24px;}
+            .brand-panel{padding:32px;min-height:330px;}
+            .brand-copy h1{font-size:2.35rem;}
+            .feature-list{display:none;}
+            .form-panel{padding:38px 30px;}
+        }
+        @media(max-width:520px){
+            .brand-panel{padding:25px;min-height:285px;}
+            .logo-shell{width:70px;height:70px;border-radius:19px;}
+            .logo-shell img{width:63px;height:63px;}
+            .brand-name{font-size:1rem;}
+            .brand-dept{font-size:.62rem;}
+            .brand-copy h1{font-size:1.9rem;letter-spacing:-1.3px;}
+            .brand-copy p{font-size:.82rem;line-height:1.55;}
+            .form-panel{padding:30px 22px;}
+            .form-panel h2{font-size:1.65rem;}
         }
     </style>
 </head>
 <body>
-
-    <div class="login-card text-center">
-        <img src="logo_dlh.png" alt="Logo DLH Tulungagung" style="height: 110px; margin-bottom: 20px; object-fit: contain;" onerror="this.onerror=null; this.src='LOGO_DLH.png';">
-        
-        <h4 style="font-weight: 800; color: #0F172A; letter-spacing: -0.5px; margin-bottom: 5px;">PORTAL TERPADU</h4>
-        <p style="color: #475569; font-size: 0.9rem; font-weight: 600; margin-bottom: 30px; line-height: 1.4;">
-            Sistem Informasi Manajemen<br>Bank Sampah Induk & Unit
-        </p>
-
-        <form id="formLogin" onsubmit="prosesLogin(event)">
-            <div class="mb-3 text-start">
-                <label style="font-weight: 700; color: #0F172A; font-size: 0.85rem; margin-bottom: 8px;">ID Pengguna / No. Registrasi BSU</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-person-fill"></i></span>
-                    <input type="text" id="username" class="form-control border-start-0 ps-0" placeholder="Cth: admin atau BSU-123..." required>
+    <main class="login-shell">
+        <section class="brand-panel">
+            <div class="brand-lockup">
+                <div class="logo-shell">
+                    <img src="logo_dlh.png" alt="Logo DLH Tulungagung" onerror="this.onerror=null; this.src='LOGO_DLH.png';">
+                </div>
+                <div>
+                    <div class="brand-kicker">Sistem Informasi</div>
+                    <div class="brand-name">BANK SAMPAH TULUNGAGUNG</div>
+                    <div class="brand-dept">DINAS LINGKUNGAN HIDUP</div>
                 </div>
             </div>
 
-            <div class="mb-4 text-start">
-                <label style="font-weight: 700; color: #0F172A; font-size: 0.85rem; margin-bottom: 8px;">Kata Sandi</label>
-                <div class="input-group">
-                    <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
-                    <input type="password" id="password" class="form-control border-start-0 border-end-0 ps-0" placeholder="Masukkan kata sandi..." required>
-                    <span class="input-group-text bg-white border-start-0 text-muted" onclick="lihatSandi('password', 'iconMataLogin')" style="cursor: pointer;">
-                        <i class="bi bi-eye-slash-fill" id="iconMataLogin"></i>
-                    </span>
-                </div>
+            <div class="brand-copy">
+                <h1>Kelola sampah.<br>Bangun nilai.</h1>
+                <p>Portal terpadu untuk pengelolaan Bank Sampah Induk dan Bank Sampah Unit yang lebih tertib, transparan, dan profesional.</p>
             </div>
 
-            <button type="submit" id="btnSubmit" class="btn btn-primary w-100 text-white">MASUK SISTEM <i class="bi bi-box-arrow-in-right ms-2"></i></button>
-        </form>
-        
-        <div class="mt-4" style="font-size: 0.75rem; color: #64748B; font-weight: 600;">
-            &copy; 2026 Dinas Lingkungan Hidup Kab. Tulungagung
-        </div>
-    </div>
+            <div class="feature-list">
+                <div class="feature-item"><i class="bi bi-shield-check"></i> Akses terproteksi</div>
+                <div class="feature-item"><i class="bi bi-database-check"></i> Data tersinkron</div>
+                <div class="feature-item"><i class="bi bi-graph-up-arrow"></i> Laporan terukur</div>
+                <div class="feature-item"><i class="bi bi-recycle"></i> Ekosistem sirkular</div>
+            </div>
+        </section>
+
+        <section class="form-panel">
+            <div class="form-eyebrow"><i class="bi bi-stars"></i> Portal Terpadu 2026</div>
+            <h2>Selamat datang</h2>
+            <p class="form-lead">Masuk menggunakan akun resmi untuk mengakses sistem manajemen Bank Sampah Induk atau Unit.</p>
+
+            <form id="formLogin" onsubmit="prosesLogin(event)">
+                <div class="mb-3">
+                    <label for="username">ID Pengguna / No. Registrasi BSU</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-fill"></i></span>
+                        <input type="text" id="username" class="form-control" placeholder="Contoh: admin atau BSU-123" required autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password">Kata Sandi</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" id="password" class="form-control" placeholder="Masukkan kata sandi" required autocomplete="current-password">
+                        <span class="input-group-text" onclick="lihatSandi('password', 'iconMataLogin')" style="cursor:pointer;" role="button" aria-label="Tampilkan atau sembunyikan kata sandi">
+                            <i class="bi bi-eye-slash-fill" id="iconMataLogin"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" id="btnSubmit" class="btn btn-primary w-100 text-white">
+                    MASUK KE SISTEM <i class="bi bi-arrow-right-circle ms-2"></i>
+                </button>
+            </form>
+
+            <div class="security-note">
+                <i class="bi bi-lock-fill"></i>
+                <span>Gunakan akun yang diberikan administrator. Jangan membagikan kata sandi kepada pihak yang tidak berwenang.</span>
+            </div>
+            <div class="footer-note">&copy; 2026 Dinas Lingkungan Hidup Kabupaten Tulungagung</div>
+        </section>
+    </main>
 
     <script>
         function lihatSandi(inputId, iconId) {

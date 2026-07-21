@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Manajemen Bank Sampah Pro</title>
+    <meta name="theme-color" content="#073B32">
+    <title>Bank Sampah Unit | DLH Tulungagung</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -116,6 +117,498 @@
         .stat-label-premium { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; opacity: 0.85; margin-bottom: 12px; }
         .stat-amount-premium { font-size: 2.6rem; font-weight: 800; letter-spacing: -1px; line-height: 1; margin-bottom: 18px; }
         .stat-desc-premium { font-size: 0.8rem; font-weight: 600; background: rgba(255, 255, 255, 0.15); padding: 8px 16px; border-radius: 30px; display: inline-flex; align-items: center; }
+    
+        /* =========================================================
+           PREMIUM REDESIGN 2026 — BANK SAMPAH UNIT TULUNGAGUNG
+           Visual diperbarui tanpa mengubah ID, fungsi, dan alur data.
+        ========================================================== */
+        :root {
+            --primary-dark: #073B32;
+            --primary-main: #0B7A5B;
+            --primary-light: #DDF4EB;
+            --accent-gold: #C99A3D;
+            --accent-gold-soft: #F2DFB4;
+            --ink-950: #071A17;
+            --ink-900: #0C2822;
+            --ink-700: #31534B;
+            --ink-500: #6A817B;
+            --surface: #FFFFFF;
+            --surface-soft: #F5F8F6;
+            --bg-color: #EDF3EF;
+            --card-bg: rgba(255,255,255,.92);
+            --border-color: rgba(9,70,57,.11);
+            --shadow-soft: 0 18px 45px rgba(7, 40, 33, .10);
+            --shadow-premium: 0 28px 70px rgba(4, 35, 28, .16);
+        }
+
+        html { scroll-behavior: smooth; }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 7% 0%, rgba(201,154,61,.15), transparent 27rem),
+                radial-gradient(circle at 96% 12%, rgba(11,122,91,.13), transparent 30rem),
+                linear-gradient(145deg, #F8FAF8 0%, #ECF3EF 48%, #E8F0EC 100%);
+            color: var(--ink-950);
+            overflow-x: hidden;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            opacity: .38;
+            background-image:
+                linear-gradient(rgba(7,59,50,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(7,59,50,.025) 1px, transparent 1px);
+            background-size: 34px 34px;
+            mask-image: linear-gradient(to bottom, black, transparent 75%);
+        }
+        ::selection { background: var(--accent-gold-soft); color: var(--ink-950); }
+
+        .nav-wrapper {
+            padding: 18px 24px 6px !important;
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+        }
+        .navbar {
+            max-width: 1580px !important;
+            padding: 12px 16px !important;
+            border-radius: 24px;
+            background:
+                linear-gradient(112deg, rgba(5,44,37,.98), rgba(7,59,50,.96) 55%, rgba(11,75,61,.95));
+            border: 1px solid rgba(255,255,255,.13) !important;
+            box-shadow: 0 16px 42px rgba(3,31,25,.24), inset 0 1px rgba(255,255,255,.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .navbar::after {
+            content:"";
+            position:absolute;
+            left:24px; right:24px; bottom:0;
+            height:1px;
+            background:linear-gradient(90deg, transparent, rgba(220,181,100,.72), transparent);
+        }
+        .navbar-brand { min-width: 285px; color: white !important; }
+        .brand-logo-shell {
+            width: 72px;
+            height: 72px;
+            flex: 0 0 72px;
+            display: grid;
+            place-items: center;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #FFFFFF, #EDF4F0);
+            border: 1px solid rgba(255,255,255,.75);
+            box-shadow: 0 10px 24px rgba(0,0,0,.20), inset 0 1px 0 #fff;
+            overflow: hidden;
+        }
+        .brand-logo-shell img { width: 64px; height: 64px; object-fit: contain; }
+        .brand-kicker {
+            color: rgba(255,255,255,.66);
+            font-size: .69rem;
+            font-weight: 800;
+            letter-spacing: 2.1px;
+            text-transform: uppercase;
+        }
+        .brand-title {
+            color: #FFFFFF;
+            font-size: 1.17rem;
+            font-weight: 800;
+            letter-spacing: -.25px;
+        }
+        .brand-subtitle {
+            color: var(--accent-gold-soft);
+            font-size: .68rem;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .navbar-toggler { color:#fff !important; }
+        .navbar-toggler i { color:#fff !important; }
+
+        .navbar-nav { gap: 3px; }
+        .nav-link {
+            color: rgba(255,255,255,.75) !important;
+            padding: 9px 11px !important;
+            margin: 2px 0 !important;
+            border: 1px solid transparent !important;
+            border-radius: 11px;
+            font-size: .76rem;
+            font-weight: 700;
+            letter-spacing: .05px;
+        }
+        .nav-link i { color: rgba(242,223,180,.88); }
+        .nav-link:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,.09) !important;
+            border-color: rgba(255,255,255,.09) !important;
+            transform: translateY(-1px);
+        }
+        .nav-link.active-tab,
+        .nav-link.dashboard-tab.active-tab,
+        .nav-link.rekap-tab.active-tab {
+            color: var(--ink-950) !important;
+            background: linear-gradient(135deg, #F4E5BF, #C99A3D) !important;
+            border-color: rgba(255,255,255,.35) !important;
+            box-shadow: 0 8px 20px rgba(0,0,0,.22), inset 0 1px rgba(255,255,255,.55) !important;
+        }
+        .nav-link.active-tab i,
+        .nav-link.dashboard-tab.active-tab i,
+        .nav-link.rekap-tab.active-tab i { color: var(--ink-950) !important; }
+        .nav-link.dashboard-tab,
+        .nav-link.rekap-tab {
+            color: rgba(255,255,255,.78) !important;
+            background: transparent !important;
+            border-color: transparent !important;
+        }
+        .logout-link {
+            color: #FFD8D8 !important;
+            border-color: rgba(255,163,163,.22) !important;
+            background: rgba(133,22,22,.22) !important;
+            margin-left: 7px !important;
+        }
+        .logout-link i { color:#FFB8B8 !important; }
+        .logout-link:hover { background: rgba(171,31,31,.35) !important; color:#fff !important; }
+
+        .container { max-width: 1440px; }
+        .tab-content { animation: premiumFade .35s ease; }
+        @keyframes premiumFade {
+            from { opacity:0; transform:translateY(6px); }
+            to { opacity:1; transform:translateY(0); }
+        }
+
+        .dashboard-hero {
+            position: relative;
+            overflow: hidden;
+            margin-top: 24px;
+            margin-bottom: 34px;
+            padding: clamp(26px, 4vw, 48px);
+            border-radius: 30px;
+            color: white;
+            text-align: left;
+            background:
+                radial-gradient(circle at 88% 12%, rgba(214,174,91,.24), transparent 15rem),
+                radial-gradient(circle at 70% 115%, rgba(35,166,119,.24), transparent 20rem),
+                linear-gradient(118deg, #062C25 0%, #084A3C 54%, #0A604B 100%);
+            border: 1px solid rgba(255,255,255,.14);
+            box-shadow: var(--shadow-premium);
+        }
+        .dashboard-hero::before {
+            content:"";
+            position:absolute;
+            width:310px; height:310px;
+            border:1px solid rgba(255,255,255,.09);
+            border-radius:50%;
+            right:-95px; top:-155px;
+            box-shadow: 0 0 0 42px rgba(255,255,255,.025), 0 0 0 86px rgba(255,255,255,.018);
+        }
+        .dashboard-hero::after {
+            content:"";
+            position:absolute;
+            left:0; right:0; top:0; height:3px;
+            background:linear-gradient(90deg, transparent, #E7C77E, transparent);
+        }
+        .hero-content { position:relative; z-index:2; max-width:900px; }
+        .hero-eyebrow {
+            display:inline-flex;
+            align-items:center;
+            gap:8px;
+            padding:7px 12px;
+            border-radius:999px;
+            color: #F7E7C2;
+            background:rgba(255,255,255,.08);
+            border:1px solid rgba(255,255,255,.12);
+            font-size:.72rem;
+            font-weight:800;
+            letter-spacing:1.35px;
+            text-transform:uppercase;
+        }
+        .hero-live-dot {
+            width:8px; height:8px; border-radius:50%;
+            background:#56E39F;
+            box-shadow:0 0 0 5px rgba(86,227,159,.13);
+        }
+        .dashboard-hero .app-title {
+            color:#fff;
+            font-size:clamp(1.9rem,4vw,3.25rem);
+            line-height:1.08;
+            letter-spacing:-1.6px;
+            text-shadow:none;
+            margin:20px 0 10px;
+        }
+        .dashboard-hero .app-subtitle {
+            color:rgba(255,255,255,.73);
+            font-weight:600;
+            letter-spacing:.15px;
+            font-size:.92rem;
+            margin:0;
+        }
+        .hero-actions {
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            gap:12px;
+            margin-top:24px;
+        }
+        .btn-hero-gold {
+            color:var(--ink-950) !important;
+            background:linear-gradient(135deg,#F3E3BA,#C99A3D) !important;
+            border:1px solid rgba(255,255,255,.3) !important;
+            box-shadow:0 10px 25px rgba(0,0,0,.2);
+        }
+        .btn-hero-gold:hover { transform:translateY(-2px); box-shadow:0 14px 30px rgba(0,0,0,.25); }
+        .hero-secure-note {
+            display:inline-flex;
+            align-items:center;
+            gap:7px;
+            color:rgba(255,255,255,.66);
+            font-size:.76rem;
+            font-weight:600;
+        }
+        #area-filter-bsi {
+            margin-left:0 !important;
+            margin-right:0 !important;
+            max-width:520px !important;
+        }
+        #area-filter-bsi .input-group {
+            border:1px solid rgba(255,255,255,.18) !important;
+            background:rgba(255,255,255,.09);
+            box-shadow:none !important;
+        }
+        #area-filter-bsi .input-group-text,
+        #area-filter-bsi .form-select {
+            background:transparent !important;
+            color:#fff !important;
+        }
+        #area-filter-bsi option { color:var(--ink-950); }
+
+        .stat-card-modern {
+            min-height: 205px;
+            padding: 25px;
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,.12);
+            box-shadow: 0 18px 40px rgba(8,34,28,.18);
+            isolation:isolate;
+        }
+        .stat-card-modern::before {
+            content:"";
+            position:absolute;
+            left:22px; right:22px; top:0;
+            height:2px;
+            background:linear-gradient(90deg, transparent, rgba(242,223,180,.9), transparent);
+            z-index:2;
+        }
+        .stat-card-modern::after {
+            content:"";
+            position:absolute;
+            width:170px; height:170px;
+            right:-60px; top:-70px;
+            border-radius:50%;
+            background:rgba(255,255,255,.07);
+            z-index:-1;
+        }
+        .stat-card-modern:hover {
+            transform:translateY(-6px);
+            box-shadow:0 26px 55px rgba(8,34,28,.25);
+        }
+        .bg-atm-blue {
+            background:linear-gradient(145deg,#0A3558 0%,#071F36 100%);
+            border-color:rgba(112,186,238,.22);
+        }
+        .bg-atm-orange {
+            background:linear-gradient(145deg,#64420B 0%,#2C210D 100%);
+            border-color:rgba(235,190,97,.25);
+        }
+        .bg-atm-purple {
+            background:linear-gradient(145deg,#175343 0%,#082F27 100%);
+            border-color:rgba(90,213,164,.22);
+        }
+        .bg-atm-black {
+            background:linear-gradient(145deg,#27313F 0%,#0A1019 100%);
+            border-color:rgba(194,205,220,.16);
+        }
+        .atm-chip {
+            width:43px; height:30px;
+            border-radius:7px;
+            margin-bottom:18px;
+            background:
+                linear-gradient(90deg, transparent 31%, rgba(99,69,14,.58) 32%, rgba(99,69,14,.58) 35%, transparent 36%),
+                linear-gradient(0deg, transparent 45%, rgba(99,69,14,.58) 46%, rgba(99,69,14,.58) 51%, transparent 52%),
+                linear-gradient(135deg,#F8E7B4,#C99434);
+            border:1px solid rgba(255,246,213,.55);
+            box-shadow:inset 0 1px rgba(255,255,255,.65), 0 7px 15px rgba(0,0,0,.18);
+        }
+        .stat-card-title-modern {
+            font-size:.72rem;
+            letter-spacing:1.65px;
+            opacity:.76;
+        }
+        .stat-card-value-modern {
+            font-size:clamp(1.75rem,3vw,2.4rem);
+            line-height:1.1;
+            text-shadow:none;
+        }
+        .stat-card-subtitle {
+            padding-top:14px;
+            border-top:1px solid rgba(255,255,255,.10);
+            opacity:.72;
+        }
+        .stat-card-icon-bg { opacity:.085; }
+
+        .card {
+            margin-top:24px;
+            border-radius:24px;
+            background:rgba(255,255,255,.91) !important;
+            border:1px solid rgba(8,64,52,.10) !important;
+            box-shadow:var(--shadow-soft) !important;
+            backdrop-filter:blur(22px);
+            -webkit-backdrop-filter:blur(22px);
+        }
+        .card:hover { box-shadow:0 24px 54px rgba(7,40,33,.13) !important; }
+        .card h5, .card h6 { letter-spacing:-.2px; }
+
+        .ai-glow-card {
+            animation:none;
+            border-radius:28px;
+            padding:32px;
+            background:
+                radial-gradient(circle at 90% 0%, rgba(201,154,61,.17), transparent 18rem),
+                linear-gradient(145deg,#071E1A,#0B3028);
+            border:1px solid rgba(224,190,116,.22);
+            box-shadow:0 24px 58px rgba(4,31,25,.24);
+        }
+        .composition-item {
+            background:rgba(255,255,255,.045);
+            border-color:rgba(255,255,255,.09);
+            border-radius:18px;
+        }
+        .composition-item:hover {
+            transform:translateY(-3px);
+            background:rgba(255,255,255,.065);
+            border-color:rgba(226,192,119,.28);
+        }
+
+        .form-control, .form-select {
+            min-height:49px;
+            border-radius:13px;
+            padding:12px 15px;
+            color:var(--ink-950);
+            background:#FBFCFB !important;
+            border:1px solid #D8E3DE !important;
+            box-shadow:inset 0 1px 1px rgba(7,40,33,.025);
+        }
+        .form-control:hover, .form-select:hover { border-color:#B5C9C1 !important; }
+        .form-control:focus, .form-select:focus {
+            background:#fff !important;
+            border-color:var(--primary-main) !important;
+            box-shadow:0 0 0 4px rgba(11,122,91,.11) !important;
+        }
+        .input-group-text {
+            border-color:#D8E3DE;
+            background:#F5F8F6;
+            color:var(--primary-dark);
+        }
+        label { color:var(--ink-900); font-size:.84rem; }
+
+        .btn {
+            border-radius:12px;
+            padding:11px 20px;
+            font-weight:700;
+            box-shadow:none;
+        }
+        .btn-success, .btn-primary {
+            color:#fff;
+            background:linear-gradient(135deg,#0F8B68,#075542) !important;
+            border:none !important;
+            box-shadow:0 9px 20px rgba(7,85,66,.20);
+        }
+        .btn-success:hover, .btn-primary:hover {
+            transform:translateY(-2px);
+            box-shadow:0 13px 26px rgba(7,85,66,.27);
+        }
+        .btn-outline-success {
+            color:var(--primary-main);
+            border-color:rgba(11,122,91,.35);
+        }
+        .btn-outline-success:hover { background:var(--primary-main); color:#fff; }
+        .btn-light { background:#F3F6F4; border-color:#E3EAE6; }
+        .btn-warning { color:#2E210A; }
+
+        .table-responsive {
+            border-radius:18px;
+            border:1px solid #E1E9E5 !important;
+            background:#fff !important;
+            box-shadow:0 10px 26px rgba(7,40,33,.045);
+        }
+        .table thead th {
+            background:#F2F6F4 !important;
+            color:#506B63;
+            border-bottom:1px solid #DDE7E2 !important;
+            letter-spacing:.7px;
+        }
+        .table td {
+            background:rgba(255,255,255,.78) !important;
+            border-bottom:1px solid #EDF2EF !important;
+        }
+        .table-hover tbody tr:hover td { background:#F6FAF8 !important; }
+        .badge-sampah {
+            color:#075542;
+            background:#E5F6EF;
+            border-color:#B8E3D2;
+        }
+
+        .premium-stat-card { border-radius:25px; box-shadow:0 18px 42px rgba(7,40,33,.16); }
+        .premium-asset-card { background:linear-gradient(145deg,#164E63,#083344); }
+        .premium-liability-card { background:linear-gradient(145deg,#6B4A13,#2F220D); }
+
+        .modal-content {
+            border:1px solid rgba(8,64,52,.10);
+            border-radius:22px;
+            box-shadow:0 30px 80px rgba(3,31,25,.25);
+        }
+        .modal-header { border-bottom-color:#E7EEEA; }
+        .modal-footer { border-top-color:#E7EEEA; }
+
+        * { scrollbar-width:thin; scrollbar-color:#9AB5AA #ECF2EF; }
+        *::-webkit-scrollbar { width:8px; height:8px; }
+        *::-webkit-scrollbar-track { background:#ECF2EF; }
+        *::-webkit-scrollbar-thumb { background:#9AB5AA; border-radius:20px; }
+
+        :focus-visible { outline:3px solid rgba(201,154,61,.55); outline-offset:2px; }
+
+        @media (max-width: 1199.98px) {
+            .navbar { padding:12px 14px !important; }
+            .navbar-collapse {
+                margin-top:14px;
+                padding:12px;
+                border-radius:16px;
+                background:rgba(255,255,255,.055);
+                border:1px solid rgba(255,255,255,.08);
+                max-height:68vh;
+                overflow:auto;
+            }
+            .navbar-nav { align-items:stretch !important; }
+            .nav-link { width:100%; padding:11px 13px !important; }
+            .logout-link { margin-left:0 !important; margin-top:6px !important; }
+        }
+        @media (max-width: 767.98px) {
+            .nav-wrapper { padding:10px 10px 4px !important; }
+            .navbar { border-radius:18px; }
+            .navbar-brand { min-width:0; }
+            .brand-logo-shell { width:54px; height:54px; flex-basis:54px; border-radius:15px; }
+            .brand-logo-shell img { width:49px; height:49px; }
+            .brand-title { font-size:.93rem; }
+            .brand-kicker { font-size:.57rem; letter-spacing:1.5px; }
+            .brand-subtitle { display:none; }
+            .dashboard-hero { border-radius:22px; padding:25px 21px; }
+            .hero-actions { align-items:stretch; }
+            .hero-actions .btn { width:100%; }
+            .hero-secure-note { width:100%; justify-content:center; }
+            .stat-card-modern { min-height:185px; }
+            .ai-glow-card { padding:22px; border-radius:22px; }
+            .card { border-radius:20px; }
+        }
+
     </style>
 </head>
 <body>
@@ -126,12 +619,15 @@
         <nav class="navbar navbar-expand-xl w-100 mx-auto" style="max-width: 100%;">
             <div class="container-fluid px-2 px-md-4">
                 
-                <span class="navbar-brand d-flex align-items-center me-lg-4">
-                    <img src="logo_dlh.png" alt="Logo DLH" style="height: 90px; margin-right: 14px; object-fit: contain;" onerror="this.onerror=null; this.src='LOGO_DLH.png';">
-                    <div class="d-flex flex-column justify-content-center" style="line-height: 1.1;">
-                        <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-muted); letter-spacing: 1px;">SISTEM</span>
-                        <span style="font-size: 1.25rem; font-weight: 800; color: var(--primary-dark);">BANK SAMPAH UNIT</span>
-                    </div>
+                <span class="navbar-brand d-flex align-items-center gap-3 me-lg-3">
+                    <span class="brand-logo-shell">
+                        <img src="logo_dlh.png" alt="Logo DLH Tulungagung" onerror="this.onerror=null; this.src='LOGO_DLH.png';">
+                    </span>
+                    <span class="d-flex flex-column justify-content-center" style="line-height:1.12;">
+                        <span class="brand-kicker">Sistem Informasi</span>
+                        <span class="brand-title">BANK SAMPAH UNIT</span>
+                        <span class="brand-subtitle">DLH KABUPATEN TULUNGAGUNG</span>
+                    </span>
                 </span>
 
                 <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -149,7 +645,7 @@
                         <li class="nav-link nav-btn" onclick="showTab('jadwal', this)"><i class="bi bi-calendar-event me-2"></i>Jadwal</li>
                         <li class="nav-link nav-btn" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark-fill me-2"></i>Buku Besar</li>
                         <li class="nav-link nav-btn rekap-tab" onclick="showTab('laporan', this)"><i class="bi bi-bar-chart-fill me-2"></i>Rekapitulasi</li>
-                        <li class="nav-link nav-btn" style="color: #ef4444 !important; border: 1px solid #fee2e2; background: #fef2f2; margin-left: 10px;" onclick="prosesLogout()"><i class="bi bi-box-arrow-right me-2"></i>Keluar</li>
+                        <li class="nav-link nav-btn logout-link" onclick="prosesLogout()"><i class="bi bi-box-arrow-right me-2"></i>Keluar</li>
                     </ul>
                 </div>
             </div>
@@ -161,21 +657,29 @@
     <div class="container pb-5">
         
         <div id="dashboard" class="tab-content" style="display:block;">
-            <div class="text-center mt-4 mb-5">
-                <h4 class="app-title" id="judul-app-bsu">BANK SAMPAH UNIT</h4>
-                <h6 class="app-subtitle">"Dengan Memilah Sampah, Kita Ubah yang Terbuang Menjadi Bernilai"</h6>
-                <button type="button" class="btn btn-sm mt-2" style="border-radius:20px; background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; font-weight:700; padding:6px 16px;" onclick="cetakQrUnitSaya()">🔲 Cetak QR Cek Saldo (untuk dipasang di lokasi)</button>
-            
-                <div id="area-filter-bsi" class="mt-4 mx-auto" style="max-width: 450px; display: none;">
-                    <div class="input-group shadow-sm" style="border-radius: 14px; overflow: hidden; border: 1px solid var(--primary-main);">
-                        <span class="input-group-text bg-white border-0" style="color: var(--primary-main);"><i class="bi bi-funnel-fill me-1"></i> Filter Unit:</span>
-                        <select id="filterUnitBSI" class="form-select border-0 fw-bold" style="color: var(--text-main);" onchange="terapkanFilterUnit()">
-                            <option value="SEMUA">-- Tampilkan Semua Bank Sampah --</option>
-                        </select>
+            <section class="dashboard-hero">
+                <div class="hero-content">
+                    <div class="hero-eyebrow"><span class="hero-live-dot"></span> Dashboard Operasional Terintegrasi</div>
+                    <h1 class="app-title" id="judul-app-bsu">BANK SAMPAH UNIT</h1>
+                    <p class="app-subtitle">“Dengan memilah sampah, kita mengubah yang terbuang menjadi nilai ekonomi dan lingkungan.”</p>
+                    <div class="hero-actions">
+                        <button type="button" class="btn btn-hero-gold" onclick="cetakQrUnitSaya()">
+                            <i class="bi bi-qr-code-scan me-2"></i>Cetak QR Cek Saldo
+                        </button>
+                        <span class="hero-secure-note"><i class="bi bi-shield-check"></i> Data unit tersinkron dan terlindungi</span>
+                    </div>
+
+                    <div id="area-filter-bsi" class="mt-4" style="display:none;">
+                        <div class="input-group" style="border-radius:14px; overflow:hidden;">
+                            <span class="input-group-text border-0"><i class="bi bi-funnel-fill me-2"></i>Filter Unit</span>
+                            <select id="filterUnitBSI" class="form-select border-0 fw-bold" onchange="terapkanFilterUnit()">
+                                <option value="SEMUA">-- Tampilkan Semua Bank Sampah --</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
-            </div>
-            
+            </section>
+
             <div class="row mt-4 g-4 d-flex align-items-stretch">
                 <div class="col-12 col-md-6 col-xl-3">
                     <div class="stat-card-modern bg-atm-blue h-100">

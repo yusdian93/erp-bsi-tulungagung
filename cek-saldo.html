@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cek Saldo Tabungan Sampah</title>
+    <meta name="theme-color" content="#073B32">
+    <title>Cek Saldo Tabungan Sampah | Tulungagung</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -11,56 +12,281 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
     <script src="supabase-adapter.js" defer></script>
 
+    
     <style>
+        :root {
+            --green-950:#041F1A;
+            --green-900:#073B32;
+            --green-700:#0B7156;
+            --green-600:#0E8A67;
+            --gold:#C99A3D;
+            --gold-soft:#F3E2B9;
+            --ink:#071A17;
+            --muted:#677C76;
+            --line:#DCE7E2;
+        }
+        * { box-sizing:border-box; }
         body {
-            background: linear-gradient(135deg, #CBD5E1 0%, #94A3B8 100%);
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            min-height:100vh;
+            margin:0;
+            padding:24px 16px 38px;
+            font-family:'Plus Jakarta Sans',sans-serif;
+            color:var(--ink);
+            background:
+                radial-gradient(circle at 5% 0%,rgba(201,154,61,.20),transparent 22rem),
+                radial-gradient(circle at 95% 15%,rgba(14,138,103,.17),transparent 25rem),
+                linear-gradient(145deg,#F8FAF8,#E9F0EC);
         }
-        .wrap { max-width: 480px; margin: 0 auto; }
+        body::before {
+            content:"";
+            position:fixed;
+            inset:0;
+            z-index:-1;
+            opacity:.32;
+            background-image:
+                linear-gradient(rgba(7,59,50,.03) 1px,transparent 1px),
+                linear-gradient(90deg,rgba(7,59,50,.03) 1px,transparent 1px);
+            background-size:32px 32px;
+            mask-image:linear-gradient(to bottom,black,transparent 78%);
+        }
+        .wrap { max-width:520px;margin:0 auto; }
+        .brand-header {
+            position:relative;
+            overflow:hidden;
+            margin-bottom:18px;
+            padding:22px;
+            display:flex;
+            align-items:center;
+            gap:16px;
+            border-radius:25px;
+            color:#fff;
+            text-align:left;
+            background:
+                radial-gradient(circle at 92% 5%,rgba(226,190,113,.26),transparent 10rem),
+                linear-gradient(135deg,#041F1A,#084A3C);
+            border:1px solid rgba(255,255,255,.13);
+            box-shadow:0 22px 55px rgba(4,40,32,.22);
+        }
+        .brand-header::after {
+            content:"";
+            position:absolute;
+            left:0;right:0;top:0;height:2px;
+            background:linear-gradient(90deg,transparent,#E7C77E,transparent);
+        }
+        .logo-shell {
+            width:76px;height:76px;
+            flex:0 0 76px;
+            display:grid;place-items:center;
+            border-radius:20px;
+            background:linear-gradient(145deg,#fff,#EAF2EE);
+            box-shadow:0 12px 25px rgba(0,0,0,.20),inset 0 1px #fff;
+        }
+        .logo-shell img { width:68px;height:68px;object-fit:contain; }
+        .brand-kicker {
+            color:var(--gold-soft);
+            font-size:.65rem;
+            font-weight:800;
+            letter-spacing:1.5px;
+            text-transform:uppercase;
+        }
+        .brand-title {
+            margin:4px 0 5px;
+            font-size:1.02rem;
+            font-weight:800;
+            letter-spacing:-.25px;
+        }
+        .brand-subtitle {
+            color:rgba(255,255,255,.63);
+            font-size:.69rem;
+            font-weight:600;
+            line-height:1.45;
+        }
+
         .card-utama {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 24px;
-            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.8);
-            padding: 28px 24px;
-            margin-bottom: 20px;
+            position:relative;
+            overflow:hidden;
+            margin-bottom:18px;
+            padding:28px 25px;
+            border-radius:24px;
+            background:rgba(255,255,255,.94);
+            border:1px solid rgba(7,59,50,.10);
+            box-shadow:0 18px 45px rgba(4,40,32,.11);
+            backdrop-filter:blur(20px);
+            -webkit-backdrop-filter:blur(20px);
+            animation:fadeUp .35s ease;
         }
-        .form-control { border-radius: 12px; padding: 13px 16px; border: 1px solid #CBD5E1; font-weight: 500; }
-        .form-control:focus { border-color: #0284C7; box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15); }
+        .card-utama::before {
+            content:"";
+            position:absolute;
+            left:24px;right:24px;top:0;height:2px;
+            background:linear-gradient(90deg,transparent,rgba(201,154,61,.75),transparent);
+        }
+        @keyframes fadeUp {
+            from{opacity:0;transform:translateY(7px)}
+            to{opacity:1;transform:translateY(0)}
+        }
+        .form-control {
+            min-height:52px;
+            border-radius:14px;
+            padding:13px 16px;
+            color:var(--ink);
+            background:#FBFCFB;
+            border:1px solid var(--line);
+            font-weight:600;
+            box-shadow:none;
+        }
+        .form-control:hover { border-color:#BCCFC7; }
+        .form-control:focus {
+            border-color:var(--green-600);
+            box-shadow:0 0 0 4px rgba(14,138,103,.10);
+            background:#fff;
+        }
         .btn-utama {
-            background: linear-gradient(135deg, #0284C7, #0F172A); border: none; border-radius: 12px;
-            padding: 14px; font-weight: 700; color: #fff; width: 100%; letter-spacing: 0.3px;
+            min-height:52px;
+            width:100%;
+            padding:14px 18px;
+            border:0;
+            border-radius:14px;
+            color:#fff;
+            font-weight:800;
+            letter-spacing:.35px;
+            background:linear-gradient(135deg,#0E8A67,#075542);
+            box-shadow:0 11px 24px rgba(7,85,66,.23);
+            transition:.25s;
         }
-        .btn-utama:disabled { opacity: 0.6; }
-        .saldo-besar { font-size: 2rem; font-weight: 800; color: #065f46; }
-        .kartu-saldo { background: linear-gradient(135deg, #10b981, #065f46); border-radius: 18px; padding: 22px; color: #fff; text-align: center; margin-bottom: 18px; }
-        .kartu-saldo .saldo-besar { color: #fff; }
-        .riwayat-item { display:flex; justify-content:space-between; align-items:center; padding: 10px 0; border-bottom: 1px solid #e2e8f0; font-size: 13.5px; }
-        .riwayat-item:last-child { border-bottom: none; }
-        .badge-jenis { background:#e0f2fe; color:#075985; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; }
-        .badge-tarik { background:#fee2e2; color:#991b1b; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; }
-        .pilih-nasabah-btn { text-align:left; width:100%; padding:14px; border-radius:12px; border:1px solid #CBD5E1; background:#fff; margin-bottom:10px; font-weight:700; }
-        .pilih-nasabah-btn:hover { border-color:#0284C7; background:#f0f9ff; }
-        .txt-muted { color:#64748B; font-size: 12.5px; }
-        .error-box { background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; border-radius:12px; padding:12px 14px; font-size:13.5px; margin-top:12px; }
+        .btn-utama:hover:not(:disabled) {
+            transform:translateY(-2px);
+            box-shadow:0 15px 30px rgba(7,85,66,.30);
+        }
+        .btn-utama:disabled { opacity:.58; }
+        .kartu-saldo {
+            position:relative;
+            overflow:hidden;
+            margin-bottom:20px;
+            padding:26px 22px;
+            border-radius:21px;
+            color:#fff;
+            text-align:left;
+            background:
+                radial-gradient(circle at 95% 0%,rgba(231,199,126,.25),transparent 10rem),
+                linear-gradient(135deg,#063B31,#0A765A);
+            border:1px solid rgba(255,255,255,.14);
+            box-shadow:0 18px 38px rgba(4,56,44,.24);
+        }
+        .kartu-saldo::before {
+            content:"";
+            position:absolute;
+            width:140px;height:140px;
+            right:-55px;top:-70px;
+            border-radius:50%;
+            border:1px solid rgba(255,255,255,.12);
+            box-shadow:0 0 0 28px rgba(255,255,255,.025);
+        }
+        .saldo-besar {
+            color:#fff;
+            font-size:clamp(2rem,8vw,2.75rem);
+            font-weight:800;
+            letter-spacing:-1.5px;
+            line-height:1.12;
+        }
+        .riwayat-item {
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:14px;
+            padding:13px 0;
+            border-bottom:1px solid #E9EFEC;
+            font-size:13.5px;
+        }
+        .riwayat-item:last-child { border-bottom:0; }
+        .badge-jenis,.badge-tarik {
+            display:inline-flex;
+            align-items:center;
+            padding:4px 9px;
+            border-radius:999px;
+            font-size:10px;
+            font-weight:800;
+            letter-spacing:.45px;
+        }
+        .badge-jenis { background:#E4F5EE;color:#075542;border:1px solid #C2E6D7; }
+        .badge-tarik { background:#FDECEC;color:#9C2424;border:1px solid #F5CCCC; }
+        .pilih-nasabah-btn {
+            width:100%;
+            margin-bottom:10px;
+            padding:14px 15px;
+            border-radius:14px;
+            border:1px solid var(--line);
+            color:var(--ink);
+            background:#FBFCFB;
+            font-weight:800;
+            text-align:left;
+            transition:.22s;
+        }
+        .pilih-nasabah-btn:hover {
+            transform:translateY(-1px);
+            border-color:#A7C8BB;
+            background:#F0F8F4;
+        }
+        .txt-muted { color:var(--muted);font-size:12.5px; }
+        .error-box {
+            margin-top:13px;
+            padding:12px 14px;
+            border-radius:13px;
+            color:#8F2525;
+            background:#FFF2F2;
+            border:1px solid #F4CACA;
+            font-size:13px;
+            line-height:1.5;
+        }
+        .privacy-note {
+            display:flex;
+            align-items:flex-start;
+            gap:9px;
+            margin-top:12px;
+            padding:11px 12px;
+            border-radius:12px;
+            color:#63766F;
+            background:#F5F8F6;
+            border:1px solid #E5ECE8;
+            font-size:11.5px;
+            line-height:1.5;
+        }
+        .privacy-note i { color:var(--green-700);margin-top:1px; }
+        .footer-copy {
+            color:#758781;
+            font-size:11.5px;
+            font-weight:600;
+            text-align:center;
+        }
+        :focus-visible { outline:3px solid rgba(201,154,61,.55);outline-offset:2px; }
+        @media(max-width:480px){
+            body{padding:12px 11px 28px;}
+            .brand-header{padding:18px;border-radius:20px;}
+            .logo-shell{width:62px;height:62px;flex-basis:62px;border-radius:17px;}
+            .logo-shell img{width:56px;height:56px;}
+            .brand-title{font-size:.91rem;}
+            .card-utama{padding:23px 19px;border-radius:20px;}
+        }
     </style>
 </head>
 <body>
 <div class="wrap">
 
-    <div class="text-center mb-3" style="padding-top:10px;">
-        <img src="logo_dlh.png" alt="Logo DLH" style="height:70px; object-fit:contain;" onerror="this.style.display='none';">
-        <h5 style="font-weight:800; color:#0F172A; margin-top:8px; margin-bottom:0;">CEK SALDO TABUNGAN SAMPAH</h5>
-        <p class="txt-muted" style="margin-top:2px;">Bank Sampah Kab. Tulungagung</p>
-    </div>
+    <header class="brand-header">
+        <div class="logo-shell">
+            <img src="logo_dlh.png" alt="Logo DLH Tulungagung" onerror="this.style.display='none';">
+        </div>
+        <div>
+            <div class="brand-kicker">Layanan Mandiri</div>
+            <div class="brand-title">CEK SALDO TABUNGAN SAMPAH</div>
+            <div class="brand-subtitle">Bank Sampah Kabupaten Tulungagung</div>
+        </div>
+    </header>
 
     <div id="areaUtama"></div>
 
-    <p class="text-center txt-muted" style="margin-top:10px;">
-        &copy; 2026 Dinas Lingkungan Hidup Kab. Tulungagung
+    <p class="footer-copy" style="margin-top:12px;">
+        &copy; 2026 Dinas Lingkungan Hidup Kabupaten Tulungagung
     </p>
 </div>
 
@@ -119,7 +345,8 @@
                 <div class="mb-3">
                     <input type="tel" id="inputHp" class="form-control" placeholder="Contoh: 081234567890" inputmode="numeric">
                 </div>
-                <button class="btn-utama" id="btnCek" onclick="prosesCekSaldo()">🔍 CEK SALDO SAYA</button>
+                <button class="btn-utama" id="btnCek" onclick="prosesCekSaldo()"><i class="bi bi-search me-2"></i>CEK SALDO SAYA</button>
+                <div class="privacy-note"><i class="bi bi-shield-lock-fill"></i><span>Nomor HP digunakan hanya untuk verifikasi data tabungan pada unit yang dipilih.</span></div>
                 <div id="areaError"></div>
                 ${!idNasabahAktif ? '' : `<button class="btn btn-link txt-muted mt-2 p-0" onclick="idNasabahAktif=''; idUnitAktif='${esc(idUnitAktif)}'; tampilkanFormCek();">Bukan Anda? Cek dengan cara lain</button>`}
             </div>
@@ -147,7 +374,8 @@
                 <div class="mb-3">
                     <input type="tel" id="inputHpManual" class="form-control" placeholder="Nomor HP terdaftar" inputmode="numeric">
                 </div>
-                <button class="btn-utama" onclick="prosesCekSaldoManual()">🔍 CEK SALDO SAYA</button>
+                <button class="btn-utama" onclick="prosesCekSaldoManual()"><i class="bi bi-search me-2"></i>CEK SALDO SAYA</button>
+                <div class="privacy-note"><i class="bi bi-shield-lock-fill"></i><span>Nomor HP digunakan hanya untuk verifikasi data tabungan pada unit yang dipilih.</span></div>
                 <div id="areaError"></div>
             </div>
         `);
@@ -192,7 +420,7 @@
         } catch (e) {
             tampilkanError('Terjadi kesalahan: ' + e);
         } finally {
-            if (btn) { btn.disabled = false; btn.innerText = '🔍 CEK SALDO SAYA'; }
+            if (btn) { btn.disabled = false; btn.innerText = 'CEK SALDO SAYA'; }
         }
     }
 
