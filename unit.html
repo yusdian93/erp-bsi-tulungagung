@@ -1072,14 +1072,35 @@
     // (x,y) ke arah dalam -- dipakai sebagai ornamen tekstur pojok kartu.
     // Menggambar tekstur garis diagonal tipis berulang (kesan modern/minimalis)
     // di seluruh latar kartu.
-    function gambarGridTipis(ctx, W, H, warna, alpha) {
+    // Menggambar motif abstrak elegan berupa goresan ombak halus berlapis
+    // (garis lengkung tipis dengan opasitas berbeda-beda) -- kesan "laut" yang
+    // tetap minimalis/modern, bukan ombak literal/kartun.
+    function gambarMotifOmbak(ctx, W, H) {
         ctx.save();
-        ctx.globalAlpha = alpha; ctx.strokeStyle = warna; ctx.lineWidth = 1;
-        for (let x = -H; x < W + H; x += 34) {
+        ctx.lineCap = 'round';
+
+        const goresan = [
+            { y: H * 0.18, amp: 34, warna: 'rgba(255,255,255,0.10)', tebal: 2.2 },
+            { y: H * 0.30, amp: 46, warna: 'rgba(255,255,255,0.07)', tebal: 1.6 },
+            { y: H * 0.62, amp: 40, warna: 'rgba(255,255,255,0.08)', tebal: 2 },
+            { y: H * 0.80, amp: 52, warna: 'rgba(255,255,255,0.06)', tebal: 1.6 },
+            { y: H * 0.95, amp: 60, warna: 'rgba(255,255,255,0.10)', tebal: 2.4 }
+        ];
+        goresan.forEach(g => {
+            ctx.strokeStyle = g.warna; ctx.lineWidth = g.tebal;
             ctx.beginPath();
-            ctx.moveTo(x, 0); ctx.lineTo(x + H, H);
+            ctx.moveTo(-40, g.y);
+            ctx.bezierCurveTo(W * 0.25, g.y - g.amp, W * 0.45, g.y + g.amp, W * 0.70, g.y - g.amp * 0.5);
+            ctx.bezierCurveTo(W * 0.85, g.y - g.amp * 0.9, W * 0.95, g.y + g.amp * 0.3, W + 40, g.y);
             ctx.stroke();
-        }
+        });
+
+        // beberapa lingkaran riak (ripple) samar sebagai aksen tambahan
+        [[W * 0.14, H * 0.75, 46], [W * 0.10, H * 0.75, 74], [W * 0.90, H * 0.20, 40]].forEach(([cx, cy, r]) => {
+            ctx.strokeStyle = 'rgba(255,255,255,0.10)'; ctx.lineWidth = 1.4;
+            ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+        });
+
         ctx.restore();
     }
 
@@ -1112,7 +1133,7 @@
     // QR digambar langsung dari elemen <canvas> yang dibuat QRCode.js, tanpa
     // bolak-balik lewat data URL + objek Image. Kalau gagal, akan throw Error
     // biasa (bukan Promise).
-    // Tema: NAVY BLUE modern-minimalis + chip & aksen EMAS + panel kaca transparan.
+    // Tema: BIRU LAUT elegan + motif ombak abstrak + chip & aksen EMAS.
     function generateKartuNasabah(n) {
         let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
 
@@ -1133,15 +1154,15 @@
         pathRoundRect(ctx, 0, 0, W, H, 44);
         ctx.save(); ctx.clip();
 
-        // --- latar navy minimalis ---
+        // --- latar biru laut ---
         let grad = ctx.createLinearGradient(0, 0, W, H);
-        grad.addColorStop(0, '#0a0e27');
-        grad.addColorStop(0.5, '#111a3d');
-        grad.addColorStop(1, '#1b2a5e');
+        grad.addColorStop(0, '#03045e');
+        grad.addColorStop(0.45, '#0077b6');
+        grad.addColorStop(1, '#00b4d8');
         ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
 
-        // tekstur grid diagonal tipis + cincin aksen emas dekoratif (pojok kanan atas)
-        gambarGridTipis(ctx, W, H, '#ffffff', 0.035);
+        // motif ombak abstrak elegan + cincin aksen emas dekoratif (pojok kanan atas)
+        gambarMotifOmbak(ctx, W, H);
         gambarCincinAksen(ctx, W - 40, -20, EMAS_TERANG);
 
         // --- bingkai tipis emas di seluruh tepi kartu ---
@@ -1150,7 +1171,7 @@
 
         // --- panel kaca transparan di kanan (tempat chip + QR) ---
         let panelX = W * 0.615, panelY = 40, panelW = W - panelX - 40, panelH = H - 80;
-        ctx.fillStyle = 'rgba(255,255,255,0.07)';
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
         pathRoundRect(ctx, panelX, panelY, panelW, panelH, 26); ctx.fill();
         ctx.strokeStyle = 'rgba(212,175,55,0.35)'; ctx.lineWidth = 1.5;
         pathRoundRect(ctx, panelX, panelY, panelW, panelH, 26); ctx.stroke();
@@ -1195,14 +1216,18 @@
         ctx.font = '800 23px Arial, sans-serif';
         ctx.fillText(tempatUnitUntukKartu().toUpperCase(), 78, 114);
 
-        // --- ID gaya "KAR | 00003" ---
+        // --- label "ID NASABAH" + ID gaya "KAR | 00003" ---
+        ctx.font = '600 13px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255,255,255,0.65)';
+        ctx.fillText('ID NASABAH', 56, 178);
+
         let idStr = String(n.id || '').toUpperCase();
         let prefixId = idStr.length >= 4 ? idStr.slice(0, 3) : idStr;
         let angkaId = idStr.length >= 4 ? idStr.slice(3) : '';
         ctx.fillStyle = '#ffffff';
         ctx.font = '700 25px Arial, sans-serif';
         ctx.fillText(prefixId, 56, 232);
-        ctx.strokeStyle = 'rgba(212,175,55,0.55)'; ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(128, 198); ctx.lineTo(128, 236); ctx.stroke();
         ctx.font = '800 40px "Courier New", monospace';
         ctx.fillStyle = '#ffffff';
@@ -1268,6 +1293,7 @@
         document.body.removeChild(temp);
         return canvas;
     }
+
 
     // Guard supaya tombol tidak bisa diklik dobel selagi proses.
     let sedangProsesKartu = false;
