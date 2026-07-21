@@ -1519,12 +1519,74 @@
         }
     }
 
+    // Membuat "poster" QR pribadi untuk satu nasabah (sinkron, tanpa CDN),
+    // mirip generatePosterQrUnit tapi dipersonalisasi dengan nama nasabah.
+    function generatePosterQrNasabah(n) {
+        let url = urlCekSaldo(CURRENT_UNIT_ID, n.id);
+        let temp = document.createElement('div');
+        temp.style.position = 'fixed'; temp.style.left = '-9999px'; temp.style.top = '-9999px';
+        document.body.appendChild(temp);
+        new QRCode(temp, { text: url, width: 420, height: 420, correctLevel: QRCode.CorrectLevel.M });
+        let qrCanvasSrc = temp.querySelector('canvas');
+        if (!qrCanvasSrc) { document.body.removeChild(temp); throw new Error('Gagal membuat QR.'); }
+
+        let W = 700, H = 1000;
+        let canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        let ctx = canvas.getContext('2d');
+
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+        let bandGrad = ctx.createLinearGradient(0, 0, W, 0);
+        bandGrad.addColorStop(0, '#059669'); bandGrad.addColorStop(1, '#047857');
+        ctx.fillStyle = bandGrad; ctx.fillRect(0, 0, W, 150);
+
+        if (logoDlhImg && logoDlhImg.complete && logoDlhImg.naturalWidth > 0) {
+            ctx.drawImage(logoDlhImg, W / 2 - 34, 26, 68, 68);
+        }
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 28px Arial, sans-serif';
+        ctx.fillText('KARTU CEK SALDO', W / 2, 132);
+
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 22px Arial, sans-serif';
+        ctx.fillText(String(n.nama || '-'), W / 2, 190);
+        ctx.font = '500 16px Arial, sans-serif';
+        ctx.fillStyle = '#64748b';
+        ctx.fillText('Bank Sampah Unit ' + tempatUnitUntukKartu(), W / 2, 216);
+
+        let qrBox = 380, qrX = (W - qrBox) / 2, qrY = 250;
+        ctx.fillStyle = '#f8fafc';
+        pathRoundRect(ctx, qrX - 16, qrY - 16, qrBox + 32, qrBox + 32, 18); ctx.fill();
+        ctx.strokeStyle = '#059669'; ctx.lineWidth = 2.5;
+        pathRoundRect(ctx, qrX - 16, qrY - 16, qrBox + 32, qrBox + 32, 18); ctx.stroke();
+        ctx.drawImage(qrCanvasSrc, qrX, qrY, qrBox, qrBox);
+
+        ctx.font = '500 18px Arial, sans-serif';
+        ctx.fillStyle = '#334155';
+        ctx.fillText('Scan QR ini lalu masukkan nomor HP Anda', W / 2, qrY + qrBox + 66);
+        ctx.fillText('untuk melihat saldo tabungan sampah.', W / 2, qrY + qrBox + 92);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '400 14px Arial, sans-serif';
+        ctx.fillText('Dinas Lingkungan Hidup Kabupaten Tulungagung', W / 2, H - 30);
+        ctx.textAlign = 'left';
+
+        document.body.removeChild(temp);
+        return canvas;
+    }
+
     function cetakQrNasabah(idNasabah, namaNasabah) {
-        let url = urlCekSaldo(CURRENT_UNIT_ID, idNasabah);
-        let dataUrl = buatQrDataUrl(url, 280);
-        if (!dataUrl) return alert('Gagal membuat QR. Coba lagi.');
-        bukaJendelaCetakQr('KARTU CEK SALDO', namaUnitTanpaBSU() + ' — ' + namaNasabah, dataUrl,
-            `Scan QR ini lalu masukkan nomor HP Anda untuk melihat saldo tabungan sampah.`);
+        let n = dataNasabah.find(x => String(x.id) === String(idNasabah));
+        if (!n) return alert('Data nasabah tidak ditemukan.');
+        try {
+            let canvas = generatePosterQrNasabah(n);
+            posterQrUnitState = { dataUrl: canvas.toDataURL('image/jpeg', 0.95), namaFile: 'QR_' + String(namaNasabah).replace(/[^a-zA-Z0-9]/g, '_') + '.jpg' };
+            document.getElementById('previewQrUnitImg').src = posterQrUnitState.dataUrl;
+            document.getElementById('modalPreviewQrUnit').style.display = 'flex';
+        } catch (e) {
+            alert('Gagal membuat QR: ' + (e && e.message ? e.message : e));
+        }
     }
 
     // Cetak kartu QR untuk SEMUA nasabah sekaligus dalam satu jendela cetak, tersusun
