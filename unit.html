@@ -997,7 +997,8 @@
 
     // Membuka jendela cetak browser (window.print()) berisi QR + instruksi. Bisa
     // langsung print ke printer fisik, atau pilih "Simpan sebagai PDF" di dialog
-    // cetak kalau ingin file PDF -- tanpa perlu pustaka PDF eksternal.
+    // cetak kalau ingin file PDF -- tanpa perlu pustaka PDF eksternal. Dipakai
+    // fitur "Cetak QR Saja" per nasabah (cetakQrNasabah).
     function bukaJendelaCetakQr(judul, subjudul, dataUrlQr, langkahHtml) {
         let win = window.open('', '_blank', 'width=480,height=720');
         if (!win) { alert('Popup diblokir browser. Izinkan popup untuk situs ini, lalu coba lagi.'); return; }
@@ -1018,16 +1019,114 @@
         win.document.close();
     }
 
-    function cetakQrUnitSaya() {
+    // Membuat "poster" QR Cek Saldo Unit sebagai canvas (sinkron, tanpa CDN),
+    // supaya bisa di-preview di dalam aplikasi sebelum dicetak/diunduh.
+    function generatePosterQrUnit() {
         let url = urlCekSaldo(CURRENT_UNIT_ID, null);
-        let dataUrl = buatQrDataUrl(url, 320);
-        if (!dataUrl) return alert('Gagal membuat QR. Coba lagi.');
-        bukaJendelaCetakQr('CEK SALDO TABUNGAN SAMPAH', 'Bank Sampah Unit: ' + namaUnitTanpaBSU(), dataUrl, `
-            <b>Cara Cek Saldo:</b><br>
-            1. Buka Kamera / aplikasi scan QR di HP<br>
-            2. Arahkan ke kode QR di atas<br>
-            3. Masukkan nomor HP yang terdaftar di Bank Sampah Unit ini<br>
-            4. Saldo &amp; rincian tabungan sampah langsung tampil`);
+        let temp = document.createElement('div');
+        temp.style.position = 'fixed'; temp.style.left = '-9999px'; temp.style.top = '-9999px';
+        document.body.appendChild(temp);
+        new QRCode(temp, { text: url, width: 420, height: 420, correctLevel: QRCode.CorrectLevel.M });
+        let qrCanvasSrc = temp.querySelector('canvas');
+        if (!qrCanvasSrc) { document.body.removeChild(temp); throw new Error('Gagal membuat QR.'); }
+
+        let W = 700, H = 1000;
+        let canvas = document.createElement('canvas');
+        canvas.width = W; canvas.height = H;
+        let ctx = canvas.getContext('2d');
+
+        // latar putih + pita hijau di atas (senada warna aplikasi)
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+        let bandGrad = ctx.createLinearGradient(0, 0, W, 0);
+        bandGrad.addColorStop(0, '#059669'); bandGrad.addColorStop(1, '#047857');
+        ctx.fillStyle = bandGrad; ctx.fillRect(0, 0, W, 150);
+
+        // logo DLH (kalau sudah termuat) di pita hijau
+        if (logoDlhImg && logoDlhImg.complete && logoDlhImg.naturalWidth > 0) {
+            ctx.drawImage(logoDlhImg, W / 2 - 34, 26, 68, 68);
+        }
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '800 30px Arial, sans-serif';
+        ctx.fillText('CEK SALDO TABUNGAN SAMPAH', W / 2, 132);
+
+        // subjudul nama unit
+        ctx.fillStyle = '#0f172a';
+        ctx.font = '700 22px Arial, sans-serif';
+        ctx.fillText('Bank Sampah Unit ' + tempatUnitUntukKartu(), W / 2, 196);
+
+        // kotak QR
+        let qrBox = 400, qrX = (W - qrBox) / 2, qrY = 230;
+        ctx.fillStyle = '#f8fafc';
+        pathRoundRect(ctx, qrX - 16, qrY - 16, qrBox + 32, qrBox + 32, 18); ctx.fill();
+        ctx.strokeStyle = '#059669'; ctx.lineWidth = 2.5;
+        pathRoundRect(ctx, qrX - 16, qrY - 16, qrBox + 32, qrBox + 32, 18); ctx.stroke();
+        ctx.drawImage(qrCanvasSrc, qrX, qrY, qrBox, qrBox);
+
+        // langkah-langkah
+        let langkah = [
+            '1. Buka Kamera / aplikasi scan QR di HP',
+            '2. Arahkan ke kode QR di atas',
+            '3. Masukkan nomor HP yang terdaftar di Bank Sampah Unit ini',
+            '4. Saldo & rincian tabungan sampah langsung tampil'
+        ];
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#334155';
+        ctx.font = '700 20px Arial, sans-serif';
+        ctx.fillText('Cara Cek Saldo:', 60, qrY + qrBox + 70);
+        ctx.font = '400 17px Arial, sans-serif';
+        langkah.forEach((l, i) => ctx.fillText(l, 60, qrY + qrBox + 106 + i * 30, W - 120));
+
+        // footer
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '400 14px Arial, sans-serif';
+        ctx.fillText('Dinas Lingkungan Hidup Kabupaten Tulungagung', W / 2, H - 30);
+        ctx.textAlign = 'left';
+
+        document.body.removeChild(temp);
+        return canvas;
+    }
+
+    let posterQrUnitState = null;
+
+    function cetakQrUnitSaya() {
+        try {
+            let canvas = generatePosterQrUnit();
+            posterQrUnitState = { dataUrl: canvas.toDataURL('image/jpeg', 0.95), namaFile: 'QR_CekSaldo_' + String(CURRENT_UNIT_NAMA).replace(/[^a-zA-Z0-9]/g, '_') + '.jpg' };
+            document.getElementById('previewQrUnitImg').src = posterQrUnitState.dataUrl;
+            document.getElementById('modalPreviewQrUnit').style.display = 'flex';
+        } catch (e) {
+            alert('Gagal membuat QR: ' + (e && e.message ? e.message : e));
+        }
+    }
+
+    function tutupPreviewQrUnit() {
+        document.getElementById('modalPreviewQrUnit').style.display = 'none';
+        posterQrUnitState = null;
+    }
+
+    function unduhQrUnitSaja() {
+        if (!posterQrUnitState) return;
+        let a = document.createElement('a');
+        a.href = posterQrUnitState.dataUrl; a.download = posterQrUnitState.namaFile;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    }
+
+    // Membuka jendela cetak browser (window.print()) berisi gambar poster QR yang
+    // sudah dibuat -- bisa langsung print ke printer fisik, atau pilih "Simpan
+    // sebagai PDF" di dialog cetak.
+    function cetakPosterQrUnit() {
+        if (!posterQrUnitState) return;
+        let win = window.open('', '_blank', 'width=480,height=720');
+        if (!win) { alert('Popup diblokir browser. Izinkan popup untuk situs ini, lalu coba lagi.'); return; }
+        win.document.write(`<!DOCTYPE html><html><head><title>Cetak QR Cek Saldo</title><meta charset="UTF-8">
+            <style> body { margin:0; padding:0; } img { width:100%; display:block; } </style>
+            </head><body>
+            <img src="${posterQrUnitState.dataUrl}">
+            <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 250); };<\/script>
+            </body></html>`);
+        win.document.close();
     }
 
     // =========================================
@@ -1860,6 +1959,20 @@
             <p class="text-muted mb-1" style="font-size:11px;">↑ Di HP: gambar otomatis siap kirim, tinggal pilih kontaknya. Di komputer: chat otomatis terbuka ke nomor nasabah, gambar terunduh untuk dilampirkan.</p>
             <button class="btn btn-outline-secondary" onclick="unduhKartuSaja()"><i class="bi bi-download me-2"></i>Unduh JPG Saja</button>
             <button class="btn btn-light text-muted" onclick="tutupPreviewKartu()">Batal</button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODAL PREVIEW QR CEK SALDO UNIT ===== -->
+<div id="modalPreviewQrUnit" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:9999; align-items:center; justify-content:center; padding:18px;">
+    <div style="background:#fff; border-radius:18px; padding:22px; max-width:420px; width:100%; text-align:center; max-height:92vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,0.3);">
+        <h5 class="fw-bold mb-1" style="color:var(--primary-dark);"><i class="bi bi-qr-code me-2"></i>Preview QR Cek Saldo</h5>
+        <p class="text-muted small mb-3">Periksa dulu tampilannya sebelum dicetak/diunduh.</p>
+        <img id="previewQrUnitImg" src="" style="width:100%; border-radius:14px; box-shadow:0 8px 22px rgba(0,0,0,0.18);">
+        <div class="d-grid gap-2 mt-4">
+            <button class="btn btn-success btn-lg" onclick="cetakPosterQrUnit()"><i class="bi bi-printer-fill me-2"></i>Cetak</button>
+            <button class="btn btn-outline-secondary" onclick="unduhQrUnitSaja()"><i class="bi bi-download me-2"></i>Unduh JPG</button>
+            <button class="btn btn-light text-muted" onclick="tutupPreviewQrUnit()">Batal</button>
         </div>
     </div>
 </div>
