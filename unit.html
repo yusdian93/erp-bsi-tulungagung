@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase-adapter.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
   // === QRCode.js (davidshimjs/qrcodejs, MIT License) disematkan langsung di sini ===
   // supaya fitur cetak QR "Cek Saldo Mandiri" tidak bergantung pada CDN eksternal
@@ -609,6 +610,53 @@
             .card { border-radius:20px; }
         }
 
+
+        /* =========================================================
+           MODUL OPERASIONAL BSU 2026
+        ========================================================== */
+        .navbar .dropdown-menu {
+            min-width: 225px; padding: 10px; margin-top: 8px;
+            border: 1px solid rgba(7,59,50,.12); border-radius: 16px;
+            box-shadow: 0 20px 50px rgba(3,31,25,.20); background: rgba(255,255,255,.98);
+        }
+        .navbar .dropdown-item {
+            padding: 10px 12px; border-radius: 10px; color: var(--ink-900);
+            font-size: .78rem; font-weight: 700; cursor: pointer;
+        }
+        .navbar .dropdown-item i { color: var(--primary-main); width: 22px; }
+        .navbar .dropdown-item:hover, .navbar .dropdown-item.active-tab {
+            background: var(--primary-light); color: var(--primary-dark);
+        }
+        .navbar .dropdown-toggle::after { color: rgba(242,223,180,.85); }
+        .module-title { display:flex; align-items:center; gap:12px; margin-bottom:6px; color:var(--primary-dark); font-weight:800; }
+        .module-title .icon-shell { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; background:var(--primary-light); color:var(--primary-main); }
+        .module-note { color:var(--text-muted); font-size:.82rem; line-height:1.55; }
+        .operational-card { border-radius:18px; padding:20px; background:#fff; border:1px solid var(--border-color); box-shadow:0 10px 28px rgba(7,40,33,.07); height:100%; }
+        .metric-soft { border-radius:16px; padding:17px; background:linear-gradient(145deg,#fff,#f5f8f6); border:1px solid var(--border-color); height:100%; }
+        .metric-soft .label { font-size:.72rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:800; }
+        .metric-soft .value { margin-top:6px; font-size:1.35rem; color:var(--primary-dark); font-weight:800; }
+        .status-chip { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:999px; font-size:.68rem; font-weight:800; }
+        .status-active { color:#166534; background:#dcfce7; border:1px solid #bbf7d0; }
+        .status-void { color:#991b1b; background:#fee2e2; border:1px solid #fecaca; }
+        .status-pending { color:#92400e; background:#fef3c7; border:1px solid #fde68a; }
+        .status-paid { color:#075985; background:#e0f2fe; border:1px solid #bae6fd; }
+        .required-mark { color:#dc2626; }
+        .table-actions { white-space:nowrap; }
+        .table-actions .btn { padding:6px 9px; border-radius:9px; }
+        .section-divider { height:1px; background:linear-gradient(90deg,transparent,var(--border-color),transparent); margin:28px 0; }
+        .empty-state { padding:38px 18px; text-align:center; color:var(--text-muted); }
+        .empty-state i { display:block; font-size:2rem; color:#94a3b8; margin-bottom:8px; }
+        .form-check-input:checked { background-color:var(--primary-main); border-color:var(--primary-main); }
+        .data-warning { border-radius:14px; padding:13px 15px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:.78rem; line-height:1.55; }
+        .cash-positive { color:#047857 !important; }
+        .cash-negative { color:#be123c !important; }
+        @media print {
+            body.mode-bukubesar * { visibility:hidden; }
+            body.mode-bukubesar #bukubesar, body.mode-bukubesar #bukubesar * { visibility:visible; }
+            body.mode-bukubesar #bukubesar { display:block !important; position:absolute; inset:0; padding:8mm; background:white; }
+            body.mode-bukubesar #bukubesar button { display:none !important; }
+        }
+
     </style>
 </head>
 <body>
@@ -634,18 +682,55 @@
                     <i class="bi bi-list fs-1 text-dark"></i>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap: wrap; justify-content: flex-end;">
-                        <li class="nav-link nav-btn dashboard-tab active-tab" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</li>
-                        <li class="nav-link nav-btn" onclick="showTab('nasabah', this); siapkanIdNasabahBaru();"><i class="bi bi-people me-2"></i>Nasabah</li>
-                        <li class="nav-link nav-btn" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down me-2"></i>Setor Sampah</li>
-                        <li class="nav-link nav-btn" onclick="showTab('stock', this)"><i class="bi bi-boxes me-2"></i>Stock Sampah</li>
-                        <li class="nav-link nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2 me-2"></i>Cek Saldo</li>
-                        <li class="nav-link nav-btn" onclick="showTab('hargasampah', this)"><i class="bi bi-tags me-2"></i>Harga Sampah</li>                    
-                        <li class="nav-link nav-btn" onclick="showTab('broadcast-harga', this)"><i class="bi bi-megaphone-fill me-2"></i>Kirim Harga</li>                    
-                        <li class="nav-link nav-btn" onclick="showTab('jadwal', this)"><i class="bi bi-calendar-event me-2"></i>Jadwal</li>
-                        <li class="nav-link nav-btn" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark-fill me-2"></i>Buku Besar</li>
-                        <li class="nav-link nav-btn rekap-tab" onclick="showTab('laporan', this)"><i class="bi bi-bar-chart-fill me-2"></i>Rekapitulasi</li>
-                        <li class="nav-link nav-btn logout-link" onclick="prosesLogout()"><i class="bi bi-box-arrow-right me-2"></i>Keluar</li>
+                    <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap:wrap;justify-content:flex-end;">
+                        <li class="nav-item"><button class="nav-link nav-btn dashboard-tab active-tab border-0" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</button></li>
+
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-database me-2"></i>Master Data</button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('nasabah', this); siapkanIdNasabahBaru();"><i class="bi bi-people"></i>Nasabah</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('hargasampah', this)"><i class="bi bi-tags"></i>Harga Material</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('profil', this)"><i class="bi bi-building-gear"></i>Profil & Petugas</button></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right me-2"></i>Transaksi</button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down"></i>Setoran Nasabah</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2"></i>Saldo & Penarikan</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('pengiriman', this)"><i class="bi bi-truck"></i>Pengiriman ke BSI</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('koreksi', this)"><i class="bi bi-arrow-counterclockwise"></i>Koreksi/Pembatalan</button></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-boxes me-2"></i>Persediaan</button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('stock', this)"><i class="bi bi-box-seam"></i>Kartu Stok</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('stockopname', this)"><i class="bi bi-clipboard2-check"></i>Stock Opname</button></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-cash-stack me-2"></i>Keuangan</button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('kas', this)"><i class="bi bi-cash-coin"></i>Kas & Bank</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark"></i>Buku Besar</button></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item dropdown">
+                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-megaphone me-2"></i>Komunikasi</button>
+                            <ul class="dropdown-menu">
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('jadwal', this)"><i class="bi bi-calendar-event"></i>Jadwal Setoran</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('broadcast-harga', this)"><i class="bi bi-tags-fill"></i>Kirim Informasi Harga</button></li>
+                            </ul>
+                        </li>
+
+                        <li class="nav-item"><button class="nav-link nav-btn rekap-tab border-0" onclick="showTab('laporan', this)"><i class="bi bi-bar-chart-fill me-2"></i>Laporan</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('audit', this)"><i class="bi bi-shield-check me-2"></i>Audit</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn logout-link border-0" onclick="prosesLogout()"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button></li>
                     </ul>
                 </div>
             </div>
@@ -730,6 +815,12 @@
                 </div>
             </div>
 
+            <div class="row mt-4 g-3">
+                <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-box-seam me-1"></i>Stok Gudang Saat Ini</div><div class="value" id="dash-stok-aktif">0 Kg</div></div></div>
+                <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-cash-stack me-1"></i>Kas/Bank Tercatat</div><div class="value" id="dash-kas">Rp 0</div></div></div>
+                <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-truck me-1"></i>Terkirim ke BSI</div><div class="value" id="dash-keluar-bsi">0 Kg</div></div></div>
+            </div>
+
             <div class="row mt-5">
                 <div class="col-12">
                     <div class="ai-glow-card">
@@ -766,6 +857,14 @@
                             </div>
                             <div class="mb-4"><label>Nama Lengkap (Sesuai KTP)</label><input type="text" id="namaNasabah" class="form-control" required></div>
                             <div class="mb-4"><label>Nomor WhatsApp Aktif</label><input type="text" id="hpNasabah" class="form-control" placeholder="Contoh: 08123456789" required></div>
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-5"><label>Jenis Nasabah</label><select id="jenisNasabah" class="form-select"><option>Rumah Tangga</option><option>Sekolah</option><option>Usaha</option><option>Instansi</option><option>Kelompok</option></select></div>
+                                <div class="col-md-2"><label>RT</label><input id="rtNasabah" class="form-control" maxlength="3"></div>
+                                <div class="col-md-2"><label>RW</label><input id="rwNasabah" class="form-control" maxlength="3"></div>
+                                <div class="col-md-3"><label>Status</label><select id="statusNasabah" class="form-select"><option value="aktif">Aktif</option><option value="nonaktif">Nonaktif</option></select></div>
+                            </div>
+                            <div class="mb-4"><label>Alamat Singkat</label><textarea id="alamatNasabah" class="form-control" rows="2" placeholder="Dusun/Jalan/Desa"></textarea></div>
+                            <div class="form-check mb-4"><input class="form-check-input" type="checkbox" id="izinWaNasabah" checked><label class="form-check-label" for="izinWaNasabah">Nasabah bersedia menerima informasi jadwal dan harga melalui WhatsApp.</label></div>
                             <button type="submit" class="btn btn-success w-100 py-3"><i class="bi bi-save me-2"></i>Simpan Data Nasabah</button>
                         </form>
                         <hr class="my-5" style="border-color: var(--border-color); opacity: 1;">
@@ -777,7 +876,7 @@
                         <button type="button" class="btn btn-sm mb-3" style="border-radius:20px; background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; font-weight:700;" onclick="cetakSemuaQrNasabah()">🔲 Cetak Semua QR Nasabah (Kartu)</button>
                         <div class="table-responsive">
                             <table class="table table-hover">
-                                <thead><tr><th>ID Nasabah</th><th>Nama Lengkap</th><th>Nomor WA</th><th class="text-center">Manajemen</th></tr></thead>
+                                <thead><tr><th>ID</th><th>Nama</th><th>Jenis/Wilayah</th><th>Nomor WA</th><th>Status</th><th class="text-center">Manajemen</th></tr></thead>
                                 <tbody id="tabel-daftar-nasabah"></tbody>
                             </table>
                         </div>
@@ -816,6 +915,7 @@
                                         <th>Nama Material</th>
                                         <th class="text-end">Masuk (Kg)</th>
                                         <th class="text-end">Sudah ke Induk (Kg)</th>
+                                        <th class="text-end">Penyesuaian (Kg)</th>
                                         <th class="text-end">Sisa Stock (Kg)</th>
                                         <th class="text-end">Estimasi Nilai</th>
                                     </tr>
@@ -985,7 +1085,9 @@
                         <div class="mb-4"><label>Pesan Tambahan (Opsional)</label><textarea id="pesanTambahan" class="form-control" rows="3"></textarea></div>
                         <button class="btn btn-success w-100 py-3 mb-5" onclick="buatBroadcast()"><i class="bi bi-magic me-2"></i>Buat Pesan & Tampilkan Kontak</button>
                         <div id="areaBroadcast" style="display:none;">
-                            <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Kirim ke Nasabah:</h6>
+                            <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Pratinjau Pesan:</h6>
+                            <div id="previewPesan" class="p-3 mb-4" style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:12px;white-space:pre-wrap;font-size:.85rem;"></div>
+                            <h6 class="fw-bold mb-3" style="color: var(--primary-dark);">Kirim ke Nasabah (<span id="totalKirimJadwal">0</span> kontak):</h6>
                             <div class="table-responsive"><table class="table table-hover"><tbody id="tabel-kirim-broadcast"></tbody></table></div>
                         </div>
                     </div>
@@ -993,6 +1095,102 @@
             </div>
         </div>
         
+
+        <div id="pengiriman" class="tab-content" style="display:none;">
+            <div class="card p-4 p-md-5">
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-truck"></i></span><div><h4 class="m-0">Pengiriman/Penjualan ke Bank Sampah Induk</h4><div class="module-note">Mencatat material keluar dari gudang unit, nilai penjualan, surat jalan, dan status pembayaran.</div></div></div>
+                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i>Berat pengiriman tidak boleh melebihi stok aplikasi. Jika stok fisik berbeda, lakukan Stock Opname terlebih dahulu.</div>
+                <form id="formPengirimanBSI" class="mt-4" onsubmit="simpanPengirimanBSI(event)">
+                    <div class="row g-3">
+                        <div class="col-md-3"><label>Tanggal <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" required></div>
+                        <div class="col-md-3"><label>No. Surat Jalan</label><input id="kirimDokumen" class="form-control" placeholder="SJ/BSU/..."></div>
+                        <div class="col-md-6"><label>Material <span class="required-mark">*</span></label><select id="kirimMaterial" class="form-select" required onchange="hitungPengirimanBSI()"></select></div>
+                        <div class="col-md-3"><label>Berat Dikirim (Kg) <span class="required-mark">*</span></label><input type="number" step="0.01" min="0.01" id="kirimBerat" class="form-control" required oninput="hitungPengirimanBSI()"></div>
+                        <div class="col-md-3"><label>Harga Jual/Kg</label><input type="number" min="0" id="kirimHarga" class="form-control" oninput="hitungPengirimanBSI()"></div>
+                        <div class="col-md-3"><label>Total Penjualan</label><input id="kirimTotal" class="form-control" readonly></div>
+                        <div class="col-md-3"><label>Biaya Angkut</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
+                        <div class="col-md-3"><label>Status Pembayaran</label><select id="kirimStatusBayar" class="form-select"><option value="belum_dibayar">Belum Dibayar</option><option value="lunas">Lunas/Diterima</option></select></div>
+                        <div class="col-md-3"><label>Metode</label><select id="kirimMetode" class="form-select"><option>Tunai</option><option>Transfer</option><option>Tabungan BSU di BSI</option></select></div>
+                        <div class="col-md-6"><label>Catatan/Selisih Timbang</label><input id="kirimCatatan" class="form-control" placeholder="Contoh: hasil timbang BSI 49,80 kg"></div>
+                    </div>
+                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-save me-2"></i>Simpan Pengiriman</button>
+                </form>
+                <div class="section-divider"></div>
+                <h6 class="fw-bold mb-3">Riwayat Pengiriman ke BSI</h6>
+                <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal/No. Dokumen</th><th>Material</th><th class="text-end">Berat</th><th class="text-end">Nilai</th><th>Status Bayar</th><th>Petugas</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
+            </div>
+        </div>
+
+        <div id="stockopname" class="tab-content" style="display:none;">
+            <div class="card p-4 p-md-5">
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-clipboard2-check"></i></span><div><h4 class="m-0">Stock Opname & Penyesuaian</h4><div class="module-note">Mencocokkan stok sistem dengan hasil timbang fisik gudang. Selisih menjadi penyesuaian stok dengan jejak audit.</div></div></div>
+                <form id="formStockOpname" class="mt-4" onsubmit="simpanStockOpname(event)">
+                    <div class="row g-3">
+                        <div class="col-md-3"><label>Tanggal</label><input type="date" id="opnameTanggal" class="form-control" required></div>
+                        <div class="col-md-5"><label>Material</label><select id="opnameMaterial" class="form-select" required onchange="isiStokSistemOpname()"></select></div>
+                        <div class="col-md-2"><label>Stok Sistem</label><input id="opnameSistem" class="form-control" readonly></div>
+                        <div class="col-md-2"><label>Stok Fisik</label><input type="number" step="0.01" min="0" id="opnameFisik" class="form-control" required></div>
+                        <div class="col-md-9"><label>Alasan Selisih</label><input id="opnameAlasan" class="form-control" placeholder="Susut, tercecer, salah timbang, material tercampur, dll."></div>
+                        <div class="col-md-3"><label>Diperiksa Oleh</label><input id="opnamePetugas" class="form-control"></div>
+                    </div>
+                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-check2-square me-2"></i>Simpan Stock Opname</button>
+                </form>
+                <div class="section-divider"></div>
+                <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal</th><th>Material</th><th class="text-end">Sistem</th><th class="text-end">Fisik</th><th class="text-end">Selisih</th><th>Alasan/Pemeriksa</th></tr></thead><tbody id="tabel-stock-opname"></tbody></table></div>
+            </div>
+        </div>
+
+        <div id="kas" class="tab-content" style="display:none;">
+            <div class="card p-4 p-md-5">
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-cash-coin"></i></span><div><h4 class="m-0">Kas & Bank Unit</h4><div class="module-note">Mencatat saldo awal, penerimaan, pengeluaran, pembayaran saldo nasabah, dan rekonsiliasi fisik.</div></div></div>
+                <div class="row g-3 mt-3 mb-4">
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Saldo Kas/Bank</div><div class="value" id="kas-saldo">Rp 0</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Total Kas Masuk</div><div class="value cash-positive" id="kas-total-masuk">Rp 0</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Total Kas Keluar</div><div class="value cash-negative" id="kas-total-keluar">Rp 0</div></div></div>
+                </div>
+                <form id="formKasMutasi" onsubmit="simpanKasMutasi(event)">
+                    <div class="row g-3">
+                        <div class="col-md-2"><label>Tanggal</label><input type="date" id="kasTanggal" class="form-control" required></div>
+                        <div class="col-md-2"><label>Arah</label><select id="kasArah" class="form-select"><option value="masuk">Kas Masuk</option><option value="keluar">Kas Keluar</option></select></div>
+                        <div class="col-md-3"><label>Kategori</label><select id="kasKategori" class="form-select"><option>Saldo Awal</option><option>Pembayaran BSI</option><option>Modal/Swadaya</option><option>Biaya Operasional</option><option>Pembayaran Nasabah</option><option>Lainnya</option></select></div>
+                        <div class="col-md-2"><label>Nominal</label><input type="number" min="1" id="kasNominal" class="form-control" required></div>
+                        <div class="col-md-3"><label>Metode</label><select id="kasMetode" class="form-select"><option>Tunai</option><option>Transfer/Rekening</option></select></div>
+                        <div class="col-md-4"><label>No. Bukti</label><input id="kasBukti" class="form-control"></div>
+                        <div class="col-md-8"><label>Keterangan</label><input id="kasKeterangan" class="form-control"></div>
+                    </div>
+                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-plus-circle me-2"></i>Catat Mutasi Kas</button>
+                </form>
+                <div class="section-divider"></div>
+                <div class="row g-4">
+                    <div class="col-lg-8"><h6 class="fw-bold mb-3">Riwayat Mutasi Kas</h6><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal/Bukti</th><th>Kategori</th><th>Metode</th><th class="text-end">Masuk</th><th class="text-end">Keluar</th><th>Petugas</th></tr></thead><tbody id="tabel-kas-mutasi"></tbody></table></div></div>
+                    <div class="col-lg-4"><div class="operational-card"><h6 class="fw-bold">Rekonsiliasi Kas Harian</h6><p class="module-note">Bandingkan saldo sistem dengan uang/rekening yang benar-benar tersedia.</p><form onsubmit="simpanRekonsiliasiUnit(event)"><div class="mb-3"><label>Tanggal</label><input type="date" id="rekTanggal" class="form-control" required></div><div class="mb-3"><label>Saldo Sistem</label><input id="rekSistem" class="form-control" readonly></div><div class="mb-3"><label>Saldo Fisik/Rekening</label><input type="number" id="rekFisik" class="form-control" required></div><div class="mb-3"><label>Keterangan</label><textarea id="rekKet" class="form-control" rows="2"></textarea></div><button class="btn btn-outline-success w-100">Simpan Rekonsiliasi</button></form></div></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="koreksi" class="tab-content" style="display:none;">
+            <div class="card p-4 p-md-5">
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-arrow-counterclockwise"></i></span><div><h4 class="m-0">Koreksi & Pembatalan Transaksi</h4><div class="module-note">Transaksi tidak dihapus permanen. Pembatalan mengubah status menjadi dibatalkan dan mempertahankan data untuk audit.</div></div></div>
+                <div class="row g-3 mt-3 mb-4"><div class="col-md-4"><input id="filterKoreksiCari" class="form-control" placeholder="Cari nomor transaksi/nasabah/material" oninput="updateTabelKoreksi()"></div><div class="col-md-3"><input type="date" id="filterKoreksiMulai" class="form-control" onchange="updateTabelKoreksi()"></div><div class="col-md-3"><input type="date" id="filterKoreksiAkhir" class="form-control" onchange="updateTabelKoreksi()"></div><div class="col-md-2"><select id="filterKoreksiStatus" class="form-select" onchange="updateTabelKoreksi()"><option value="semua">Semua Status</option><option value="aktif">Aktif</option><option value="dibatalkan">Dibatalkan</option></select></div></div>
+                <div class="table-responsive"><table class="table table-hover"><thead><tr><th>No./Tanggal</th><th>Nasabah</th><th>Aktivitas</th><th class="text-end">Berat/Nilai</th><th>Status</th><th class="text-center">Tindakan</th></tr></thead><tbody id="tabel-koreksi"></tbody></table></div>
+            </div>
+        </div>
+
+        <div id="audit" class="tab-content" style="display:none;">
+            <div class="card p-4 p-md-5">
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-shield-check"></i></span><div><h4 class="m-0">Audit Log Unit</h4><div class="module-note">Jejak siapa melakukan penambahan, perubahan, pembatalan, stock opname, dan mutasi kas.</div></div></div>
+                <div class="row g-3 mt-3 mb-4"><div class="col-md-4"><select id="auditFilterTabel" class="form-select" onchange="updateAuditUnit()"><option value="">Semua Modul</option><option value="transaksi">Transaksi</option><option value="nasabah">Nasabah</option><option value="stock_opname">Stock Opname</option><option value="kas_mutasi">Kas</option><option value="rekonsiliasi_kas">Rekonsiliasi</option></select></div><div class="col-md-4"><input type="date" id="auditFilterMulai" class="form-control" onchange="updateAuditUnit()"></div><div class="col-md-4"><button class="btn btn-outline-success w-100" onclick="muatAuditUnit()"><i class="bi bi-arrow-clockwise me-2"></i>Muat Ulang Audit</button></div></div>
+                <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Waktu</th><th>Modul/Aksi</th><th>Referensi</th><th>Petugas</th><th>Keterangan</th></tr></thead><tbody id="tabel-audit-unit"></tbody></table></div>
+            </div>
+        </div>
+
+        <div id="profil" class="tab-content" style="display:none;">
+            <div class="row g-4">
+                <div class="col-lg-7"><div class="card p-4 p-md-5"><div class="module-title"><span class="icon-shell"><i class="bi bi-building-gear"></i></span><div><h4 class="m-0">Profil Bank Sampah Unit</h4><div class="module-note">Identitas yang berasal dari data registrasi Bank Sampah Induk.</div></div></div><div id="profilUnitDetail" class="mt-4"></div></div></div>
+                <div class="col-lg-5"><div class="card p-4 p-md-5"><h5 class="fw-bold">Petugas & Akses Sesi</h5><p class="module-note">Nama ini digunakan pada audit log untuk membedakan operator yang memakai akun unit yang sama.</p><div class="mb-3"><label>Petugas Aktif</label><input id="profilPetugasAktif" class="form-control" readonly></div><button class="btn btn-outline-success w-100" onclick="gantiPetugasAktif()"><i class="bi bi-person-gear me-2"></i>Ganti Petugas Aktif</button><div class="data-warning mt-4">Hak akses tingkat lanjut tetap harus diamankan melalui autentikasi server/RLS. Jangan membagikan akun unit kepada pihak di luar pengelola.</div></div></div>
+            </div>
+        </div>
+
         <div id="laporan" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
                 <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
@@ -1001,6 +1199,12 @@
                         <button class="btn btn-success px-4" onclick="eksporExcel()"><i class="bi bi-file-earmark-spreadsheet me-2"></i> Ekspor Excel</button>
                         <button class="btn btn-danger px-4" onclick="cetakLaporanA4()"><i class="bi bi-file-earmark-pdf me-2"></i> Ekspor PDF</button>
                     </div>
+                </div>
+                <div class="row g-3 mb-4 p-3" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;">
+                    <div class="col-md-3"><label>Dari Tanggal</label><input type="date" id="lapFilterMulai" class="form-control" onchange="updateLaporan()"></div>
+                    <div class="col-md-3"><label>Sampai Tanggal</label><input type="date" id="lapFilterAkhir" class="form-control" onchange="updateLaporan()"></div>
+                    <div class="col-md-3"><label>Material</label><select id="lapFilterMaterial" class="form-select" onchange="updateLaporan()"><option value="">Semua Material</option></select></div>
+                    <div class="col-md-3"><label>Nasabah</label><select id="lapFilterNasabah" class="form-select" onchange="updateLaporan()"><option value="">Semua Nasabah</option></select></div>
                 </div>
                 <div class="row mt-2 g-4 mb-5">
                     <div class="col-12 col-md-6">
@@ -1032,8 +1236,14 @@
                     </div>
                 </div>
                 
+                <div class="row g-3 mb-2">
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Dikirim ke BSI</div><div class="value" id="lap-keluar">0 Kg</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Stok Akhir</div><div class="value" id="lap-stok-akhir">0 Kg</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Kas/Bank Tercatat</div><div class="value" id="lap-kas">Rp 0</div></div></div>
+                </div>
+
                 <h6 class="fw-bold mb-3 mt-5" style="color: var(--primary-dark);"><i class="bi bi-pie-chart me-2 text-success"></i>Matriks Inventaris Persediaan</h6>
-                <div class="table-responsive mb-5"><table class="table table-hover mb-0"><thead><tr><th>Kategori Material Persediaan</th><th>Akumulasi Volume</th><th class="text-end">Total Valuasi Aset (Rp)</th></tr></thead><tbody id="tabel-rekap-sampah"></tbody></table></div>
+                <div class="table-responsive mb-5"><table class="table table-hover mb-0"><thead><tr><th>Material</th><th>Masuk</th><th>Keluar ke BSI</th><th>Penyesuaian</th><th>Stok Akhir</th><th class="text-end">Nilai Stok</th></tr></thead><tbody id="tabel-rekap-sampah"></tbody></table></div>
                 <h6 class="fw-bold mb-3" style="color: var(--primary-dark);"><i class="bi bi-journal-text me-2 text-success"></i>Buku Besar Pembantu (Rincian Hutang)</h6>
                 <div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Identitas Kreditur (Nasabah)</th><th>Total Volume Disetor</th><th class="text-end">Sisa Saldo Mengendap (Rp)</th></tr></thead><tbody id="tabel-rekap-nasabah"></tbody></table></div>
             </div>
@@ -1070,7 +1280,7 @@
         // mengetik nama manual berulang-ulang -> dipakai sebagai "oleh" di audit_log).
         try {
             if (!sessionStorage.getItem('NAMA_PETUGAS_SESI')) {
-                sessionStorage.setItem('NAMA_PETUGAS_SESI', 'BSU ' + namaUnitTanpaBSU());
+                getPetugasSesi();
             }
         } catch (e) {}
 
@@ -1115,45 +1325,52 @@
         return false;
     }
 
-    let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = []; 
+    let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = [];
+    let dataStockOpname = []; let dataKasMutasi = []; let dataRekonsiliasiUnit = []; let dataAuditUnit = [];
     let masterNasabah = []; let masterTransaksi = [];
 
     function loadDataDatabase() {
         AdapterAPI.getBundleBSU(CURRENT_UNIT_ID).then(data => {
-            masterNasabah = data.nasabah || []; 
-            masterTransaksi = data.transaksi || []; 
+            masterNasabah = data.nasabah || [];
+            masterTransaksi = data.transaksi || [];
             dataTransaksiKeluar = data.transaksiKeluar || [];
             dataKategori = data.kategori || [];
-            dataUnit = data.unit || []; 
-            
-            dataNasabah = [...masterNasabah]; 
+            dataUnit = data.unit || [];
+            dataStockOpname = data.stockOpname || [];
+            dataKasMutasi = data.kasMutasi || [];
+            dataRekonsiliasiUnit = data.rekonsiliasi || [];
+            dataAuditUnit = data.audit || [];
+
+            dataNasabah = [...masterNasabah];
             dataTransaksi = [...masterTransaksi];
 
-            if(CURRENT_ROLE === 'BSI') {
-                document.getElementById('area-filter-bsi').style.display = 'flex';
-                updateDropdownFilterUnit();
-            }
-
-            dataTransaksi.forEach(t => {
-                if (typeof t.tgl === 'string' && t.tgl.includes('T') && t.tgl.includes('Z')) {
-                    let pisah = t.tgl.split('T'); let tanggalArr = pisah[0].split('-'); let jamArr = pisah[1].split('.')[0]; 
-                    t.tgl = `${tanggalArr[2]}-${tanggalArr[1]}-${tanggalArr[0]} ${jamArr}`;
-                }
+            [...dataTransaksi, ...dataTransaksiKeluar].forEach(t => {
+                t.berat = parseFloat(t.berat) || 0;
+                t.total = parseFloat(t.total) || 0;
+                t.harga_satuan = parseFloat(t.harga_satuan) || (t.berat > 0 ? t.total / t.berat : 0);
             });
- 
-            updateTabelNasabah(); 
+
+            updateTabelNasabah();
             updateTabelHargaSampah();
-            updateDropdownKategori();             
-            updateDropdownNasabah('pilihNasabah'); 
-            if(document.getElementById('pilihNasabahSaldo')) updateDropdownNasabah('pilihNasabahSaldo');
-            updateDashboard(); 
-            updateBukuBesar(); 
+            updateDropdownKategori();
+            updateDropdownNasabah('pilihNasabah');
+            updateDropdownNasabah('pilihNasabahSaldo');
+            isiDropdownModulBaru();
+            updateDashboard();
+            updateBukuBesar();
             updateLaporan();
             updateTabelStock();
-        }).catch(error => { 
-            console.error("Gagal memuat data:", error);
-            alert("Gagal memuat data. Periksa koneksi internet atau script Google Anda.");
-            document.getElementById('area-komposisi-sampah').innerHTML = `<div class="col-12 text-center py-4 text-danger">Gagal memuat data dari server.</div>`;
+            updateTabelPengiriman();
+            updateTabelStockOpname();
+            updateKasUnit();
+            updateTabelKoreksi();
+            updateAuditUnit();
+            updateProfilUnit();
+        }).catch(error => {
+            console.error('Gagal memuat data:', error);
+            alert('Gagal memuat data dari server. Periksa koneksi internet atau hubungi administrator sistem.');
+            const area = document.getElementById('area-komposisi-sampah');
+            if (area) area.innerHTML = `<div class="col-12 text-center py-4 text-danger">Gagal memuat data dari server.</div>`;
         });
     }
 
@@ -1161,126 +1378,48 @@
     // LOGIKA DASBOR & ANIMASI AI KOMPOSISI HIERARKI
     // ==========================================
     function updateDashboard() {
-        let btnTransaksi = document.getElementById('dash-transaksi');
-        if(btnTransaksi) btnTransaksi.innerText = dataTransaksi.length; 
-        
-        let btnNasabah = document.getElementById('dash-nasabah');
-        if(btnNasabah) btnNasabah.innerText = dataNasabah.length;
-        
-        let totalRupiah = 0;
-        let totalBerat = 0;
-        let komposisiData = {};
+        const trxAktif = transaksiAktif(dataTransaksi);
+        const keluarAktif = transaksiAktif(dataTransaksiKeluar);
+        const totalSaldo = trxAktif.reduce((a,t) => a + num(t.total), 0);
+        const totalMasuk = trxAktif.filter(t => t.jenis !== 'Penarikan Tunai').reduce((a,t) => a + num(t.berat), 0);
+        const totalKeluar = keluarAktif.filter(t => num(t.berat) > 0).reduce((a,t) => a + num(t.berat), 0);
+        const totalStok = hitungSemuaStok().reduce((a,b) => a + b.sisa, 0);
+        const saldoKas = hitungSaldoKas();
 
-        dataTransaksi.forEach(t => {
-            totalRupiah += t.total; 
-            if (t.jenis !== 'Penarikan Tunai') {
-                totalBerat += t.berat;
-                
-                let materialMaster = dataKategori.find(k => k.nama_kategori === t.jenis);
-                let jenisKategori = materialMaster && materialMaster.jenis_material ? materialMaster.jenis_material : 'Lainnya';
-                let namaMaterialSpesifik = t.jenis;
+        setText('dash-transaksi', trxAktif.length);
+        setText('dash-nasabah', dataNasabah.filter(n => (n.status || 'aktif') !== 'nonaktif').length);
+        setText('dash-rupiah', rupiah(totalSaldo));
+        setText('dash-sampah', totalMasuk.toFixed(1) + ' Kg');
+        setText('dash-stok-aktif', totalStok.toFixed(2) + ' Kg');
+        setText('dash-kas', rupiah(saldoKas));
+        setText('dash-keluar-bsi', totalKeluar.toFixed(2) + ' Kg');
 
-                if(!komposisiData[jenisKategori]) {
-                    komposisiData[jenisKategori] = { total: 0, rincian: {} };
-                }
-                komposisiData[jenisKategori].total += t.berat;
-                if(!komposisiData[jenisKategori].rincian[namaMaterialSpesifik]) {
-                    komposisiData[jenisKategori].rincian[namaMaterialSpesifik] = 0;
-                }
-                komposisiData[jenisKategori].rincian[namaMaterialSpesifik] += t.berat;
-            }
+        const komposisi = {};
+        trxAktif.filter(t => t.jenis !== 'Penarikan Tunai').forEach(t => {
+            const master = dataKategori.find(k => k.nama_kategori === t.jenis);
+            const kelompok = master?.jenis_material || 'Lainnya';
+            if (!komposisi[kelompok]) komposisi[kelompok] = { total:0, rincian:{} };
+            komposisi[kelompok].total += num(t.berat);
+            komposisi[kelompok].rincian[t.jenis] = (komposisi[kelompok].rincian[t.jenis] || 0) + num(t.berat);
         });
-
-        let btnRupiah = document.getElementById('dash-rupiah');
-        if(btnRupiah) btnRupiah.innerText = 'Rp ' + totalRupiah.toLocaleString('id-ID');
-        
-        let btnSampah = document.getElementById('dash-sampah');
-        if(btnSampah) btnSampah.innerText = totalBerat.toFixed(1) + ' Kg';
-
-        let areaKomposisi = document.getElementById('area-komposisi-sampah');
-        if(areaKomposisi) {
-            areaKomposisi.innerHTML = '';
-            let warnaArray = ['#10b981', '#0ea5e9', '#f59e0b', '#ec4899', '#8b5cf6', '#ef4444', '#14b8a6'];
-
-            if(Object.keys(komposisiData).length === 0) {
-                areaKomposisi.innerHTML = `<div class="col-12 text-center py-4" style="color: #64748b;">Belum ada volume material masuk untuk dianalisis.</div>`;
-            } else {
-                let sortedKomposisi = Object.entries(komposisiData).sort((a, b) => b[1].total - a[1].total);
-                
-                sortedKomposisi.forEach(([jenisBesar, dataBesar], index) => {
-                    let persentaseUtama = totalBerat > 0 ? ((dataBesar.total / totalBerat) * 100).toFixed(1) : 0;
-                    let warna = warnaArray[index % warnaArray.length];
-                    let rincianHtml = '';
-                    let sortedRincian = Object.entries(dataBesar.rincian).sort((a, b) => b[1] - a[1]);
-                    
-                    sortedRincian.forEach(([namaSub, beratSub]) => {
-                        let persenSub = dataBesar.total > 0 ? ((beratSub / dataBesar.total) * 100).toFixed(1) : 0;
-                        rincianHtml += `
-                            <div class="mt-3">
-                                <div class="d-flex justify-content-between align-items-center mb-1" style="font-size: 0.82rem;">
-                                    <span style="color: #cbd5e1;"><i class="bi bi-arrow-return-right me-1" style="color: ${warna}; opacity: 0.8;"></i> ${namaSub}</span>
-                                    <span style="color: #94a3b8; font-weight: 600;">${beratSub.toFixed(1)} Kg <small style="opacity: 0.7; font-weight: 400;">(${persenSub}%)</small></span>
-                                </div>
-                                <div class="progress" style="height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px;">
-                                    <div class="progress-bar" style="width: ${persenSub}%; background-color: ${warna}; opacity: 0.7; border-radius: 2px; transition: width 1.5s ease-out;"></div>
-                                </div>
-                            </div>
-                        `;
-                    });
-
-                    areaKomposisi.innerHTML += `
-                        <div class="col-12 col-md-6 col-xl-4 d-flex">
-                            <div class="composition-item w-100 d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-end mb-2">
-                                    <div class="fw-bold" style="color: #e2e8f0; font-size: 1.05rem; letter-spacing: 0.5px;">${jenisBesar}</div>
-                                    <div class="text-end">
-                                        <span style="color: ${warna}; font-weight: 800; font-size: 1.25rem;">${dataBesar.total.toFixed(1)} Kg</span>
-                                        <span style="color: #94a3b8; font-size: 0.85rem; margin-left: 5px;">(${persentaseUtama}%)</span>
-                                    </div>
-                                </div>
-                                <div class="progress-container mb-2">
-                                    <div class="progress-bar-ai" style="width: ${persentaseUtama}%; background: linear-gradient(90deg, transparent, ${warna});"></div>
-                                </div>
-                                
-                                <div class="mt-auto pt-3" style="border-top: 1px dashed rgba(255,255,255,0.15);">
-                                    <div style="font-size: 0.75rem; color: #64748b; text-transform: uppercase; letter-spacing: 1px;">Breakdown Material:</div>
-                                    ${rincianHtml}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
+        const area = document.getElementById('area-komposisi-sampah');
+        if (area) {
+            const warna = ['#10b981','#0ea5e9','#f59e0b','#8b5cf6','#ef4444','#14b8a6'];
+            const entries = Object.entries(komposisi).sort((a,b)=>b[1].total-a[1].total);
+            area.innerHTML = entries.length ? entries.map(([kelompok,d],idx) => {
+                const pct = totalMasuk ? d.total/totalMasuk*100 : 0;
+                const detail = Object.entries(d.rincian).sort((a,b)=>b[1]-a[1]).map(([nama,kg]) => `<div class="d-flex justify-content-between mt-2" style="font-size:.8rem;color:#cbd5e1"><span>${escapeHtml(nama)}</span><span>${kg.toFixed(2)} Kg</span></div>`).join('');
+                return `<div class="col-12 col-md-6 col-xl-4"><div class="composition-item h-100"><div class="d-flex justify-content-between"><strong style="color:#e2e8f0">${escapeHtml(kelompok)}</strong><strong style="color:${warna[idx%warna.length]}">${d.total.toFixed(2)} Kg</strong></div><div class="progress-container"><div class="progress-bar-ai" style="width:${pct.toFixed(1)}%;background:${warna[idx%warna.length]}"></div></div>${detail}</div></div>`;
+            }).join('') : `<div class="col-12 empty-state"><i class="bi bi-bar-chart"></i>Belum ada transaksi aktif untuk dianalisis.</div>`;
         }
 
-        let tbody = document.getElementById('tabel-riwayat'); 
-        if(!tbody) return;
-        tbody.innerHTML = '';
-        if(dataTransaksi.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">Belum ada aktivitas.</td></tr>`;
-
-        let sudahDitampilkan = new Set(); let barisDitampilkan = 0;
-        for (let i = dataTransaksi.length - 1; i >= 0 && barisDitampilkan < 10; i--) {
-            let t = dataTransaksi[i];
-            if (t.kelompok_id) {
-                if (sudahDitampilkan.has(t.kelompok_id)) continue;
-                sudahDitampilkan.add(t.kelompok_id);
-                let items = dataTransaksi.filter(x => x.kelompok_id === t.kelompok_id);
-                let totalNominal = items.reduce((a, x) => a + x.total, 0);
-                let totalBerat = items.reduce((a, x) => a + x.berat, 0);
-                let rincianHtmlBaris = items.map(it => `<div style="display:flex; justify-content:space-between; gap:10px; font-size:12.5px; padding:2px 0;"><span>${it.jenis} <span class="text-muted">(${it.berat} Kg)</span></span><span class="fw-bold text-success">Rp ${it.total.toLocaleString('id-ID')}</span></div>`).join('');
-                tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle">${rincianHtmlBaris}</td>
-                    <td class="fw-bold text-success align-middle" style="border-top:1px dashed #cbd5e1;">Rp ${totalNominal.toLocaleString('id-ID')}<br><small class="text-muted fw-normal">Total ${totalBerat.toFixed(2)} Kg</small></td>
-                    <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStrukGrup('${escAttrJs(t.kelompok_id)}')"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
-                    <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStrukGrup('${escAttrJs(t.kelompok_id)}')"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
-            } else {
-                let absTotal = Math.abs(t.total); let sign = t.total < 0 ? '-' : ''; let colorClass = t.total < 0 ? 'text-danger' : 'text-success'; let beratHtml = t.jenis !== 'Penarikan Tunai' ? `<br><small class="text-muted fw-normal">${t.berat} Kg</small>` : '';
-                tbody.innerHTML += `<tr><td class="text-muted small align-middle">${t.tgl}</td><td class="fw-bold align-middle" style="color: var(--text-main);">${t.nama}</td><td class="align-middle"><span class="badge-sampah">${t.jenis}</span></td>
-                    <td class="fw-bold ${colorClass} align-middle">${sign} Rp ${absTotal.toLocaleString('id-ID')} ${beratHtml}</td>
-                    <td class="text-center align-middle"><button class="btn btn-sm btn-outline-danger py-1 px-2 me-1 d-inline-flex align-items-center" onclick="cetakPdfStruk(${i})"><i class="bi bi-file-pdf fs-6 me-1"></i> PDF</button>
-                    <button class="btn btn-sm btn-outline-wa py-1 px-2 d-inline-flex align-items-center" onclick="kirimWaStruk(${i})"><i class="bi bi-whatsapp fs-6"></i></button></td></tr>`;
-            }
-            barisDitampilkan++;
-        }
+        const tbody = document.getElementById('tabel-riwayat');
+        if (!tbody) return;
+        const rows = [...trxAktif].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).slice(0,10);
+        tbody.innerHTML = rows.length ? rows.map(t => {
+            const n = cariNasabahTransaksi(t);
+            return `<tr><td class="text-muted small">${formatTanggalTampil(t.tgl)}<br><code>${escapeHtml(t.id || '-')}</code></td><td class="fw-bold">${escapeHtml(n?.nama || t.nama || '-')}</td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':''}${rupiah(Math.abs(num(t.total)))}${num(t.berat)>0?`<br><small class="text-muted">${num(t.berat).toFixed(2)} Kg @ ${rupiah(num(t.harga_satuan))}</small>`:''}</td><td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="cetakPdfStrukById('${escAttrJs(t.id)}')"><i class="bi bi-printer"></i></button> <button class="btn btn-sm btn-outline-success" onclick="kirimWaStrukById('${escAttrJs(t.id)}')"><i class="bi bi-whatsapp"></i></button></td></tr>`;
+        }).join('') : `<tr><td colspan="5" class="empty-state"><i class="bi bi-inbox"></i>Belum ada aktivitas.</td></tr>`;
     }
 
     function escAttrJs(str) { return String(str).replace(/'/g, "\\'"); }
@@ -1288,16 +1427,23 @@
     // ==========================================
     // FUNGSI LAINNYA LENGKAP
     // ==========================================
-    function showTab(tabId, element) { 
-        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none'); 
-        document.getElementById(tabId).style.display = 'block'; 
-        if(element) { 
-            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab')); 
-            element.classList.add('active-tab'); 
-        } 
-        if(tabId === 'ceksaldo') document.getElementById('areaDetailSaldo').style.display = 'none'; 
+    function showTab(tabId, element) {
+        document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+        const target = document.getElementById(tabId);
+        if (!target) return alert('Modul tidak ditemukan: ' + tabId);
+        target.style.display = 'block';
+        document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
+        if (element) element.classList.add('active-tab');
+        if (tabId === 'ceksaldo') document.getElementById('areaDetailSaldo').style.display = 'none';
+        if (tabId === 'pengiriman') { updateTabelPengiriman(); hitungPengirimanBSI(); }
+        if (tabId === 'stockopname') { isiStokSistemOpname(); updateTabelStockOpname(); }
+        if (tabId === 'kas') updateKasUnit();
+        if (tabId === 'koreksi') updateTabelKoreksi();
+        if (tabId === 'audit') updateAuditUnit();
+        if (tabId === 'laporan') updateLaporan();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    
+
     function updateTabelHargaSampah() {
         let tbody = document.getElementById('tabel-daftar-hargasampah'); if(!tbody) return; tbody.innerHTML = '';
         if(dataKategori.length === 0) return tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-5">Belum ada sinkronisasi harga dari Bank Sampah Induk.</td></tr>`;
@@ -1308,33 +1454,14 @@
     }
 
     function updateTabelStock() {
-        let tbody = document.getElementById('tabel-stock-sampah'); if(!tbody) return;
-        if (dataKategori.length === 0) { tbody.innerHTML = `<tr><td colspan="6" class="text-center text-muted py-5">Belum ada sinkronisasi kategori material dari Bank Sampah Induk.</td></tr>`; return; }
-
-        let baris = dataKategori.map(k => {
-            let masuk = dataTransaksi.filter(t => t.jenis === k.nama_kategori).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-            let keluar = dataTransaksiKeluar.filter(t => t.jenis === k.nama_kategori).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-            let sisa = masuk - keluar;
-            let nilai = sisa * (parseFloat(k.harga) || 0);
-            return { jenis_material: k.jenis_material || '-', nama_kategori: k.nama_kategori, masuk, keluar, sisa, nilai };
-        }).sort((a, b) => b.sisa - a.sisa);
-
-        let totalSisa = baris.reduce((a, b) => a + b.sisa, 0);
-        let totalNilai = baris.reduce((a, b) => a + b.nilai, 0);
-        document.getElementById('stock-total-kg').innerText = totalSisa.toFixed(2) + ' Kg';
-        document.getElementById('stock-total-rp').innerText = 'Rp ' + Math.round(totalNilai).toLocaleString('id-ID');
-
-        tbody.innerHTML = baris.map(b => {
-            let warnaSisa = b.sisa <= 0 ? 'text-muted' : (b.sisa < 5 ? 'text-warning' : 'text-success');
-            return `<tr>
-                <td class="align-middle text-muted">${b.jenis_material}</td>
-                <td class="align-middle fw-bold" style="color: var(--primary-dark);">${b.nama_kategori}</td>
-                <td class="align-middle text-end">${b.masuk.toFixed(2)}</td>
-                <td class="align-middle text-end">${b.keluar.toFixed(2)}</td>
-                <td class="align-middle text-end fw-bold ${warnaSisa}">${b.sisa.toFixed(2)} Kg</td>
-                <td class="align-middle text-end">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td>
-            </tr>`;
-        }).join('') || `<tr><td colspan="6" class="text-center text-muted py-5">Belum ada aktivitas setoran.</td></tr>`;
+        const tbody = document.getElementById('tabel-stock-sampah');
+        if (!tbody) return;
+        const baris = hitungSemuaStok();
+        const totalSisa = baris.reduce((a,b)=>a+b.sisa,0);
+        const totalNilai = baris.reduce((a,b)=>a+b.nilai,0);
+        setText('stock-total-kg', totalSisa.toFixed(2)+' Kg');
+        setText('stock-total-rp', rupiah(totalNilai));
+        tbody.innerHTML = baris.length ? baris.map(b => `<tr><td class="text-muted">${escapeHtml(b.jenis_material)}</td><td class="fw-bold">${escapeHtml(b.nama_kategori)}</td><td class="text-end">${b.masuk.toFixed(2)}</td><td class="text-end">${b.keluar.toFixed(2)}</td><td class="text-end ${b.penyesuaian<0?'text-danger':'text-primary'}">${b.penyesuaian>=0?'+':''}${b.penyesuaian.toFixed(2)}</td><td class="text-end fw-bold ${b.sisa<0?'text-danger':'text-success'}">${b.sisa.toFixed(2)}</td><td class="text-end fw-bold">${rupiah(b.nilai)}</td></tr>`).join('') : `<tr><td colspan="7" class="empty-state"><i class="bi bi-box"></i>Belum ada kategori material.</td></tr>`;
     }
 
     function updateDropdownKategori() {
@@ -1380,53 +1507,51 @@
 
     function simpanNasabah(e) {
         e.preventDefault();
-        let nama = document.getElementById('namaNasabah').value.trim();
-        let hp = document.getElementById('hpNasabah').value.trim();
-        if(nama === '') return alert("Nama tidak boleh kosong!");
-        // Generate ulang ID tepat sebelum simpan (bukan cuma pakai nilai yang tampil
-        // di form), supaya tetap akurat walau data nasabah sempat berubah sejak form
-        // dibuka (mis. ada nasabah lain ditambahkan di tab/perangkat lain).
-        let idBaru = generateIdNasabahOtomatis();
-        let btnSubmit = e.target.querySelector('button[type="submit"]');
-        btnSubmit.disabled = true; btnSubmit.innerHTML = 'Menyimpan...';
-        AdapterAPI.tambahNasabah({ id: idBaru, id_unit: CURRENT_UNIT_ID, nama: nama, hp: hp })
-            .then(() => { alert('Berhasil! Data nasabah telah direkam dengan ID: ' + idBaru); document.getElementById('formNasabah').reset(); loadDataDatabase(); })
-            .catch(error => alert('Gagal menyimpan.'))
-            .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-save me-2"></i>Simpan Data Nasabah'; siapkanIdNasabahBaru(); });
+        const nama = document.getElementById('namaNasabah').value.trim();
+        const hp = normalisasiHpLokal(document.getElementById('hpNasabah').value);
+        if (!nama || !hp) return alert('Nama dan nomor WhatsApp wajib diisi.');
+        if (dataNasabah.some(n => String(n.hp||'').replace(/\D/g,'') === hp.replace(/\D/g,''))) {
+            if (!confirm('Nomor HP ini sudah dipakai nasabah lain. Tetap simpan?')) return;
+        }
+        const idBaru = generateIdNasabahOtomatis();
+        const form = {
+            id:idBaru, id_unit:CURRENT_UNIT_ID, nama, hp,
+            jenis_nasabah:document.getElementById('jenisNasabah').value,
+            rt:document.getElementById('rtNasabah').value.trim(), rw:document.getElementById('rwNasabah').value.trim(),
+            alamat:document.getElementById('alamatNasabah').value.trim(), status:document.getElementById('statusNasabah').value,
+            izin_whatsapp:document.getElementById('izinWaNasabah').checked,
+            tanggal_gabung:new Date().toISOString().slice(0,10)
+        };
+        const btn=e.target.querySelector('button[type="submit"]'); btn.disabled=true; btn.innerHTML='Menyimpan...';
+        AdapterAPI.tambahNasabah(form).then(res=>{
+            if(!String(res).includes('Sukses')) throw new Error(res);
+            alert('Nasabah berhasil disimpan dengan ID '+idBaru); e.target.reset(); document.getElementById('izinWaNasabah').checked=true; loadDataDatabase();
+        }).catch(err=>alert('Gagal menyimpan: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-save me-2"></i>Simpan Data Nasabah';siapkanIdNasabahBaru();});
     }
 
     function editNasabah(id) {
-        let nasabah = dataNasabah.find(n => String(n.id) === String(id));
-        if (!nasabah) return alert("Data tidak ditemukan!");
-        let namaBaru = prompt("Edit Nama Lengkap Nasabah:", nasabah.nama); if (namaBaru === null) return; namaBaru = namaBaru.trim(); if (namaBaru === '') return alert("Nama tidak boleh kosong!");
-        let hpBaru = prompt("Edit Nomor WhatsApp / HP:", nasabah.hp || ''); if (hpBaru === null) return;
-        document.body.style.cursor = 'wait';
-        AdapterAPI.editNasabah({ id: id, nama: namaBaru, hp: hpBaru.trim() }).then(text => {
-            if (text.includes("Sukses")) { alert("Berhasil diperbarui."); loadDataDatabase(); } else { alert(text); }
-        }).catch(error => alert("Gagal memperbarui data.")).finally(() => { document.body.style.cursor = 'default'; });
+        const n=dataNasabah.find(x=>String(x.id)===String(id)); if(!n) return alert('Data tidak ditemukan.');
+        const nama=prompt('Nama nasabah:',n.nama); if(nama===null||!nama.trim()) return;
+        const hp=prompt('Nomor WhatsApp:',n.hp||''); if(hp===null) return;
+        const alamat=prompt('Alamat singkat:',n.alamat||''); if(alamat===null) return;
+        const status=confirm('Klik OK untuk status AKTIF. Klik Batal untuk NONAKTIF.')?'aktif':'nonaktif';
+        AdapterAPI.editNasabah({id,nama:nama.trim(),hp:normalisasiHpLokal(hp),alamat:alamat.trim(),status}).then(res=>{alert(res);loadDataDatabase();});
     }
 
     function hapusNasabah(id) {
-        if(confirm('Yakin ingin menghapus data nasabah ini secara permanen?')) {
-            document.body.style.cursor = 'wait';
-            AdapterAPI.deleteNasabah(id).then(text => {
-                if (text.includes("Sukses")) { alert("Data dihapus."); loadDataDatabase(); } else { alert(text); }
-            }).catch(error => alert("Gagal menghapus data.")).finally(() => { document.body.style.cursor = 'default'; });
-        }
+        const n=dataNasabah.find(x=>String(x.id)===String(id)); if(!n) return;
+        const punyaTrx=dataTransaksi.some(t=>String(t.id_nasabah||'')===String(id)||(!t.id_nasabah&&t.nama===n.nama));
+        if(punyaTrx) return alert('Nasabah sudah memiliki transaksi dan tidak boleh dihapus. Ubah status menjadi NONAKTIF melalui tombol edit.');
+        if(confirm('Hapus data nasabah yang belum pernah bertransaksi ini?')) AdapterAPI.deleteNasabah(id).then(res=>{alert(res);loadDataDatabase();});
     }
 
     function updateTabelNasabah() {
-        let tbody = document.getElementById('tabel-daftar-nasabah'); if(!tbody) return; tbody.innerHTML = '';
-        if(dataNasabah.length === 0) return tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-5">Kosong.</td></tr>`;
-        dataNasabah.forEach(n => {
-            let noHp = n.hp ? String(n.hp).trim() : '-'; if (noHp.startsWith('8')) { noHp = '0' + noHp; }
-            tbody.innerHTML += `<tr><td class="align-middle" style="font-family:monospace; font-weight:700; color:#475569; letter-spacing:0.5px;">${n.id}</td>
-                <td class="align-middle fw-bold" style="color: var(--primary-dark);">${n.nama}</td><td class="align-middle text-muted">${noHp}</td>
-                <td class="text-center align-middle" style="white-space:nowrap;"><button class="btn btn-sm btn-outline-secondary py-1 px-2 me-2" title="Cetak QR Saja" onclick="cetakQrNasabah('${n.id}', '${(n.nama||'').replace(/'/g,"\\'")}')"><i class="bi bi-qr-code"></i></button>
-                <button class="btn btn-sm btn-outline-success py-1 px-2 me-2" title="Kartu Digital (kirim WA)" onclick="unduhKartuNasabah('${n.id}', this)"><i class="bi bi-credit-card-2-front"></i></button>
-                <button class="btn btn-sm btn-outline-primary py-1 px-2 me-2" onclick="editNasabah('${n.id}')"><i class="bi bi-pencil-square"></i></button>
-                <button class="btn btn-sm btn-outline-danger py-1 px-2" onclick="hapusNasabah('${n.id}')"><i class="bi bi-trash3"></i></button></td></tr>`;
-        });
+        const tbody=document.getElementById('tabel-daftar-nasabah'); if(!tbody)return;
+        tbody.innerHTML=dataNasabah.length?dataNasabah.slice().sort((a,b)=>String(a.nama).localeCompare(String(b.nama))).map(n=>{
+            const wilayah=[n.rt?'RT '+n.rt:'',n.rw?'RW '+n.rw:''].filter(Boolean).join('/')||'-';
+            const status=(n.status||'aktif');
+            return `<tr><td><code>${escapeHtml(n.id)}</code></td><td class="fw-bold">${escapeHtml(n.nama)}<br><small class="text-muted">${escapeHtml(n.alamat||'-')}</small></td><td>${escapeHtml(n.jenis_nasabah||'Rumah Tangga')}<br><small class="text-muted">${escapeHtml(wilayah)}</small></td><td>${escapeHtml(n.hp||'-')}</td><td><span class="status-chip ${status==='nonaktif'?'status-void':'status-active'}">${status.toUpperCase()}</span></td><td class="text-center table-actions"><button class="btn btn-sm btn-outline-secondary" title="QR" onclick="cetakQrNasabah('${escAttrJs(n.id)}','${escAttrJs(n.nama)}')"><i class="bi bi-qr-code"></i></button> <button class="btn btn-sm btn-outline-success" title="Kartu Digital" onclick="unduhKartuNasabah('${escAttrJs(n.id)}',this)"><i class="bi bi-credit-card"></i></button> <button class="btn btn-sm btn-outline-primary" onclick="editNasabah('${escAttrJs(n.id)}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="hapusNasabah('${escAttrJs(n.id)}')"><i class="bi bi-trash"></i></button></td></tr>`;
+        }).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-people"></i>Belum ada nasabah.</td></tr>`;
         cekMigrasiIdNasabah();
     }
 
@@ -2130,8 +2255,14 @@
     }
 
     function updateDropdownNasabah(dropdownId) {
-        let sel = document.getElementById(dropdownId); if(!sel) return; sel.innerHTML = '<option value="" disabled selected>-- Pilih Data Nasabah --</option>';
-        dataNasabah.forEach(n => sel.innerHTML += `<option value="${n.nama}">${n.nama}</option>`);
+        const sel = document.getElementById(dropdownId);
+        if (!sel) return;
+        const current = sel.value;
+        sel.innerHTML = '<option value="" disabled selected>-- Pilih Data Nasabah --</option>';
+        dataNasabah.filter(n => (n.status || 'aktif') !== 'nonaktif').sort((a,b)=>String(a.nama).localeCompare(String(b.nama))).forEach(n => {
+            sel.innerHTML += `<option value="${escapeHtmlAttr(n.id)}">${escapeHtml(n.nama)} — ${escapeHtml(n.id)}</option>`;
+        });
+        if ([...sel.options].some(o=>o.value===current)) sel.value=current;
     }
 
     let keranjangSetor = [];
@@ -2182,33 +2313,22 @@
         }
     }
 
-    function simpanSetoran(e) { 
+    function simpanSetoran(e) {
         e.preventDefault();
-        let nama = document.getElementById('pilihNasabah').value;
-        if (!nama) return alert('Harap pilih nasabah!');
-
-        let itemSaatIni = ambilItemFormSetorSaatIni();
-        let semuaItem = keranjangSetor.slice();
-        if (itemSaatIni) semuaItem.push(itemSaatIni);
-        if (semuaItem.length === 0) return alert('Harap lengkapi minimal 1 material untuk disetor!');
-
-        let now = new Date();
-        let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        if (cekPeringatanPeriodeTerkunci(tgl)) return;
-        let kelompokId = semuaItem.length > 1 ? genId('GRP') : null;
-
-        let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true; btnSubmit.innerHTML = 'Memproses...';
-        Promise.all(semuaItem.map((item, i) =>
-            AdapterAPI.tambahTransaksiUnit({ id: genId('TRX'), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: item.jenis, berat: item.berat, total: item.total, kelompok_id: kelompokId })
-        )).then(() => {
-            alert(`Setoran Berhasil disimpan (${semuaItem.length} jenis material)! Struk bisa dicetak/dikirim WA di tabel Riwayat Transaksi di bawah.`);
-            keranjangSetor = [];
-            renderKeranjangSetor();
-            document.getElementById('formSetor').reset();
-            updateDropdownKategori();
-            loadDataDatabase();
-        }).catch(err => alert('Gagal menyimpan: ' + err))
-          .finally(() => { btnSubmit.disabled = false; btnSubmit.innerHTML = '<i class="bi bi-check-circle me-2"></i>Simpan Semua Setoran'; });
+        const idNasabah=document.getElementById('pilihNasabah').value;
+        const nasabah=dataNasabah.find(n=>String(n.id)===String(idNasabah));
+        if(!nasabah) return alert('Harap pilih nasabah.');
+        const itemSaatIni=ambilItemFormSetorSaatIni();
+        const semuaItem=keranjangSetor.slice(); if(itemSaatIni) semuaItem.push(itemSaatIni);
+        if(!semuaItem.length) return alert('Lengkapi minimal satu material.');
+        const now=new Date(); const tgl=now.toISOString();
+        if(cekPeringatanPeriodeTerkunci(tgl)) return;
+        const kelompokId=semuaItem.length>1?genId('GRP'):null;
+        const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;btn.innerHTML='Memproses...';
+        AdapterAPI.tambahSetoranBatchUnit({id_unit:CURRENT_UNIT_ID,id_nasabah:nasabah.id,nama:nasabah.nama,tgl,kelompok_id:kelompokId,oleh:getPetugasSesi(),items:semuaItem}).then(res=>{
+            if(!String(res).includes('Sukses')) throw new Error(res);
+            alert(`Setoran berhasil disimpan (${semuaItem.length} material).`);keranjangSetor=[];renderKeranjangSetor();e.target.reset();updateDropdownKategori();loadDataDatabase();
+        }).catch(err=>alert('Gagal menyimpan: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-save-check me-2"></i>Proses Semua Setoran & Cetak Struk';});
     }
 
     function cetakPdfStrukGrup(kelompokId) {
@@ -2284,147 +2404,88 @@
     }
 
     function kirimWaStruk(index) {
-        let t = dataTransaksi[index]; let n = dataNasabah.find(x => x.nama === t.nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
+        let t = dataTransaksi[index]; let n = cariNasabahTransaksi(t); let hp = n && n.hp ? String(n.hp).trim() : ''; 
         if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
         let pesan = `*STRUK BANK SAMPAH*\nTgl: ${t.tgl}\nNasabah: *${t.nama}*\n\n▪ Aktivitas: ${t.jenis}\n▪ Volume: ${t.berat} Kg\n*TOTAL: Rp ${Math.abs(t.total).toLocaleString('id-ID')}*`;
         window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function tampilkanDetailSaldo() {
-        let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return; document.getElementById('areaDetailSaldo').style.display = 'block';
-        let riwayat = dataTransaksi.filter(t => t.nama === nama); let totRp = 0; let totKg = 0; let tbody = document.getElementById('tabel-riwayat-saldo'); tbody.innerHTML = '';
-        if (riwayat.length === 0) tbody.innerHTML = `<tr><td colspan="4" class="text-center py-5">Belum ada riwayat.</td></tr>`;
-        else {
-            riwayat.slice().reverse().forEach(t => {
-                totRp += t.total; totKg += t.berat; let sign = t.total < 0 ? '-' : '+'; let cl = t.total < 0 ? 'text-danger' : 'text-success';
-                tbody.innerHTML += `<tr><td class="text-muted small">${t.tgl}</td><td><span class="badge-sampah">${t.jenis}</span></td><td class="text-center fw-medium">${t.berat>0 ? t.berat+' Kg' : '-'}</td><td class="text-end fw-bold ${cl}">${sign} Rp ${Math.abs(t.total).toLocaleString('id-ID')}</td></tr>`;
-            });
-        }
-        document.getElementById('detail-total-rp').innerText = 'Rp ' + totRp.toLocaleString('id-ID'); document.getElementById('detail-total-kg').innerText = totKg.toFixed(1) + ' Kg';
+        const idNasabah=document.getElementById('pilihNasabahSaldo').value;
+        const n=dataNasabah.find(x=>String(x.id)===String(idNasabah)); if(!n)return;
+        document.getElementById('areaDetailSaldo').style.display='block';
+        const riwayat=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n));
+        let totRp=0,totKg=0; const tbody=document.getElementById('tabel-riwayat-saldo');
+        tbody.innerHTML=riwayat.length?[...riwayat].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).map(t=>{totRp+=num(t.total);if(num(t.total)>=0)totKg+=num(t.berat);return `<tr><td class="text-muted small">${formatTanggalTampil(t.tgl)}<br><code>${escapeHtml(t.id)}</code></td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-center">${num(t.berat)>0?num(t.berat).toFixed(2)+' Kg':'-'}</td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':'+ '}${rupiah(Math.abs(num(t.total)))}</td></tr>`;}).join(''):`<tr><td colspan="4" class="empty-state">Belum ada riwayat.</td></tr>`;
+        setText('detail-total-rp',rupiah(totRp));setText('detail-total-kg',totKg.toFixed(2)+' Kg');
     }
 
-    function cetakPdfSaldo() {
-        let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return alert("Pilih nasabah dulu.");
-        let totRp = 0, totKg = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => { totRp += t.total; totKg += t.berat; });
-        let html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:400px;margin:0 auto;padding:30px;border:1px solid #cbd5e1;border-radius:16px;">
-            <div style="text-align:center;border-bottom:2px solid #0f172a;padding-bottom:15px;margin-bottom:20px;"><h3 style="margin:0;font-weight:800;">BANK SAMPAH UNIT ${namaUnitTanpaBSU().toUpperCase()}</h3><p style="margin:5px 0 0 0;font-size:12px;font-weight:600;">REKENING KORAN</p></div>
-            <table style="width:100%;font-size:13px;margin-bottom:20px;"><tr><td style="color:#64748b;">Entitas</td><td style="font-weight:700;">: ${nama}</td></tr></table>
-            <div style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #e2e8f0;margin-bottom:20px;"><p style="margin:0 0 5px 0;font-size:12px;color:#64748b;">Akumulasi Volume</p><h4 style="margin:0 0 20px 0;color:#334155;">${totKg.toFixed(1)} Kg</h4>
-            <p style="margin:0 0 5px 0;font-size:12px;color:#64748b;">Kewajiban Saldo (IDR)</p><h3 style="margin:0;color:#059669;font-weight:800;font-size:24px;">Rp ${totRp.toLocaleString('id-ID')}</h3></div></div>`;
-        document.getElementById('area-laporan-a4').innerHTML = html; document.body.className = 'mode-cetak'; window.print(); document.body.className = '';
-    }
-
+    function cetakPdfSaldo() { cetakRekeningKoranNasabah(document.getElementById('pilihNasabahSaldo').value); }
     function kirimWaSaldo() {
-        let nama = document.getElementById('pilihNasabahSaldo').value; if (!nama) return;
-        let totRp = 0, totKg = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => { totRp += t.total; totKg += t.berat; });
-        let n = dataNasabah.find(x => x.nama === nama); let hp = n && n.hp ? String(n.hp).trim() : ''; 
-        if(hp.startsWith('8')) hp = '62' + hp; else if(hp.startsWith('0')) hp = '62' + hp.substring(1);
-        let pesan = `Yth. *${nama}*,\nBerikut posisi saldo Anda:\n📊 Volume: *${totKg.toFixed(1)} Kg*\n💳 Saldo: *Rp ${totRp.toLocaleString('id-ID')}*`;
-        window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesan)}`, '_blank');
+        const id=document.getElementById('pilihNasabahSaldo').value; const n=dataNasabah.find(x=>String(x.id)===String(id));if(!n)return;
+        const trx=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n));
+        const saldo=trx.reduce((a,t)=>a+num(t.total),0); const kg=trx.filter(t=>num(t.total)>=0).reduce((a,t)=>a+num(t.berat),0);
+        bukaWhatsApp(n.hp,`Yth. *${n.nama}*,\nPosisi tabungan sampah Anda:\n📊 Volume setoran: *${kg.toFixed(2)} Kg*\n💳 Saldo: *${rupiah(saldo)}*\nID Nasabah: ${n.id}`);
     }
 
     function tarikSaldo(e) {
         e.preventDefault();
-        let nama = document.getElementById('pilihNasabahSaldo').value; let nominal = parseInt(document.getElementById('nominalTarik').value);
-        let saldoTersedia = 0; dataTransaksi.filter(t => t.nama === nama).forEach(t => saldoTersedia += t.total);
-        if (nominal > saldoTersedia) return alert(`Gagal: Maksimal penarikan Rp ${saldoTersedia.toLocaleString('id-ID')}`);
-        let now = new Date(); let tgl = now.toLocaleDateString('id-ID') + ' ' + now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
-        if (cekPeringatanPeriodeTerkunci(tgl)) return;
-        let btnSubmit = e.target.querySelector('button[type="submit"]'); btnSubmit.disabled = true;
-        AdapterAPI.tambahTransaksiUnit({ id: genId('TRX'), id_unit: CURRENT_UNIT_ID, tgl: tgl, nama: nama, jenis: 'Penarikan Tunai', berat: 0, total: -nominal })
-            .then(response => { alert(`Penarikan sukses.`); document.getElementById('formTarikSaldo').reset(); loadDataDatabase(); })
-            .finally(() => btnSubmit.disabled = false);
+        const idNasabah=document.getElementById('pilihNasabahSaldo').value;const n=dataNasabah.find(x=>String(x.id)===String(idNasabah));
+        const nominal=num(document.getElementById('nominalTarik').value);if(!n||nominal<=0)return alert('Pilih nasabah dan isi nominal.');
+        const saldo=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n)).reduce((a,t)=>a+num(t.total),0);
+        if(nominal>saldo)return alert('Saldo nasabah tidak mencukupi. Maksimal '+rupiah(saldo));
+        if(nominal>hitungSaldoKas())return alert('Kas unit tidak mencukupi. Catat saldo awal/penerimaan pada menu Kas & Bank terlebih dahulu.');
+        const metode=prompt('Metode pembayaran: Tunai atau Transfer?','Tunai')||'Tunai';
+        const noBukti=prompt('Nomor bukti pembayaran (opsional):','')||'';
+        const tgl=new Date().toISOString(); if(cekPeringatanPeriodeTerkunci(tgl))return;
+        const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;
+        AdapterAPI.tambahPenarikanNasabahUnit({id_unit:CURRENT_UNIT_ID,id_nasabah:n.id,nama:n.nama,tgl,nominal,metode,no_bukti:noBukti,oleh:getPetugasSesi()}).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Penarikan berhasil dicatat.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message)).finally(()=>btn.disabled=false);
     }
 
     function updateBukuBesar() {
-        let tbody = document.getElementById('tabel-jurnal-umum'); if(!tbody) return; tbody.innerHTML = '';
-        if(dataTransaksi.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center py-5">Kosong.</td></tr>`;
-        dataTransaksi.forEach((t, i) => {
-            let idTrx = "REF-" + (i + 1).toString().padStart(5, '0'); let rp = 'Rp ' + Math.abs(t.total).toLocaleString('id-ID');
-            if (t.jenis === 'Penarikan Tunai') {
-                tbody.innerHTML += `<tr><td class="text-muted small">${t.tgl}<br><strong class="text-dark">${idTrx}</strong></td><td>Pelunasan: ${t.nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end fw-bold text-success">${rp}</td><td class="text-end text-muted">-</td></tr>
-                <tr style="border-bottom:2px solid var(--border-color);"><td></td><td class="text-muted small px-4"><i>Penarikan Tunai</i></td><td class="px-4"><span class="badge bg-light text-dark border">111</span> Kas Bank</td><td class="text-end text-muted">-</td><td class="text-end fw-bold text-danger">${rp}</td></tr>`;
-            } else {
-                tbody.innerHTML += `<tr><td class="text-muted small">${t.tgl}<br><strong class="text-dark">${idTrx}</strong></td><td>Kredit: ${t.nama}</td><td><span class="badge bg-light text-dark border">511</span> Beban Pembelian</td><td class="text-end fw-bold text-success">${rp}</td><td class="text-end text-muted">-</td></tr>
-                <tr style="border-bottom:2px solid var(--border-color);"><td></td><td class="text-muted small px-4"><i>Liabilitas Warga</i></td><td class="px-4"><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end text-muted">-</td><td class="text-end fw-bold text-danger">${rp}</td></tr>`;
-            }
-        });
+        const tbody=document.getElementById('tabel-jurnal-umum');if(!tbody)return;
+        const rows=transaksiAktif(dataTransaksi).sort((a,b)=>tanggalKeMs(a.tgl)-tanggalKeMs(b.tgl));
+        tbody.innerHTML=rows.length?rows.map(t=>{
+            const ref=escapeHtml(t.id||'-');const rp=rupiah(Math.abs(num(t.total))); const nama=escapeHtml(cariNasabahTransaksi(t)?.nama||t.nama||'-');
+            if(t.jenis==='Penarikan Tunai')return `<tr><td>${formatTanggalTampil(t.tgl)}<br><code>${ref}</code></td><td>Pelunasan saldo: ${nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Pembayaran ${escapeHtml(t.metode||'Kas')}</td><td><span class="badge bg-light text-dark border">111</span> Kas/Bank</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
+            return `<tr><td>${formatTanggalTampil(t.tgl)}<br><code>${ref}</code></td><td>Setoran: ${nama} — ${escapeHtml(t.jenis)}</td><td><span class="badge bg-light text-dark border">113</span> Persediaan Sampah</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Kredit saldo nasabah</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
+        }).join(''):`<tr><td colspan="5" class="empty-state">Belum ada transaksi aktif.</td></tr>`;
     }
 
     function cetakBukuBesar() { document.body.className = 'mode-bukubesar'; window.print(); document.body.className = ''; }
 
     function updateLaporan() {
-        let totB = 0, totR = 0, rekapJ = {}, rekapN = {}; 
-        dataTransaksi.forEach(t => {
-            totB += t.berat; totR += t.total;
-            if(t.jenis !== 'Penarikan Tunai') { if(!rekapJ[t.jenis]) rekapJ[t.jenis] = {b:0, n:0}; rekapJ[t.jenis].b += t.berat; rekapJ[t.jenis].n += t.total; }
-            if(!rekapN[t.nama]) rekapN[t.nama] = {b:0, n:0}; rekapN[t.nama].b += t.berat; rekapN[t.nama].n += t.total;
-        });
-        
-        let elSampah = document.getElementById('lap-sampah'); 
-        if(elSampah) elSampah.innerText = totB.toFixed(1); 
-        
-        let elRupiah = document.getElementById('lap-rupiah'); 
-        if(elRupiah) elRupiah.innerText = 'Rp ' + totR.toLocaleString('id-ID'); 
-        
-        let tbJ = document.getElementById('tabel-rekap-sampah'); if(tbJ) {
-            tbJ.innerHTML = '';
-            for(let j in rekapJ) tbJ.innerHTML += `<tr><td class="fw-bold">${j}</td><td class="text-muted">${rekapJ[j].b.toFixed(1)} Kg</td><td class="text-end text-success fw-bold">Rp ${rekapJ[j].n.toLocaleString('id-ID')}</td></tr>`;
-        }
-        let tbN = document.getElementById('tabel-rekap-nasabah'); if(tbN) {
-            tbN.innerHTML = '';
-            dataNasabah.forEach(n => {
-                let b = rekapN[n.nama] ? rekapN[n.nama].b : 0; let v = rekapN[n.nama] ? rekapN[n.nama].n : 0;
-                tbN.innerHTML += `<tr><td class="fw-bold">${n.nama}</td><td class="text-muted">${b.toFixed(1)} Kg</td><td class="text-end text-primary fw-bold">Rp ${v.toLocaleString('id-ID')}</td></tr>`;
-            });
-        }
+        const mulai=document.getElementById('lapFilterMulai')?.value||'';
+        const akhir=document.getElementById('lapFilterAkhir')?.value||'';
+        const material=document.getElementById('lapFilterMaterial')?.value||'';
+        const idNasabah=document.getElementById('lapFilterNasabah')?.value||'';
+        const nFilter=dataNasabah.find(n=>String(n.id)===String(idNasabah));
+        const masuk=transaksiAktif(dataTransaksi).filter(t=>dalamRentang(t.tgl,mulai,akhir)&&(!material||t.jenis===material)&&(!nFilter||transaksiMilikNasabah(t,nFilter)));
+        const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>dalamRentang(t.tgl,mulai,akhir)&&(!material||t.jenis===material));
+        const totalBeratMasuk=masuk.filter(t=>t.jenis!=='Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0);
+        const totalKeluar=keluar.reduce((a,t)=>a+num(t.berat),0);
+        const totalHutang=masuk.reduce((a,t)=>a+num(t.total),0);
+        const stokRows=hitungSemuaStok().filter(r=>!material||r.nama_kategori===material);
+        const stokAkhir=stokRows.reduce((a,r)=>a+r.sisa,0);
+        setText('lap-sampah',totalBeratMasuk.toFixed(2));setText('lap-rupiah',rupiah(totalHutang));setText('lap-keluar',totalKeluar.toFixed(2)+' Kg');setText('lap-stok-akhir',stokAkhir.toFixed(2)+' Kg');setText('lap-kas',rupiah(hitungSaldoKas()));
+        const tbJ=document.getElementById('tabel-rekap-sampah');
+        if(tbJ)tbJ.innerHTML=stokRows.length?stokRows.map(r=>`<tr><td class="fw-bold">${escapeHtml(r.nama_kategori)}</td><td>${r.masuk.toFixed(2)} Kg</td><td>${r.keluar.toFixed(2)} Kg</td><td>${r.penyesuaian>=0?'+':''}${r.penyesuaian.toFixed(2)} Kg</td><td class="fw-bold">${r.sisa.toFixed(2)} Kg</td><td class="text-end fw-bold">${rupiah(r.nilai)}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state">Tidak ada data.</td></tr>`;
+        const tbN=document.getElementById('tabel-rekap-nasabah');
+        if(tbN){const list=nFilter?[nFilter]:dataNasabah;tbN.innerHTML=list.map(n=>{const trx=masuk.filter(t=>transaksiMilikNasabah(t,n));const kg=trx.filter(t=>num(t.total)>=0).reduce((a,t)=>a+num(t.berat),0);const saldo=trx.reduce((a,t)=>a+num(t.total),0);return `<tr><td class="fw-bold">${escapeHtml(n.nama)}<br><small class="text-muted">${escapeHtml(n.id)}</small></td><td>${kg.toFixed(2)} Kg</td><td class="text-end fw-bold">${rupiah(saldo)}</td></tr>`;}).join('');}
     }
 
     function eksporExcel() {
-        let csv = "data:text/csv;charset=utf-8,Tanggal;Nasabah;Aktivitas;Volume(Kg);Nilai(Rp)\n";
-        dataTransaksi.forEach(r => csv += `${r.tgl};${r.nama};${r.jenis};${r.berat};${r.total}\n`);
-        let link = document.createElement("a"); link.setAttribute("href", encodeURI(csv));
-        link.setAttribute("download", "Laporan.csv"); document.body.appendChild(link); link.click(); link.remove();
+        const trx=transaksiAktif(dataTransaksi);const keluar=transaksiAktif(dataTransaksiKeluar);const stok=hitungSemuaStok();
+        const rowsTrx=trx.map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),ID_Nasabah:t.id_nasabah||'',Nasabah:t.nama,Jenis:t.jenis,Berat_Kg:num(t.berat),Harga_Satuan:num(t.harga_satuan),Nilai:num(t.total),Status:t.status||'aktif'}));
+        const rowsKeluar=keluar.map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),No_Dokumen:t.no_dokumen||'',Material:t.jenis,Berat_Kg:num(t.berat),Harga_Jual:num(t.harga_satuan),Total:num(t.total),Status_Pembayaran:t.status_pembayaran||''}));
+        const rowsKas=dataKasMutasi.map(k=>({Tanggal:formatTanggalTampil(k.tanggal),Arah:k.arah,Kategori:k.kategori,Nominal:num(k.nominal),Metode:k.metode,No_Bukti:k.no_bukti,Keterangan:k.keterangan,Petugas:k.oleh}));
+        if(window.XLSX){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsTrx),'Transaksi Nasabah');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsKeluar),'Pengiriman BSI');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(stok),'Stok');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsKas),'Kas');XLSX.writeFile(wb,`Laporan_BSU_${namaUnitTanpaBSU().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);}else unduhCsv(rowsTrx,'Laporan_BSU.csv');
     }
 
     function cetakLaporanA4() {
-        let lapSampah = document.getElementById('lap-sampah').innerText;
-        let lapRupiah = document.getElementById('lap-rupiah').innerText;
-        let tabelSampah = document.getElementById('tabel-rekap-sampah').innerHTML;
-        let tabelNasabah = document.getElementById('tabel-rekap-nasabah').innerHTML;
-
-        let html = `
-        <div style="font-family:'Plus Jakarta Sans',sans-serif; padding: 20px;">
-            <h2 style="text-align:center; margin-bottom: 5px; font-weight: 800;">Laporan Finansial & Persediaan Konsolidasi</h2>
-            <h3 style="text-align:center; margin-top: 0; color: #064E3B; font-weight: 700;">BANK SAMPAH UNIT ${namaUnitTanpaBSU().toUpperCase()} KAB. TULUNGAGUNG</h3>
-            <p style="text-align:center; font-size: 12px; color: #64748b; margin-bottom: 30px;">Dicetak pada: ${new Date().toLocaleDateString('id-ID')} pukul ${new Date().toLocaleTimeString('id-ID')}</p>
-
-            <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
-                <div style="border: 1px solid #cbd5e1; padding: 15px; width: 48%; border-radius: 12px;">
-                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px; font-weight: 600;">Aset Fisik (Volume Masuk)</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #059669;">${lapSampah} Kg</div>
-                </div>
-                <div style="border: 1px solid #cbd5e1; padding: 15px; width: 48%; border-radius: 12px;">
-                    <div style="font-size: 13px; color: #64748b; margin-bottom: 5px; font-weight: 600;">Liabilitas (Hutang Warga)</div>
-                    <div style="font-size: 24px; font-weight: 800; color: #059669;">${lapRupiah}</div>
-                </div>
-            </div>
-            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #0f172a; font-weight: 700;">1. Matriks Inventaris Persediaan</h4>
-            <table class="table table-bordered" style="width: 100%; margin-bottom: 30px; font-size: 14px;">
-                <thead><tr style="background-color: #f8fafc;"><th>Kategori Material Persediaan</th><th>Akumulasi Volume</th><th class="text-end">Total Valuasi Aset (Rp)</th></tr></thead>
-                <tbody>${tabelSampah}</tbody>
-            </table>
-            <h4 style="border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 15px; color: #0f172a; font-weight: 700;">2. Buku Besar Pembantu (Rincian Hutang)</h4>
-            <table class="table table-bordered" style="width: 100%; font-size: 14px;">
-                <thead><tr style="background-color: #f8fafc;"><th>Identitas Kreditur (Nasabah)</th><th>Total Volume Disetor</th><th class="text-end">Sisa Saldo Mengendap (Rp)</th></tr></thead>
-                <tbody>${tabelNasabah}</tbody>
-            </table>
-        </div>`;
-        
-        document.getElementById('area-laporan-a4').innerHTML = html; 
-        document.body.className = 'mode-cetak'; 
-        window.print(); 
-        document.body.className = '';
+        updateLaporan();
+        const htmlCetak=`<div style="font-family:Arial;padding:15mm;color:#111"><div style="text-align:center;border-bottom:2px solid #111;padding-bottom:12px"><h2 style="margin:0">LAPORAN BANK SAMPAH UNIT</h2><h3 style="margin:5px 0">${escapeHtml(namaUnitTanpaBSU().toUpperCase())}</h3><small>Dicetak ${new Date().toLocaleString('id-ID')}</small></div><div style="display:flex;gap:15px;margin:20px 0"><div style="flex:1;border:1px solid #ccc;padding:12px"><small>Sampah Masuk</small><h3>${document.getElementById('lap-sampah').innerText} Kg</h3></div><div style="flex:1;border:1px solid #ccc;padding:12px"><small>Stok Akhir</small><h3>${document.getElementById('lap-stok-akhir').innerText}</h3></div><div style="flex:1;border:1px solid #ccc;padding:12px"><small>Hutang Nasabah</small><h3>${document.getElementById('lap-rupiah').innerText}</h3></div></div><h4>Persediaan</h4><table style="width:100%;border-collapse:collapse" border="1" cellpadding="7"><thead>${document.querySelector('#tabel-rekap-sampah').closest('table').querySelector('thead').innerHTML}</thead><tbody>${document.getElementById('tabel-rekap-sampah').innerHTML}</tbody></table><h4 style="margin-top:25px">Saldo Nasabah</h4><table style="width:100%;border-collapse:collapse" border="1" cellpadding="7"><thead>${document.querySelector('#tabel-rekap-nasabah').closest('table').querySelector('thead').innerHTML}</thead><tbody>${document.getElementById('tabel-rekap-nasabah').innerHTML}</tbody></table></div>`;
+        document.getElementById('area-laporan-a4').innerHTML=htmlCetak;document.body.className='mode-cetak';window.print();document.body.className='';
     }
 
     let pesanBroadcastGlobal = "";
@@ -2440,8 +2501,10 @@
         let previewPesan = document.getElementById('previewPesan'); if(previewPesan) previewPesan.innerText = pesanBroadcastGlobal;
         
         let tbody = document.getElementById('tabel-kirim-broadcast'); if(!tbody) return; tbody.innerHTML = '';
-        if(dataNasabah.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada nasabah terdaftar.</td></tr>`; return; }
-        dataNasabah.forEach((n, i) => {
+        const penerima=dataNasabah.filter(n=>(n.status||'aktif')!=='nonaktif' && n.izin_whatsapp!==false);
+        setText('totalKirimJadwal',penerima.length);
+        if(penerima.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada penerima WhatsApp aktif.</td></tr>`; return; }
+        penerima.forEach((n, i) => {
             let hp = n.hp ? String(n.hp).trim() : ''; let valid = true; if(hp === '') valid = false;
             if (hp.startsWith('8')) hp = '62' + hp; else if (hp.startsWith('0')) hp = '62' + hp.substring(1);
             let btnHtml = valid ? `<button class="btn btn-sm btn-success" onclick="eksekusiWa('${hp}', ${i})"><i class="bi bi-whatsapp me-1"></i> Kirim</button>` : `<span class="badge bg-danger">No. HP Kosong</span>`;
@@ -2467,8 +2530,10 @@
         let previewPesanHarga = document.getElementById('previewPesanHarga'); if(previewPesanHarga) previewPesanHarga.innerText = pesanBroadcastHargaGlobal;
         
         let tbody = document.getElementById('tabel-kirim-broadcast-harga'); if(!tbody) return; tbody.innerHTML = '';
-        if(dataNasabah.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada nasabah terdaftar.</td></tr>`; return; }
-        dataNasabah.forEach((n, i) => {
+        const penerima=dataNasabah.filter(n=>(n.status||'aktif')!=='nonaktif' && n.izin_whatsapp!==false);
+        setText('totalKirimHarga',penerima.length);
+        if(penerima.length === 0) { tbody.innerHTML = `<tr><td class="text-center text-muted">Belum ada penerima WhatsApp aktif.</td></tr>`; return; }
+        penerima.forEach((n, i) => {
             let hp = n.hp ? String(n.hp).trim() : ''; let valid = true; if(hp === '') valid = false;
             if (hp.startsWith('8')) hp = '62' + hp; else if (hp.startsWith('0')) hp = '62' + hp.substring(1);
             let btnHtml = valid ? `<button class="btn btn-sm btn-success" onclick="eksekusiWaHarga('${hp}', ${i})"><i class="bi bi-whatsapp me-1"></i> Kirim</button>` : `<span class="badge bg-danger">No. HP Kosong</span>`;
@@ -2480,6 +2545,73 @@
         document.getElementById(`status-kirim-harga-${idBaris}`).innerHTML = `<span class="badge bg-secondary"><i class="bi bi-check2-all me-1"></i> Terbuka</span>`;
         window.open(`https://wa.me/${hp}?text=${encodeURIComponent(pesanBroadcastHargaGlobal)}`, '_blank');
     }
+
+
+    // ==========================================================
+    // HELPER & MODUL OPERASIONAL BARU
+    // ==========================================================
+    function num(v){const n=parseFloat(v);return Number.isFinite(n)?n:0;}
+    function rupiah(v){return 'Rp '+Math.round(num(v)).toLocaleString('id-ID');}
+    function setText(id,v){const el=document.getElementById(id);if(el)el.innerText=v;}
+    function escapeHtml(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+    function escapeHtmlAttr(v){return escapeHtml(v).replace(/'/g,'&#39;');}
+    function transaksiAktif(rows){return (rows||[]).filter(t=>(t.status||'aktif')!=='dibatalkan');}
+    function parseTanggalUnit(v){if(!v)return new Date(NaN);if(typeof parseTanggalFleksibel==='function')return parseTanggalFleksibel(v);const s=String(v);const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return new Date(s);}
+    function tanggalKeMs(v){const d=parseTanggalUnit(v);return isNaN(d)?0:d.getTime();}
+    function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});}
+    function dalamRentang(v,mulai,akhir){const ms=tanggalKeMs(v);if(mulai&&ms<new Date(mulai+'T00:00:00').getTime())return false;if(akhir&&ms>new Date(akhir+'T23:59:59').getTime())return false;return true;}
+    function transaksiMilikNasabah(t,n){return String(t.id_nasabah||'')===String(n.id)||(!t.id_nasabah&&String(t.nama||'').trim()===String(n.nama||'').trim());}
+    function cariNasabahTransaksi(t){return dataNasabah.find(n=>transaksiMilikNasabah(t,n));}
+    function normalisasiHpLokal(v){let x=String(v||'').replace(/[^0-9+]/g,'');if(x.startsWith('+62'))x='0'+x.slice(3);else if(x.startsWith('62'))x='0'+x.slice(2);else if(x.startsWith('8'))x='0'+x;return x;}
+    function hpWa(v){let x=normalisasiHpLokal(v);return x.startsWith('0')?'62'+x.slice(1):x;}
+    function bukaWhatsApp(hp,pesan){const no=hpWa(hp);if(!no)return alert('Nomor WhatsApp tidak tersedia.');window.open(`https://wa.me/${no}?text=${encodeURIComponent(pesan)}`,'_blank');}
+    function unduhCsv(rows,nama){if(!rows.length)return alert('Tidak ada data.');const keys=Object.keys(rows[0]);const body=[keys.join(';'),...rows.map(r=>keys.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`).join(';'))].join('\n');const blob=new Blob(['\ufeff'+body],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nama;a.click();URL.revokeObjectURL(a.href);}
+
+    function hitungSemuaStok(){
+        return (dataKategori||[]).map(k=>{
+            const masuk=transaksiAktif(dataTransaksi).filter(t=>t.jenis===k.nama_kategori&&t.jenis!=='Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0);
+            const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>t.jenis===k.nama_kategori).reduce((a,t)=>a+num(t.berat),0);
+            const penyesuaian=(dataStockOpname||[]).filter(o=>(o.status||'aktif')!=='dibatalkan'&&o.material===k.nama_kategori).reduce((a,o)=>a+num(o.selisih),0);
+            const sisa=masuk-keluar+penyesuaian;return{jenis_material:k.jenis_material||'-',nama_kategori:k.nama_kategori,masuk,keluar,penyesuaian,sisa,nilai:sisa*num(k.harga),harga:num(k.harga)};
+        }).sort((a,b)=>b.sisa-a.sisa);
+    }
+    function stokMaterial(nama){return hitungSemuaStok().find(r=>r.nama_kategori===nama)?.sisa||0;}
+    function hitungSaldoKas(){return (dataKasMutasi||[]).filter(k=>(k.status||'aktif')!=='dibatalkan').reduce((a,k)=>a+(k.arah==='keluar'?-num(k.nominal):num(k.nominal)),0);}
+
+    function isiDropdownModulBaru(){
+        const opts='<option value="">-- Pilih Material --</option>'+dataKategori.map(k=>`<option value="${escapeHtmlAttr(k.nama_kategori)}" data-harga="${num(k.harga)}">${escapeHtml(k.nama_kategori)} — stok ${stokMaterial(k.nama_kategori).toFixed(2)} Kg</option>`).join('');
+        ['kirimMaterial','opnameMaterial'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+        const lapMat=document.getElementById('lapFilterMaterial');if(lapMat)lapMat.innerHTML='<option value="">Semua Material</option>'+dataKategori.map(k=>`<option>${escapeHtml(k.nama_kategori)}</option>`).join('');
+        const lapNas=document.getElementById('lapFilterNasabah');if(lapNas)lapNas.innerHTML='<option value="">Semua Nasabah</option>'+dataNasabah.map(n=>`<option value="${escapeHtmlAttr(n.id)}">${escapeHtml(n.nama)} — ${escapeHtml(n.id)}</option>`).join('');
+        const today=new Date().toISOString().slice(0,10);['kirimTanggal','opnameTanggal','kasTanggal','rekTanggal'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
+        const op=document.getElementById('opnamePetugas');if(op&&!op.value)op.value=getPetugasSesi();
+    }
+
+    function hitungPengirimanBSI(){const sel=document.getElementById('kirimMaterial');if(!sel)return;const opt=sel.options[sel.selectedIndex];const hargaEl=document.getElementById('kirimHarga');if(opt&&opt.dataset.harga&&(!hargaEl.value||num(hargaEl.value)===0))hargaEl.value=opt.dataset.harga;setText('kirimTotal',rupiah(num(document.getElementById('kirimBerat').value)*num(hargaEl.value)));}
+    function simpanPengirimanBSI(e){e.preventDefault();const material=document.getElementById('kirimMaterial').value;const berat=num(document.getElementById('kirimBerat').value);const harga=num(document.getElementById('kirimHarga').value);if(!material||berat<=0)return alert('Material dan berat wajib diisi.');const stok=stokMaterial(material);if(berat>stok)return alert(`Stok ${material} hanya ${stok.toFixed(2)} Kg.`);const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl:document.getElementById('kirimTanggal').value,jenis:material,berat,harga_satuan:harga,total:berat*harga,no_dokumen:document.getElementById('kirimDokumen').value.trim(),status_pembayaran:document.getElementById('kirimStatusBayar').value,metode:document.getElementById('kirimMetode').value,biaya_angkut:num(document.getElementById('kirimBiayaAngkut').value),catatan:document.getElementById('kirimCatatan').value.trim(),oleh:getPetugasSesi()};AdapterAPI.tambahPengirimanBSI(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Pengiriman berhasil dicatat.');e.target.reset();isiDropdownModulBaru();loadDataDatabase();}).catch(err=>alert(err.message));}
+    function updateTabelPengiriman(){const tb=document.getElementById('tabel-pengiriman-bsi');if(!tb)return;const rows=[...dataTransaksiKeluar].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));tb.innerHTML=rows.length?rows.map(t=>`<tr><td>${formatTanggalTampil(t.tgl)}<br><small class="text-muted">${escapeHtml(t.no_dokumen||t.id)}</small></td><td class="fw-bold">${escapeHtml(t.jenis)}</td><td class="text-end">${num(t.berat).toFixed(2)} Kg</td><td class="text-end">${rupiah(t.total)}</td><td><span class="status-chip ${t.status_pembayaran==='lunas'?'status-paid':'status-pending'}">${escapeHtml((t.status_pembayaran||'belum_dibayar').replaceAll('_',' '))}</span></td><td>${escapeHtml(t.created_by||t.oleh||'-')}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-truck"></i>Belum ada pengiriman.</td></tr>`;}
+
+    function isiStokSistemOpname(){const material=document.getElementById('opnameMaterial')?.value||'';const v=stokMaterial(material);const el=document.getElementById('opnameSistem');if(el)el.value=v.toFixed(2);}
+    function simpanStockOpname(e){e.preventDefault();const material=document.getElementById('opnameMaterial').value;const sistem=stokMaterial(material);const fisik=num(document.getElementById('opnameFisik').value);if(!material)return alert('Pilih material.');AdapterAPI.tambahStockOpname({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('opnameTanggal').value,material,stok_sistem:sistem,stok_fisik:fisik,selisih:fisik-sistem,alasan:document.getElementById('opnameAlasan').value.trim(),diperiksa_oleh:document.getElementById('opnamePetugas').value.trim()||getPetugasSesi()}).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Stock opname tersimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
+    function updateTabelStockOpname(){const tb=document.getElementById('tabel-stock-opname');if(!tb)return;const rows=[...dataStockOpname].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));tb.innerHTML=rows.length?rows.map(o=>`<tr><td>${formatTanggalTampil(o.tanggal)}</td><td class="fw-bold">${escapeHtml(o.material)}</td><td class="text-end">${num(o.stok_sistem).toFixed(2)}</td><td class="text-end">${num(o.stok_fisik).toFixed(2)}</td><td class="text-end fw-bold ${num(o.selisih)<0?'text-danger':'text-success'}">${num(o.selisih)>=0?'+':''}${num(o.selisih).toFixed(2)}</td><td>${escapeHtml(o.alasan||'-')}<br><small class="text-muted">${escapeHtml(o.diperiksa_oleh||'-')}</small></td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-clipboard-check"></i>Belum ada stock opname.</td></tr>`;}
+
+    function updateKasUnit(){const masuk=dataKasMutasi.filter(k=>(k.status||'aktif')!=='dibatalkan'&&k.arah==='masuk').reduce((a,k)=>a+num(k.nominal),0);const keluar=dataKasMutasi.filter(k=>(k.status||'aktif')!=='dibatalkan'&&k.arah==='keluar').reduce((a,k)=>a+num(k.nominal),0);setText('kas-saldo',rupiah(masuk-keluar));setText('kas-total-masuk',rupiah(masuk));setText('kas-total-keluar',rupiah(keluar));const rek=document.getElementById('rekSistem');if(rek)rek.value=Math.round(masuk-keluar);const tb=document.getElementById('tabel-kas-mutasi');if(tb){const rows=[...dataKasMutasi].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));tb.innerHTML=rows.length?rows.map(k=>`<tr><td>${formatTanggalTampil(k.tanggal)}<br><small>${escapeHtml(k.no_bukti||k.id)}</small></td><td class="fw-bold">${escapeHtml(k.kategori)}</td><td>${escapeHtml(k.metode||'-')}</td><td class="text-end text-success fw-bold">${k.arah==='masuk'?rupiah(k.nominal):'-'}</td><td class="text-end text-danger fw-bold">${k.arah==='keluar'?rupiah(k.nominal):'-'}</td><td>${escapeHtml(k.oleh||'-')}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-cash"></i>Belum ada mutasi kas. Masukkan Saldo Awal terlebih dahulu.</td></tr>`;}}
+    function simpanKasMutasi(e){e.preventDefault();const form={id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('kasTanggal').value,arah:document.getElementById('kasArah').value,kategori:document.getElementById('kasKategori').value,nominal:num(document.getElementById('kasNominal').value),metode:document.getElementById('kasMetode').value,no_bukti:document.getElementById('kasBukti').value.trim(),keterangan:document.getElementById('kasKeterangan').value.trim(),oleh:getPetugasSesi()};if(form.arah==='keluar'&&form.nominal>hitungSaldoKas())return alert('Kas tidak mencukupi.');AdapterAPI.tambahKasMutasi(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Mutasi kas tersimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
+    function simpanRekonsiliasiUnit(e){e.preventDefault();const sistem=hitungSaldoKas(),fisik=num(document.getElementById('rekFisik').value);AdapterAPI.tambahRekonsiliasiUnit({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('rekTanggal').value,sumber:'Kas/Bank BSU',saldo_sistem:sistem,saldo_fisik:fisik,keterangan:document.getElementById('rekKet').value.trim(),diperiksa_oleh:getPetugasSesi()}).then(res=>{alert(res);e.target.reset();loadDataDatabase();});}
+
+    function updateTabelKoreksi(){const tb=document.getElementById('tabel-koreksi');if(!tb)return;const cari=(document.getElementById('filterKoreksiCari')?.value||'').toLowerCase();const mulai=document.getElementById('filterKoreksiMulai')?.value||'';const akhir=document.getElementById('filterKoreksiAkhir')?.value||'';const status=document.getElementById('filterKoreksiStatus')?.value||'semua';const all=[...dataTransaksi,...dataTransaksiKeluar].filter(t=>dalamRentang(t.tgl,mulai,akhir)).filter(t=>status==='semua'||(t.status||'aktif')===status).filter(t=>!cari||JSON.stringify([t.id,t.nama,t.jenis,t.no_dokumen]).toLowerCase().includes(cari)).sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));tb.innerHTML=all.length?all.map(t=>`<tr><td><code>${escapeHtml(t.id)}</code><br><small>${formatTanggalTampil(t.tgl)}</small></td><td>${escapeHtml(t.nama||'-')}</td><td><strong>${escapeHtml(t.jenis)}</strong><br><small class="text-muted">${escapeHtml(t.level||'')}</small></td><td class="text-end">${num(t.berat).toFixed(2)} Kg<br><strong>${rupiah(t.total)}</strong></td><td><span class="status-chip ${(t.status||'aktif')==='dibatalkan'?'status-void':'status-active'}">${escapeHtml(t.status||'aktif')}</span>${t.alasan_koreksi?`<br><small>${escapeHtml(t.alasan_koreksi)}</small>`:''}</td><td class="text-center">${(t.status||'aktif')==='dibatalkan'?'-':`<button class="btn btn-sm btn-outline-danger" onclick="batalkanTransaksiUnit('${escAttrJs(t.id)}')"><i class="bi bi-x-octagon me-1"></i>Batalkan</button>`}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state">Tidak ada transaksi.</td></tr>`;}
+    function batalkanTransaksiUnit(id){const alasan=prompt('Alasan pembatalan transaksi:');if(!alasan||!alasan.trim())return;const pin=prompt('Ketik BATAL untuk mengonfirmasi:');if(pin!=='BATAL')return alert('Pembatalan dibatalkan.');AdapterAPI.batalkanTransaksiUnit({id,alasan:alasan.trim(),oleh:getPetugasSesi()}).then(res=>{alert(res);loadDataDatabase();});}
+
+    function updateAuditUnit(){const tb=document.getElementById('tabel-audit-unit');if(!tb)return;const tabel=document.getElementById('auditFilterTabel')?.value||'';const mulai=document.getElementById('auditFilterMulai')?.value||'';const rows=(dataAuditUnit||[]).filter(a=>!tabel||a.tabel===tabel).filter(a=>!mulai||tanggalKeMs(a.waktu)>=new Date(mulai+'T00:00:00').getTime());tb.innerHTML=rows.length?rows.map(a=>`<tr><td>${formatTanggalTampil(a.waktu)}</td><td><strong>${escapeHtml(a.tabel)}</strong><br><span class="status-chip status-active">${escapeHtml(a.aksi)}</span></td><td><code>${escapeHtml(a.record_id)}</code></td><td>${escapeHtml(a.oleh||'-')}</td><td><small>${escapeHtml(a.keterangan||ringkasAudit(a))}</small></td></tr>`).join(''):`<tr><td colspan="5" class="empty-state"><i class="bi bi-shield-check"></i>Belum ada audit untuk unit ini.</td></tr>`;}
+    function ringkasAudit(a){try{const d=a.data_baru||a.data_lama||{};return [d.nama,d.jenis,d.material,d.kategori].filter(Boolean).join(' — ')||'-';}catch(e){return '-';}}
+    function muatAuditUnit(){AdapterAPI.getAuditLogUnit(CURRENT_UNIT_ID).then(rows=>{dataAuditUnit=rows||[];updateAuditUnit();});}
+
+    function updateProfilUnit(){const u=dataUnit[0]||{};const box=document.getElementById('profilUnitDetail');if(box)box.innerHTML=`<div class="row g-3"><div class="col-md-6"><div class="metric-soft"><div class="label">Nama Unit</div><div class="value" style="font-size:1rem">${escapeHtml(u.nama||CURRENT_UNIT_NAMA||'-')}</div></div></div><div class="col-md-6"><div class="metric-soft"><div class="label">Kode Registrasi</div><div class="value" style="font-size:1rem">${escapeHtml(CURRENT_UNIT_ID)}</div></div></div><div class="col-md-6"><div class="metric-soft"><div class="label">Desa/Kelurahan</div><div class="value" style="font-size:1rem">${escapeHtml(u.desa||'-')}</div></div></div><div class="col-md-6"><div class="metric-soft"><div class="label">Kecamatan</div><div class="value" style="font-size:1rem">${escapeHtml(u.kecamatan||'-')}</div></div></div></div>`;const p=document.getElementById('profilPetugasAktif');if(p)p.value=getPetugasSesi();}
+    function gantiPetugasAktif(){const nama=resetPetugasSesi();const p=document.getElementById('profilPetugasAktif');if(p)p.value=nama;alert('Petugas aktif: '+nama);}
+
+    function cetakPdfStrukById(id){const t=dataTransaksi.find(x=>String(x.id)===String(id));if(!t)return;const idx=dataTransaksi.indexOf(t);cetakPdfStruk(idx);}
+    function kirimWaStrukById(id){const t=dataTransaksi.find(x=>String(x.id)===String(id));if(!t)return;const n=cariNasabahTransaksi(t);bukaWhatsApp(n?.hp,`*STRUK BANK SAMPAH*\nNo: ${t.id}\nTanggal: ${formatTanggalTampil(t.tgl)}\nNasabah: *${n?.nama||t.nama}*\nMaterial: ${t.jenis}\nBerat: ${num(t.berat).toFixed(2)} Kg\nHarga: ${rupiah(t.harga_satuan)}/Kg\n*TOTAL: ${rupiah(Math.abs(t.total))}*`);}
+    function cetakRekeningKoranNasabah(id){const n=dataNasabah.find(x=>String(x.id)===String(id));if(!n)return alert('Pilih nasabah.');const trx=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n));const saldo=trx.reduce((a,t)=>a+num(t.total),0);const kg=trx.filter(t=>num(t.total)>=0).reduce((a,t)=>a+num(t.berat),0);document.getElementById('area-laporan-a4').innerHTML=`<div style="font-family:Arial;padding:15mm"><h2 style="text-align:center">REKENING KORAN TABUNGAN SAMPAH</h2><h3 style="text-align:center">${escapeHtml(namaUnitTanpaBSU())}</h3><p><b>ID/Nama:</b> ${escapeHtml(n.id)} / ${escapeHtml(n.nama)}</p><p><b>Total Setoran:</b> ${kg.toFixed(2)} Kg &nbsp; <b>Saldo:</b> ${rupiah(saldo)}</p><table border="1" cellpadding="7" style="border-collapse:collapse;width:100%"><tr><th>Tanggal</th><th>Aktivitas</th><th>Berat</th><th>Nilai</th></tr>${trx.map(t=>`<tr><td>${formatTanggalTampil(t.tgl)}</td><td>${escapeHtml(t.jenis)}</td><td>${num(t.berat).toFixed(2)}</td><td>${rupiah(t.total)}</td></tr>`).join('')}</table></div>`;document.body.className='mode-cetak';window.print();document.body.className='';}
 
     function prosesLogout() {
         if(confirm('Apakah Anda yakin ingin keluar dari sistem Bank Sampah Unit?')) {
