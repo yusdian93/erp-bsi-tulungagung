@@ -1613,6 +1613,139 @@
         }
     }
 
+    let modalHapusSuperAdminInstance = null;
+
+    function getModalHapusSuperAdmin() {
+        const el = document.getElementById('modalHapusSuperAdmin');
+        if (!el || typeof bootstrap === 'undefined') return null;
+        modalHapusSuperAdminInstance = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static', keyboard: false });
+        return modalHapusSuperAdminInstance;
+    }
+
+    function ringkasanRiwayatNasabah(n) {
+        // Untuk penghapusan total, seluruh transaksi ikut dihitung:
+        // aktif maupun dibatalkan. Dampak saldo/volume hanya menghitung transaksi aktif.
+        const trx = (dataTransaksi || []).filter(t => transaksiMilikNasabah(t, n));
+        const trxAktif = transaksiAktif(trx);
+        const trxIds = new Set(trx.map(t => String(t.id || '')).filter(Boolean));
+        const kasTerkait = (dataKasMutasi || []).filter(k => trxIds.has(String(k.referensi_id || '')));
+        return {
+            transaksi: trx,
+            kas: kasTerkait,
+            jumlah: trx.length,
+            jumlahKas: kasTerkait.length,
+            berat: trxAktif.filter(t => t.jenis !== 'Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0),
+            saldo: trxAktif.reduce((a,t)=>a+num(t.total),0)
+        };
+    }
+
+    function bukaOtorisasiHapusSuperAdmin(n) {
+        const info = ringkasanRiwayatNasabah(n);
+        document.getElementById('hapusAdminIdNasabah').value = n.id || '';
+        document.getElementById('hapusAdminNamaNasabah').textContent = n.nama || '-';
+        document.getElementById('hapusAdminKodeNasabah').textContent = n.id || '-';
+        document.getElementById('hapusAdminJumlahTrx').textContent = info.jumlah.toLocaleString('id-ID') + ' transaksi';
+        document.getElementById('hapusAdminKas').textContent = info.jumlahKas.toLocaleString('id-ID') + ' mutasi';
+        document.getElementById('hapusAdminVolume').textContent = info.berat.toFixed(2) + ' Kg';
+        document.getElementById('hapusAdminSaldo').textContent = rupiah(info.saldo);
+        document.getElementById('hapusAdminKonfirmasiId').value = '';
+        document.getElementById('hapusAdminFrasaTotal').value = '';
+        document.getElementById('hapusAdminAlasan').value = '';
+        document.getElementById('hapusAdminUsername').value = '';
+        document.getElementById('hapusAdminPassword').value = '';
+        document.getElementById('hapusAdminSetuju').checked = false;
+
+        const dampakBox = document.getElementById('hapusAdminPeringatanSaldo');
+        dampakBox.className = 'alert alert-danger mt-3 mb-0';
+        dampakBox.innerHTML =
+            '<i class="bi bi-exclamation-octagon-fill me-2"></i><strong>Penghapusan total dan tidak dapat dibatalkan.</strong><br>' +
+            'Sistem akan menghapus data master, <strong>' + info.jumlah.toLocaleString('id-ID') + ' transaksi</strong>, ' +
+            '<strong>' + info.jumlahKas.toLocaleString('id-ID') + ' mutasi kas terkait</strong>, arsip lama, dan audit rinci terkait. ' +
+            'Dampak saldo aktif saat ini: <strong>' + rupiah(info.saldo) + '</strong>; dampak volume aktif: <strong>' + info.berat.toFixed(2) + ' Kg</strong>. ' +
+            'Saldo dan stok unit akan dihitung ulang otomatis dari data yang tersisa.';
+
+        const frasaContoh = document.getElementById('hapusAdminFrasaContoh');
+        if (frasaContoh) frasaContoh.textContent = 'HAPUS TOTAL ' + (n.id || '');
+
+        const modal = getModalHapusSuperAdmin();
+        if (!modal) return alert('Komponen otorisasi Super Admin belum siap. Muat ulang halaman.');
+        modal.show();
+        setTimeout(() => document.getElementById('hapusAdminKonfirmasiId')?.focus(), 250);
+    }
+
+    async function prosesHapusSuperAdmin(e) {
+        e.preventDefault();
+        const id = document.getElementById('hapusAdminIdNasabah').value.trim();
+        const konfirmasiId = document.getElementById('hapusAdminKonfirmasiId').value.trim();
+        const frasaTotal = document.getElementById('hapusAdminFrasaTotal').value.trim();
+        const alasan = document.getElementById('hapusAdminAlasan').value.trim();
+        const adminUsername = document.getElementById('hapusAdminUsername').value.trim();
+        const adminPassword = document.getElementById('hapusAdminPassword').value;
+        const setuju = document.getElementById('hapusAdminSetuju').checked;
+        const frasaWajib = 'HAPUS TOTAL ' + id;
+
+        if (konfirmasiId !== id) return alert('Konfirmasi gagal. Ketik ID nasabah persis: ' + id);
+        if (frasaTotal !== frasaWajib) return alert('Frasa konfirmasi tidak sesuai. Ketik persis: ' + frasaWajib);
+        if (alasan.length < 10) return alert('Alasan penghapusan wajib diisi minimal 10 karakter.');
+        if (!adminUsername || !adminPassword) return alert('Username dan kata sandi Super Admin wajib diisi.');
+        if (!setuju) return alert('Centang pernyataan persetujuan penghapusan total terlebih dahulu.');
+
+        const n = dataNasabah.find(x => String(x.id) === String(id));
+        if (!n) return alert('Data nasabah tidak ditemukan atau sudah berubah.');
+        if (String(n.status || 'aktif').toLowerCase() !== 'nonaktif') {
+            return alert('Nasabah harus berstatus NONAKTIF sebelum penghapusan total.');
+        }
+
+        const info = ringkasanRiwayatNasabah(n);
+        const konfirmasiTerakhir = confirm(
+            'KONFIRMASI TERAKHIR\n\n' +
+            'Nasabah: ' + n.nama + '\n' +
+            'ID: ' + id + '\n' +
+            'Transaksi yang dihapus: ' + info.jumlah + '\n' +
+            'Mutasi kas terkait: ' + info.jumlahKas + '\n' +
+            'Dampak saldo aktif: ' + rupiah(info.saldo) + '\n' +
+            'Dampak volume aktif: ' + info.berat.toFixed(2) + ' Kg\n\n' +
+            'Tindakan ini TIDAK DAPAT DIBATALKAN. Lanjutkan?'
+        );
+        if (!konfirmasiTerakhir) return;
+
+        const btn = document.getElementById('btnHapusSuperAdmin');
+        const awal = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menghapus Total...';
+        try {
+            const hasil = await AdapterAPI.deleteNasabahSuperAdmin({
+                mode_penghapusan: 'total',
+                id_nasabah: id,
+                id_unit: CURRENT_UNIT_ID,
+                konfirmasi_id: konfirmasiId,
+                konfirmasi_total: frasaTotal,
+                alasan,
+                admin_username: adminUsername,
+                admin_password: adminPassword
+            });
+            if (!hasil || hasil.ok !== true) throw new Error(hasil?.error || 'Penghapusan ditolak server.');
+            getModalHapusSuperAdmin()?.hide();
+            alert(
+                'PENGHAPUSAN TOTAL BERHASIL\n\n' +
+                'Nasabah: ' + (hasil.nama || n.nama) + '\n' +
+                'Transaksi dihapus: ' + Number(hasil.jumlah_transaksi || 0).toLocaleString('id-ID') + '\n' +
+                'Mutasi kas dihapus: ' + Number(hasil.jumlah_kas_mutasi || 0).toLocaleString('id-ID') + '\n' +
+                'Audit rinci dihapus: ' + Number(hasil.jumlah_audit_dihapus || 0).toLocaleString('id-ID') + '\n' +
+                'Dampak saldo: ' + rupiah(Number(hasil.dampak_saldo || 0)) + '\n' +
+                'Dampak volume: ' + Number(hasil.total_berat || 0).toFixed(2) + ' Kg\n\n' +
+                'Satu log ringkas penghapusan Super Admin tetap disimpan untuk pertanggungjawaban.'
+            );
+            await loadDataDatabase();
+        } catch (err) {
+            alert('Gagal melakukan penghapusan total: ' + (err?.message || err));
+        } finally {
+            document.getElementById('hapusAdminPassword').value = '';
+            btn.disabled = false;
+            btn.innerHTML = awal;
+        }
+    }
+
     function hapusNasabah(id) {
         const n = dataNasabah.find(x => String(x.id) === String(id));
         if (!n) return alert('Data nasabah tidak ditemukan.');
@@ -1623,13 +1756,13 @@
             return;
         }
 
-        const punyaTrx = dataTransaksi.some(t => String(t.id_nasabah || '') === String(id) || (!t.id_nasabah && t.nama === n.nama));
+        const punyaTrx = dataTransaksi.some(t => transaksiMilikNasabah(t, n));
         if (punyaTrx) {
-            alert('Nasabah ini sudah memiliki riwayat transaksi sehingga tidak boleh dihapus permanen. Status NONAKTIF sudah cukup: nasabah tidak muncul pada setoran baru, tetapi riwayat keuangan tetap aman.');
+            bukaOtorisasiHapusSuperAdmin(n);
             return;
         }
 
-        if (!confirm('Hapus permanen nasabah NONAKTIF "' + n.nama + '"?\n\nTindakan ini hanya diperbolehkan karena nasabah belum pernah bertransaksi.')) return;
+        if (!confirm('Hapus permanen nasabah NONAKTIF "' + n.nama + '"?\n\nNasabah belum pernah bertransaksi sehingga tidak memerlukan otorisasi Super Admin.')) return;
         AdapterAPI.deleteNasabah(id).then(res => {
             alert(res);
             if (String(res).toLowerCase().includes('sukses')) loadDataDatabase();
@@ -2651,7 +2784,7 @@
     function tanggalKeMs(v){const d=parseTanggalUnit(v);return isNaN(d)?0:d.getTime();}
     function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});}
     function dalamRentang(v,mulai,akhir){const ms=tanggalKeMs(v);if(mulai&&ms<new Date(mulai+'T00:00:00').getTime())return false;if(akhir&&ms>new Date(akhir+'T23:59:59').getTime())return false;return true;}
-    function transaksiMilikNasabah(t,n){return String(t.id_nasabah||'')===String(n.id)||(!t.id_nasabah&&String(t.nama||'').trim()===String(n.nama||'').trim());}
+    function transaksiMilikNasabah(t,n){return String(t.id_nasabah||'')===String(n.id)||String(t.id_nasabah_arsip||'')===String(n.id)||(!t.id_nasabah&&!t.id_nasabah_arsip&&String(t.nama||'').trim()===String(n.nama||'').trim());}
     function cariNasabahTransaksi(t){return dataNasabah.find(n=>transaksiMilikNasabah(t,n));}
     function normalisasiHpLokal(v){let x=String(v||'').replace(/[^0-9+]/g,'');if(x.startsWith('+62'))x='0'+x.slice(3);else if(x.startsWith('62'))x='0'+x.slice(2);else if(x.startsWith('8'))x='0'+x;return x;}
     function hpWa(v){let x=normalisasiHpLokal(v);return x.startsWith('0')?'62'+x.slice(1):x;}
@@ -2803,6 +2936,79 @@
                 <div class="modal-footer border-0 px-4 px-md-5 pb-4 pb-md-5 pt-0">
                     <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Batal</button>
                     <button type="submit" class="btn btn-success px-4" id="btnSimpanEditNasabah"><i class="bi bi-check2-circle me-2"></i>Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ===== MODAL PENGHAPUSAN TOTAL NASABAH OLEH SUPER ADMIN ===== -->
+<div class="modal fade" id="modalHapusSuperAdmin" tabindex="-1" aria-labelledby="judulModalHapusSuperAdmin" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border:0; border-radius:24px; overflow:hidden; box-shadow:0 28px 75px rgba(88,15,15,.35);">
+            <form id="formHapusSuperAdmin" onsubmit="prosesHapusSuperAdmin(event)">
+                <input type="hidden" id="hapusAdminIdNasabah">
+                <div class="modal-header text-white" style="background:linear-gradient(120deg,#5f0f0f,#991b1b); border:0; padding:22px 25px;">
+                    <div>
+                        <div class="small text-uppercase fw-bold" style="letter-spacing:1.4px; color:#fecaca;">Akses Khusus Super Admin</div>
+                        <h5 class="modal-title fw-bold mt-1" id="judulModalHapusSuperAdmin"><i class="bi bi-shield-fill-x me-2"></i>Penghapusan Total Nasabah</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5">
+                    <div class="alert alert-danger border-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        Fasilitas ini menghapus <strong>data master nasabah, seluruh transaksi setoran/penarikan, mutasi kas yang terhubung, arsip lama, dan audit rinci terkait</strong>.
+                        Saldo, stok, dan kas unit akan berubah mengikuti data yang tersisa. Tindakan ini tidak dapat dipulihkan dari aplikasi.
+                    </div>
+                    <div class="alert alert-secondary small">
+                        Data tingkat unit yang tidak mempunyai hubungan khusus dengan satu nasabah—seperti stock opname gudang, pengiriman ke BSI, dan rekonsiliasi kas—tidak ikut dihapus.
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4"><div class="metric-soft h-100"><div class="label">Nama Nasabah</div><div class="value fs-5" id="hapusAdminNamaNasabah">-</div><small class="text-muted" id="hapusAdminKodeNasabah">-</small></div></div>
+                        <div class="col-md-2"><div class="metric-soft h-100"><div class="label">Transaksi</div><div class="value fs-6" id="hapusAdminJumlahTrx">0</div></div></div>
+                        <div class="col-md-2"><div class="metric-soft h-100"><div class="label">Mutasi Kas</div><div class="value fs-6" id="hapusAdminKas">0</div></div></div>
+                        <div class="col-md-2"><div class="metric-soft h-100"><div class="label">Volume Aktif</div><div class="value fs-6" id="hapusAdminVolume">0 Kg</div></div></div>
+                        <div class="col-md-2"><div class="metric-soft h-100"><div class="label">Dampak Saldo</div><div class="value fs-6" id="hapusAdminSaldo">Rp0</div></div></div>
+                    </div>
+                    <div id="hapusAdminPeringatanSaldo" class="alert alert-danger mt-3"></div>
+                    <hr class="my-4">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label>Ketik Ulang ID Nasabah</label>
+                            <input type="text" id="hapusAdminKonfirmasiId" class="form-control" required autocomplete="off" placeholder="Harus sama persis dengan ID nasabah">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Alasan Penghapusan Total</label>
+                            <input type="text" id="hapusAdminAlasan" class="form-control" required minlength="10" placeholder="Contoh: seluruh pencatatan salah/duplikat">
+                        </div>
+                        <div class="col-12">
+                            <label>Frasa Penghapusan Total</label>
+                            <div class="small text-danger fw-bold mb-2">Ketik persis: <code id="hapusAdminFrasaContoh">HAPUS TOTAL ID</code></div>
+                            <input type="text" id="hapusAdminFrasaTotal" class="form-control" required autocomplete="off" placeholder="HAPUS TOTAL ...">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Username Super Admin</label>
+                            <input type="text" id="hapusAdminUsername" class="form-control" required autocomplete="username">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Kata Sandi Super Admin</label>
+                            <input type="password" id="hapusAdminPassword" class="form-control" required autocomplete="current-password">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check p-3 rounded-3" style="background:#fff1f2; border:1px solid #fda4af;">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="hapusAdminSetuju" required>
+                                <label class="form-check-label mb-0 fw-semibold" for="hapusAdminSetuju">
+                                    Saya memahami bahwa seluruh data nasabah dan data transaksi terkait akan dihapus permanen, saldo/stok/kas dapat berubah, dan tindakan ini tidak dapat dibatalkan.
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 px-md-5 pb-4 pb-md-5 pt-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Batal</button>
+                    <button type="submit" class="btn btn-danger px-4" id="btnHapusSuperAdmin"><i class="bi bi-trash3-fill me-2"></i>Hapus Total Permanen</button>
                 </div>
             </form>
         </div>

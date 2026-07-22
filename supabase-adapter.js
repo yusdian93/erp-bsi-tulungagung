@@ -497,13 +497,13 @@ const AdapterAPI = {
     return 'Sukses';
   },
   async editNasabah(form) {
-    const id = form && form.id;
-    if (!id) return 'Gagal: ID nasabah tidak tersedia.';
+    const id = String(form?.id || '').trim();
+    if (!id) return 'Gagal: ID nasabah kosong.';
     const { data: lama, error: errBaca } = await sb.from('nasabah').select('*').eq('id', id).maybeSingle();
     if (errBaca) return 'Gagal: ' + errBaca.message;
     if (!lama) return 'Gagal: Data nasabah tidak ditemukan.';
 
-    const statusFix = String(form.status ?? lama.status ?? 'aktif').toLowerCase() === 'nonaktif' ? 'nonaktif' : 'aktif';
+    const statusFix = String(form.status || lama.status || 'aktif').toLowerCase() === 'nonaktif' ? 'nonaktif' : 'aktif';
     const dataBaru = {
       nama: String(form.nama ?? lama.nama ?? '').trim(),
       hp: String(form.hp ?? lama.hp ?? '').trim(),
@@ -521,6 +521,7 @@ const AdapterAPI = {
     logAudit('nasabah', id, 'update', lama, { ...lama, ...dataBaru }, 'Perubahan data/status nasabah melalui menu edit BSU');
     return 'Sukses diperbarui';
   },
+
   async deleteNasabah(id) {
     const { data: lama, error: errBaca } = await sb.from('nasabah').select('*').eq('id', id).maybeSingle();
     if (errBaca) return 'Gagal: ' + errBaca.message;
@@ -528,11 +529,52 @@ const AdapterAPI = {
     if (String(lama.status || 'aktif').toLowerCase() !== 'nonaktif') {
       return 'Gagal: Nasabah masih berstatus AKTIF. Ubah menjadi NONAKTIF melalui tombol Edit terlebih dahulu.';
     }
+
+    const [{ count: countId, error: errId }, { count: countLegacy, error: errLegacy }] = await Promise.all([
+      sb.from('transaksi').select('id', { count: 'exact', head: true }).eq('id_unit', lama.id_unit).eq('id_nasabah', id),
+      sb.from('transaksi').select('id', { count: 'exact', head: true }).eq('id_unit', lama.id_unit).is('id_nasabah', null).eq('nama', lama.nama)
+    ]);
+    if (errId || errLegacy) return 'Gagal memeriksa riwayat transaksi: ' + (errId?.message || errLegacy?.message || 'kesalahan database');
+    if (Number(countId || 0) + Number(countLegacy || 0) > 0) {
+      return 'Gagal: Nasabah memiliki riwayat transaksi. Gunakan otorisasi Penghapusan Total Super Admin.';
+    }
+
     const { error } = await sb.from('nasabah').delete().eq('id', id);
     if (error) return 'Gagal: ' + error.message;
     logAudit('nasabah', id, 'delete', lama || null, null, 'Penghapusan permanen nasabah nonaktif tanpa riwayat transaksi');
     return 'Sukses dihapus';
   },
+
+  // Penghapusan TOTAL nasabah yang sudah mempunyai transaksi hanya dilakukan
+  // melalui Edge Function. Kredensial Super Admin diverifikasi di server.
+  // Master nasabah, transaksi, mutasi kas terkait, arsip lama, dan audit rinci
+  // dihapus atomik oleh RPC service_role.
+  async deleteNasabahSuperAdmin(form) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/delete-nasabah-superadmin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'apikey': SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify(form || {})
+      });
+      let data = null;
+      try {
+        data = await res.json();
+      } catch (e) {
+        data = { ok: false, error: 'Respons server tidak valid.' };
+      }
+      if (!res.ok || data?.ok !== true) {
+        return { ok: false, error: data?.error || ('HTTP ' + res.status) };
+      }
+      return data;
+    } catch (e) {
+      return { ok: false, error: e?.message || String(e) };
+    }
+  },
+
   // Mengubah ID (primary key) nasabah lama -> format baru (3 huruf desa + 5
   // angka). Dipakai fitur migrasi satu-kali di unit.html untuk menyeragamkan
   // ID nasabah yang didaftarkan sebelum fitur ID otomatis dibuat. Aman karena
