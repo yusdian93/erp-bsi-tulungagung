@@ -1246,7 +1246,7 @@
 
         <div id="profil" class="tab-content" style="display:none;">
             <div class="row g-4">
-                <div class="col-lg-7"><div class="card p-4 p-md-5"><div class="module-title"><span class="icon-shell"><i class="bi bi-building-gear"></i></span><div><h4 class="m-0">Profil Bank Sampah Unit</h4><div class="module-note">Identitas yang berasal dari data registrasi Bank Sampah Induk.</div></div></div><div id="profilUnitDetail" class="mt-4"></div></div></div>
+                <div class="col-lg-7"><div class="card p-4 p-md-5"><div class="module-title"><span class="icon-shell"><i class="bi bi-building-gear"></i></span><div><h4 class="m-0">Profil Bank Sampah Unit</h4><div class="module-note">Identitas dan dokumen resmi yang disinkronkan dari registrasi Bank Sampah Induk.</div></div></div><div id="profilUnitDetail" class="mt-4"></div></div></div>
                 <div class="col-lg-5"><div class="card p-4 p-md-5"><h5 class="fw-bold">Petugas & Akses Sesi</h5><p class="module-note">Nama ini digunakan pada audit log untuk membedakan operator yang memakai akun unit yang sama.</p><div class="mb-3"><label>Petugas Aktif</label><input id="profilPetugasAktif" class="form-control" readonly></div><button class="btn btn-outline-success w-100" onclick="gantiPetugasAktif()"><i class="bi bi-person-gear me-2"></i>Ganti Petugas Aktif</button><div class="data-warning mt-4">Hak akses tingkat lanjut tetap harus diamankan melalui autentikasi server/RLS. Jangan membagikan akun unit kepada pihak di luar pengelola.</div></div></div>
             </div>
         </div>
@@ -2890,7 +2890,30 @@
     function ringkasAudit(a){try{const d=a.data_baru||a.data_lama||{};return [d.nama,d.jenis,d.material,d.kategori].filter(Boolean).join(' — ')||'-';}catch(e){return '-';}}
     function muatAuditUnit(){AdapterAPI.getAuditLogUnit(CURRENT_UNIT_ID).then(rows=>{dataAuditUnit=rows||[];updateAuditUnit();});}
 
-    function updateProfilUnit(){const u=dataUnit[0]||{};const box=document.getElementById('profilUnitDetail');if(box)box.innerHTML=`<div class="row g-3"><div class="col-md-6"><div class="metric-soft"><div class="label">Nama Unit</div><div class="value" style="font-size:1rem">${escapeHtml(u.nama||CURRENT_UNIT_NAMA||'-')}</div></div></div><div class="col-md-6"><div class="metric-soft"><div class="label">Kode Registrasi</div><div class="value" style="font-size:1rem">${escapeHtml(CURRENT_UNIT_ID)}</div></div></div><div class="col-md-6"><div class="metric-soft"><div class="label">Desa/Kelurahan</div><div class="value" style="font-size:1rem">${escapeHtml(u.desa||'-')}</div></div></div><div class="col-md-6"><div class="metric-soft"><div class="label">Kecamatan</div><div class="value" style="font-size:1rem">${escapeHtml(u.kecamatan||'-')}</div></div></div></div>`;const p=document.getElementById('profilPetugasAktif');if(p)p.value=getPetugasSesi();}
+    function previewSkProfilUnit(){
+        const u=dataUnit[0]||{};
+        if(!u.sk_pdf_path)return alert('Dokumen SK belum tersedia. Hubungi Bank Sampah Induk.');
+        const url=AdapterAPI.getDokumenSkBsuUrl(u.sk_pdf_path);
+        if(!url)return alert('URL dokumen SK tidak tersedia.');
+        window.open(url,'_blank','noopener');
+    }
+    async function downloadSkProfilUnit(){
+        const u=dataUnit[0]||{};
+        if(!u.sk_pdf_path)return alert('Dokumen SK belum tersedia. Hubungi Bank Sampah Induk.');
+        const hasil=await AdapterAPI.downloadDokumenSkBsu(u.sk_pdf_path,u.sk_pdf_nama||`SK-${CURRENT_UNIT_ID}.pdf`);
+        if(!hasil.ok&&hasil.error)console.warn(hasil.error);
+    }
+    function updateProfilUnit(){
+        const u=dataUnit[0]||{};
+        const box=document.getElementById('profilUnitDetail');
+        const item=(label,value,kol='col-md-6')=>`<div class="${kol}"><div class="metric-soft h-100"><div class="label">${label}</div><div class="value" style="font-size:1rem;word-break:break-word">${escapeHtml(value||'-')}</div></div></div>`;
+        let koordinat=String(u.koordinat||'').trim();
+        let mapBtn=koordinat?`<a class="btn btn-sm btn-outline-success" href="https://www.google.com/maps?q=${encodeURIComponent(koordinat)}" target="_blank" rel="noopener"><i class="bi bi-geo-alt me-1"></i>Lihat Peta</a>`:'';
+        let skHtml=u.sk_pdf_path?`<div class="data-success mt-4"><div class="d-flex align-items-start justify-content-between gap-3 flex-wrap"><div><div class="fw-bold"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Dokumen SK Bank Sampah Unit</div><div class="small mt-1">${escapeHtml(u.sk_pdf_nama||'SK Bank Sampah Unit.pdf')}</div>${u.sk_pdf_uploaded_at?`<div class="small text-muted mt-1">Diunggah: ${formatTanggalTampil(u.sk_pdf_uploaded_at)}</div>`:''}</div><div class="d-flex gap-2 flex-wrap"><button class="btn btn-outline-danger btn-sm" onclick="previewSkProfilUnit()"><i class="bi bi-eye me-1"></i>Preview PDF</button><button class="btn btn-danger btn-sm" onclick="downloadSkProfilUnit()"><i class="bi bi-download me-1"></i>Download PDF</button></div></div></div>`:`<div class="data-warning mt-4"><i class="bi bi-exclamation-triangle me-2"></i>Dokumen SK belum diunggah oleh Bank Sampah Induk.</div>`;
+        if(box)box.innerHTML=`<div class="row g-3">${item('Nama Bank Sampah Unit',u.nama||CURRENT_UNIT_NAMA,'col-12')}${item('Kode Registrasi',CURRENT_UNIT_ID)}${item('Nama Ketua',u.ketua)}${item('Nomor HP / WhatsApp',u.hp)}${item('Jumlah Pengurus',String(u.jumlah_pengurus??0))}${item('Kecamatan',u.kecamatan)}${item('Desa/Kelurahan',u.desa)}${item('Alamat Lengkap',u.alamat,'col-12')}${item('Koordinat Lokasi',koordinat||'-','col-md-8')}<div class="col-md-4 d-flex align-items-stretch"><div class="metric-soft h-100 w-100 d-flex align-items-center justify-content-center">${mapBtn||'<span class="text-muted small">Koordinat belum tersedia</span>'}</div></div></div>${skHtml}`;
+        const p=document.getElementById('profilPetugasAktif');if(p)p.value=getPetugasSesi();
+    }
+
     function gantiPetugasAktif(){const nama=resetPetugasSesi();const p=document.getElementById('profilPetugasAktif');if(p)p.value=nama;alert('Petugas aktif: '+nama);}
 
     function cetakPdfStrukById(id){const t=dataTransaksi.find(x=>String(x.id)===String(id));if(!t)return;const idx=dataTransaksi.indexOf(t);cetakPdfStruk(idx);}

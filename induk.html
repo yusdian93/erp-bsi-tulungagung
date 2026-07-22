@@ -2449,6 +2449,12 @@
                             <button type="button" class="btn-sync" style="white-space:nowrap;" onclick="ambilLokasiRegistrasi()">📍 Ambil Lokasi</button>
                         </div>
                     </div>
+                    <div class="form-group">
+                        <label>Dokumen SK Bank Sampah Unit <span style="color:#ef4444;">*</span></label>
+                        <input type="file" id="regSkPdf" class="form-control" accept="application/pdf,.pdf" required onchange="tampilkanInfoPdfBsu('regSkPdf','regSkInfo','btnPreviewRegSk')">
+                        <div id="regSkInfo" style="margin-top:8px;font-size:12px;color:#64748b;">PDF maksimal 10 MB.</div>
+                        <button type="button" id="btnPreviewRegSk" class="btn-sync" style="margin-top:8px;display:none;" onclick="previewPdfTerpilih('regSkPdf')">📄 Preview PDF Dipilih</button>
+                    </div>
                     <button type="button" class="btn-submit" id="btnSimpanBsu" onclick="simpanBsuBaru()">DAFTARKAN BSU</button>
                 </form>
             </div>
@@ -2480,6 +2486,19 @@
             <div class="form-group"><label>Desa / Kelurahan</label><input type="text" id="editBsuDesa" class="form-control"></div>
             <div class="form-group"><label>Alamat Lengkap</label><input type="text" id="editBsuAlamat" class="form-control"></div>
             <div class="form-group"><label>Koordinat (opsional)</label><input type="text" id="editBsuKoordinat" class="form-control"></div>
+            <input type="hidden" id="editBsuSkPathLama">
+            <input type="hidden" id="editBsuSkNamaLama">
+            <div class="form-group">
+                <label>Dokumen SK Bank Sampah Unit</label>
+                <div id="editBsuSkStatus" style="padding:10px 12px;border:1px solid #dbe5e1;border-radius:10px;background:#f8faf9;margin-bottom:8px;font-size:12px;color:#475569;">Belum ada dokumen.</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+                    <button type="button" id="btnPreviewEditSkLama" class="btn-sync" style="display:none;" onclick="previewSkBsu(document.getElementById('editBsuId').value)">📄 Preview SK</button>
+                    <button type="button" id="btnDownloadEditSkLama" class="btn-sync" style="display:none;" onclick="downloadSkBsu(document.getElementById('editBsuId').value)">⬇️ Download SK</button>
+                </div>
+                <input type="file" id="editBsuSkPdf" class="form-control" accept="application/pdf,.pdf" onchange="tampilkanInfoPdfBsu('editBsuSkPdf','editBsuSkBaruInfo','btnPreviewEditSkBaru')">
+                <div id="editBsuSkBaruInfo" style="margin-top:8px;font-size:12px;color:#64748b;">Kosongkan jika SK tidak diganti. PDF maksimal 10 MB.</div>
+                <button type="button" id="btnPreviewEditSkBaru" class="btn-sync" style="margin-top:8px;display:none;" onclick="previewPdfTerpilih('editBsuSkPdf')">📄 Preview PDF Baru</button>
+            </div>
             <button type="button" class="btn-submit" id="btnSimpanEditBsu" onclick="simpanEditBsu()">SIMPAN PERUBAHAN</button>
         </div>
     </div>
@@ -3580,29 +3599,72 @@
         if (el) el.value = generateIdBsuOtomatis();
     }
 
-    function simpanBsuBaru() {
+    function tampilkanInfoPdfBsu(inputId, infoId, btnId) {
+        const input = document.getElementById(inputId);
+        const info = document.getElementById(infoId);
+        const btn = document.getElementById(btnId);
+        const file = input?.files?.[0];
+        if(!file) { if(info) info.textContent='PDF maksimal 10 MB.'; if(btn) btn.style.display='none'; return; }
+        const okPdf = /\.pdf$/i.test(file.name) && (!file.type || file.type === 'application/pdf');
+        const ukuran = (file.size / (1024*1024)).toFixed(2);
+        if(info) { info.textContent = `${file.name} • ${ukuran} MB${okPdf ? '' : ' • FORMAT TIDAK VALID'}`; info.style.color = okPdf && file.size <= 10*1024*1024 ? '#166534' : '#b91c1c'; }
+        if(btn) btn.style.display = okPdf ? 'inline-flex' : 'none';
+    }
+
+    function previewPdfTerpilih(inputId) {
+        const file = document.getElementById(inputId)?.files?.[0];
+        if(!file) return alert('Pilih file PDF terlebih dahulu.');
+        if(!/\.pdf$/i.test(file.name)) return alert('File harus berformat PDF.');
+        const url = URL.createObjectURL(file);
+        window.open(url, '_blank', 'noopener');
+        setTimeout(()=>URL.revokeObjectURL(url), 60000);
+    }
+
+    async function simpanBsuBaru() {
+        const idTampil = document.getElementById('regIdOtomatis').value || generateIdBsuOtomatis();
+        const fileSk = document.getElementById('regSkPdf')?.files?.[0];
         let form = {
-            action: 'tambahUnit',
-            id: generateIdBsuOtomatis(),
-            nama: document.getElementById('regNama').value,
+            action: 'tambahUnit', id: idTampil,
+            nama: document.getElementById('regNama').value.trim(),
             password: document.getElementById('regPassword').value,
-            ketua: document.getElementById('regKetua').value,
-            hp: document.getElementById('regHp').value,
-            kecamatan: document.getElementById('regKecamatan').value,
-            desa: document.getElementById('regDesa').value,
-            alamat: document.getElementById('regAlamat').value,
-            koordinat: document.getElementById('regKoordinat').value,
+            ketua: document.getElementById('regKetua').value.trim(),
+            hp: document.getElementById('regHp').value.trim(),
+            kecamatan: document.getElementById('regKecamatan').value.trim(),
+            desa: document.getElementById('regDesa').value.trim(),
+            alamat: document.getElementById('regAlamat').value.trim(),
+            koordinat: document.getElementById('regKoordinat').value.trim(),
             jumlah_pengurus: 0
         };
-        if(!form.nama || !form.ketua || !form.desa) return alert('Lengkapi Nama BSU, Ketua, dan Desa!');
+        if(!form.nama || !form.ketua || !form.desa || !form.kecamatan || !form.alamat) return alert('Lengkapi seluruh identitas BSU!');
         if(!form.password) return alert('Kata Sandi wajib diisi!');
-        
-        let btn = document.getElementById('btnSimpanBsu');
-        btn.innerText = '⏳ MENYIMPAN...'; btn.disabled = true;
+        if(!fileSk) return alert('Dokumen SK Bank Sampah Unit wajib diunggah.');
+        if(!/\.pdf$/i.test(fileSk.name) || (fileSk.type && fileSk.type !== 'application/pdf')) return alert('Dokumen SK harus berupa PDF.');
+        if(fileSk.size > 10*1024*1024) return alert('Ukuran PDF maksimal 10 MB.');
 
-        postAksi(form)
-        .then(res=>{ alert('Sukses mendaftarkan BSU Baru dengan ID: ' + form.id); document.getElementById('formRegistrasiBsu').reset(); loadDataPusat(); })
-        .catch(e=>alert('Error: ' + e)).finally(()=>{ btn.innerText = 'DAFTARKAN BSU'; btn.disabled = false; siapkanIdBsuBaru(); });
+        let btn = document.getElementById('btnSimpanBsu');
+        btn.innerText = '⏳ MENGUNGGAH SK...'; btn.disabled = true;
+        let pathTerunggah = '';
+        try {
+            const unggah = await AdapterAPI.uploadDokumenSkBsu({ id_unit: form.id, file: fileSk });
+            if(!unggah.ok) throw new Error(unggah.error || 'Gagal mengunggah SK.');
+            pathTerunggah = unggah.path;
+            form.sk_pdf_path = unggah.path;
+            form.sk_pdf_nama = unggah.nama;
+            form.sk_pdf_uploaded_at = new Date().toISOString();
+            btn.innerText = '⏳ MENYIMPAN DATA...';
+            const res = await postAksi(form);
+            if(String(res).toLowerCase().startsWith('gagal')) throw new Error(res);
+            alert('Sukses mendaftarkan BSU Baru dengan ID: ' + form.id);
+            document.getElementById('formRegistrasiBsu').reset();
+            document.getElementById('regSkInfo').textContent='PDF maksimal 10 MB.';
+            document.getElementById('btnPreviewRegSk').style.display='none';
+            await loadDataPusat();
+        } catch(e) {
+            if(pathTerunggah) await AdapterAPI.hapusDokumenSkBsu(pathTerunggah).catch(()=>{});
+            alert('Gagal mendaftarkan BSU: ' + (e.message || e));
+        } finally {
+            btn.innerText = 'DAFTARKAN BSU'; btn.disabled = false; siapkanIdBsuBaru();
+        }
     }
 
     function ambilLokasiRegistrasi() {
@@ -3615,11 +3677,41 @@
         );
     }
 
+    function dataBsuById(id) { return globalNasabah.find(x => String(x.id) === String(id)); }
+
+    function previewSkBsu(id) {
+        const n = dataBsuById(id);
+        if(!n?.sk_pdf_path) return alert('Dokumen SK belum tersedia.');
+        const url = AdapterAPI.getDokumenSkBsuUrl(n.sk_pdf_path);
+        if(!url) return alert('URL dokumen tidak tersedia.');
+        window.open(url, '_blank', 'noopener');
+    }
+
+    async function downloadSkBsu(id) {
+        const n = dataBsuById(id);
+        if(!n?.sk_pdf_path) return alert('Dokumen SK belum tersedia.');
+        const hasil = await AdapterAPI.downloadDokumenSkBsu(n.sk_pdf_path, n.sk_pdf_nama || `SK-${n.id}.pdf`);
+        if(!hasil.ok && hasil.error) console.warn(hasil.error);
+    }
+
     function waKirimKredensialBsu(id) {
         let n = globalNasabah.find(x => String(x.id) === String(id));
         if(!n) return alert('Data BSU tidak ditemukan.');
 
-        let pesan = `*DATA AKUN BANK SAMPAH UNIT*\nBank Sampah Induk - DLH Kab. Tulungagung\n\nID Register: ${n.id}\nKata Sandi: ${n.password || '-'}\nNama BSU: ${n.nama}\nKetua: ${n.ketua}\nKontak WA: ${n.hp}\nDesa: ${n.desa}\nKecamatan: ${n.kecamatan}\n\nSimpan data ini baik-baik untuk login ke sistem.`;
+        const linkSk = n.sk_pdf_path ? AdapterAPI.getDokumenSkBsuUrl(n.sk_pdf_path) : '';
+        let pesan = `*DATA AKUN BANK SAMPAH UNIT*
+Bank Sampah Induk - DLH Kab. Tulungagung
+
+ID Register: ${n.id}
+Kata Sandi: ${n.password || '-'}
+Nama BSU: ${n.nama}
+Ketua: ${n.ketua}
+Kontak WA: ${n.hp}
+Desa: ${n.desa}
+Kecamatan: ${n.kecamatan}${linkSk ? `
+Dokumen SK: ${linkSk}` : ''}
+
+Simpan data ini baik-baik untuk login ke sistem.`;
 
         let hp = String(n.hp || '').replace(/[^0-9]/g, '');
         if(hp.startsWith('0')) hp = '62' + hp.slice(1);
@@ -3644,6 +3736,15 @@
         document.getElementById('editBsuDesa').value = n.desa || '';
         document.getElementById('editBsuAlamat').value = n.alamat || '';
         document.getElementById('editBsuKoordinat').value = n.koordinat || '';
+        document.getElementById('editBsuSkPathLama').value = n.sk_pdf_path || '';
+        document.getElementById('editBsuSkNamaLama').value = n.sk_pdf_nama || '';
+        document.getElementById('editBsuSkPdf').value = '';
+        document.getElementById('editBsuSkBaruInfo').textContent = 'Kosongkan jika SK tidak diganti. PDF maksimal 10 MB.';
+        document.getElementById('btnPreviewEditSkBaru').style.display = 'none';
+        const adaSk = !!n.sk_pdf_path;
+        document.getElementById('editBsuSkStatus').innerHTML = adaSk ? `Dokumen aktif: <b>${escAttr(n.sk_pdf_nama || 'SK Bank Sampah Unit.pdf')}</b>` : '<span style="color:#b91c1c;">Belum ada dokumen SK.</span>';
+        document.getElementById('btnPreviewEditSkLama').style.display = adaSk ? 'inline-flex' : 'none';
+        document.getElementById('btnDownloadEditSkLama').style.display = adaSk ? 'inline-flex' : 'none';
         document.getElementById('modalEditBsu').classList.add('show');
     }
 
@@ -3651,28 +3752,49 @@
         document.getElementById('modalEditBsu').classList.remove('show');
     }
 
-    function simpanEditBsu() {
+    async function simpanEditBsu() {
+        const id = document.getElementById('editBsuId').value;
+        const fileBaru = document.getElementById('editBsuSkPdf')?.files?.[0];
         let form = {
-            action: 'updateUnit',
-            id: document.getElementById('editBsuId').value,
-            nama: document.getElementById('editBsuNama').value,
+            action: 'updateUnit', id,
+            nama: document.getElementById('editBsuNama').value.trim(),
             password: document.getElementById('editBsuPassword').value,
-            ketua: document.getElementById('editBsuKetua').value,
-            hp: document.getElementById('editBsuHp').value,
-            jumlah_pengurus: document.getElementById('editBsuPengurus').value,
-            kecamatan: document.getElementById('editBsuKecamatan').value,
-            desa: document.getElementById('editBsuDesa').value,
-            alamat: document.getElementById('editBsuAlamat').value,
-            koordinat: document.getElementById('editBsuKoordinat').value
+            ketua: document.getElementById('editBsuKetua').value.trim(),
+            hp: document.getElementById('editBsuHp').value.trim(),
+            jumlah_pengurus: Number(document.getElementById('editBsuPengurus').value)||0,
+            kecamatan: document.getElementById('editBsuKecamatan').value.trim(),
+            desa: document.getElementById('editBsuDesa').value.trim(),
+            alamat: document.getElementById('editBsuAlamat').value.trim(),
+            koordinat: document.getElementById('editBsuKoordinat').value.trim()
         };
         if(!form.nama || !form.ketua) return alert('Nama BSU dan Ketua wajib diisi!');
+        if(fileBaru && (!/\.pdf$/i.test(fileBaru.name) || (fileBaru.type && fileBaru.type !== 'application/pdf'))) return alert('Dokumen pengganti harus berupa PDF.');
+        if(fileBaru && fileBaru.size > 10*1024*1024) return alert('Ukuran PDF maksimal 10 MB.');
 
         let btn = document.getElementById('btnSimpanEditBsu');
-        btn.innerText = '⏳ MENYIMPAN...'; btn.disabled = true;
-
-        postAksi(form)
-        .then(res=>{ alert(res); tutupModalEditBsu(); loadDataPusat(); })
-        .catch(e=>alert('Error: ' + e)).finally(()=>{ btn.innerText = 'SIMPAN PERUBAHAN'; btn.disabled = false; });
+        btn.innerText = fileBaru ? '⏳ MENGUNGGAH SK...' : '⏳ MENYIMPAN...'; btn.disabled = true;
+        let pathBaru = '';
+        try {
+            if(fileBaru) {
+                const unggah = await AdapterAPI.uploadDokumenSkBsu({ id_unit:id, file:fileBaru });
+                if(!unggah.ok) throw new Error(unggah.error || 'Gagal mengunggah PDF SK.');
+                pathBaru = unggah.path;
+                form.sk_pdf_path = unggah.path;
+                form.sk_pdf_nama = unggah.nama;
+                form.sk_pdf_uploaded_at = new Date().toISOString();
+                btn.innerText = '⏳ MENYIMPAN DATA...';
+            }
+            const res = await postAksi(form);
+            if(String(res).toLowerCase().startsWith('gagal')) throw new Error(res);
+            alert(res);
+            tutupModalEditBsu();
+            await loadDataPusat();
+        } catch(e) {
+            if(pathBaru) await AdapterAPI.hapusDokumenSkBsu(pathBaru).catch(()=>{});
+            alert('Gagal memperbarui BSU: ' + (e.message || e));
+        } finally {
+            btn.innerText = 'SIMPAN PERUBAHAN'; btn.disabled = false;
+        }
     }
 
     function hapusBSU(id, nama) {
@@ -5594,7 +5716,12 @@
         if(document.getElementById('tabelPenjualan')) document.getElementById('tabelPenjualan').innerHTML = jualHtml + '</tbody>';
         renderRiwayatPenjualanHariIni();
         
-        let regHtml = ''; globalNasabah.slice().reverse().forEach(n => regHtml += `<tr><td>${n.id}</td><td style="font-family:monospace;">${n.password || '-'}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#dcfce7; color:#166534; border-color:#86efac; margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#ede9fe; color:#5b21b6; border-color:#c4b5fd; margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#dbeafe; color:#1e40af; border-color:#93c5fd; margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button><button class="btn-sync" style="padding:5px 10px; font-size:11px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button></td></tr>`);
+        let regHtml = ''; globalNasabah.slice().reverse().forEach(n => {
+            const tombolSk = n.sk_pdf_path
+              ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fff7ed;color:#9a3412;border-color:#fdba74;margin-right:4px;" onclick="previewSkBsu('${escAttr(n.id)}')">📄 Preview SK</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ecfeff;color:#155e75;border-color:#67e8f9;margin-right:4px;" onclick="downloadSkBsu('${escAttr(n.id)}')">⬇️ Download</button>`
+              : `<span style="display:inline-block;padding:5px 8px;margin-right:4px;border-radius:7px;background:#f1f5f9;color:#94a3b8;font-size:10px;">SK belum ada</span>`;
+            regHtml += `<tr><td>${n.id}</td><td style="font-family:monospace;">${n.password || '-'}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;">${tombolSk}<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button></td></tr>`;
+        });
         if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="8" class="text-center">Belum ada data</td></tr>';
 
         // 6. Eksekusi Grafik

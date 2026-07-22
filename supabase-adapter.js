@@ -20,6 +20,25 @@ const SUPABASE_ANON_KEY = "sb_publishable_7GGbKw6wLd2nwdvV7XcesA_oU7hm2HD";
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+
+// ================== DOKUMEN SK BANK SAMPAH UNIT ==================
+// Dokumen disimpan pada Supabase Storage bucket `dokumen-bsu`.
+// Bucket dan policy dibuat oleh upgrade_dokumen_sk_bsu.sql.
+const DOKUMEN_BSU_BUCKET = 'dokumen-bsu';
+const MAKS_DOKUMEN_BSU_BYTES = 10 * 1024 * 1024; // 10 MB
+
+function namaFileAman(nama) {
+  return String(nama || 'dokumen.pdf')
+    .normalize('NFKD')
+    .replace(/[^a-zA-Z0-9._-]+/g, '_')
+    .replace(/_+/g, '_')
+    .replace(/^_+|_+$/g, '') || 'dokumen.pdf';
+}
+
+function idPathAman(id) {
+  return String(id || 'BSU').replace(/[^a-zA-Z0-9_-]+/g, '_');
+}
+
 // ================== UTIL: ID UNIK ==================
 // Pengganti pola lama `PREFIX + Date.now()` yang berisiko kecil bentrok
 // jika dua entri tersimpan di milidetik yang sama. crypto.randomUUID()
@@ -408,6 +427,70 @@ const AdapterAPI = {
     return 'Sukses dihapus';
   },
 
+  // ---- Dokumen SK BSU (Supabase Storage) ----
+  async uploadDokumenSkBsu({ id_unit, file }) {
+    if (!file || typeof file.arrayBuffer !== 'function') {
+      return { ok: false, error: 'Pilih file PDF terlebih dahulu.' };
+    }
+    const namaAsli = String(file.name || 'dokumen-sk.pdf');
+    const ekstensiPdf = /\.pdf$/i.test(namaAsli);
+    const mimePdf = !file.type || file.type === 'application/pdf';
+    if (!ekstensiPdf || !mimePdf) {
+      return { ok: false, error: 'Dokumen SK harus berformat PDF.' };
+    }
+    if (Number(file.size || 0) > MAKS_DOKUMEN_BSU_BYTES) {
+      return { ok: false, error: 'Ukuran PDF maksimal 10 MB.' };
+    }
+
+    const namaSimpan = `${Date.now()}_${namaFileAman(namaAsli)}`;
+    const path = `${idPathAman(id_unit)}/${namaSimpan}`;
+    const { error } = await sb.storage.from(DOKUMEN_BSU_BUCKET).upload(path, file, {
+      cacheControl: '3600',
+      contentType: 'application/pdf',
+      upsert: false
+    });
+    if (error) return { ok: false, error: 'Gagal mengunggah PDF SK: ' + error.message };
+
+    const { data } = sb.storage.from(DOKUMEN_BSU_BUCKET).getPublicUrl(path);
+    return { ok: true, path, nama: namaAsli, url: data?.publicUrl || '' };
+  },
+
+  getDokumenSkBsuUrl(path) {
+    if (!path) return '';
+    if (/^https?:\/\//i.test(String(path))) return String(path);
+    const { data } = sb.storage.from(DOKUMEN_BSU_BUCKET).getPublicUrl(String(path));
+    return data?.publicUrl || '';
+  },
+
+  async hapusDokumenSkBsu(path) {
+    if (!path || /^https?:\/\//i.test(String(path))) return { ok: true };
+    const { error } = await sb.storage.from(DOKUMEN_BSU_BUCKET).remove([String(path)]);
+    return error ? { ok: false, error: error.message } : { ok: true };
+  },
+
+  async downloadDokumenSkBsu(path, namaFile) {
+    const url = this.getDokumenSkBsuUrl(path);
+    if (!url) return { ok: false, error: 'Dokumen SK belum tersedia.' };
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = namaFileAman(namaFile || 'SK-Bank-Sampah-Unit.pdf');
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      return { ok: true };
+    } catch (e) {
+      // Fallback apabila CORS/proxy browser mencegah fetch; tetap buka URL publik.
+      window.open(url, '_blank', 'noopener');
+      return { ok: false, error: 'Unduhan langsung dibuka di tab baru: ' + (e?.message || e) };
+    }
+  },
+
   // ---- BSU (unit) ----
   async tambahUnit(form) {
     const id = form.id || ('BSU-' + genId());
@@ -423,6 +506,9 @@ const AdapterAPI = {
     const { data: lama } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
     const { error } = await sb.from('bsu').update(rest).eq('id', id);
     if (error) return 'Gagal: ' + error.message;
+    if (lama?.sk_pdf_path && rest.sk_pdf_path && lama.sk_pdf_path !== rest.sk_pdf_path) {
+      this.hapusDokumenSkBsu(lama.sk_pdf_path).catch(() => {});
+    }
     const stripPass = (o) => { if (!o) return o; const { password, ...r } = o; return r; };
     logAudit('bsu', id, 'update', stripPass(lama), stripPass({ ...lama, ...rest }));
     return 'Sukses diperbarui';
@@ -431,6 +517,7 @@ const AdapterAPI = {
     const { data: lama } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
     const { error } = await sb.from('bsu').delete().eq('id', id);
     if (error) return 'Gagal: ' + error.message;
+    if (lama?.sk_pdf_path) this.hapusDokumenSkBsu(lama.sk_pdf_path).catch(() => {});
     const stripPass = (o) => { if (!o) return o; const { password, ...r } = o; return r; };
     logAudit('bsu', id, 'delete', stripPass(lama), null);
     return 'Sukses dihapus';
