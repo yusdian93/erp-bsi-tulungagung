@@ -570,6 +570,66 @@
         .modal-header { border-bottom-color:#E7EEEA; }
         .modal-footer { border-top-color:#E7EEEA; }
 
+        /* Modal penghapusan total memiliki formulir panjang. Form membungkus
+           header, body, dan footer, sehingga aturan modal-dialog-scrollable
+           bawaan Bootstrap perlu dilengkapi agar area tengah benar-benar dapat
+           digulir sementara header dan tombol aksi tetap terlihat. */
+        #modalHapusSuperAdmin .modal-dialog {
+            height: calc(100dvh - 2rem);
+            max-height: calc(100dvh - 2rem);
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+        }
+        #modalHapusSuperAdmin .modal-content {
+            max-height: calc(100dvh - 2rem);
+            overflow: hidden !important;
+        }
+        #modalHapusSuperAdmin #formHapusSuperAdmin {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            min-height: 0;
+            max-height: calc(100dvh - 2rem);
+        }
+        #modalHapusSuperAdmin .modal-header,
+        #modalHapusSuperAdmin .modal-footer {
+            flex: 0 0 auto;
+        }
+        #modalHapusSuperAdmin .modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow-y: auto !important;
+            overflow-x: hidden;
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-gutter: stable;
+        }
+        @supports not (height: 100dvh) {
+            #modalHapusSuperAdmin .modal-dialog,
+            #modalHapusSuperAdmin .modal-content,
+            #modalHapusSuperAdmin #formHapusSuperAdmin {
+                height: auto;
+                max-height: calc(100vh - 2rem);
+            }
+        }
+        @media (max-width: 575.98px) {
+            #modalHapusSuperAdmin .modal-dialog {
+                height: calc(100dvh - 1rem);
+                max-height: calc(100dvh - 1rem);
+                margin: .5rem;
+            }
+            #modalHapusSuperAdmin .modal-content,
+            #modalHapusSuperAdmin #formHapusSuperAdmin {
+                max-height: calc(100dvh - 1rem);
+            }
+            #modalHapusSuperAdmin .modal-body {
+                padding: 1.15rem !important;
+            }
+            #modalHapusSuperAdmin .modal-footer {
+                padding: .85rem 1.15rem 1.15rem !important;
+            }
+        }
+
         * { scrollbar-width:thin; scrollbar-color:#9AB5AA #ECF2EF; }
         *::-webkit-scrollbar { width:8px; height:8px; }
         *::-webkit-scrollbar-track { background:#ECF2EF; }
