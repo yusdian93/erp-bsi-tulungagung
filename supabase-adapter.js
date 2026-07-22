@@ -496,19 +496,41 @@ const AdapterAPI = {
     logAudit('nasabah', idFix, 'insert', null, row);
     return 'Sukses';
   },
-  async editNasabah({ id, nama, hp, alamat, status }) {
-    const { data: lama } = await sb.from('nasabah').select('*').eq('id', id).maybeSingle();
-    const dataBaru = { nama, hp, alamat: alamat ?? lama?.alamat ?? null, status: status || lama?.status || 'aktif' };
+  async editNasabah(form) {
+    const id = form && form.id;
+    if (!id) return 'Gagal: ID nasabah tidak tersedia.';
+    const { data: lama, error: errBaca } = await sb.from('nasabah').select('*').eq('id', id).maybeSingle();
+    if (errBaca) return 'Gagal: ' + errBaca.message;
+    if (!lama) return 'Gagal: Data nasabah tidak ditemukan.';
+
+    const statusFix = String(form.status ?? lama.status ?? 'aktif').toLowerCase() === 'nonaktif' ? 'nonaktif' : 'aktif';
+    const dataBaru = {
+      nama: String(form.nama ?? lama.nama ?? '').trim(),
+      hp: String(form.hp ?? lama.hp ?? '').trim(),
+      alamat: form.alamat !== undefined ? (form.alamat || null) : (lama.alamat || null),
+      rt: form.rt !== undefined ? (form.rt || null) : (lama.rt || null),
+      rw: form.rw !== undefined ? (form.rw || null) : (lama.rw || null),
+      jenis_nasabah: form.jenis_nasabah || lama.jenis_nasabah || 'Rumah Tangga',
+      status: statusFix,
+      izin_whatsapp: form.izin_whatsapp !== undefined ? Boolean(form.izin_whatsapp) : (lama.izin_whatsapp !== false)
+    };
+    if (!dataBaru.nama || !dataBaru.hp) return 'Gagal: Nama dan nomor WhatsApp wajib diisi.';
+
     const { error } = await sb.from('nasabah').update(dataBaru).eq('id', id);
     if (error) return 'Gagal: ' + error.message;
-    logAudit('nasabah', id, 'update', lama, { ...lama, ...dataBaru });
+    logAudit('nasabah', id, 'update', lama, { ...lama, ...dataBaru }, 'Perubahan data/status nasabah melalui menu edit BSU');
     return 'Sukses diperbarui';
   },
   async deleteNasabah(id) {
-    const { data: lama } = await sb.from('nasabah').select('*').eq('id', id).maybeSingle();
+    const { data: lama, error: errBaca } = await sb.from('nasabah').select('*').eq('id', id).maybeSingle();
+    if (errBaca) return 'Gagal: ' + errBaca.message;
+    if (!lama) return 'Gagal: Data nasabah tidak ditemukan.';
+    if (String(lama.status || 'aktif').toLowerCase() !== 'nonaktif') {
+      return 'Gagal: Nasabah masih berstatus AKTIF. Ubah menjadi NONAKTIF melalui tombol Edit terlebih dahulu.';
+    }
     const { error } = await sb.from('nasabah').delete().eq('id', id);
     if (error) return 'Gagal: ' + error.message;
-    logAudit('nasabah', id, 'delete', lama || null, null);
+    logAudit('nasabah', id, 'delete', lama || null, null, 'Penghapusan permanen nasabah nonaktif tanpa riwayat transaksi');
     return 'Sukses dihapus';
   },
   // Mengubah ID (primary key) nasabah lama -> format baru (3 huruf desa + 5

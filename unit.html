@@ -1529,20 +1529,111 @@
         }).catch(err=>alert('Gagal menyimpan: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-save me-2"></i>Simpan Data Nasabah';siapkanIdNasabahBaru();});
     }
 
+    let modalEditNasabahInstance = null;
+
+    function getModalEditNasabah() {
+        const el = document.getElementById('modalEditNasabah');
+        if (!el || typeof bootstrap === 'undefined') return null;
+        modalEditNasabahInstance = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
+        return modalEditNasabahInstance;
+    }
+
+    function perbaruiPetunjukStatusEdit() {
+        const status = String(document.getElementById('editStatusNasabah')?.value || 'aktif').toLowerCase();
+        const box = document.getElementById('petunjukStatusEditNasabah');
+        if (!box) return;
+        if (status === 'nonaktif') {
+            box.className = 'alert alert-warning py-3 mb-0';
+            box.innerHTML = '<i class="bi bi-person-dash-fill me-2"></i><strong>NONAKTIF:</strong> nasabah tidak muncul pada pilihan setoran baru. Data dan riwayat lama tetap tersimpan. Nasabah yang belum pernah bertransaksi dapat dihapus setelah disimpan sebagai nonaktif.';
+        } else {
+            box.className = 'alert alert-success py-3 mb-0';
+            box.innerHTML = '<i class="bi bi-person-check-fill me-2"></i><strong>AKTIF:</strong> nasabah dapat dipilih untuk setoran dan menerima layanan Bank Sampah Unit.';
+        }
+    }
+
     function editNasabah(id) {
-        const n=dataNasabah.find(x=>String(x.id)===String(id)); if(!n) return alert('Data tidak ditemukan.');
-        const nama=prompt('Nama nasabah:',n.nama); if(nama===null||!nama.trim()) return;
-        const hp=prompt('Nomor WhatsApp:',n.hp||''); if(hp===null) return;
-        const alamat=prompt('Alamat singkat:',n.alamat||''); if(alamat===null) return;
-        const status=confirm('Klik OK untuk status AKTIF. Klik Batal untuk NONAKTIF.')?'aktif':'nonaktif';
-        AdapterAPI.editNasabah({id,nama:nama.trim(),hp:normalisasiHpLokal(hp),alamat:alamat.trim(),status}).then(res=>{alert(res);loadDataDatabase();});
+        const n = dataNasabah.find(x => String(x.id) === String(id));
+        if (!n) return alert('Data nasabah tidak ditemukan.');
+
+        document.getElementById('editIdNasabah').value = n.id || '';
+        document.getElementById('editNamaNasabah').value = n.nama || '';
+        document.getElementById('editHpNasabah').value = n.hp || '';
+        document.getElementById('editJenisNasabah').value = n.jenis_nasabah || 'Rumah Tangga';
+        document.getElementById('editRtNasabah').value = n.rt || '';
+        document.getElementById('editRwNasabah').value = n.rw || '';
+        document.getElementById('editAlamatNasabah').value = n.alamat || '';
+        document.getElementById('editStatusNasabah').value = String(n.status || 'aktif').toLowerCase() === 'nonaktif' ? 'nonaktif' : 'aktif';
+        document.getElementById('editIzinWaNasabah').checked = n.izin_whatsapp !== false;
+        perbaruiPetunjukStatusEdit();
+
+        const modal = getModalEditNasabah();
+        if (!modal) return alert('Komponen formulir edit belum siap. Muat ulang halaman lalu coba kembali.');
+        modal.show();
+        setTimeout(() => document.getElementById('editNamaNasabah')?.focus(), 250);
+    }
+
+    async function simpanEditNasabah(e) {
+        e.preventDefault();
+        const id = document.getElementById('editIdNasabah').value;
+        const nama = document.getElementById('editNamaNasabah').value.trim();
+        const hp = normalisasiHpLokal(document.getElementById('editHpNasabah').value);
+        const status = document.getElementById('editStatusNasabah').value;
+        if (!id || !nama || !hp) return alert('ID, nama, dan nomor WhatsApp wajib diisi.');
+
+        const duplikatHp = dataNasabah.some(n => String(n.id) !== String(id) && String(n.hp || '').replace(/\D/g, '') === String(hp).replace(/\D/g, ''));
+        if (duplikatHp && !confirm('Nomor WhatsApp ini juga dipakai nasabah lain. Tetap simpan perubahan?')) return;
+
+        const payload = {
+            id,
+            nama,
+            hp,
+            jenis_nasabah: document.getElementById('editJenisNasabah').value,
+            rt: document.getElementById('editRtNasabah').value.trim(),
+            rw: document.getElementById('editRwNasabah').value.trim(),
+            alamat: document.getElementById('editAlamatNasabah').value.trim(),
+            status,
+            izin_whatsapp: document.getElementById('editIzinWaNasabah').checked
+        };
+
+        const btn = document.getElementById('btnSimpanEditNasabah');
+        const teksAwal = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
+        try {
+            const res = await AdapterAPI.editNasabah(payload);
+            if (!String(res).toLowerCase().includes('sukses')) throw new Error(String(res));
+            getModalEditNasabah()?.hide();
+            alert('Data nasabah berhasil diperbarui. Status sekarang: ' + status.toUpperCase() + '.');
+            await loadDataDatabase();
+        } catch (err) {
+            alert('Gagal memperbarui nasabah: ' + (err?.message || err));
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = teksAwal;
+        }
     }
 
     function hapusNasabah(id) {
-        const n=dataNasabah.find(x=>String(x.id)===String(id)); if(!n) return;
-        const punyaTrx=dataTransaksi.some(t=>String(t.id_nasabah||'')===String(id)||(!t.id_nasabah&&t.nama===n.nama));
-        if(punyaTrx) return alert('Nasabah sudah memiliki transaksi dan tidak boleh dihapus. Ubah status menjadi NONAKTIF melalui tombol edit.');
-        if(confirm('Hapus data nasabah yang belum pernah bertransaksi ini?')) AdapterAPI.deleteNasabah(id).then(res=>{alert(res);loadDataDatabase();});
+        const n = dataNasabah.find(x => String(x.id) === String(id));
+        if (!n) return alert('Data nasabah tidak ditemukan.');
+
+        const status = String(n.status || 'aktif').toLowerCase();
+        if (status !== 'nonaktif') {
+            alert('Nasabah masih berstatus AKTIF dan belum dapat dihapus.\n\nKlik tombol Edit (ikon pensil), ubah Status menjadi NONAKTIF, lalu Simpan Perubahan. Setelah itu tekan tombol Hapus kembali.');
+            return;
+        }
+
+        const punyaTrx = dataTransaksi.some(t => String(t.id_nasabah || '') === String(id) || (!t.id_nasabah && t.nama === n.nama));
+        if (punyaTrx) {
+            alert('Nasabah ini sudah memiliki riwayat transaksi sehingga tidak boleh dihapus permanen. Status NONAKTIF sudah cukup: nasabah tidak muncul pada setoran baru, tetapi riwayat keuangan tetap aman.');
+            return;
+        }
+
+        if (!confirm('Hapus permanen nasabah NONAKTIF "' + n.nama + '"?\n\nTindakan ini hanya diperbolehkan karena nasabah belum pernah bertransaksi.')) return;
+        AdapterAPI.deleteNasabah(id).then(res => {
+            alert(res);
+            if (String(res).toLowerCase().includes('sukses')) loadDataDatabase();
+        }).catch(err => alert('Gagal menghapus nasabah: ' + (err?.message || err)));
     }
 
     function updateTabelNasabah() {
@@ -2645,6 +2736,78 @@
         updateLaporan();
     }
 </script>
+
+
+<!-- ===== MODAL EDIT NASABAH ===== -->
+<div class="modal fade" id="modalEditNasabah" tabindex="-1" aria-labelledby="judulModalEditNasabah" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border:0; border-radius:24px; overflow:hidden; box-shadow:0 28px 70px rgba(4,35,28,.28);">
+            <form id="formEditNasabah" onsubmit="simpanEditNasabah(event)">
+                <div class="modal-header" style="color:#fff; background:linear-gradient(118deg,#062C25,#0A604B); border:0; padding:22px 25px;">
+                    <div>
+                        <div class="small text-uppercase fw-bold" style="letter-spacing:1.4px; color:#F2DFB4;">Manajemen Nasabah</div>
+                        <h5 class="modal-title fw-bold mt-1" id="judulModalEditNasabah"><i class="bi bi-pencil-square me-2"></i>Edit Data dan Status Nasabah</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label>ID Nasabah</label>
+                            <input type="text" id="editIdNasabah" class="form-control" readonly style="background:#f1f5f9 !important; font-family:monospace; font-weight:800;">
+                        </div>
+                        <div class="col-md-8">
+                            <label>Nama Lengkap</label>
+                            <input type="text" id="editNamaNasabah" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label>Nomor WhatsApp Aktif</label>
+                            <input type="text" id="editHpNasabah" class="form-control" required placeholder="Contoh: 08123456789">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Jenis Nasabah</label>
+                            <select id="editJenisNasabah" class="form-select">
+                                <option>Rumah Tangga</option><option>Sekolah</option><option>Usaha</option><option>Instansi</option><option>Kelompok</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label>RT</label>
+                            <input type="text" id="editRtNasabah" class="form-control" maxlength="3">
+                        </div>
+                        <div class="col-md-3">
+                            <label>RW</label>
+                            <input type="text" id="editRwNasabah" class="form-control" maxlength="3">
+                        </div>
+                        <div class="col-md-6">
+                            <label>Status Nasabah</label>
+                            <select id="editStatusNasabah" class="form-select fw-bold" onchange="perbaruiPetunjukStatusEdit()" required>
+                                <option value="aktif">AKTIF</option>
+                                <option value="nonaktif">NONAKTIF</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <div id="petunjukStatusEditNasabah" class="alert alert-success py-3 mb-0"></div>
+                        </div>
+                        <div class="col-12">
+                            <label>Alamat Singkat</label>
+                            <textarea id="editAlamatNasabah" class="form-control" rows="3" placeholder="Dusun/Jalan/Desa"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check p-3 rounded-3" style="background:#f5f8f6; border:1px solid #e2ebe6;">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" id="editIzinWaNasabah">
+                                <label class="form-check-label mb-0" for="editIzinWaNasabah">Nasabah bersedia menerima informasi jadwal dan harga melalui WhatsApp.</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 px-md-5 pb-4 pb-md-5 pt-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Batal</button>
+                    <button type="submit" class="btn btn-success px-4" id="btnSimpanEditNasabah"><i class="bi bi-check2-circle me-2"></i>Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- ===== MODAL PREVIEW KARTU DIGITAL ===== -->
 <div id="modalPreviewKartu" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.65); z-index:9999; align-items:center; justify-content:center; padding:18px;">
