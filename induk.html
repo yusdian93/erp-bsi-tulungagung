@@ -2437,6 +2437,15 @@
                     </div>
                     <div class="form-group"><label>Nama BSU</label><input type="text" id="regNama" class="form-control" placeholder="Contoh: BSU Berkah Jaya" required></div>
                     <div class="form-group"><label>Kata Sandi</label><input type="text" id="regPassword" class="form-control" placeholder="Contoh: bsu123" required></div>
+                    <div class="form-group">
+                        <label>Hak Akses Akun BSU</label>
+                        <select id="regHakAkses" class="form-control" required>
+                            <option value="ADMIN_BSU">Admin BSU — akses seluruh menu unit</option>
+                            <option value="OPERATOR">Operator — nasabah, setoran, stok, jadwal dan laporan</option>
+                            <option value="BENDAHARA">Bendahara — saldo, kas, buku besar dan laporan</option>
+                        </select>
+                        <div style="margin-top:7px;font-size:11.5px;color:#64748b;line-height:1.5;">Hak akses ini berlaku untuk akun login BSU yang dibuat pada registrasi ini.</div>
+                    </div>
                     <div class="form-group"><label>Nama Ketua</label><input type="text" id="regKetua" class="form-control" placeholder="Nama Lengkap Ketua" required></div>
                     <div class="form-group"><label>Nomor HP / WA</label><input type="text" id="regHp" class="form-control" placeholder="Contoh: 08123456789" required></div>
                     <div class="form-group"><label>Kecamatan</label><input type="text" id="regKecamatan" class="form-control" required></div>
@@ -2462,8 +2471,8 @@
                 <div class="panel-header"><h2>📋 DAFTAR BANK SAMPAH UNIT</h2></div>
                 <div class="table-container" style="max-height: 500px; overflow-y:auto;">
                     <table style="min-width: 950px; white-space: nowrap;">
-                        <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>ID REGISTER</th><th>KATA SANDI</th><th>NAMA BSU</th><th>KETUA</th><th>KONTAK WA</th><th>DESA</th><th>KECAMATAN</th><th class="text-center">AKSI</th></tr></thead>
-                        <tbody id="tbodyBsuBaru"><tr><td colspan="8" class="text-center">Memuat...</td></tr></tbody>
+                        <thead style="position: sticky; top: 0; z-index: 1;"><tr><th>ID REGISTER</th><th>KATA SANDI</th><th>HAK AKSES</th><th>NAMA BSU</th><th>KETUA</th><th>KONTAK WA</th><th>DESA</th><th>KECAMATAN</th><th class="text-center">AKSI</th></tr></thead>
+                        <tbody id="tbodyBsuBaru"><tr><td colspan="9" class="text-center">Memuat...</td></tr></tbody>
                     </table>
                 </div>
             </div>
@@ -2479,6 +2488,14 @@
             <input type="hidden" id="editBsuId">
             <div class="form-group"><label>Nama BSU</label><input type="text" id="editBsuNama" class="form-control" required></div>
             <div class="form-group"><label>Kata Sandi</label><input type="text" id="editBsuPassword" class="form-control"></div>
+            <div class="form-group">
+                <label>Hak Akses Akun BSU</label>
+                <select id="editBsuHakAkses" class="form-control">
+                    <option value="ADMIN_BSU">Admin BSU — akses seluruh menu unit</option>
+                    <option value="OPERATOR">Operator — nasabah, setoran, stok, jadwal dan laporan</option>
+                    <option value="BENDAHARA">Bendahara — saldo, kas, buku besar dan laporan</option>
+                </select>
+            </div>
             <div class="form-group"><label>Nama Ketua</label><input type="text" id="editBsuKetua" class="form-control" required></div>
             <div class="form-group"><label>Nomor HP / WA</label><input type="text" id="editBsuHp" class="form-control"></div>
             <div class="form-group"><label>Jumlah Pengurus</label><input type="number" id="editBsuPengurus" class="form-control"></div>
@@ -3627,6 +3644,7 @@
             action: 'tambahUnit', id: idTampil,
             nama: document.getElementById('regNama').value.trim(),
             password: document.getElementById('regPassword').value,
+            hak_akses: normalisasiHakAksesBsu(document.getElementById('regHakAkses').value),
             ketua: document.getElementById('regKetua').value.trim(),
             hp: document.getElementById('regHp').value.trim(),
             kecamatan: document.getElementById('regKecamatan').value.trim(),
@@ -3694,6 +3712,26 @@
         if(!hasil.ok && hasil.error) console.warn(hasil.error);
     }
 
+    function normalisasiHakAksesBsu(nilai) {
+        const kode = String(nilai || 'ADMIN_BSU').trim().toUpperCase();
+        return ['ADMIN_BSU','OPERATOR','BENDAHARA'].includes(kode) ? kode : 'ADMIN_BSU';
+    }
+
+    function labelHakAksesBsu(nilai) {
+        const kode = normalisasiHakAksesBsu(nilai);
+        return kode === 'OPERATOR' ? 'Operator' : (kode === 'BENDAHARA' ? 'Bendahara' : 'Admin BSU');
+    }
+
+    function badgeHakAksesBsu(nilai) {
+        const kode = normalisasiHakAksesBsu(nilai);
+        const gaya = kode === 'OPERATOR'
+          ? 'background:#e0f2fe;color:#075985;border:1px solid #7dd3fc;'
+          : kode === 'BENDAHARA'
+            ? 'background:#fef3c7;color:#92400e;border:1px solid #fcd34d;'
+            : 'background:#dcfce7;color:#166534;border:1px solid #86efac;';
+        return `<span style="display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10.5px;font-weight:800;${gaya}">${labelHakAksesBsu(kode)}</span>`;
+    }
+
     function waKirimKredensialBsu(id) {
         let n = globalNasabah.find(x => String(x.id) === String(id));
         if(!n) return alert('Data BSU tidak ditemukan.');
@@ -3704,6 +3742,7 @@ Bank Sampah Induk - DLH Kab. Tulungagung
 
 ID Register: ${n.id}
 Kata Sandi: ${n.password || '-'}
+Hak Akses: ${labelHakAksesBsu(n.hak_akses)}
 Nama BSU: ${n.nama}
 Ketua: ${n.ketua}
 Kontak WA: ${n.hp}
@@ -3729,6 +3768,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         document.getElementById('editBsuId').value = n.id;
         document.getElementById('editBsuNama').value = n.nama || '';
         document.getElementById('editBsuPassword').value = n.password || '';
+        document.getElementById('editBsuHakAkses').value = normalisasiHakAksesBsu(n.hak_akses);
         document.getElementById('editBsuKetua').value = n.ketua || '';
         document.getElementById('editBsuHp').value = n.hp || '';
         document.getElementById('editBsuPengurus').value = n.jumlah_pengurus || 0;
@@ -3759,6 +3799,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             action: 'updateUnit', id,
             nama: document.getElementById('editBsuNama').value.trim(),
             password: document.getElementById('editBsuPassword').value,
+            hak_akses: normalisasiHakAksesBsu(document.getElementById('editBsuHakAkses').value),
             ketua: document.getElementById('editBsuKetua').value.trim(),
             hp: document.getElementById('editBsuHp').value.trim(),
             jumlah_pengurus: Number(document.getElementById('editBsuPengurus').value)||0,
@@ -5720,9 +5761,9 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             const tombolSk = n.sk_pdf_path
               ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fff7ed;color:#9a3412;border-color:#fdba74;margin-right:4px;" onclick="previewSkBsu('${escAttr(n.id)}')">📄 Preview SK</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ecfeff;color:#155e75;border-color:#67e8f9;margin-right:4px;" onclick="downloadSkBsu('${escAttr(n.id)}')">⬇️ Download</button>`
               : `<span style="display:inline-block;padding:5px 8px;margin-right:4px;border-radius:7px;background:#f1f5f9;color:#94a3b8;font-size:10px;">SK belum ada</span>`;
-            regHtml += `<tr><td>${n.id}</td><td style="font-family:monospace;">${n.password || '-'}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;">${tombolSk}<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button></td></tr>`;
+            regHtml += `<tr><td>${n.id}</td><td style="font-family:monospace;">${n.password || '-'}</td><td>${badgeHakAksesBsu(n.hak_akses)}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;">${tombolSk}<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button></td></tr>`;
         });
-        if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="8" class="text-center">Belum ada data</td></tr>';
+        if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="9" class="text-center">Belum ada data</td></tr>';
 
         // 6. Eksekusi Grafik
         renderVisualisasiTren(document.getElementById('filterRangeTren')?.value || 'bulan');

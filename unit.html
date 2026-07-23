@@ -812,6 +812,7 @@
                             <i class="bi bi-qr-code-scan me-2"></i>Cetak QR Cek Saldo
                         </button>
                         <span class="hero-secure-note"><i class="bi bi-shield-check"></i> Data unit tersinkron dan terlindungi</span>
+                        <span id="badgeHakAksesUnit" class="hero-secure-note"><i class="bi bi-person-badge"></i> Hak akses: Admin BSU</span>
                     </div>
 
                     <div id="area-filter-bsi" class="mt-4" style="display:none;">
@@ -1388,6 +1389,7 @@
     let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = [];
     let dataStockOpname = []; let dataKasMutasi = []; let dataRekonsiliasiUnit = []; let dataAuditUnit = [];
     let masterNasabah = []; let masterTransaksi = [];
+    let HAK_AKSES_UNIT = 'ADMIN_BSU';
 
     function loadDataDatabase() {
         AdapterAPI.getBundleBSU(CURRENT_UNIT_ID).then(data => {
@@ -1400,6 +1402,7 @@
             dataKasMutasi = data.kasMutasi || [];
             dataRekonsiliasiUnit = data.rekonsiliasi || [];
             dataAuditUnit = data.audit || [];
+            terapkanHakAksesUnit();
 
             dataNasabah = [...masterNasabah];
             dataTransaksi = [...masterTransaksi];
@@ -1487,7 +1490,56 @@
     // ==========================================
     // FUNGSI LAINNYA LENGKAP
     // ==========================================
+    const MATRIKS_HAK_AKSES_UNIT = {
+        ADMIN_BSU: ['dashboard','nasabah','hargasampah','profil','setor','ceksaldo','pengiriman','koreksi','stock','stockopname','kas','bukubesar','jadwal','broadcast-harga','laporan','audit'],
+        OPERATOR: ['dashboard','nasabah','hargasampah','profil','setor','stock','jadwal','broadcast-harga','laporan'],
+        BENDAHARA: ['dashboard','profil','ceksaldo','kas','bukubesar','laporan']
+    };
+
+    function normalisasiHakAksesUnit(nilai) {
+        const kode = String(nilai || 'ADMIN_BSU').trim().toUpperCase();
+        return Object.prototype.hasOwnProperty.call(MATRIKS_HAK_AKSES_UNIT, kode) ? kode : 'ADMIN_BSU';
+    }
+
+    function labelHakAksesUnit(nilai) {
+        const kode = normalisasiHakAksesUnit(nilai);
+        return kode === 'OPERATOR' ? 'Operator' : (kode === 'BENDAHARA' ? 'Bendahara' : 'Admin BSU');
+    }
+
+    function bolehAksesTab(tabId) {
+        const daftar = MATRIKS_HAK_AKSES_UNIT[normalisasiHakAksesUnit(HAK_AKSES_UNIT)] || MATRIKS_HAK_AKSES_UNIT.ADMIN_BSU;
+        return daftar.includes(String(tabId));
+    }
+
+    function terapkanHakAksesUnit() {
+        const unit = dataUnit[0] || {};
+        HAK_AKSES_UNIT = normalisasiHakAksesUnit(unit.hak_akses);
+        try { localStorage.setItem('HAK_AKSES_BSU', HAK_AKSES_UNIT); } catch (e) {}
+
+        const badge = document.getElementById('badgeHakAksesUnit');
+        if (badge) badge.innerHTML = `<i class="bi bi-person-badge"></i> Hak akses: ${labelHakAksesUnit(HAK_AKSES_UNIT)}`;
+
+        document.querySelectorAll('button[onclick*="showTab(\'"]').forEach(btn => {
+            const cocok = String(btn.getAttribute('onclick') || '').match(/showTab\('([^']+)'/);
+            if (!cocok) return;
+            const tab = cocok[1];
+            const li = btn.closest('li');
+            if (li) li.style.display = bolehAksesTab(tab) ? '' : 'none';
+        });
+
+        document.querySelectorAll('.nav-item.dropdown').forEach(group => {
+            const submenu = Array.from(group.querySelectorAll('.dropdown-menu > li'));
+            group.style.display = submenu.some(li => li.style.display !== 'none') ? '' : 'none';
+        });
+
+        const aktif = document.querySelector('.tab-content[style*="display:block"], .tab-content[style*="display: block"]');
+        if (aktif && !bolehAksesTab(aktif.id)) showTab('dashboard', document.querySelector('.dashboard-tab'));
+    }
+
     function showTab(tabId, element) {
+        if (!bolehAksesTab(tabId)) {
+            return alert(`Menu ini tidak tersedia untuk hak akses ${labelHakAksesUnit(HAK_AKSES_UNIT)}.`);
+        }
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
         const target = document.getElementById(tabId);
         if (!target) return alert('Modul tidak ditemukan: ' + tabId);
@@ -2910,7 +2962,7 @@
         let koordinat=String(u.koordinat||'').trim();
         let mapBtn=koordinat?`<a class="btn btn-sm btn-outline-success" href="https://www.google.com/maps?q=${encodeURIComponent(koordinat)}" target="_blank" rel="noopener"><i class="bi bi-geo-alt me-1"></i>Lihat Peta</a>`:'';
         let skHtml=u.sk_pdf_path?`<div class="data-success mt-4"><div class="d-flex align-items-start justify-content-between gap-3 flex-wrap"><div><div class="fw-bold"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Dokumen SK Bank Sampah Unit</div><div class="small mt-1">${escapeHtml(u.sk_pdf_nama||'SK Bank Sampah Unit.pdf')}</div>${u.sk_pdf_uploaded_at?`<div class="small text-muted mt-1">Diunggah: ${formatTanggalTampil(u.sk_pdf_uploaded_at)}</div>`:''}</div><div class="d-flex gap-2 flex-wrap"><button class="btn btn-outline-danger btn-sm" onclick="previewSkProfilUnit()"><i class="bi bi-eye me-1"></i>Preview PDF</button><button class="btn btn-danger btn-sm" onclick="downloadSkProfilUnit()"><i class="bi bi-download me-1"></i>Download PDF</button></div></div></div>`:`<div class="data-warning mt-4"><i class="bi bi-exclamation-triangle me-2"></i>Dokumen SK belum diunggah oleh Bank Sampah Induk.</div>`;
-        if(box)box.innerHTML=`<div class="row g-3">${item('Nama Bank Sampah Unit',u.nama||CURRENT_UNIT_NAMA,'col-12')}${item('Kode Registrasi',CURRENT_UNIT_ID)}${item('Nama Ketua',u.ketua)}${item('Nomor HP / WhatsApp',u.hp)}${item('Jumlah Pengurus',String(u.jumlah_pengurus??0))}${item('Kecamatan',u.kecamatan)}${item('Desa/Kelurahan',u.desa)}${item('Alamat Lengkap',u.alamat,'col-12')}${item('Koordinat Lokasi',koordinat||'-','col-md-8')}<div class="col-md-4 d-flex align-items-stretch"><div class="metric-soft h-100 w-100 d-flex align-items-center justify-content-center">${mapBtn||'<span class="text-muted small">Koordinat belum tersedia</span>'}</div></div></div>${skHtml}`;
+        if(box)box.innerHTML=`<div class="row g-3">${item('Nama Bank Sampah Unit',u.nama||CURRENT_UNIT_NAMA,'col-12')}${item('Kode Registrasi',CURRENT_UNIT_ID)}${item('Hak Akses Akun',labelHakAksesUnit(u.hak_akses))}${item('Nama Ketua',u.ketua)}${item('Nomor HP / WhatsApp',u.hp)}${item('Jumlah Pengurus',String(u.jumlah_pengurus??0))}${item('Kecamatan',u.kecamatan)}${item('Desa/Kelurahan',u.desa)}${item('Alamat Lengkap',u.alamat,'col-12')}${item('Koordinat Lokasi',koordinat||'-','col-md-8')}<div class="col-md-4 d-flex align-items-stretch"><div class="metric-soft h-100 w-100 d-flex align-items-center justify-content-center">${mapBtn||'<span class="text-muted small">Koordinat belum tersedia</span>'}</div></div></div>${skHtml}`;
         const p=document.getElementById('profilPetugasAktif');if(p)p.value=getPetugasSesi();
     }
 
