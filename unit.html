@@ -1086,11 +1086,10 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Waktu Transaksi</th>
-                                <th>Identitas Nasabah</th>
-                                <th>Aktivitas / Material</th>
-                                <th>Total Nominal</th>
-                                <th class="text-center">Aksi Struk</th>
+                                <th style="min-width:180px;">Waktu Transaksi</th>
+                                <th style="min-width:420px;">Nasabah &amp; Rincian Material</th>
+                                <th style="min-width:180px;" class="text-end">Total Nominal</th>
+                                <th style="min-width:140px;" class="text-center">Aksi Struk</th>
                             </tr>
                         </thead>
                         <tbody id="tabel-riwayat"></tbody>
@@ -1483,14 +1482,133 @@
 
         const tbody = document.getElementById('tabel-riwayat');
         if (!tbody) return;
-        const rows = [...trxAktif].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).slice(0,10);
-        tbody.innerHTML = rows.length ? rows.map(t => {
-            const n = cariNasabahTransaksi(t);
-            return `<tr><td class="text-muted small">${formatTanggalTampil(t.tgl)}<br><code>${escapeHtml(t.id || '-')}</code></td><td class="fw-bold">${escapeHtml(n?.nama || t.nama || '-')}</td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':''}${rupiah(Math.abs(num(t.total)))}${num(t.berat)>0?`<br><small class="text-muted">${num(t.berat).toFixed(2)} Kg @ ${rupiah(num(t.harga_satuan))}</small>`:''}</td><td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="cetakPdfStrukById('${escAttrJs(t.id)}')"><i class="bi bi-printer"></i></button> <button class="btn btn-sm btn-outline-success" onclick="kirimWaStrukById('${escAttrJs(t.id)}')"><i class="bi bi-whatsapp"></i></button></td></tr>`;
-        }).join('') : `<tr><td colspan="5" class="empty-state"><i class="bi bi-inbox"></i>Belum ada aktivitas.</td></tr>`;
+        const grupRiwayat = kelompokkanRiwayatTerbaru(trxAktif).slice(0, 10);
+        tbody.innerHTML = grupRiwayat.length ? grupRiwayat.map(grup => {
+            const utama = grup.items[0];
+            const n = cariNasabahTransaksi(utama);
+            const namaNasabah = n?.nama || utama.nama || '-';
+            const totalNominal = grup.items.reduce((a, t) => a + num(t.total), 0);
+            const totalBerat = grup.items.reduce((a, t) => a + Math.max(0, num(t.berat)), 0);
+            const rincian = grup.items.map(t => {
+                if (num(t.berat) > 0) {
+                    return `<div style="padding:8px 0;border-bottom:1px dashed #dbe7e2;">
+                        <div class="fw-bold" style="color:#075542;">${escapeHtml(t.jenis || 'Material')}</div>
+                        <div class="small text-muted mt-1"><b>${num(t.berat).toFixed(2)} Kg</b> &nbsp; Harga: <b>${rupiah(num(t.harga_satuan))}/Kg</b> &nbsp; Subtotal: <b>${rupiah(Math.abs(num(t.total)))}</b></div>
+                    </div>`;
+                }
+                return `<div style="padding:8px 0;border-bottom:1px dashed #dbe7e2;">
+                    <div class="fw-bold ${num(t.total)<0?'text-danger':''}">${escapeHtml(t.jenis || 'Aktivitas')}</div>
+                    <div class="small text-muted mt-1">Nominal: <b>${rupiah(Math.abs(num(t.total)))}</b></div>
+                </div>`;
+            }).join('');
+            const kunciAman = escAttrJs(encodeURIComponent(grup.kunci));
+            return `<tr>
+                <td class="text-muted small" style="vertical-align:top;">${formatTanggalTampil(utama.tgl)}</td>
+                <td style="vertical-align:top;">
+                    <div style="font-size:1rem;margin-bottom:7px;"><span class="text-muted">Nasabah:</span> <strong>${escapeHtml(namaNasabah)}</strong></div>
+                    <div>${rincian}</div>
+                </td>
+                <td class="text-end fw-bold ${totalNominal<0?'text-danger':'text-success'}" style="vertical-align:top;font-size:1.05rem;">
+                    ${totalNominal<0?'- ':''}${rupiah(Math.abs(totalNominal))}
+                    ${totalBerat>0?`<br><small class="text-muted fw-semibold">Total Berat: ${totalBerat.toFixed(2)} Kg</small>`:''}
+                </td>
+                <td class="text-center" style="vertical-align:top;">
+                    <button class="btn btn-sm btn-outline-danger" title="Cetak struk gabungan" onclick="cetakStrukRiwayat('${kunciAman}')"><i class="bi bi-printer"></i></button>
+                    <button class="btn btn-sm btn-outline-success" title="Kirim struk gabungan melalui WhatsApp" onclick="kirimWaStrukRiwayat('${kunciAman}')"><i class="bi bi-whatsapp"></i></button>
+                </td>
+            </tr>`;
+        }).join('') : `<tr><td colspan="4" class="empty-state"><i class="bi bi-inbox"></i>Belum ada aktivitas.</td></tr>`;
     }
 
-    function escAttrJs(str) { return String(str).replace(/'/g, "\\'"); }
+    function escAttrJs(str) { return String(str).replace(/\\/g, "\\\\").replace(/'/g, "\\'").replace(/\r?\n/g, ' '); }
+
+    function kunciRiwayatTransaksi(t) {
+        if (t?.kelompok_id) return 'GRP|' + String(t.kelompok_id);
+        const setoranMaterial = String(t?.level || '') === 'nasabah_ke_unit' && num(t?.total) >= 0 && num(t?.berat) > 0;
+        if (setoranMaterial && t?.tgl) {
+            const nasabahKey = String(t.id_nasabah || t.nama || '-');
+            return `SET|${nasabahKey}|${String(t.tgl)}`;
+        }
+        return 'ID|' + String(t?.id || `${t?.tgl || ''}|${t?.jenis || ''}|${t?.nama || ''}`);
+    }
+
+    function kelompokkanRiwayatTerbaru(list) {
+        const map = new Map();
+        [...(list || [])].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).forEach(t => {
+            const kunci = kunciRiwayatTransaksi(t);
+            if (!map.has(kunci)) map.set(kunci, { kunci, items: [], waktu: t.tgl });
+            map.get(kunci).items.push(t);
+        });
+        return [...map.values()].sort((a,b)=>tanggalKeMs(b.waktu)-tanggalKeMs(a.waktu));
+    }
+
+    function ambilItemRiwayat(kunciTerenkode) {
+        let kunci = String(kunciTerenkode || '');
+        try { kunci = decodeURIComponent(kunci); } catch (e) {}
+        return transaksiAktif(dataTransaksi)
+            .filter(t => kunciRiwayatTransaksi(t) === kunci)
+            .sort((a,b)=>tanggalKeMs(a.tgl)-tanggalKeMs(b.tgl));
+    }
+
+    function cetakStrukRiwayat(kunciTerenkode) {
+        const items = ambilItemRiwayat(kunciTerenkode);
+        if (!items.length) return alert('Data struk tidak ditemukan.');
+        cetakPdfStrukKumpulan(items);
+    }
+
+    function kirimWaStrukRiwayat(kunciTerenkode) {
+        const items = ambilItemRiwayat(kunciTerenkode);
+        if (!items.length) return alert('Data struk tidak ditemukan.');
+        const utama = items[0];
+        const n = cariNasabahTransaksi(utama);
+        const nama = n?.nama || utama.nama || '-';
+        const totalNominal = items.reduce((a, t) => a + num(t.total), 0);
+        const rincian = items.map(t => num(t.berat) > 0
+            ? `• ${t.jenis}: ${num(t.berat).toFixed(2)} Kg | Harga ${rupiah(num(t.harga_satuan))}/Kg | Subtotal ${rupiah(Math.abs(num(t.total)))}`
+            : `• ${t.jenis}: ${rupiah(Math.abs(num(t.total)))}`
+        ).join('\n');
+        const pesan = `*STRUK BANK SAMPAH*\nTanggal: ${formatTanggalTampil(utama.tgl)}\nNasabah: *${nama}*\n\n${rincian}\n\n*TOTAL: ${totalNominal < 0 ? '- ' : ''}${rupiah(Math.abs(totalNominal))}*`;
+        bukaWhatsApp(n?.hp, pesan);
+    }
+
+    function cetakPdfStrukKumpulan(items) {
+        if (!Array.isArray(items) || !items.length) return alert('Data struk tidak ditemukan.');
+        const utama = items[0];
+        const n = cariNasabahTransaksi(utama);
+        const nama = n?.nama || utama.nama || '-';
+        const totalNominal = items.reduce((a, t) => a + num(t.total), 0);
+        const jenisStruk = totalNominal < 0 ? 'PENARIKAN SALDO' : 'SETORAN MATERIAL';
+        const baris = items.map(t => {
+            const detail = num(t.berat) > 0
+                ? `${num(t.berat).toFixed(2)} Kg × ${rupiah(num(t.harga_satuan))}/Kg`
+                : 'Transaksi keuangan';
+            return `<tr>
+                <td style="padding:7px 0;border-bottom:1px dashed #e2e8f0;">
+                    <b>${escapeHtml(t.jenis || 'Aktivitas')}</b><br><small style="color:#64748b;">${detail}</small>
+                </td>
+                <td style="text-align:right;padding:7px 0;border-bottom:1px dashed #e2e8f0;font-weight:700;">${num(t.total)<0?'- ':''}${rupiah(Math.abs(num(t.total)))}</td>
+            </tr>`;
+        }).join('');
+        const html = `<div style="font-family:'Plus Jakarta Sans',sans-serif;width:340px;margin:0 auto;padding:25px;border:1px solid #e2e8f0;border-radius:12px;">
+            <h3 style="text-align:center;margin:0;font-weight:800;font-size:18px;">BANK SAMPAH UNIT ${escapeHtml(namaUnitTanpaBSU().toUpperCase())}</h3>
+            <p style="text-align:center;margin:5px 0 15px;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p>
+            <hr style="border-top:1px dashed #cbd5e1;">
+            <table style="width:100%;font-size:13px;margin:10px 0;">
+                <tr><td style="color:#64748b;">Tanggal</td><td style="text-align:right;font-weight:600;">${formatTanggalTampil(utama.tgl)}</td></tr>
+                <tr><td style="color:#64748b;">Nasabah</td><td style="text-align:right;font-weight:600;">${escapeHtml(nama)}</td></tr>
+            </table>
+            <hr style="border-top:1px dashed #cbd5e1;">
+            <table style="width:100%;font-size:13px;margin:10px 0;">${baris}</table>
+            <hr style="border-top:1px dashed #cbd5e1;">
+            <div style="display:flex;justify-content:space-between;font-weight:800;margin-top:15px;color:${totalNominal<0?'#e11d48':'#059669'};">
+                <span>${jenisStruk}</span><span>${totalNominal<0?'- ':''}${rupiah(Math.abs(totalNominal))}</span>
+            </div>
+        </div>`;
+        document.getElementById('area-laporan-a4').innerHTML = html;
+        document.body.className = 'mode-cetak';
+        window.print();
+        document.body.className = '';
+    }
 
     // ==========================================
     // FUNGSI LAINNYA LENGKAP
