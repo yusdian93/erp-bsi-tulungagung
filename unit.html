@@ -720,6 +720,61 @@
             body.mode-bukubesar #bukubesar button { display:none !important; }
         }
 
+
+
+        /* Daftar anggota: tipografi seragam, hitam, dan kolom lebih rapi. */
+        .table-nasabah-rapi {
+            min-width: 1040px;
+            table-layout: fixed;
+        }
+        .table-nasabah-rapi thead th {
+            color: #111827 !important;
+            font-family: inherit !important;
+            font-size: .82rem !important;
+            font-weight: 700 !important;
+            line-height: 1.35;
+            white-space: nowrap;
+        }
+        .table-nasabah-rapi tbody td,
+        .table-nasabah-rapi tbody td code,
+        .table-nasabah-rapi tbody td small,
+        .table-nasabah-rapi tbody td strong,
+        .table-nasabah-rapi .nasabah-main,
+        .table-nasabah-rapi .nasabah-sub {
+            color: #111827 !important;
+            font-family: inherit !important;
+            font-size: .92rem !important;
+            font-weight: 500 !important;
+            line-height: 1.5;
+        }
+        .table-nasabah-rapi tbody td {
+            vertical-align: middle !important;
+            overflow-wrap: anywhere;
+        }
+        .table-nasabah-rapi tbody td code {
+            display: inline;
+            padding: 0;
+            background: transparent;
+            border: 0;
+            letter-spacing: 0;
+        }
+        .table-nasabah-rapi .nasabah-main,
+        .table-nasabah-rapi .nasabah-sub {
+            display: block;
+        }
+        .table-nasabah-rapi .nasabah-sub { margin-top: 2px; }
+        .table-nasabah-rapi .status-chip {
+            color: #111827 !important;
+            font-family: inherit !important;
+            font-size: .78rem !important;
+            font-weight: 700 !important;
+        }
+        .table-nasabah-rapi th:nth-child(1), .table-nasabah-rapi td:nth-child(1) { width: 13%; white-space: nowrap; }
+        .table-nasabah-rapi th:nth-child(2), .table-nasabah-rapi td:nth-child(2) { width: 24%; }
+        .table-nasabah-rapi th:nth-child(3), .table-nasabah-rapi td:nth-child(3) { width: 19%; }
+        .table-nasabah-rapi th:nth-child(4), .table-nasabah-rapi td:nth-child(4) { width: 18%; white-space: nowrap; }
+        .table-nasabah-rapi th:nth-child(5), .table-nasabah-rapi td:nth-child(5) { width: 10%; text-align: center; }
+        .table-nasabah-rapi th:nth-child(6), .table-nasabah-rapi td:nth-child(6) { width: 16%; }
     </style>
 </head>
 <body>
@@ -913,7 +968,7 @@
 
         <div id="nasabah" class="tab-content" style="display:none;">
             <div class="row justify-content-center">
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <div class="card p-4 p-md-5">
                         <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-person-plus me-2 text-success"></i>Registrasi Nasabah Baru</h5>
                         <form id="formNasabah" onsubmit="simpanNasabah(event)">
@@ -941,7 +996,7 @@
                         </div>
                         <button type="button" class="btn btn-sm mb-3" style="border-radius:20px; background:#ede9fe; color:#5b21b6; border:1px solid #c4b5fd; font-weight:700;" onclick="cetakSemuaQrNasabah()">🔲 Cetak Semua QR Nasabah (Kartu)</button>
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover table-nasabah-rapi">
                                 <thead><tr><th>ID</th><th>Nama</th><th>Jenis/Wilayah</th><th>Nomor WA</th><th>Status</th><th class="text-center">Manajemen</th></tr></thead>
                                 <tbody id="tabel-daftar-nasabah"></tbody>
                             </table>
@@ -2081,7 +2136,7 @@
         tbody.innerHTML=dataNasabah.length?dataNasabah.slice().sort((a,b)=>String(a.nama).localeCompare(String(b.nama))).map(n=>{
             const wilayah=[n.rt?'RT '+n.rt:'',n.rw?'RW '+n.rw:''].filter(Boolean).join('/')||'-';
             const status=(n.status||'aktif');
-            return `<tr><td><code>${escapeHtml(n.id)}</code></td><td class="fw-bold">${escapeHtml(n.nama)}<br><small class="text-muted">${escapeHtml(n.alamat||'-')}</small></td><td>${escapeHtml(n.jenis_nasabah||'Rumah Tangga')}<br><small class="text-muted">${escapeHtml(wilayah)}</small></td><td>${escapeHtml(n.hp||'-')}</td><td><span class="status-chip ${status==='nonaktif'?'status-void':'status-active'}">${status.toUpperCase()}</span></td><td class="text-center table-actions"><button class="btn btn-sm btn-outline-secondary" title="QR" onclick="cetakQrNasabah('${escAttrJs(n.id)}','${escAttrJs(n.nama)}')"><i class="bi bi-qr-code"></i></button> <button class="btn btn-sm btn-outline-success" title="Kartu Digital" onclick="unduhKartuNasabah('${escAttrJs(n.id)}',this)"><i class="bi bi-credit-card"></i></button> <button class="btn btn-sm btn-outline-primary" onclick="editNasabah('${escAttrJs(n.id)}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="hapusNasabah('${escAttrJs(n.id)}')"><i class="bi bi-trash"></i></button></td></tr>`;
+            return `<tr><td><span class="nasabah-main">${escapeHtml(n.id)}</span></td><td><span class="nasabah-main">${escapeHtml(n.nama)}</span><span class="nasabah-sub">${escapeHtml(n.alamat||'-')}</span></td><td><span class="nasabah-main">${escapeHtml(n.jenis_nasabah||'Rumah Tangga')}</span><span class="nasabah-sub">${escapeHtml(wilayah)}</span></td><td><span class="nasabah-main">${escapeHtml(n.hp||'-')}</span></td><td><span class="status-chip ${status==='nonaktif'?'status-void':'status-active'}">${status.toUpperCase()}</span></td><td class="text-center table-actions"><button class="btn btn-sm btn-outline-secondary" title="QR" onclick="cetakQrNasabah('${escAttrJs(n.id)}','${escAttrJs(n.nama)}')"><i class="bi bi-qr-code"></i></button> <button class="btn btn-sm btn-outline-success" title="Kartu Digital" onclick="unduhKartuNasabah('${escAttrJs(n.id)}',this)"><i class="bi bi-credit-card"></i></button> <button class="btn btn-sm btn-outline-primary" onclick="editNasabah('${escAttrJs(n.id)}')"><i class="bi bi-pencil"></i></button> <button class="btn btn-sm btn-outline-danger" onclick="hapusNasabah('${escAttrJs(n.id)}')"><i class="bi bi-trash"></i></button></td></tr>`;
         }).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-people"></i>Belum ada nasabah.</td></tr>`;
         cekMigrasiIdNasabah();
     }
