@@ -779,7 +779,7 @@
                         <li class="nav-item dropdown">
                             <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-cash-stack me-2"></i>Keuangan</button>
                             <ul class="dropdown-menu">
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('kas', this)"><i class="bi bi-cash-coin"></i>Kas & Bank</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('kas', this); loadDataDatabase();"><i class="bi bi-cash-coin"></i>Kas & Bank</button></li>
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('bagihasil', this)"><i class="bi bi-percent"></i>Bagi Hasil</button></li>
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark"></i>Buku Besar</button></li>
                             </ul>
@@ -1254,7 +1254,7 @@
 
         <div id="kas" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
-                <div class="module-title"><span class="icon-shell"><i class="bi bi-cash-coin"></i></span><div><h4 class="m-0">Kas & Bank Unit</h4><div class="module-note">Mencatat saldo awal, penerimaan, pengeluaran, pembayaran saldo nasabah, dan rekonsiliasi fisik.</div></div></div>
+                <div class="module-title d-flex justify-content-between align-items-center flex-wrap gap-3"><div class="d-flex align-items-center gap-3"><span class="icon-shell"><i class="bi bi-cash-coin"></i></span><div><h4 class="m-0">Kas & Bank Unit</h4><div class="module-note">Mencatat saldo awal, penerimaan, pengeluaran, pembayaran saldo nasabah, dan rekonsiliasi fisik.</div></div></div><button type="button" class="btn btn-outline-success btn-sm px-3" onclick="loadDataDatabase()"><i class="bi bi-arrow-clockwise me-1"></i>Muat Ulang Kas</button></div>
                 <div class="row g-3 mt-3 mb-4">
                     <div class="col-md-4"><div class="metric-soft"><div class="label">Saldo Kas/Bank</div><div class="value" id="kas-saldo">Rp 0</div></div></div>
                     <div class="col-md-4"><div class="metric-soft"><div class="label">Total Kas Masuk</div><div class="value cash-positive" id="kas-total-masuk">Rp 0</div></div></div>
