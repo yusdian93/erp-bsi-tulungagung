@@ -1503,7 +1503,7 @@
             }).join('');
             const kunciAman = escAttrJs(encodeURIComponent(grup.kunci));
             return `<tr>
-                <td class="text-muted small" style="vertical-align:top;">${formatTanggalTampil(utama.tgl)}</td>
+                <td class="text-muted small" style="vertical-align:top;">${formatTanggalSaja(utama.tgl)}</td>
                 <td style="vertical-align:top;">
                     <div style="font-size:1rem;margin-bottom:7px;"><span class="text-muted">Nasabah:</span> <strong>${escapeHtml(namaNasabah)}</strong></div>
                     <div>${rincian}</div>
@@ -1594,7 +1594,7 @@
             <p style="text-align:center;margin:5px 0 15px;font-size:12px;color:#64748b;">BUKTI TRANSAKSI SAH</p>
             <hr style="border-top:1px dashed #cbd5e1;">
             <table style="width:100%;font-size:13px;margin:10px 0;">
-                <tr><td style="color:#64748b;">Tanggal</td><td style="text-align:right;font-weight:600;">${formatTanggalTampil(utama.tgl)}</td></tr>
+                <tr><td style="color:#64748b;">Tanggal</td><td style="text-align:right;font-weight:600;">${formatTanggalSaja(utama.tgl)}</td></tr>
                 <tr><td style="color:#64748b;">Nasabah</td><td style="text-align:right;font-weight:600;">${escapeHtml(nama)}</td></tr>
             </table>
             <hr style="border-top:1px dashed #cbd5e1;">
@@ -2875,7 +2875,7 @@
         document.getElementById('areaDetailSaldo').style.display='block';
         const riwayat=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n));
         let totRp=0,totKg=0; const tbody=document.getElementById('tabel-riwayat-saldo');
-        tbody.innerHTML=riwayat.length?[...riwayat].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).map(t=>{totRp+=num(t.total);if(num(t.total)>=0)totKg+=num(t.berat);return `<tr><td class="text-muted small">${formatTanggalTampil(t.tgl)}</td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-center">${num(t.berat)>0?num(t.berat).toFixed(2)+' Kg':'-'}</td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':'+ '}${rupiah(Math.abs(num(t.total)))}</td></tr>`;}).join(''):`<tr><td colspan="4" class="empty-state">Belum ada riwayat.</td></tr>`;
+        tbody.innerHTML=riwayat.length?[...riwayat].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).map(t=>{totRp+=num(t.total);if(num(t.total)>=0)totKg+=num(t.berat);return `<tr><td class="text-muted small">${formatTanggalSaja(t.tgl)}</td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-center">${num(t.berat)>0?num(t.berat).toFixed(2)+' Kg':'-'}</td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':'+ '}${rupiah(Math.abs(num(t.total)))}</td></tr>`;}).join(''):`<tr><td colspan="4" class="empty-state">Belum ada riwayat.</td></tr>`;
         setText('detail-total-rp',rupiah(totRp));setText('detail-total-kg',totKg.toFixed(2)+' Kg');
     }
 
@@ -2906,8 +2906,8 @@
         const rows=transaksiAktif(dataTransaksi).sort((a,b)=>tanggalKeMs(a.tgl)-tanggalKeMs(b.tgl));
         tbody.innerHTML=rows.length?rows.map(t=>{
             const ref=escapeHtml(t.id||'-');const rp=rupiah(Math.abs(num(t.total))); const nama=escapeHtml(cariNasabahTransaksi(t)?.nama||t.nama||'-');
-            if(t.jenis==='Penarikan Tunai')return `<tr><td>${formatTanggalTampil(t.tgl)}</td><td>Pelunasan saldo: ${nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Pembayaran ${escapeHtml(t.metode||'Kas')}</td><td><span class="badge bg-light text-dark border">111</span> Kas/Bank</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
-            return `<tr><td>${formatTanggalTampil(t.tgl)}</td><td>Setoran: ${nama} — ${escapeHtml(t.jenis)}</td><td><span class="badge bg-light text-dark border">113</span> Persediaan Sampah</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Kredit saldo nasabah</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
+            if(t.jenis==='Penarikan Tunai')return `<tr><td>${formatTanggalSaja(t.tgl)}</td><td>Pelunasan saldo: ${nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Pembayaran ${escapeHtml(t.metode||'Kas')}</td><td><span class="badge bg-light text-dark border">111</span> Kas/Bank</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
+            return `<tr><td>${formatTanggalSaja(t.tgl)}</td><td>Setoran: ${nama} — ${escapeHtml(t.jenis)}</td><td><span class="badge bg-light text-dark border">113</span> Persediaan Sampah</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Kredit saldo nasabah</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
         }).join(''):`<tr><td colspan="5" class="empty-state">Belum ada transaksi aktif.</td></tr>`;
     }
 
@@ -3018,6 +3018,7 @@
     function parseTanggalUnit(v){if(!v)return new Date(NaN);if(typeof parseTanggalFleksibel==='function')return parseTanggalFleksibel(v);const s=String(v);const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return new Date(s);}
     function tanggalKeMs(v){const d=parseTanggalUnit(v);return isNaN(d)?0:d.getTime();}
     function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});}
+    function formatTanggalSaja(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
     function dalamRentang(v,mulai,akhir){const ms=tanggalKeMs(v);if(mulai&&ms<new Date(mulai+'T00:00:00').getTime())return false;if(akhir&&ms>new Date(akhir+'T23:59:59').getTime())return false;return true;}
     function transaksiMilikNasabah(t,n){return String(t.id_nasabah||'')===String(n.id)||String(t.id_nasabah_arsip||'')===String(n.id)||(!t.id_nasabah&&!t.id_nasabah_arsip&&String(t.nama||'').trim()===String(n.nama||'').trim());}
     function cariNasabahTransaksi(t){return dataNasabah.find(n=>transaksiMilikNasabah(t,n));}
