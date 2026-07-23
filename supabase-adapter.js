@@ -284,7 +284,11 @@ const AdapterAPI = {
       sb.from('transaksi').select('*').eq('level', 'unit_ke_induk').order('tgl', { ascending: false }),
       sb.from('bantuan_hibah').select('*')
     ]);
-    return { kategori: kategori || [], nasabah: bsuList || [], transaksi: transaksi || [], hibah: hibah || [] };
+    // Data BSU latihan tetap ditampilkan pada daftar administrasi, tetapi transaksi
+    // latihan tidak dimasukkan ke dashboard dan laporan resmi Bank Sampah Induk.
+    const idLatihan = new Set((bsuList || []).filter(b => b.mode_latihan === true).map(b => String(b.id)));
+    const transaksiResmi = (transaksi || []).filter(t => !idLatihan.has(String(t.id_unit || '')));
+    return { kategori: kategori || [], nasabah: bsuList || [], transaksi: transaksiResmi, hibah: hibah || [] };
   },
 
   async tambahBantuanHibah(form) {
@@ -343,21 +347,20 @@ const AdapterAPI = {
   },
 
   async getRingkasanDashboard() {
-    const { count: unit } = await sb.from('bsu').select('*', { count: 'exact', head: true });
-    const { data: trxBulanIni } = await sb
-      .from('transaksi')
-      .select('berat, total, tgl')
-      .eq('level', 'unit_ke_induk')
-      .gt('berat', 0);
-
+    const [{ data: bsuList }, { data: trxSemua }] = await Promise.all([
+      sb.from('bsu').select('id, mode_latihan'),
+      sb.from('transaksi').select('id_unit, berat, total, tgl').eq('level', 'unit_ke_induk').gt('berat', 0)
+    ]);
+    const resmi = (bsuList || []).filter(b => b.mode_latihan !== true);
+    const idResmi = new Set(resmi.map(b => String(b.id)));
+    const trxResmi = (trxSemua || []).filter(t => idResmi.has(String(t.id_unit || '')));
     const now = new Date();
-    const bulanIni = trxBulanIni.filter(t => {
+    const bulanIni = trxResmi.filter(t => {
       const d = new Date(t.tgl);
       return !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
-    const totalSampah = trxBulanIni.reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-
-    return { ringkasan: { unit: unit || 0, setoran_bulan: bulanIni.length, total_sampah: totalSampah.toFixed(1) } };
+    const totalSampah = trxResmi.reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
+    return { ringkasan: { unit: resmi.length, setoran_bulan: bulanIni.length, total_sampah: totalSampah.toFixed(1) } };
   },
 
   async getTransaksiInternalBSU(namaBsu) {
@@ -370,11 +373,16 @@ const AdapterAPI = {
   // Semua transaksi nasabah->BSU (SEMUA unit) + master data nasabah, dipakai untuk
   // menu Saldo/Tabungan BSU di induk.html.
   async getSemuaTransaksiNasabah() {
-    const [{ data: transaksi }, { data: nasabah }] = await Promise.all([
+    const [{ data: transaksi }, { data: nasabah }, { data: bsuList }] = await Promise.all([
       sb.from('transaksi').select('*').eq('level', 'nasabah_ke_unit'),
-      sb.from('nasabah').select('*')
+      sb.from('nasabah').select('*'),
+      sb.from('bsu').select('id, mode_latihan')
     ]);
-    return { transaksi: transaksi || [], nasabah: nasabah || [] };
+    const idResmi = new Set((bsuList || []).filter(b => b.mode_latihan !== true).map(b => String(b.id)));
+    return {
+      transaksi: (transaksi || []).filter(t => idResmi.has(String(t.id_unit || ''))),
+      nasabah: (nasabah || []).filter(n => idResmi.has(String(n.id_unit || '')))
+    };
   },
 
   // ---- Transaksi (level BSI: BSU -> BSI) ----
@@ -524,12 +532,63 @@ const AdapterAPI = {
     return 'Sukses diperbarui';
   },
   async deleteUnit(id) {
-    const { data: lama } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
+    const { data: lama, error: errBsu } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
+    if (errBsu) return 'Gagal: ' + errBsu.message;
+    if (!lama) return 'Gagal: Data BSU tidak ditemukan.';
+    const [nas, trx, opn, kas, rek] = await Promise.all([
+      sb.from('nasabah').select('id', { count:'exact', head:true }).eq('id_unit', id),
+      sb.from('transaksi').select('id', { count:'exact', head:true }).eq('id_unit', id),
+      sb.from('stock_opname').select('id', { count:'exact', head:true }).eq('id_unit', id),
+      sb.from('kas_mutasi').select('id', { count:'exact', head:true }).eq('id_unit', id),
+      sb.from('rekonsiliasi_kas').select('id', { count:'exact', head:true }).eq('id_unit', id)
+    ]);
+    const totalTerkait = [nas,trx,opn,kas,rek].reduce((a,r)=>a+Number(r.count||0),0);
+    if (totalTerkait > 0) {
+      return lama.mode_latihan === true
+        ? 'Gagal: BSU latihan masih memiliki data. Gunakan tombol RESET DATA LATIHAN terlebih dahulu.'
+        : 'Gagal: BSU masih memiliki nasabah/transaksi/data operasional. Data induk tidak boleh dihapus sebelum seluruh data terkait diselesaikan.';
+    }
     const { error } = await sb.from('bsu').delete().eq('id', id);
     if (error) return 'Gagal: ' + error.message;
     if (lama?.sk_pdf_path) this.hapusDokumenSkBsu(lama.sk_pdf_path).catch(() => {});
     logAudit('bsu', id, 'delete', stripPasswordBsu(lama), null);
     return 'Sukses dihapus';
+  },
+
+  async getRingkasanResetBsuLatihan(idUnit) {
+    const { data: unit, error: unitError } = await sb.from('bsu').select('id,nama,mode_latihan').eq('id', idUnit).maybeSingle();
+    if (unitError) return { ok:false, error:unitError.message };
+    if (!unit || unit.mode_latihan !== true) return { ok:false, error:'BSU ini bukan BSU latihan.' };
+    const [nas, trx, opn, kas, rek] = await Promise.all([
+      sb.from('nasabah').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
+      sb.from('transaksi').select('id,berat,total,status', { count:'exact' }).eq('id_unit', idUnit),
+      sb.from('stock_opname').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
+      sb.from('kas_mutasi').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
+      sb.from('rekonsiliasi_kas').select('id', { count:'exact', head:true }).eq('id_unit', idUnit)
+    ]);
+    const transaksi = trx.data || [];
+    const aktif = transaksi.filter(t => String(t.status || 'aktif').toLowerCase() !== 'dibatalkan');
+    return {
+      ok:true, id_unit:idUnit, nama:unit.nama,
+      jumlah_nasabah:Number(nas.count||0), jumlah_transaksi:Number(trx.count||transaksi.length||0),
+      jumlah_stock_opname:Number(opn.count||0), jumlah_kas_mutasi:Number(kas.count||0),
+      jumlah_rekonsiliasi:Number(rek.count||0),
+      dampak_berat_kg:aktif.reduce((a,t)=>a+(Number(t.berat)||0),0),
+      dampak_nilai:aktif.reduce((a,t)=>a+(Number(t.total)||0),0)
+    };
+  },
+
+  async resetBsuLatihanSuperAdmin(form) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/reset-bsu-latihan`, {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_ANON_KEY,'apikey':SUPABASE_ANON_KEY},
+        body:JSON.stringify(form || {})
+      });
+      const data = await res.json().catch(()=>({ok:false,error:'Respons server tidak valid.'}));
+      if (!res.ok || data?.ok !== true) return { ok:false, error:data?.error || ('HTTP '+res.status) };
+      return data;
+    } catch(e) { return { ok:false, error:e?.message || String(e) }; }
   },
 
   // ---- Kategori ----

@@ -2461,6 +2461,12 @@
                             <button type="button" class="btn-sync" style="white-space:nowrap;" onclick="ambilLokasiRegistrasi()">📍 Ambil Lokasi</button>
                         </div>
                     </div>
+                    <div class="form-group" style="padding:13px 14px;border-radius:12px;background:#fff7ed;border:1px solid #fdba74;">
+                        <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;margin:0;">
+                            <input type="checkbox" id="regModeLatihan" style="width:18px;height:18px;margin-top:2px;">
+                            <span><b>Jadikan sebagai BSU Latihan / Simulasi</b><br><small style="color:#9a3412;font-weight:500;line-height:1.5;">Data unit ini tidak dihitung dalam dashboard dan laporan resmi. Setelah pelatihan, data operasional dapat dikosongkan dengan tombol Reset Data Latihan tanpa menghapus akun BSU.</small></span>
+                        </label>
+                    </div>
                     <div class="form-group">
                         <label>Dokumen SK Bank Sampah Unit <span style="color:#ef4444;">*</span></label>
                         <input type="file" id="regSkPdf" class="form-control" accept="application/pdf,.pdf" required onchange="tampilkanInfoPdfBsu('regSkPdf','regSkInfo','btnPreviewRegSk')">
@@ -2494,6 +2500,12 @@
             <div class="form-group"><label>Kata Sandi Operator</label><input type="text" id="editBsuPasswordOperator" class="form-control"></div>
             <div class="form-group"><label>Kata Sandi Bendahara</label><input type="text" id="editBsuPasswordBendahara" class="form-control"></div>
             <div style="margin:-4px 0 15px;padding:10px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:11.5px;line-height:1.5;">Semua akun memakai ID BSU yang sama. Pengguna memilih jenis akses pada halaman login.</div>
+            <div class="form-group" style="padding:12px 13px;border-radius:11px;background:#fff7ed;border:1px solid #fdba74;">
+                <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;margin:0;">
+                    <input type="checkbox" id="editBsuModeLatihan" style="width:18px;height:18px;margin-top:2px;">
+                    <span><b>BSU Latihan / Simulasi</b><br><small style="color:#9a3412;font-weight:500;">Data transaksi unit ini dikecualikan dari laporan resmi.</small></span>
+                </label>
+            </div>
             <div class="form-group"><label>Nama Ketua</label><input type="text" id="editBsuKetua" class="form-control" required></div>
             <div class="form-group"><label>Nomor HP / WA</label><input type="text" id="editBsuHp" class="form-control"></div>
             <div class="form-group"><label>Jumlah Pengurus</label><input type="number" id="editBsuPengurus" class="form-control"></div>
@@ -2515,6 +2527,32 @@
                 <button type="button" id="btnPreviewEditSkBaru" class="btn-sync" style="margin-top:8px;display:none;" onclick="previewPdfTerpilih('editBsuSkPdf')">📄 Preview PDF Baru</button>
             </div>
             <button type="button" class="btn-submit" id="btnSimpanEditBsu" onclick="simpanEditBsu()">SIMPAN PERUBAHAN</button>
+        </div>
+    </div>
+
+    <div id="modalResetBsuLatihan" class="modal-overlay">
+        <div class="modal-box" style="max-width:720px;max-height:calc(100vh - 32px);overflow-y:auto;">
+            <div class="modal-box-header">
+                <h3>♻️ Reset Data BSU Latihan</h3>
+                <button type="button" class="modal-close-btn" onclick="tutupModalResetBsuLatihan()">&times;</button>
+            </div>
+            <input type="hidden" id="resetLatihanId">
+            <div style="padding:13px 14px;border-radius:12px;background:#fff1f2;border:1px solid #fda4af;color:#9f1239;font-size:12.5px;line-height:1.55;margin-bottom:15px;">
+                <b>Perhatian:</b> reset akan menghapus permanen seluruh nasabah, setoran, penarikan, pengiriman, stok opname, mutasi kas, rekonsiliasi, dan audit rinci milik BSU latihan ini. Identitas BSU, tiga kata sandi, dan dokumen SK tetap disimpan.
+            </div>
+            <div id="resetLatihanRingkasan" style="padding:14px;border:1px solid #dbe5e1;border-radius:12px;background:#f8faf9;margin-bottom:15px;">Memuat ringkasan data...</div>
+            <div class="form-group"><label>Alasan Reset</label><textarea id="resetLatihanAlasan" class="form-control" rows="3" placeholder="Contoh: Pelatihan angkatan pertama telah selesai" oninput="cekFormResetLatihan()"></textarea></div>
+            <div class="form-group"><label>Ketik Frasa Konfirmasi</label><input type="text" id="resetLatihanKonfirmasi" class="form-control" placeholder="RESET BSU-XXXXX" oninput="cekFormResetLatihan()"><small id="resetLatihanPetunjuk" style="color:#64748b;">Ketik sesuai petunjuk.</small></div>
+            <div class="form-group"><label>Username Admin Pusat</label><input type="text" id="resetLatihanAdminUser" class="form-control" autocomplete="username" oninput="cekFormResetLatihan()"></div>
+            <div class="form-group"><label>Kata Sandi Admin Pusat</label><input type="password" id="resetLatihanAdminPass" class="form-control" autocomplete="current-password" oninput="cekFormResetLatihan()"></div>
+            <label style="display:flex;align-items:flex-start;gap:10px;padding:12px;border-radius:11px;background:#f8fafc;border:1px solid #cbd5e1;cursor:pointer;margin-bottom:15px;">
+                <input type="checkbox" id="resetLatihanSetuju" style="width:18px;height:18px;margin-top:2px;" onchange="cekFormResetLatihan()">
+                <span style="font-size:12px;line-height:1.5;">Saya memahami bahwa data latihan akan dihapus permanen dan akun BSU latihan tetap dipertahankan.</span>
+            </label>
+            <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+                <button type="button" class="btn-sync" onclick="tutupModalResetBsuLatihan()">BATAL</button>
+                <button type="button" class="btn-submit" id="btnProsesResetLatihan" style="background:#c2410c;" onclick="prosesResetBsuLatihan()" disabled>RESET DATA LATIHAN</button>
+            </div>
         </div>
     </div>
 
@@ -3650,7 +3688,8 @@
             desa: document.getElementById('regDesa').value.trim(),
             alamat: document.getElementById('regAlamat').value.trim(),
             koordinat: document.getElementById('regKoordinat').value.trim(),
-            jumlah_pengurus: 0
+            jumlah_pengurus: 0,
+            mode_latihan: document.getElementById('regModeLatihan').checked
         };
         if(!form.nama || !form.ketua || !form.desa || !form.kecamatan || !form.alamat) return alert('Lengkapi seluruh identitas BSU!');
         if(!form.password_admin || !form.password_operator || !form.password_bendahara) return alert('Kata sandi Admin BSU, Operator, dan Bendahara wajib diisi!');
@@ -3747,7 +3786,7 @@ Operator: ${n.password_operator || '-'}
 Bendahara: ${n.password_bendahara || '-'}
 
 Pada halaman login, pilih jenis akses sesuai akun yang digunakan.
-Nama BSU: ${n.nama}
+Nama BSU: ${n.nama}${n.mode_latihan === true ? ' (MODE LATIHAN)' : ''}
 Ketua: ${n.ketua}
 Kontak WA: ${n.hp}
 Desa: ${n.desa}
@@ -3774,6 +3813,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         document.getElementById('editBsuPasswordAdmin').value = n.password_admin || n.password || '';
         document.getElementById('editBsuPasswordOperator').value = n.password_operator || '';
         document.getElementById('editBsuPasswordBendahara').value = n.password_bendahara || '';
+        document.getElementById('editBsuModeLatihan').checked = n.mode_latihan === true;
         document.getElementById('editBsuKetua').value = n.ketua || '';
         document.getElementById('editBsuHp').value = n.hp || '';
         document.getElementById('editBsuPengurus').value = n.jumlah_pengurus || 0;
@@ -3812,7 +3852,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             kecamatan: document.getElementById('editBsuKecamatan').value.trim(),
             desa: document.getElementById('editBsuDesa').value.trim(),
             alamat: document.getElementById('editBsuAlamat').value.trim(),
-            koordinat: document.getElementById('editBsuKoordinat').value.trim()
+            koordinat: document.getElementById('editBsuKoordinat').value.trim(),
+            mode_latihan: document.getElementById('editBsuModeLatihan').checked
         };
         if(!form.nama || !form.ketua) return alert('Nama BSU dan Ketua wajib diisi!');
         if(!form.password_admin || !form.password_operator || !form.password_bendahara) return alert('Ketiga kata sandi akun wajib diisi!');
@@ -3846,8 +3887,62 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         }
     }
 
+    function badgeModeLatihanBsu(n) {
+        return n?.mode_latihan === true ? '<span style="display:inline-flex;align-items:center;padding:4px 8px;border-radius:999px;background:#ffedd5;color:#9a3412;border:1px solid #fdba74;font-size:9.5px;font-weight:900;letter-spacing:.4px;margin-left:6px;">LATIHAN</span>' : '';
+    }
+
+    async function bukaModalResetBsuLatihan(id) {
+        const n = dataBsuById(id);
+        if(!n || n.mode_latihan !== true) return alert('Reset hanya tersedia untuk BSU yang ditandai sebagai BSU Latihan.');
+        document.getElementById('resetLatihanId').value = id;
+        document.getElementById('resetLatihanAlasan').value = '';
+        document.getElementById('resetLatihanKonfirmasi').value = '';
+        document.getElementById('resetLatihanAdminUser').value = '';
+        document.getElementById('resetLatihanAdminPass').value = '';
+        document.getElementById('resetLatihanSetuju').checked = false;
+        document.getElementById('resetLatihanPetunjuk').innerHTML = `Ketik persis: <b>RESET ${escAttr(id)}</b>`;
+        document.getElementById('resetLatihanRingkasan').innerHTML = '⏳ Memuat ringkasan data latihan...';
+        document.getElementById('modalResetBsuLatihan').classList.add('show');
+        cekFormResetLatihan();
+        const r = await AdapterAPI.getRingkasanResetBsuLatihan(id);
+        if(!r.ok) { document.getElementById('resetLatihanRingkasan').innerHTML = `<span style="color:#b91c1c;">Gagal memuat ringkasan: ${escAttr(r.error||'-')}</span>`; return; }
+        document.getElementById('resetLatihanRingkasan').innerHTML = `
+          <div style="font-weight:900;margin-bottom:9px;">${escAttr(r.nama)} — ${escAttr(r.id_unit)}</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:8px;">
+            <div><small>Nasabah</small><br><b>${r.jumlah_nasabah}</b></div><div><small>Transaksi</small><br><b>${r.jumlah_transaksi}</b></div>
+            <div><small>Stock Opname</small><br><b>${r.jumlah_stock_opname}</b></div><div><small>Mutasi Kas</small><br><b>${r.jumlah_kas_mutasi}</b></div>
+            <div><small>Rekonsiliasi</small><br><b>${r.jumlah_rekonsiliasi}</b></div><div><small>Dampak Berat Aktif</small><br><b>${Number(r.dampak_berat_kg||0).toLocaleString('id-ID')} Kg</b></div>
+          </div>`;
+    }
+
+    function tutupModalResetBsuLatihan(){ document.getElementById('modalResetBsuLatihan').classList.remove('show'); }
+    function cekFormResetLatihan(){
+        const id=document.getElementById('resetLatihanId')?.value||'';
+        const ok=document.getElementById('resetLatihanKonfirmasi')?.value.trim()===`RESET ${id}`
+          && (document.getElementById('resetLatihanAlasan')?.value.trim().length||0)>=10
+          && !!document.getElementById('resetLatihanAdminUser')?.value.trim()
+          && !!document.getElementById('resetLatihanAdminPass')?.value
+          && document.getElementById('resetLatihanSetuju')?.checked;
+        const btn=document.getElementById('btnProsesResetLatihan'); if(btn) btn.disabled=!ok;
+    }
+    async function prosesResetBsuLatihan(){
+        const id=document.getElementById('resetLatihanId').value;
+        if(!confirm(`PERINGATAN TERAKHIR\n\nSeluruh data operasional latihan milik ${id} akan dihapus permanen. Akun BSU dan dokumen SK tetap ada. Lanjutkan?`)) return;
+        const btn=document.getElementById('btnProsesResetLatihan'); btn.disabled=true; btn.innerText='⏳ MERESET DATA...';
+        const hasil=await AdapterAPI.resetBsuLatihanSuperAdmin({
+          id_unit:id, konfirmasi:`RESET ${id}`, alasan:document.getElementById('resetLatihanAlasan').value.trim(),
+          admin_username:document.getElementById('resetLatihanAdminUser').value.trim(), admin_password:document.getElementById('resetLatihanAdminPass').value
+        });
+        btn.innerText='RESET DATA LATIHAN'; cekFormResetLatihan();
+        if(!hasil.ok) return alert('Reset gagal: '+(hasil.error||'Kesalahan server.'));
+        alert(`Reset berhasil.\nNasabah dihapus: ${hasil.jumlah_nasabah||0}\nTransaksi dihapus: ${hasil.jumlah_transaksi||0}\nMutasi kas dihapus: ${hasil.jumlah_kas_mutasi||0}`);
+        tutupModalResetBsuLatihan(); await loadDataPusat();
+    }
+
     function hapusBSU(id, nama) {
-        if(!confirm('Yakin ingin menghapus BSU "' + nama + '"?\nData transaksi terkait TIDAK akan otomatis terhapus.')) return;
+        const n=dataBsuById(id);
+        if(n?.mode_latihan === true) return alert('BSU latihan tidak perlu dihapus. Gunakan tombol RESET DATA LATIHAN agar akun, kata sandi, dan dokumen SK tetap dapat dipakai untuk pelatihan berikutnya.');
+        if(!confirm('Yakin ingin menghapus BSU "' + nama + '"?\nPenghapusan hanya diizinkan jika BSU tidak memiliki nasabah atau data transaksi.')) return;
         postAksi({ action: 'deleteUnit', id: id })
         .then(res=>{ alert(res); loadDataPusat(); })
         .catch(e=>alert('Error: ' + e));
@@ -3885,7 +3980,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             <div class="bsu-card">
                 <div class="bsu-card-head">
                     <div style="min-width:0;">
-                        <h3 class="bsu-card-title" title="${escAttr(n.nama)}">${n.nama}</h3>
+                        <h3 class="bsu-card-title" title="${escAttr(n.nama)}">${n.nama}${badgeModeLatihanBsu(n)}</h3>
                         <span class="bsu-card-id">${n.id}</span>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end;font-size:10px;"><span class="pw-mask" data-pw="${escAttr(n.password_admin || n.password)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Admin BSU">A: ••••••</span><span class="pw-mask" data-pw="${escAttr(n.password_operator)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Operator">O: ••••••</span><span class="pw-mask" data-pw="${escAttr(n.password_bendahara)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Bendahara">B: ••••••</span></div>
@@ -3904,7 +3999,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
                     <button type="button" class="btn-icon" title="Lihat Peta Lokasi" onclick="bukaPetaBsu('${escAttr(n.koordinat)}')">📍</button>
                     <button type="button" class="btn-icon" title="Cetak QR Cek Saldo" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲</button>
                     <button type="button" class="btn-text-icon" title="Edit Data BSU" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>
-                    <button type="button" class="btn-icon danger" title="Hapus BSU" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️</button>
+                    ${n.mode_latihan === true ? `<button type="button" class="btn-text-icon" style="background:#ffedd5;color:#9a3412;border:1px solid #fdba74;" title="Reset Data Latihan" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset</button>` : `<button type="button" class="btn-icon danger" title="Hapus BSU" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️</button>`}
                 </div>
             </div>
         `).join('');
@@ -4937,7 +5032,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let jmlPembinaan = (globalPembinaan || []).filter(p => dalamPeriodeISO(p.tanggal)).length;
         let jmlDarurat = (globalDarurat || []).filter(d => dalamPeriodeISO(d.tanggal)).length;
 
-        return { totalSetoranKg, totalPenjualanRp, kasMasuk, kasKeluar, saldoBersih: kasMasuk - kasKeluar, biayaOp, jmlBsuAktif: globalNasabah.length, jmlPembinaan, jmlDarurat };
+        return { totalSetoranKg, totalPenjualanRp, kasMasuk, kasKeluar, saldoBersih: kasMasuk - kasKeluar, biayaOp, jmlBsuAktif: globalNasabah.filter(b=>b.mode_latihan!==true).length, jmlPembinaan, jmlDarurat };
     }
 
     function renderRingkasanDokOperasional() {
@@ -5770,7 +5865,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
               ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fff7ed;color:#9a3412;border-color:#fdba74;margin-right:4px;" onclick="previewSkBsu('${escAttr(n.id)}')">📄 Preview SK</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ecfeff;color:#155e75;border-color:#67e8f9;margin-right:4px;" onclick="downloadSkBsu('${escAttr(n.id)}')">⬇️ Download</button>`
               : `<span style="display:inline-block;padding:5px 8px;margin-right:4px;border-radius:7px;background:#f1f5f9;color:#94a3b8;font-size:10px;">SK belum ada</span>`;
             const akunHtml = `<div style="font-family:monospace;font-size:10.5px;line-height:1.8;min-width:155px;"><div><b>Admin:</b> ${escAttr(n.password_admin || n.password || '-')}</div><div><b>Operator:</b> ${escAttr(n.password_operator || '-')}</div><div><b>Bendahara:</b> ${escAttr(n.password_bendahara || '-')}</div></div>`;
-            regHtml += `<tr><td>${n.id}</td><td>${akunHtml}</td><td style="font-weight:bold;">${n.nama}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;">${tombolSk}<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button></td></tr>`;
+            regHtml += `<tr><td>${n.id}</td><td>${akunHtml}</td><td style="font-weight:bold;">${n.nama}${badgeModeLatihanBsu(n)}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;">${tombolSk}<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>${n.mode_latihan === true ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ffedd5;color:#9a3412;border-color:#fdba74;" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset Latihan</button>` : `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button>`}</td></tr>`;
         });
         if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="8" class="text-center">Belum ada data</td></tr>';
 

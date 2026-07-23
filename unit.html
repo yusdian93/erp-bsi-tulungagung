@@ -710,6 +710,9 @@
         .data-warning { border-radius:14px; padding:13px 15px; background:#fffbeb; border:1px solid #fde68a; color:#92400e; font-size:.78rem; line-height:1.55; }
         .cash-positive { color:#047857 !important; }
         .cash-negative { color:#be123c !important; }
+        .training-banner { display:none; margin:0 15px 12px; padding:13px 18px; border-radius:16px; background:linear-gradient(135deg,#9a3412,#ea580c); color:#fff; border:1px solid rgba(255,255,255,.28); box-shadow:0 12px 28px rgba(154,52,18,.22); font-weight:800; text-align:center; letter-spacing:.25px; }
+        body.mode-latihan-bsu .training-banner { display:block; }
+        body.mode-latihan-bsu .navbar { box-shadow:0 0 0 3px rgba(249,115,22,.28),0 18px 55px rgba(7,59,50,.15); }
         @media print {
             body.mode-bukubesar * { visibility:hidden; }
             body.mode-bukubesar #bukubesar, body.mode-bukubesar #bukubesar * { visibility:visible; }
@@ -722,6 +725,7 @@
 <body>
 
 <div id="main-app" style="display: block;">
+    <div id="bannerModeLatihanUnit" class="training-banner"><i class="bi bi-mortarboard-fill me-2"></i>MODE LATIHAN / SIMULASI — DATA UNIT INI TIDAK MASUK LAPORAN RESMI DAN DAPAT DIRESET OLEH BANK SAMPAH INDUK</div>
     
     <div class="nav-wrapper" style="padding: 15px;">
         <nav class="navbar navbar-expand-xl w-100 mx-auto" style="max-width: 100%;">
@@ -1398,6 +1402,7 @@
             dataTransaksiKeluar = data.transaksiKeluar || [];
             dataKategori = data.kategori || [];
             dataUnit = data.unit || [];
+            terapkanModeLatihanUnit();
             dataStockOpname = data.stockOpname || [];
             dataKasMutasi = data.kasMutasi || [];
             dataRekonsiliasiUnit = data.rekonsiliasi || [];
@@ -2955,6 +2960,12 @@
         const hasil=await AdapterAPI.downloadDokumenSkBsu(u.sk_pdf_path,u.sk_pdf_nama||`SK-${CURRENT_UNIT_ID}.pdf`);
         if(!hasil.ok&&hasil.error)console.warn(hasil.error);
     }
+    function terapkanModeLatihanUnit(){
+        const u=dataUnit[0]||{};
+        document.body.classList.toggle('mode-latihan-bsu',u.mode_latihan===true);
+        const banner=document.getElementById('bannerModeLatihanUnit');
+        if(banner) banner.style.display=u.mode_latihan===true?'block':'none';
+    }
     function updateProfilUnit(){
         const u=dataUnit[0]||{};
         const box=document.getElementById('profilUnitDetail');
@@ -2962,7 +2973,7 @@
         let koordinat=String(u.koordinat||'').trim();
         let mapBtn=koordinat?`<a class="btn btn-sm btn-outline-success" href="https://www.google.com/maps?q=${encodeURIComponent(koordinat)}" target="_blank" rel="noopener"><i class="bi bi-geo-alt me-1"></i>Lihat Peta</a>`:'';
         let skHtml=u.sk_pdf_path?`<div class="data-success mt-4"><div class="d-flex align-items-start justify-content-between gap-3 flex-wrap"><div><div class="fw-bold"><i class="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Dokumen SK Bank Sampah Unit</div><div class="small mt-1">${escapeHtml(u.sk_pdf_nama||'SK Bank Sampah Unit.pdf')}</div>${u.sk_pdf_uploaded_at?`<div class="small text-muted mt-1">Diunggah: ${formatTanggalTampil(u.sk_pdf_uploaded_at)}</div>`:''}</div><div class="d-flex gap-2 flex-wrap"><button class="btn btn-outline-danger btn-sm" onclick="previewSkProfilUnit()"><i class="bi bi-eye me-1"></i>Preview PDF</button><button class="btn btn-danger btn-sm" onclick="downloadSkProfilUnit()"><i class="bi bi-download me-1"></i>Download PDF</button></div></div></div>`:`<div class="data-warning mt-4"><i class="bi bi-exclamation-triangle me-2"></i>Dokumen SK belum diunggah oleh Bank Sampah Induk.</div>`;
-        if(box)box.innerHTML=`<div class="row g-3">${item('Nama Bank Sampah Unit',u.nama||CURRENT_UNIT_NAMA,'col-12')}${item('Kode Registrasi',CURRENT_UNIT_ID)}${item('Hak Akses yang Sedang Login',labelHakAksesUnit(HAK_AKSES_UNIT))}${item('Nama Ketua',u.ketua)}${item('Nomor HP / WhatsApp',u.hp)}${item('Jumlah Pengurus',String(u.jumlah_pengurus??0))}${item('Kecamatan',u.kecamatan)}${item('Desa/Kelurahan',u.desa)}${item('Alamat Lengkap',u.alamat,'col-12')}${item('Koordinat Lokasi',koordinat||'-','col-md-8')}<div class="col-md-4 d-flex align-items-stretch"><div class="metric-soft h-100 w-100 d-flex align-items-center justify-content-center">${mapBtn||'<span class="text-muted small">Koordinat belum tersedia</span>'}</div></div></div>${skHtml}`;
+        if(box)box.innerHTML=`<div class="row g-3">${item('Nama Bank Sampah Unit',u.nama||CURRENT_UNIT_NAMA,'col-12')}${item('Kode Registrasi',CURRENT_UNIT_ID)}${item('Jenis Unit',u.mode_latihan===true?'LATIHAN / SIMULASI':'OPERASIONAL / RESMI')}${item('Hak Akses yang Sedang Login',labelHakAksesUnit(HAK_AKSES_UNIT))}${item('Nama Ketua',u.ketua)}${item('Nomor HP / WhatsApp',u.hp)}${item('Jumlah Pengurus',String(u.jumlah_pengurus??0))}${item('Kecamatan',u.kecamatan)}${item('Desa/Kelurahan',u.desa)}${item('Alamat Lengkap',u.alamat,'col-12')}${item('Koordinat Lokasi',koordinat||'-','col-md-8')}<div class="col-md-4 d-flex align-items-stretch"><div class="metric-soft h-100 w-100 d-flex align-items-center justify-content-center">${mapBtn||'<span class="text-muted small">Koordinat belum tersedia</span>'}</div></div></div>${skHtml}`;
         const p=document.getElementById('profilPetugasAktif');if(p)p.value=getPetugasSesi();
     }
 
