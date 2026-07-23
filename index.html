@@ -322,6 +322,20 @@
                     </div>
                 </div>
 
+                <div class="mb-3">
+                    <label for="jenisAkses">Jenis Akses</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person-badge-fill"></i></span>
+                        <select id="jenisAkses" class="form-control" required>
+                            <option value="BSI">Admin Pusat / Bank Sampah Induk</option>
+                            <option value="ADMIN_BSU">Admin Bank Sampah Unit</option>
+                            <option value="OPERATOR">Operator Bank Sampah Unit</option>
+                            <option value="BENDAHARA">Bendahara Bank Sampah Unit</option>
+                        </select>
+                    </div>
+                    <div style="margin-top:7px;color:#7b8c86;font-size:.72rem;line-height:1.5;">Untuk akun BSU, gunakan ID registrasi yang sama lalu pilih jenis akses sesuai kata sandi yang diberikan.</div>
+                </div>
+
                 <div class="mb-4">
                     <label for="password">Kata Sandi</label>
                     <div class="input-group">
@@ -366,18 +380,24 @@
             
             let user = document.getElementById('username').value.trim();
             let pass = document.getElementById('password').value.trim();
+            let jenisAkses = document.getElementById('jenisAkses').value;
             let btnSubmit = document.getElementById('btnSubmit');
 
             let originalText = btnSubmit.innerHTML;
             btnSubmit.disabled = true;
             btnSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Memeriksa Database...';
 
-            AdapterAPI.loginServer(user, pass)
+            AdapterAPI.loginServer(user, pass, jenisAkses)
                 .then(data => {
                     if (data.ok) {
                         localStorage.setItem('ROLE_PENGGUNA', data.role);
                         localStorage.setItem('ID_UNIT_PENGGUNA', data.id_unit);
-                        if (data.role === 'BSU') localStorage.setItem('NAMA_UNIT_PENGGUNA', data.nama);
+                        if (data.role === 'BSU') {
+                            localStorage.setItem('NAMA_UNIT_PENGGUNA', data.nama);
+                            localStorage.setItem('HAK_AKSES_BSU', data.hak_akses || jenisAkses || 'ADMIN_BSU');
+                        } else {
+                            localStorage.removeItem('HAK_AKSES_BSU');
+                        }
                         window.location.href = data.role === 'BSI' ? 'induk.html' : 'unit.html';
                     } else {
                         alert('Akses Ditolak: ' + (data.error || 'Login gagal.'));
@@ -385,7 +405,7 @@
                 })
                 .catch(error => {
                     console.error("Terjadi Kesalahan:", error);
-                    alert('Gagal terhubung ke Server Database. Pastikan Apps Script sudah di-deploy.');
+                    alert('Gagal terhubung ke server login. Periksa koneksi internet atau deployment Edge Function login.');
                 })
                 .finally(() => {
                     btnSubmit.disabled = false;

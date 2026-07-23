@@ -184,9 +184,15 @@ async function restoreBsuAman(rowsBackup) {
   const perluReset = [];
   const rows = rowsBackup.map(r => {
     const row = { ...r };
-    delete row.password; // field ini memang tidak ada di backup, dijaga eksplisit
+    delete row.password;
+    delete row.password_admin;
+    delete row.password_operator;
+    delete row.password_bendahara; // field rahasia tidak dipulihkan dari backup
     if (!existingIds.has(row.id)) {
       row.password = 'RESET-' + genId().slice(0, 8).toUpperCase();
+      row.password_admin = row.password;
+      row.password_operator = null;
+      row.password_bendahara = null;
       perluReset.push(row.id);
     }
     return row;
@@ -232,11 +238,17 @@ async function hapusSemuaBaris(tabel) {
   return { ok: true };
 }
 
+function stripPasswordBsu(obj) {
+  if (!obj) return obj;
+  const { password, password_admin, password_operator, password_bendahara, ...aman } = obj;
+  return aman;
+}
+
 const AdapterAPI = {
 
   // ================== LOGIN (dipakai index.html) ==================
   // Password dicek di server (Edge Function), TIDAK PERNAH dikirim mentah ke browser.
-  async loginServer(username, password) {
+  async loginServer(username, password, jenis_akses) {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/login`, {
       method: 'POST',
       headers: {
@@ -244,9 +256,9 @@ const AdapterAPI = {
         'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
         'apikey': SUPABASE_ANON_KEY
       },
-      body: JSON.stringify({ username, password })
+      body: JSON.stringify({ username, password, jenis_akses: jenis_akses || 'BSI' })
     });
-    return res.json(); // { ok:true, role, id_unit, nama } atau { ok:false, error }
+    return res.json(); // { ok:true, role, id_unit, nama, hak_akses } atau { ok:false, error }
   },
 
   // Ubah ID/password Admin Pusat. Dicek & disimpan di server (Edge Function),
@@ -497,8 +509,7 @@ const AdapterAPI = {
     const row = { ...form, id };
     const { error } = await sb.from('bsu').insert(row);
     if (error) return 'Gagal: ' + error.message;
-    const { password, ...rowTanpaPassword } = row;
-    logAudit('bsu', row.id, 'insert', null, rowTanpaPassword);
+    logAudit('bsu', row.id, 'insert', null, stripPasswordBsu(row));
     return 'Sukses mendaftarkan BSU';
   },
   async updateUnit(form) {
@@ -509,8 +520,7 @@ const AdapterAPI = {
     if (lama?.sk_pdf_path && rest.sk_pdf_path && lama.sk_pdf_path !== rest.sk_pdf_path) {
       this.hapusDokumenSkBsu(lama.sk_pdf_path).catch(() => {});
     }
-    const stripPass = (o) => { if (!o) return o; const { password, ...r } = o; return r; };
-    logAudit('bsu', id, 'update', stripPass(lama), stripPass({ ...lama, ...rest }));
+    logAudit('bsu', id, 'update', stripPasswordBsu(lama), stripPasswordBsu({ ...lama, ...rest }));
     return 'Sukses diperbarui';
   },
   async deleteUnit(id) {
@@ -518,8 +528,7 @@ const AdapterAPI = {
     const { error } = await sb.from('bsu').delete().eq('id', id);
     if (error) return 'Gagal: ' + error.message;
     if (lama?.sk_pdf_path) this.hapusDokumenSkBsu(lama.sk_pdf_path).catch(() => {});
-    const stripPass = (o) => { if (!o) return o; const { password, ...r } = o; return r; };
-    logAudit('bsu', id, 'delete', stripPass(lama), null);
+    logAudit('bsu', id, 'delete', stripPasswordBsu(lama), null);
     return 'Sukses dihapus';
   },
 
@@ -1065,7 +1074,7 @@ const AdapterAPI = {
       sb.from('kas_mutasi').select('*'),
       sb.from('audit_log').select('*').order('waktu', { ascending: false }).limit(5000)
     ]);
-    const stripPassBsu = (bsu || []).map(({ password, ...r }) => r);
+    const stripPassBsu = (bsu || []).map(stripPasswordBsu);
     return {
       meta: { diekspor_pada: new Date().toISOString(), sumber: 'Sistem Bank Sampah Induk & Unit (Supabase)', catatan: 'Kolom password pada admin & bsu disamarkan demi keamanan.' },
       admin: admin || [], bsu: stripPassBsu, nasabah: nasabah || [], kategori: kategori || [],
