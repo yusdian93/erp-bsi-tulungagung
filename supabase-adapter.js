@@ -344,6 +344,41 @@ const AdapterAPI = {
     return data || { ok:true };
   },
 
+
+  async verifikasiPengirimanBatchBSI(form) {
+    const { data, error } = await sb.rpc('verifikasi_pengiriman_bsu_batch', {
+      p_kelompok_id: form.kelompok_id,
+      p_status: form.status_verifikasi,
+      p_items: form.items || [],
+      p_catatan: form.catatan || null,
+      p_oleh: form.oleh || getPetugasSesi()
+    });
+    if (error) return { ok:false, error:error.message };
+    return data || { ok:true };
+  },
+
+  async konfirmasiPembayaranPengirimanBatchBSI(form) {
+    const { data, error } = await sb.rpc('konfirmasi_pembayaran_pengiriman_bsu_batch', {
+      p_kelompok_id: form.kelompok_id,
+      p_tanggal: form.tanggal,
+      p_metode: form.metode,
+      p_no_bukti: form.no_bukti || null,
+      p_oleh: form.oleh || getPetugasSesi()
+    });
+    if (error) return { ok:false, error:error.message };
+    return data || { ok:true };
+  },
+
+  async batalkanPengajuanPengirimanBatchBSU(form) {
+    const { data, error } = await sb.rpc('batalkan_pengajuan_pengiriman_bsu_batch', {
+      p_kelompok_id: form.kelompok_id,
+      p_alasan: form.alasan || null,
+      p_oleh: form.oleh || getPetugasSesi()
+    });
+    if (error) return { ok:false, error:error.message };
+    return data || { ok:true };
+  },
+
   async tambahBantuanHibah(form) {
     const id = 'HBH-' + genId();
     const row = { id, ...form };
@@ -960,6 +995,37 @@ const AdapterAPI = {
     if (error) return 'Gagal: ' + error.message;
     rows.forEach(row => logAudit('transaksi', row.id, 'insert', null, row, 'Setoran batch unit ' + id_unit + ' oleh ' + row.created_by));
     return 'Sukses: ' + rows.length + ' item tersimpan';
+  },
+
+  async tambahPengirimanBatchBSI({ id_unit, nama, tgl, no_dokumen, biaya_angkut, catatan, items, kelompok_id, oleh }) {
+    const kunci = await cekPeriodeTerkunci(tgl);
+    if (kunci) return { ok:false, error:pesanPeriodeTerkunci(kunci) };
+    if (!id_unit || !tgl || !String(no_dokumen || '').trim()) return { ok:false, error:'Tanggal dan nomor surat pengantar wajib diisi.' };
+    if (!Array.isArray(items) || !items.length) return { ok:false, error:'Daftar material pengiriman masih kosong.' };
+    const grupId = kelompok_id || genId('KRM');
+    const petugas = oleh || getPetugasSesi();
+    const seen = new Set();
+    const rows = items.map((item, index) => {
+      const jenis = String(item.jenis || '').trim();
+      const beratKirim = Number(item.berat_kirim ?? item.berat) || 0;
+      const hargaUsulan = Number(item.harga_usulan ?? item.harga_satuan) || 0;
+      if (!jenis || beratKirim <= 0) throw new Error('Setiap material wajib memiliki nama dan berat lebih dari 0 Kg.');
+      if (seen.has(jenis)) throw new Error('Material ' + jenis + ' tercantum lebih dari satu kali.');
+      seen.add(jenis);
+      return {
+        id: genId('TRX'), id_unit, level:'unit_ke_induk', nama, tgl, jenis,
+        berat_kirim:beratKirim, berat:beratKirim,
+        harga_usulan:hargaUsulan, total_usulan:beratKirim*hargaUsulan,
+        harga_satuan:0, total:0, no_dokumen:String(no_dokumen).trim(),
+        kelompok_id:grupId, status_verifikasi:'menunggu_verifikasi', status_pembayaran:'belum_dibayar',
+        biaya_angkut:index===0?(Number(biaya_angkut)||0):0,
+        catatan:catatan||null, status:'aktif', created_by:petugas
+      };
+    });
+    const { error } = await sb.from('transaksi').insert(rows);
+    if (error) return { ok:false, error:error.message };
+    rows.forEach(row => logAudit('transaksi', row.id, 'insert', null, row, 'Surat pengantar multi-material ' + no_dokumen + ' / grup ' + grupId));
+    return { ok:true, kelompok_id:grupId, jumlah_item:rows.length, total_kg:rows.reduce((a,r)=>a+Number(r.berat_kirim||0),0) };
   },
 
   async tambahPengirimanBSI(form) {

@@ -1264,27 +1264,45 @@
 
         <div id="pengiriman" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
-                <div class="module-title"><span class="icon-shell"><i class="bi bi-truck"></i></span><div><h4 class="m-0">Pengajuan Pengiriman Sampah ke BSI</h4><div class="module-note">BSU mengajukan material dan berat kirim. Berat diterima, harga final, serta pembayaran ditetapkan oleh Bank Sampah Induk.</div></div></div>
-                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i><strong>Alur:</strong> BSU mengirim pengajuan → BSI memeriksa dan menimbang → BSI menerima/menolak → nilai masuk saldo BSU → BSI mengonfirmasi pembayaran. Pengurus BSU tidak menetapkan sendiri status lunas.</div>
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-truck"></i></span><div><h4 class="m-0">Pengajuan Pengiriman Sampah ke BSI</h4><div class="module-note">Satu surat pengantar dapat memuat beberapa jenis material sekaligus. BSI memeriksa berat dan harga final setiap material dalam satu pengiriman.</div></div></div>
+                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i><strong>Alur:</strong> Isi satu nomor surat pengantar → tambahkan seluruh material ke daftar → kirim satu kali → BSI memverifikasi semua material dalam surat yang sama → pembayaran dilakukan untuk total pengiriman.</div>
                 <form id="formPengirimanBSI" class="mt-4" onsubmit="simpanPengirimanBSI(event)">
                     <div class="row g-3">
                         <div class="col-md-3"><label>Tanggal Pengiriman <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" required></div>
-                        <div class="col-md-3"><label>No. Surat Jalan</label><input id="kirimDokumen" class="form-control" placeholder="SJ/BSU/..."></div>
-                        <div class="col-md-6"><label>Material <span class="required-mark">*</span></label><select id="kirimMaterial" class="form-select" required onchange="hitungPengirimanBSI()"></select></div>
-                        <div class="col-md-3"><label>Berat Dikirim BSU (Kg) <span class="required-mark">*</span></label><input type="number" step="0.01" min="0.01" id="kirimBerat" class="form-control" required oninput="hitungPengirimanBSI()"></div>
-                        <div class="col-md-3"><label>Harga Acuan BSI</label><input id="kirimEstimasiHarga" class="form-control" readonly value="Rp 0/Kg"></div>
-                        <div class="col-md-3"><label>Estimasi Nilai</label><input id="kirimEstimasiNilai" class="form-control" readonly value="Rp 0"></div>
-                        <div class="col-md-3"><label>Biaya Angkut BSU</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
-                        <div class="col-12"><label>Catatan Pengiriman</label><input id="kirimCatatan" class="form-control" placeholder="Kondisi material, jumlah karung, nama pengemudi, atau catatan lain"></div>
+                        <div class="col-md-4"><label>No. Surat Pengantar/Jalan <span class="required-mark">*</span></label><input id="kirimDokumen" class="form-control" placeholder="Contoh: SJ/BSU/07/2026/001" required></div>
+                        <div class="col-md-2"><label>Biaya Angkut BSU</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
+                        <div class="col-md-3"><label>Catatan Pengiriman</label><input id="kirimCatatan" class="form-control" placeholder="Pengemudi/jumlah karung/kondisi"></div>
                     </div>
-                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-send-check me-2"></i>Kirim Pengajuan ke BSI</button>
+
+                    <div class="mt-4 p-3 p-md-4 rounded-4" style="background:#f8fafc;border:1px solid #dbe7e2;">
+                        <h6 class="fw-bold mb-3" style="color:var(--primary-dark);"><i class="bi bi-plus-circle me-2"></i>Tambahkan Material ke Surat Pengantar</h6>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-5"><label>Material</label><select id="kirimMaterial" class="form-select" onchange="hitungPengirimanBSI()"></select></div>
+                            <div class="col-md-2"><label>Berat (Kg)</label><input type="number" step="0.01" min="0.01" id="kirimBerat" class="form-control" oninput="hitungPengirimanBSI()"></div>
+                            <div class="col-md-2"><label>Harga Acuan</label><input id="kirimEstimasiHarga" class="form-control" readonly value="Rp 0/Kg"></div>
+                            <div class="col-md-2"><label>Estimasi Nilai</label><input id="kirimEstimasiNilai" class="form-control" readonly value="Rp 0"></div>
+                            <div class="col-md-1 d-grid"><button type="button" class="btn btn-outline-success" onclick="tambahItemPengirimanBSI()" title="Tambahkan material"><i class="bi bi-plus-lg"></i></button></div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive mt-4">
+                        <table class="table table-hover align-middle" style="min-width:760px;">
+                            <thead><tr><th style="width:55px;">No.</th><th>Material</th><th class="text-end">Stok Tersedia</th><th class="text-end">Berat Dikirim</th><th class="text-end">Harga Acuan</th><th class="text-end">Estimasi Nilai</th><th class="text-center">Aksi</th></tr></thead>
+                            <tbody id="tabel-item-pengiriman"><tr><td colspan="7" class="empty-state">Belum ada material dalam surat pengantar.</td></tr></tbody>
+                            <tfoot><tr class="fw-bold"><td colspan="3" class="text-end">TOTAL</td><td class="text-end" id="kirimTotalKg">0,00 Kg</td><td></td><td class="text-end" id="kirimTotalEstimasi">Rp 0</td><td></td></tr></tfoot>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mt-3">
+                        <small class="text-muted"><span id="kirimJumlahMaterial">0</span> jenis material dalam satu surat pengantar.</small>
+                        <button class="btn btn-success px-4" type="submit"><i class="bi bi-send-check me-2"></i>Kirim Satu Pengajuan ke BSI</button>
+                    </div>
                 </form>
                 <div class="section-divider"></div>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                    <h6 class="fw-bold m-0">Status Pengajuan dan Hasil Verifikasi BSI</h6>
-                    <small class="text-muted">Data diperbarui otomatis dari database yang sama.</small>
+                    <h6 class="fw-bold m-0">Status Surat Pengantar dan Hasil Verifikasi BSI</h6>
+                    <small class="text-muted">Satu baris mewakili satu surat pengantar, meskipun berisi banyak material.</small>
                 </div>
-                <div class="table-responsive"><table class="table table-hover" style="min-width:1050px;"><thead><tr><th>Tanggal/Surat Jalan</th><th>Material</th><th class="text-end">Berat Kirim</th><th>Status Verifikasi</th><th>Hasil BSI</th><th>Status Pembayaran</th><th>Catatan</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
+                <div class="table-responsive"><table class="table table-hover" style="min-width:1180px;"><thead><tr><th>Tanggal/Surat Pengantar</th><th>Rincian Material</th><th class="text-end">Total Berat Kirim</th><th>Status Verifikasi</th><th>Hasil BSI</th><th>Status Pembayaran</th><th>Catatan</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
             </div>
         </div>
 
@@ -1495,6 +1513,7 @@
     let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = [];
     let dataStockOpname = []; let dataKasMutasi = []; let dataRekonsiliasiUnit = []; let dataAuditUnit = [];
     let dataPenggunaanBagiHasil = [];
+    let keranjangPengirimanBSI = [];
     let masterNasabah = []; let masterTransaksi = [];
     let HAK_AKSES_UNIT = String(localStorage.getItem('HAK_AKSES_BSU') || 'ADMIN_BSU').toUpperCase();
 
@@ -1788,7 +1807,7 @@
         document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active-tab'));
         if (element) element.classList.add('active-tab');
         if (tabId === 'ceksaldo') document.getElementById('areaDetailSaldo').style.display = 'none';
-        if (tabId === 'pengiriman') { updateTabelPengiriman(); hitungPengirimanBSI(); }
+        if (tabId === 'pengiriman') { updateTabelPengiriman(); renderKeranjangPengirimanBSI(); hitungPengirimanBSI(); }
         if (tabId === 'stockopname') { isiStokSistemOpname(); updateTabelStockOpname(); }
         if (tabId === 'kas') updateKasUnit();
         if (tabId === 'bagihasil') updateBagiHasilUnit();
@@ -3318,35 +3337,80 @@
         const h=document.getElementById('kirimEstimasiHarga');if(h)h.value=rupiah(harga)+'/Kg';
         const n=document.getElementById('kirimEstimasiNilai');if(n)n.value=rupiah(berat*harga);
     }
+    function tambahItemPengirimanBSI(){
+        const sel=document.getElementById('kirimMaterial');
+        const material=sel?.value||'';const berat=num(document.getElementById('kirimBerat')?.value);
+        if(!material||berat<=0)return alert('Pilih material dan isi berat lebih dari 0 Kg.');
+        const stok=stokMaterial(material);
+        const sudah=keranjangPengirimanBSI.filter(x=>x.jenis===material).reduce((a,x)=>a+num(x.berat_kirim),0);
+        if(sudah+berat>stok)return alert(`Stok ${material} tersedia ${stok.toFixed(2)} Kg. Total dalam surat ini tidak boleh melebihi stok.`);
+        const harga=num(sel.selectedOptions[0]?.dataset?.harga);
+        const ada=keranjangPengirimanBSI.find(x=>x.jenis===material);
+        if(ada){ada.berat_kirim=num(ada.berat_kirim)+berat;ada.harga_usulan=harga;}
+        else keranjangPengirimanBSI.push({jenis:material,berat_kirim:berat,harga_usulan:harga});
+        document.getElementById('kirimBerat').value='';sel.value='';hitungPengirimanBSI();renderKeranjangPengirimanBSI();
+    }
+    function hapusItemPengirimanBSI(index){keranjangPengirimanBSI.splice(index,1);renderKeranjangPengirimanBSI();}
+    function renderKeranjangPengirimanBSI(){
+        const tb=document.getElementById('tabel-item-pengiriman');if(!tb)return;
+        const totalKg=keranjangPengirimanBSI.reduce((a,x)=>a+num(x.berat_kirim),0);
+        const totalRp=keranjangPengirimanBSI.reduce((a,x)=>a+num(x.berat_kirim)*num(x.harga_usulan),0);
+        tb.innerHTML=keranjangPengirimanBSI.length?keranjangPengirimanBSI.map((x,i)=>`<tr><td>${i+1}</td><td class="fw-bold">${escapeHtml(x.jenis)}</td><td class="text-end">${stokMaterial(x.jenis).toFixed(2)} Kg</td><td class="text-end fw-bold">${num(x.berat_kirim).toFixed(2)} Kg</td><td class="text-end">${rupiah(x.harga_usulan)}/Kg</td><td class="text-end fw-bold">${rupiah(num(x.berat_kirim)*num(x.harga_usulan))}</td><td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="hapusItemPengirimanBSI(${i})"><i class="bi bi-trash"></i></button></td></tr>`).join(''):`<tr><td colspan="7" class="empty-state">Belum ada material dalam surat pengantar.</td></tr>`;
+        setText('kirimJumlahMaterial',keranjangPengirimanBSI.length);setText('kirimTotalKg',totalKg.toFixed(2)+' Kg');setText('kirimTotalEstimasi',rupiah(totalRp));
+    }
     function simpanPengirimanBSI(e){
         e.preventDefault();
-        const material=document.getElementById('kirimMaterial').value;
-        const berat=num(document.getElementById('kirimBerat').value);
-        if(!material||berat<=0)return alert('Material dan berat kirim wajib diisi.');
-        const stok=stokMaterial(material);if(berat>stok)return alert(`Stok ${material} hanya ${stok.toFixed(2)} Kg.`);
-        const opt=document.getElementById('kirimMaterial').selectedOptions[0];
-        const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl:document.getElementById('kirimTanggal').value,jenis:material,berat_kirim:berat,harga_usulan:num(opt?.dataset?.harga),no_dokumen:document.getElementById('kirimDokumen').value.trim(),biaya_angkut:num(document.getElementById('kirimBiayaAngkut').value),catatan:document.getElementById('kirimCatatan').value.trim(),oleh:getPetugasSesi()};
-        if(!confirm(`Kirim pengajuan ${material} sebanyak ${berat.toFixed(2)} Kg ke BSI?\n\nBerat dan harga final akan ditentukan setelah verifikasi BSI.`))return;
+        const tgl=document.getElementById('kirimTanggal').value;const noDok=document.getElementById('kirimDokumen').value.trim();
+        if(!tgl)return alert('Tanggal pengiriman wajib diisi.');
+        if(!noDok)return alert('Nomor surat pengantar/jalan wajib diisi.');
+        if(!keranjangPengirimanBSI.length)return alert('Tambahkan minimal satu material ke surat pengantar.');
+        for(const item of keranjangPengirimanBSI){const stok=stokMaterial(item.jenis);if(num(item.berat_kirim)>stok)return alert(`Stok ${item.jenis} hanya ${stok.toFixed(2)} Kg.`);}
+        const totalKg=keranjangPengirimanBSI.reduce((a,x)=>a+num(x.berat_kirim),0);
+        const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl,no_dokumen:noDok,biaya_angkut:num(document.getElementById('kirimBiayaAngkut').value),catatan:document.getElementById('kirimCatatan').value.trim(),oleh:getPetugasSesi(),items:keranjangPengirimanBSI.map(x=>({...x}))};
+        if(!confirm(`Kirim satu surat pengantar ${noDok} berisi ${form.items.length} material dengan total ${totalKg.toFixed(2)} Kg ke BSI?\n\nBerat dan harga final setiap material akan ditentukan BSI.`))return;
         const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Mengirim...';
-        AdapterAPI.tambahPengirimanBSI(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Pengajuan berhasil dikirim dan menunggu verifikasi BSI.');e.target.reset();isiDropdownModulBaru();hitungPengirimanBSI();loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-send-check me-2"></i>Kirim Pengajuan ke BSI';});
+        AdapterAPI.tambahPengirimanBatchBSI(form).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pengiriman gagal');alert(`Pengajuan ${noDok} berhasil dikirim dengan ${res.jumlah_item||form.items.length} material.`);keranjangPengirimanBSI=[];e.target.reset();isiDropdownModulBaru();renderKeranjangPengirimanBSI();hitungPengirimanBSI();loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-send-check me-2"></i>Kirim Satu Pengajuan ke BSI';});
+    }
+    function kunciGrupPengirimanUnit(t){return t.kelompok_id?'GRP|'+String(t.kelompok_id):'ID|'+String(t.id);}
+    function buatGrupPengirimanUnit(){
+        const map=new Map();
+        (dataTransaksiKeluar||[]).filter(t=>t.jenis!=='Penarikan Tabungan'&&num(t.berat_kirim??t.berat)>0).forEach(t=>{
+            const key=kunciGrupPengirimanUnit(t);if(!map.has(key))map.set(key,{key,kelompok_id:t.kelompok_id||null,items:[]});map.get(key).items.push(t);
+        });
+        return [...map.values()].map(g=>{
+            g.items.sort((a,b)=>String(a.jenis).localeCompare(String(b.jenis),'id'));
+            g.wakil=g.items[0];g.total_kirim=g.items.reduce((a,t)=>a+num(t.berat_kirim??t.berat),0);g.total_diterima=g.items.reduce((a,t)=>a+(t.status_verifikasi==='diterima'?num(t.berat_diterima??t.berat):0),0);g.total_final=g.items.reduce((a,t)=>a+num(t.total_final??t.total),0);
+            const sts=g.items.map(t=>(t.status||'aktif')==='dibatalkan'?(t.status_verifikasi==='ditolak'?'ditolak':'dibatalkan'):(t.status_verifikasi||'menunggu_verifikasi'));
+            g.status_verifikasi=sts.every(s=>s==='diterima')?'diterima':(sts.some(s=>s==='menunggu_verifikasi')?'menunggu_verifikasi':(sts.some(s=>s==='ditolak')?'ditolak':'dibatalkan'));
+            const bayar=g.items.map(t=>String(t.status_pembayaran||'belum_dibayar'));g.status_pembayaran=bayar.every(s=>s==='lunas')?'lunas':(g.status_verifikasi==='diterima'?'masuk_saldo_bsu':(g.status_verifikasi==='menunggu_verifikasi'?'belum_dibayar':'tidak_berlaku'));
+            return g;
+        });
     }
     function updateTabelPengiriman(){
         const tb=document.getElementById('tabel-pengiriman-bsi');if(!tb)return;
-        const rows=[...dataTransaksiKeluar].filter(t=>t.jenis!=='Penarikan Tabungan'&&num(t.berat_kirim??t.berat)>0).sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));
-        tb.innerHTML=rows.length?rows.map(t=>{
-            const kirim=num(t.berat_kirim??t.berat);
-            const diterima=t.status_verifikasi==='diterima'?num(t.berat_diterima??t.berat):0;
-            const hasil=t.status_verifikasi==='diterima'?`<strong>${diterima.toFixed(2)} Kg</strong><br><small>${rupiah(t.harga_final??t.harga_satuan)}/Kg · ${rupiah(t.total_final??t.total)}</small>`:(t.status_verifikasi==='ditolak'?'<span class="text-danger fw-bold">Tidak diterima</span>':'<span class="text-muted">Belum diperiksa</span>');
-            const cat=[t.catatan_verifikasi,t.catatan].filter(Boolean).map(escapeHtml).join('<br>')||'-';
-            const bisaBatal=(t.status||'aktif')!=='dibatalkan'&&(!t.status_verifikasi||t.status_verifikasi==='menunggu_verifikasi');
-            return `<tr><td>${formatTanggalTampil(t.tgl)}<br><small class="text-muted">${escapeHtml(t.no_dokumen||'-')}</small></td><td class="fw-bold">${escapeHtml(t.jenis)}</td><td class="text-end fw-bold">${kirim.toFixed(2)} Kg</td><td><span class="status-chip ${kelasStatusVerifikasiPengiriman(t)}">${escapeHtml(labelStatusVerifikasiPengiriman(t))}</span>${t.diverifikasi_oleh?`<br><small class="text-muted">oleh ${escapeHtml(t.diverifikasi_oleh)}</small>`:''}</td><td>${hasil}</td><td><span class="status-chip ${kelasStatusPembayaranPengiriman(t)}">${escapeHtml(labelStatusPembayaranPengiriman(t))}</span>${t.tanggal_pembayaran?`<br><small>${formatTanggalTampil(t.tanggal_pembayaran)}</small>`:''}</td><td><small>${cat}</small></td><td class="text-center">${bisaBatal?`<button class="btn btn-sm btn-outline-danger" onclick="batalkanPengajuanPengiriman('${escAttrJs(t.id)}')"><i class="bi bi-x-circle me-1"></i>Batalkan</button>`:'-'}</td></tr>`;
+        const groups=buatGrupPengirimanUnit().sort((a,b)=>tanggalKeMs(b.wakil.tgl)-tanggalKeMs(a.wakil.tgl));
+        tb.innerHTML=groups.length?groups.map(g=>{
+            const t=g.wakil;const pseudo={...t,status_verifikasi:g.status_verifikasi,status_pembayaran:g.status_pembayaran};
+            const rincian=g.items.map(x=>`<div><strong>${escapeHtml(x.jenis)}</strong> — ${num(x.berat_kirim??x.berat).toFixed(2)} Kg</div>`).join('');
+            const hasil=g.status_verifikasi==='diterima'?g.items.map(x=>`<div><strong>${escapeHtml(x.jenis)}</strong>: ${num(x.berat_diterima??x.berat).toFixed(2)} Kg × ${rupiah(x.harga_final??x.harga_satuan)}/Kg = <b>${rupiah(x.total_final??x.total)}</b></div>`).join(''):(g.status_verifikasi==='ditolak'?'<span class="text-danger fw-bold">Seluruh pengiriman ditolak</span>':'<span class="text-muted">Belum diperiksa</span>');
+            const cat=[...new Set(g.items.flatMap(x=>[x.catatan_verifikasi,x.catatan]).filter(Boolean))].map(escapeHtml).join('<br>')||'-';
+            const bisaBatal=g.status_verifikasi==='menunggu_verifikasi';
+            const aksi=`<div class="d-flex gap-1 justify-content-center flex-wrap"><button class="btn btn-sm btn-outline-success" onclick="cetakSuratPengantarPengiriman('${escAttrJs(g.key)}')"><i class="bi bi-printer me-1"></i>Cetak</button>${bisaBatal?`<button class="btn btn-sm btn-outline-danger" onclick="batalkanPengajuanPengiriman('${escAttrJs(g.key)}')"><i class="bi bi-x-circle me-1"></i>Batalkan</button>`:''}</div>`;
+            return `<tr><td>${formatTanggalTampil(t.tgl)}<br><strong>${escapeHtml(t.no_dokumen||'-')}</strong><br><small class="text-muted">${g.items.length} material</small></td><td>${rincian}</td><td class="text-end fw-bold">${g.total_kirim.toFixed(2)} Kg</td><td><span class="status-chip ${kelasStatusVerifikasiPengiriman(pseudo)}">${escapeHtml(labelStatusVerifikasiPengiriman(pseudo))}</span>${t.diverifikasi_oleh?`<br><small class="text-muted">oleh ${escapeHtml(t.diverifikasi_oleh)}</small>`:''}</td><td>${hasil}${g.status_verifikasi==='diterima'?`<hr class="my-1"><strong>Total: ${g.total_diterima.toFixed(2)} Kg · ${rupiah(g.total_final)}</strong>`:''}</td><td><span class="status-chip ${kelasStatusPembayaranPengiriman(pseudo)}">${escapeHtml(labelStatusPembayaranPengiriman(pseudo))}</span>${t.tanggal_pembayaran?`<br><small>${formatTanggalTampil(t.tanggal_pembayaran)}</small>`:''}</td><td><small>${cat}</small></td><td class="text-center">${aksi}</td></tr>`;
         }).join(''):`<tr><td colspan="8" class="empty-state"><i class="bi bi-truck"></i>Belum ada pengajuan pengiriman.</td></tr>`;
     }
-    function batalkanPengajuanPengiriman(id){
-        const t=dataTransaksiKeluar.find(x=>String(x.id)===String(id));if(!t)return;
-        const alasan=prompt('Alasan pembatalan pengajuan:');if(!alasan||!alasan.trim())return;
-        if(!confirm('Batalkan pengajuan ini? Stok yang sebelumnya dicadangkan akan kembali tersedia di aplikasi.'))return;
-        AdapterAPI.batalkanPengajuanPengirimanBSU({id,alasan:alasan.trim(),oleh:getPetugasSesi()}).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pembatalan gagal');alert('Pengajuan dibatalkan.');loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message));
+    function batalkanPengajuanPengiriman(key){
+        const g=buatGrupPengirimanUnit().find(x=>x.key===key);if(!g)return;
+        const alasan=prompt('Alasan pembatalan seluruh surat pengantar:');if(!alasan||!alasan.trim())return;
+        if(!confirm(`Batalkan surat ${g.wakil.no_dokumen||'-'} beserta ${g.items.length} material? Stok seluruh item akan kembali tersedia.`))return;
+        const req=g.kelompok_id?AdapterAPI.batalkanPengajuanPengirimanBatchBSU({kelompok_id:g.kelompok_id,alasan:alasan.trim(),oleh:getPetugasSesi()}):AdapterAPI.batalkanPengajuanPengirimanBSU({id:g.wakil.id,alasan:alasan.trim(),oleh:getPetugasSesi()});
+        Promise.resolve(req).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pembatalan gagal');alert('Surat pengantar dan seluruh material berhasil dibatalkan.');loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message));
+    }
+    function cetakSuratPengantarPengiriman(key){
+        const g=buatGrupPengirimanUnit().find(x=>x.key===key);if(!g)return alert('Data surat pengantar tidak ditemukan.');
+        const t=g.wakil;const rows=g.items.map((x,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(x.jenis)}</td><td style="text-align:right">${num(x.berat_kirim??x.berat).toFixed(2)} Kg</td><td></td></tr>`).join('');
+        const w=window.open('','_blank');if(!w)return alert('Pop-up diblokir browser. Izinkan pop-up lalu coba lagi.');
+        w.document.write(`<!doctype html><html><head><title>Surat Pengantar ${escapeHtml(t.no_dokumen||'')}</title><style>body{font-family:Arial,sans-serif;color:#111;margin:35px;font-size:13px}h2{text-align:center;margin:0}h3{text-align:center;margin:5px 0 22px;font-size:14px}table{width:100%;border-collapse:collapse;margin-top:16px}th,td{border:1px solid #222;padding:8px}th{background:#f3f4f6}.info td{border:0;padding:3px}.ttd{margin-top:45px;display:flex;justify-content:space-between;text-align:center}.ttd div{width:30%}.space{height:65px}@media print{button{display:none}}</style></head><body><h2>SURAT PENGANTAR PENGIRIMAN SAMPAH</h2><h3>BANK SAMPAH UNIT KE BANK SAMPAH INDUK</h3><table class="info"><tr><td style="width:160px">Nomor Surat</td><td>: <strong>${escapeHtml(t.no_dokumen||'-')}</strong></td></tr><tr><td>Tanggal</td><td>: ${formatTanggalTampil(t.tgl)}</td></tr><tr><td>Bank Sampah Unit</td><td>: ${escapeHtml(CURRENT_UNIT_NAMA||namaUnitTanpaBSU())}</td></tr><tr><td>Jumlah Material</td><td>: ${g.items.length} jenis</td></tr><tr><td>Total Berat Kirim</td><td>: <strong>${g.total_kirim.toFixed(2)} Kg</strong></td></tr><tr><td>Catatan</td><td>: ${escapeHtml(t.catatan||'-')}</td></tr></table><table><thead><tr><th>No.</th><th>Jenis Material</th><th>Berat Dikirim</th><th>Keterangan BSI</th></tr></thead><tbody>${rows}<tr><td colspan="2" style="text-align:right"><strong>TOTAL</strong></td><td style="text-align:right"><strong>${g.total_kirim.toFixed(2)} Kg</strong></td><td></td></tr></tbody></table><div class="ttd"><div>Pengirim/BSU<div class="space"></div>(........................)</div><div>Pengangkut<div class="space"></div>(........................)</div><div>Penerima/BSI<div class="space"></div>(........................)</div></div><div style="text-align:center;margin-top:30px"><button onclick="window.print()">Cetak</button></div></body></html>`);w.document.close();
     }
 
     function isiStokSistemOpname(){const material=document.getElementById('opnameMaterial')?.value||'';const v=stokMaterial(material);const el=document.getElementById('opnameSistem');if(el)el.value=v.toFixed(2);}
