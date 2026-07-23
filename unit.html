@@ -2875,7 +2875,7 @@
         document.getElementById('areaDetailSaldo').style.display='block';
         const riwayat=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n));
         let totRp=0,totKg=0; const tbody=document.getElementById('tabel-riwayat-saldo');
-        tbody.innerHTML=riwayat.length?[...riwayat].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).map(t=>{totRp+=num(t.total);if(num(t.total)>=0)totKg+=num(t.berat);return `<tr><td class="text-muted small">${formatTanggalTampil(t.tgl)}<br><code>${escapeHtml(t.id)}</code></td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-center">${num(t.berat)>0?num(t.berat).toFixed(2)+' Kg':'-'}</td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':'+ '}${rupiah(Math.abs(num(t.total)))}</td></tr>`;}).join(''):`<tr><td colspan="4" class="empty-state">Belum ada riwayat.</td></tr>`;
+        tbody.innerHTML=riwayat.length?[...riwayat].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl)).map(t=>{totRp+=num(t.total);if(num(t.total)>=0)totKg+=num(t.berat);return `<tr><td class="text-muted small">${formatTanggalTampil(t.tgl)}</td><td><span class="badge-sampah">${escapeHtml(t.jenis)}</span></td><td class="text-center">${num(t.berat)>0?num(t.berat).toFixed(2)+' Kg':'-'}</td><td class="text-end fw-bold ${num(t.total)<0?'text-danger':'text-success'}">${num(t.total)<0?'- ':'+ '}${rupiah(Math.abs(num(t.total)))}</td></tr>`;}).join(''):`<tr><td colspan="4" class="empty-state">Belum ada riwayat.</td></tr>`;
         setText('detail-total-rp',rupiah(totRp));setText('detail-total-kg',totKg.toFixed(2)+' Kg');
     }
 
