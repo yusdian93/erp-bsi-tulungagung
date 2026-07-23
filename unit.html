@@ -1136,7 +1136,7 @@
                     <div><h4 class="m-0 fw-bold" style="color: var(--primary-dark);">Jurnal Umum Akuntansi</h4></div>
                     <button class="btn btn-outline-primary px-4" onclick="cetakBukuBesar()"><i class="bi bi-printer me-2"></i> Cetak Dokumen A4</button>
                 </div>
-                <div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Waktu & No. Ref</th><th>Keterangan Transaksi</th><th>Kode & Nama Akun</th><th class="text-end">Debit (Rp)</th><th class="text-end">Kredit (Rp)</th></tr></thead><tbody id="tabel-jurnal-umum"></tbody></table></div>
+                <div class="table-responsive"><table class="table table-hover mb-0"><thead><tr><th>Waktu Transaksi</th><th>Keterangan Transaksi</th><th>Kode & Nama Akun</th><th class="text-end">Debit (Rp)</th><th class="text-end">Kredit (Rp)</th></tr></thead><tbody id="tabel-jurnal-umum"></tbody></table></div>
             </div>
         </div>
         
@@ -2906,8 +2906,8 @@
         const rows=transaksiAktif(dataTransaksi).sort((a,b)=>tanggalKeMs(a.tgl)-tanggalKeMs(b.tgl));
         tbody.innerHTML=rows.length?rows.map(t=>{
             const ref=escapeHtml(t.id||'-');const rp=rupiah(Math.abs(num(t.total))); const nama=escapeHtml(cariNasabahTransaksi(t)?.nama||t.nama||'-');
-            if(t.jenis==='Penarikan Tunai')return `<tr><td>${formatTanggalTampil(t.tgl)}<br><code>${ref}</code></td><td>Pelunasan saldo: ${nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Pembayaran ${escapeHtml(t.metode||'Kas')}</td><td><span class="badge bg-light text-dark border">111</span> Kas/Bank</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
-            return `<tr><td>${formatTanggalTampil(t.tgl)}<br><code>${ref}</code></td><td>Setoran: ${nama} — ${escapeHtml(t.jenis)}</td><td><span class="badge bg-light text-dark border">113</span> Persediaan Sampah</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Kredit saldo nasabah</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
+            if(t.jenis==='Penarikan Tunai')return `<tr><td>${formatTanggalTampil(t.tgl)}</td><td>Pelunasan saldo: ${nama}</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Pembayaran ${escapeHtml(t.metode||'Kas')}</td><td><span class="badge bg-light text-dark border">111</span> Kas/Bank</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
+            return `<tr><td>${formatTanggalTampil(t.tgl)}</td><td>Setoran: ${nama} — ${escapeHtml(t.jenis)}</td><td><span class="badge bg-light text-dark border">113</span> Persediaan Sampah</td><td class="text-end fw-bold">${rp}</td><td></td></tr><tr><td></td><td class="text-muted">Kredit saldo nasabah</td><td><span class="badge bg-light text-dark border">211</span> Hutang Saldo</td><td></td><td class="text-end fw-bold">${rp}</td></tr>`;
         }).join(''):`<tr><td colspan="5" class="empty-state">Belum ada transaksi aktif.</td></tr>`;
     }
 
