@@ -780,6 +780,7 @@
                             <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-cash-stack me-2"></i>Keuangan</button>
                             <ul class="dropdown-menu">
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('kas', this)"><i class="bi bi-cash-coin"></i>Kas & Bank</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('bagihasil', this)"><i class="bi bi-percent"></i>Bagi Hasil</button></li>
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark"></i>Buku Besar</button></li>
                             </ul>
                         </li>
@@ -1003,7 +1004,7 @@
                         <h5 class="fw-bold mb-4" style="color: var(--primary-dark);"><i class="bi bi-tags-fill me-2 text-success"></i>Daftar Harga Material Persediaan</h5>
                         <div class="table-responsive">
                             <table class="table table-hover">
-                                <thead><tr><th>Jenis Material</th><th>Nama Material / Klasifikasi</th><th>Harga Acuan / Kg</th></tr></thead>
+                                <thead><tr><th>Jenis Material</th><th>Nama Material / Klasifikasi</th><th>Harga Dasar BSI</th><th>Harga Nasabah</th><th>Operasional BSU</th></tr></thead>
                                 <tbody id="tabel-daftar-hargasampah"></tbody>
                             </table>
                         </div>
@@ -1066,7 +1067,7 @@
                             <div id="areaKeranjangSetor" class="mb-4" style="display:none;">
                                 <label class="fw-bold">Daftar Material yang Akan Disetor</label>
                                 <div class="table-responsive"><table class="table table-sm mb-2">
-                                    <thead><tr><th>Jenis Material</th><th>Berat</th><th class="text-end">Subtotal</th><th></th></tr></thead>
+                                    <thead><tr><th>Jenis Material</th><th>Berat</th><th class="text-end">Nilai Kotor</th><th class="text-end">Saldo Nasabah</th><th class="text-end">Operasional</th><th></th></tr></thead>
                                     <tbody id="tabelKeranjangSetor"></tbody>
                                 </table></div>
                                 <div class="text-end fw-bold" id="totalKeranjangSetor" style="color: var(--primary-dark);"></div>
@@ -1125,6 +1126,52 @@
                                 </form>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="bagihasil" class="tab-content" style="display:none;">
+            <div class="card p-4 p-md-5 mb-4">
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-percent"></i></span><div><h4 class="m-0">Skema Bagi Hasil</h4><div class="module-note">Pembagian otomatis nilai setoran antara saldo nasabah dan dana operasional pengelola BSU.</div></div></div>
+                <div id="bagiStatus" class="data-warning mt-4">Memuat pengaturan bagi hasil...</div>
+                <div class="row g-3 mt-2">
+                    <div class="col-6 col-lg"><div class="metric-soft h-100"><div class="label">Nilai Kotor Setoran</div><div class="value" id="bagiNilaiKotor">Rp 0</div></div></div>
+                    <div class="col-6 col-lg"><div class="metric-soft h-100"><div class="label">Saldo Nasabah</div><div class="value cash-positive" id="bagiNilaiNasabah">Rp 0</div></div></div>
+                    <div class="col-6 col-lg"><div class="metric-soft h-100"><div class="label">Hak Operasional</div><div class="value" id="bagiNilaiPengelola">Rp 0</div></div></div>
+                    <div class="col-6 col-lg"><div class="metric-soft h-100"><div class="label">Sudah Digunakan</div><div class="value cash-negative" id="bagiSudahDigunakan">Rp 0</div></div></div>
+                    <div class="col-12 col-lg"><div class="metric-soft h-100"><div class="label">Sisa Dana Operasional</div><div class="value" id="bagiSisaDana">Rp 0</div></div></div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <div class="card p-4 p-md-5 h-100">
+                        <h5 class="fw-bold mb-3" style="color:var(--primary-dark);"><i class="bi bi-receipt-cutoff me-2 text-success"></i>Rincian Perolehan Bagi Hasil</h5>
+                        <p class="module-note">Transaksi lama sebelum skema diaktifkan tetap tercatat 100% sebagai saldo nasabah dan tidak dihitung ulang.</p>
+                        <div class="table-responsive" style="max-height:540px;">
+                            <table class="table table-hover"><thead><tr><th>Tanggal</th><th>Nasabah / Material</th><th class="text-end">Kotor</th><th class="text-end">Nasabah</th><th class="text-end">Pengelola</th></tr></thead><tbody id="tabel-bagi-hasil"></tbody></table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="card p-4 p-md-5 mb-4">
+                        <h5 class="fw-bold mb-3" style="color:var(--primary-dark);"><i class="bi bi-wallet2 me-2 text-success"></i>Catat Penggunaan Dana Operasional</h5>
+                        <form id="formPenggunaanBagiHasil" onsubmit="simpanPenggunaanBagiHasil(event)">
+                            <div class="row g-3">
+                                <div class="col-md-5"><label>Tanggal</label><input type="date" id="bagiTanggal" class="form-control" required></div>
+                                <div class="col-md-7"><label>Kategori</label><select id="bagiKategori" class="form-select" required><option value="">-- Pilih --</option><option>Buku Tabungan & ATK</option><option>Karung/Wadah</option><option>Biaya Angkut</option><option>Konsumsi Kegiatan</option><option>Honor Pengelola</option><option>Perawatan Peralatan</option><option>Lainnya</option></select></div>
+                                <div class="col-md-6"><label>Nominal</label><input type="number" min="1" id="bagiNominal" class="form-control" required></div>
+                                <div class="col-md-6"><label>Metode</label><select id="bagiMetode" class="form-select"><option>Tunai</option><option>Transfer</option></select></div>
+                                <div class="col-md-6"><label>No. Bukti</label><input id="bagiBukti" class="form-control"></div>
+                                <div class="col-md-6"><label>Keterangan</label><input id="bagiKeterangan" class="form-control"></div>
+                            </div>
+                            <button class="btn btn-success w-100 mt-4" type="submit"><i class="bi bi-save me-2"></i>Simpan Penggunaan</button>
+                        </form>
+                    </div>
+                    <div class="card p-4 p-md-5">
+                        <h5 class="fw-bold mb-3" style="color:var(--primary-dark);">Riwayat Penggunaan</h5>
+                        <div class="table-responsive" style="max-height:330px;"><table class="table table-hover"><thead><tr><th>Tanggal/Kategori</th><th class="text-end">Nominal</th><th></th></tr></thead><tbody id="tabel-penggunaan-bagi-hasil"></tbody></table></div>
                     </div>
                 </div>
             </div>
@@ -1391,6 +1438,7 @@
 
     let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = [];
     let dataStockOpname = []; let dataKasMutasi = []; let dataRekonsiliasiUnit = []; let dataAuditUnit = [];
+    let dataPenggunaanBagiHasil = [];
     let masterNasabah = []; let masterTransaksi = [];
     let HAK_AKSES_UNIT = String(localStorage.getItem('HAK_AKSES_BSU') || 'ADMIN_BSU').toUpperCase();
 
@@ -1405,6 +1453,7 @@
             dataStockOpname = data.stockOpname || [];
             dataKasMutasi = data.kasMutasi || [];
             dataRekonsiliasiUnit = data.rekonsiliasi || [];
+            dataPenggunaanBagiHasil = data.penggunaanBagiHasil || [];
             dataAuditUnit = data.audit || [];
             terapkanHakAksesUnit();
 
@@ -1415,6 +1464,12 @@
                 t.berat = parseFloat(t.berat) || 0;
                 t.total = parseFloat(t.total) || 0;
                 t.harga_satuan = parseFloat(t.harga_satuan) || (t.berat > 0 ? t.total / t.berat : 0);
+                t.harga_kotor = t.harga_kotor == null ? null : (parseFloat(t.harga_kotor) || 0);
+                t.nilai_kotor = t.nilai_kotor == null ? null : (parseFloat(t.nilai_kotor) || 0);
+                t.persen_nasabah = t.persen_nasabah == null ? null : (parseFloat(t.persen_nasabah) || 0);
+                t.nilai_nasabah = t.nilai_nasabah == null ? null : (parseFloat(t.nilai_nasabah) || 0);
+                t.persen_pengelola = t.persen_pengelola == null ? null : (parseFloat(t.persen_pengelola) || 0);
+                t.nilai_pengelola = t.nilai_pengelola == null ? null : (parseFloat(t.nilai_pengelola) || 0);
             });
 
             updateTabelNasabah();
@@ -1430,6 +1485,7 @@
             updateTabelPengiriman();
             updateTabelStockOpname();
             updateKasUnit();
+            updateBagiHasilUnit();
             updateTabelKoreksi();
             updateAuditUnit();
             updateProfilUnit();
@@ -1493,7 +1549,7 @@
                 if (num(t.berat) > 0) {
                     return `<div style="padding:8px 0;border-bottom:1px dashed #dbe7e2;">
                         <div class="fw-bold" style="color:#075542;">${escapeHtml(t.jenis || 'Material')}</div>
-                        <div class="small text-muted mt-1"><b>${num(t.berat).toFixed(2)} Kg</b> &nbsp; Harga: <b>${rupiah(num(t.harga_satuan))}/Kg</b> &nbsp; Subtotal: <b>${rupiah(Math.abs(num(t.total)))}</b></div>
+                        <div class="small text-muted mt-1"><b>${num(t.berat).toFixed(2)} Kg</b> &nbsp; Harga dasar: <b>${rupiah(hargaKotorBagiHasil(t))}/Kg</b><br>Saldo nasabah: <b class="text-success">${rupiah(nilaiNasabahBagiHasil(t))}</b>${nilaiPengelolaBagiHasil(t)>0?` &nbsp;|&nbsp; Operasional: <b style="color:#b45309;">${rupiah(nilaiPengelolaBagiHasil(t))}</b>`:''}</div>
                     </div>`;
                 }
                 return `<div style="padding:8px 0;border-bottom:1px dashed #dbe7e2;">
@@ -1510,7 +1566,7 @@
                 </td>
                 <td class="text-end fw-bold ${totalNominal<0?'text-danger':'text-success'}" style="vertical-align:top;font-size:1.05rem;">
                     ${totalNominal<0?'- ':''}${rupiah(Math.abs(totalNominal))}
-                    ${totalBerat>0?`<br><small class="text-muted fw-semibold">Total Berat: ${totalBerat.toFixed(2)} Kg</small>`:''}
+                    ${totalBerat>0?`<br><small class="text-muted fw-semibold">Saldo Nasabah · Total Berat: ${totalBerat.toFixed(2)} Kg</small>`:''}
                 </td>
                 <td class="text-center" style="vertical-align:top;">
                     <button class="btn btn-sm btn-outline-danger" title="Cetak struk gabungan" onclick="cetakStrukRiwayat('${kunciAman}')"><i class="bi bi-printer"></i></button>
@@ -1562,12 +1618,15 @@
         const utama = items[0];
         const n = cariNasabahTransaksi(utama);
         const nama = n?.nama || utama.nama || '-';
-        const totalNominal = items.reduce((a, t) => a + num(t.total), 0);
+        const totalNominal = items.reduce((a, t) => a + nilaiNasabahBagiHasil(t), 0);
+        const totalKotor = items.reduce((a,t)=>a+nilaiKotorBagiHasil(t),0);
+        const totalPengelola = items.reduce((a,t)=>a+nilaiPengelolaBagiHasil(t),0);
         const rincian = items.map(t => num(t.berat) > 0
-            ? `• ${t.jenis}: ${num(t.berat).toFixed(2)} Kg | Harga ${rupiah(num(t.harga_satuan))}/Kg | Subtotal ${rupiah(Math.abs(num(t.total)))}`
+            ? `• ${t.jenis}: ${num(t.berat).toFixed(2)} Kg | Harga dasar ${rupiah(hargaKotorBagiHasil(t))}/Kg | Saldo ${rupiah(nilaiNasabahBagiHasil(t))}`
             : `• ${t.jenis}: ${rupiah(Math.abs(num(t.total)))}`
         ).join('\n');
-        const pesan = `*STRUK BANK SAMPAH*\nTanggal: ${formatTanggalTampil(utama.tgl)}\nNasabah: *${nama}*\n\n${rincian}\n\n*TOTAL: ${totalNominal < 0 ? '- ' : ''}${rupiah(Math.abs(totalNominal))}*`;
+        const tambahan = totalPengelola > 0 ? `\nNilai kotor: ${rupiah(totalKotor)}\nOperasional pengelola: ${rupiah(totalPengelola)}` : '';
+        const pesan = `*STRUK BANK SAMPAH*\nTanggal: ${formatTanggalSaja(utama.tgl)}\nNasabah: *${nama}*\n\n${rincian}\n\n*SALDO MASUK: ${totalNominal < 0 ? '- ' : ''}${rupiah(Math.abs(totalNominal))}*${tambahan}`;
         bukaWhatsApp(n?.hp, pesan);
     }
 
@@ -1576,11 +1635,13 @@
         const utama = items[0];
         const n = cariNasabahTransaksi(utama);
         const nama = n?.nama || utama.nama || '-';
-        const totalNominal = items.reduce((a, t) => a + num(t.total), 0);
-        const jenisStruk = totalNominal < 0 ? 'PENARIKAN SALDO' : 'SETORAN MATERIAL';
+        const totalNominal = items.reduce((a, t) => a + nilaiNasabahBagiHasil(t), 0);
+        const totalKotor = items.reduce((a, t) => a + nilaiKotorBagiHasil(t), 0);
+        const totalPengelola = items.reduce((a, t) => a + nilaiPengelolaBagiHasil(t), 0);
+        const jenisStruk = totalNominal < 0 ? 'PENARIKAN SALDO' : 'SALDO MASUK NASABAH';
         const baris = items.map(t => {
             const detail = num(t.berat) > 0
-                ? `${num(t.berat).toFixed(2)} Kg × ${rupiah(num(t.harga_satuan))}/Kg`
+                ? `${num(t.berat).toFixed(2)} Kg × harga dasar ${rupiah(hargaKotorBagiHasil(t))}/Kg`
                 : 'Transaksi keuangan';
             return `<tr>
                 <td style="padding:7px 0;border-bottom:1px dashed #e2e8f0;">
@@ -1600,6 +1661,7 @@
             <hr style="border-top:1px dashed #cbd5e1;">
             <table style="width:100%;font-size:13px;margin:10px 0;">${baris}</table>
             <hr style="border-top:1px dashed #cbd5e1;">
+            ${totalPengelola>0?`<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-top:10px;"><span>Nilai kotor</span><b>${rupiah(totalKotor)}</b></div><div style="display:flex;justify-content:space-between;font-size:12px;color:#b45309;margin-top:5px;"><span>Operasional pengelola</span><b>${rupiah(totalPengelola)}</b></div>`:''}
             <div style="display:flex;justify-content:space-between;font-weight:800;margin-top:15px;color:${totalNominal<0?'#e11d48':'#059669'};">
                 <span>${jenisStruk}</span><span>${totalNominal<0?'- ':''}${rupiah(Math.abs(totalNominal))}</span>
             </div>
@@ -1614,9 +1676,9 @@
     // FUNGSI LAINNYA LENGKAP
     // ==========================================
     const MATRIKS_HAK_AKSES_UNIT = {
-        ADMIN_BSU: ['dashboard','nasabah','hargasampah','profil','setor','ceksaldo','pengiriman','koreksi','stock','stockopname','kas','bukubesar','jadwal','broadcast-harga','laporan','audit'],
+        ADMIN_BSU: ['dashboard','nasabah','hargasampah','profil','setor','ceksaldo','pengiriman','koreksi','stock','stockopname','kas','bagihasil','bukubesar','jadwal','broadcast-harga','laporan','audit'],
         OPERATOR: ['dashboard','nasabah','hargasampah','profil','setor','stock','jadwal','broadcast-harga','laporan'],
-        BENDAHARA: ['dashboard','profil','ceksaldo','kas','bukubesar','laporan']
+        BENDAHARA: ['dashboard','profil','ceksaldo','kas','bagihasil','bukubesar','laporan']
     };
 
     function normalisasiHakAksesUnit(nilai) {
@@ -1673,6 +1735,7 @@
         if (tabId === 'pengiriman') { updateTabelPengiriman(); hitungPengirimanBSI(); }
         if (tabId === 'stockopname') { isiStokSistemOpname(); updateTabelStockOpname(); }
         if (tabId === 'kas') updateKasUnit();
+        if (tabId === 'bagihasil') updateBagiHasilUnit();
         if (tabId === 'koreksi') updateTabelKoreksi();
         if (tabId === 'audit') updateAuditUnit();
         if (tabId === 'laporan') updateLaporan();
@@ -1681,10 +1744,18 @@
 
     function updateTabelHargaSampah() {
         let tbody = document.getElementById('tabel-daftar-hargasampah'); if(!tbody) return; tbody.innerHTML = '';
-        if(dataKategori.length === 0) return tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted py-5">Belum ada sinkronisasi harga dari Bank Sampah Induk.</td></tr>`;
+        if(dataKategori.length === 0) return tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">Belum ada sinkronisasi harga dari Bank Sampah Induk.</td></tr>`;
+        const sk = skemaBagiHasilUnit();
+        const hariIni = new Date().toISOString().slice(0,10);
+        const berlaku = sk.aktif && (!sk.mulai || hariIni >= String(sk.mulai).slice(0,10));
+        const pn = berlaku ? sk.persenNasabah : 100;
+        const pp = berlaku ? sk.persenPengelola : 0;
         dataKategori.forEach(k => {
             let jenis = k.jenis_material ? k.jenis_material : '-';
-            tbody.innerHTML += `<tr><td class="align-middle fw-bold" style="color: #64748b;">${jenis}</td><td class="align-middle fw-bold" style="color: var(--primary-dark);">${k.nama_kategori}</td><td class="align-middle text-success fw-bold">Rp ${parseInt(k.harga).toLocaleString('id-ID')}</td></tr>`;
+            const hargaDasar = num(k.harga);
+            const hargaNasabah = hargaDasar * pn / 100;
+            const hargaPengelola = hargaDasar - hargaNasabah;
+            tbody.innerHTML += `<tr><td class="align-middle fw-bold" style="color:#64748b;">${escapeHtml(jenis)}</td><td class="align-middle fw-bold" style="color:var(--primary-dark);">${escapeHtml(k.nama_kategori)}</td><td class="align-middle fw-bold">${rupiah(hargaDasar)}</td><td class="align-middle text-success fw-bold">${rupiah(hargaNasabah)} <small>(${pn}%)</small></td><td class="align-middle fw-bold" style="color:#b45309;">${rupiah(hargaPengelola)} <small>(${pp}%)</small></td></tr>`;
         });
     }
 
@@ -2733,7 +2804,7 @@
         let jenisSampah = selSampah.options[selSampah.selectedIndex].text;
         let harga = parseInt(selSampah.value);
         let jenisBersih = jenisSampah.split(' (')[0];
-        return { jenis: jenisBersih, berat: berat, total: harga * berat };
+        return { jenis: jenisBersih, berat: berat, harga_satuan: harga, harga_kotor: harga, total: harga * berat, nilai_kotor: harga * berat };
     }
 
     function tambahKeKeranjang() {
@@ -2759,9 +2830,21 @@
         if (!area || !tbody) return;
         if (keranjangSetor.length === 0) { area.style.display = 'none'; tbody.innerHTML = ''; return; }
         area.style.display = 'block';
-        tbody.innerHTML = keranjangSetor.map((it, i) => `<tr><td>${it.jenis}</td><td>${it.berat} Kg</td><td class="text-end">Rp ${it.total.toLocaleString('id-ID')}</td><td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="hapusItemKeranjang(${i})">&times;</button></td></tr>`).join('');
-        let total = keranjangSetor.reduce((a, it) => a + it.total, 0);
-        document.getElementById('totalKeranjangSetor').innerText = 'Total: Rp ' + total.toLocaleString('id-ID');
+        const sk = skemaBagiHasilUnit();
+        const hariIni = new Date().toISOString().slice(0,10);
+        const berlaku = sk.aktif && (!sk.mulai || hariIni >= String(sk.mulai).slice(0,10));
+        const pn = berlaku ? sk.persenNasabah : 100;
+        const pp = berlaku ? sk.persenPengelola : 0;
+        tbody.innerHTML = keranjangSetor.map((it, i) => {
+            const kotor = Math.round(num(it.total));
+            const nasabah = Math.round(kotor * pn / 100);
+            const pengelola = kotor - nasabah;
+            return `<tr><td>${escapeHtml(it.jenis)}</td><td>${num(it.berat).toFixed(2)} Kg</td><td class="text-end">${rupiah(kotor)}</td><td class="text-end text-success fw-bold">${rupiah(nasabah)}</td><td class="text-end fw-bold" style="color:#b45309;">${rupiah(pengelola)}</td><td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="hapusItemKeranjang(${i})">&times;</button></td></tr>`;
+        }).join('');
+        const totalKotor = keranjangSetor.reduce((a, it) => a + Math.round(num(it.total)), 0);
+        const totalNasabah = Math.round(totalKotor * pn / 100);
+        const totalPengelola = totalKotor - totalNasabah;
+        document.getElementById('totalKeranjangSetor').innerHTML = `Nilai kotor: <b>${rupiah(totalKotor)}</b> &nbsp;|&nbsp; Saldo nasabah (${pn}%): <b class="text-success">${rupiah(totalNasabah)}</b> &nbsp;|&nbsp; Operasional (${pp}%): <b style="color:#b45309;">${rupiah(totalPengelola)}</b>`;
     }
 
     function onGantiNasabahSetor() {
@@ -2899,6 +2982,115 @@
         const tgl=new Date().toISOString(); if(cekPeringatanPeriodeTerkunci(tgl))return;
         const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;
         AdapterAPI.tambahPenarikanNasabahUnit({id_unit:CURRENT_UNIT_ID,id_nasabah:n.id,nama:n.nama,tgl,nominal,metode,no_bukti:noBukti,oleh:getPetugasSesi()}).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Penarikan berhasil dicatat.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message)).finally(()=>btn.disabled=false);
+    }
+
+    function skemaBagiHasilUnit() {
+        const u = dataUnit && dataUnit[0] ? dataUnit[0] : {};
+        const pn = Number(u.persen_nasabah);
+        const pp = Number(u.persen_pengelola);
+        return {
+            aktif: u.bagi_hasil_aktif === true,
+            persenNasabah: Number.isFinite(pn) ? pn : 85,
+            persenPengelola: Number.isFinite(pp) ? pp : 15,
+            mulai: u.bagi_hasil_mulai || null,
+            dasar: u.bagi_hasil_dasar || null
+        };
+    }
+
+    function nilaiKotorBagiHasil(t) {
+        return t && t.nilai_kotor != null ? num(t.nilai_kotor) : num(t?.total);
+    }
+    function nilaiNasabahBagiHasil(t) {
+        return t && t.nilai_nasabah != null ? num(t.nilai_nasabah) : num(t?.total);
+    }
+    function nilaiPengelolaBagiHasil(t) {
+        return t && t.nilai_pengelola != null ? num(t.nilai_pengelola) : 0;
+    }
+    function hargaKotorBagiHasil(t) {
+        return t && t.harga_kotor != null ? num(t.harga_kotor) : num(t?.harga_satuan);
+    }
+
+    function ringkasanBagiHasilUnit() {
+        const setoran = transaksiAktif(dataTransaksi).filter(t => t.jenis !== 'Penarikan Tunai' && num(t.berat) > 0 && num(t.total) >= 0);
+        const nilaiKotor = setoran.reduce((a,t)=>a+nilaiKotorBagiHasil(t),0);
+        const nilaiNasabah = setoran.reduce((a,t)=>a+nilaiNasabahBagiHasil(t),0);
+        const nilaiPengelola = setoran.reduce((a,t)=>a+nilaiPengelolaBagiHasil(t),0);
+        const penggunaan = (dataPenggunaanBagiHasil || []).filter(x => (x.status || 'aktif') !== 'dibatalkan').reduce((a,x)=>a+num(x.nominal),0);
+        return { setoran, nilaiKotor, nilaiNasabah, nilaiPengelola, penggunaan, sisa: nilaiPengelola - penggunaan };
+    }
+
+    function updateBagiHasilUnit() {
+        const status = document.getElementById('bagiStatus');
+        if (!status) return;
+        const skema = skemaBagiHasilUnit();
+        const r = ringkasanBagiHasilUnit();
+        status.className = skema.aktif ? 'data-success mt-4' : 'data-warning mt-4';
+        status.innerHTML = skema.aktif
+            ? `<i class="bi bi-check-circle-fill me-2"></i><b>Skema aktif: ${skema.persenNasabah}% untuk nasabah dan ${skema.persenPengelola}% untuk pengelola.</b><br><span class="small">Mulai berlaku: ${skema.mulai ? formatTanggalSaja(skema.mulai) : 'sejak diaktifkan'}${skema.dasar ? ` &nbsp;|&nbsp; Dasar: ${escapeHtml(skema.dasar)}` : ''}. Perubahan hanya berlaku untuk transaksi baru.</span>`
+            : `<i class="bi bi-exclamation-triangle-fill me-2"></i><b>Skema bagi hasil belum diaktifkan oleh Bank Sampah Induk.</b><br><span class="small">Transaksi baru masih masuk 100% sebagai saldo nasabah sampai pengaturan diaktifkan.</span>`;
+        setText('bagiNilaiKotor', rupiah(r.nilaiKotor));
+        setText('bagiNilaiNasabah', rupiah(r.nilaiNasabah));
+        setText('bagiNilaiPengelola', rupiah(r.nilaiPengelola));
+        setText('bagiSudahDigunakan', rupiah(r.penggunaan));
+        const sisa = document.getElementById('bagiSisaDana');
+        if (sisa) { sisa.innerText = rupiah(r.sisa); sisa.className = 'value ' + (r.sisa < 0 ? 'text-danger' : 'text-success'); }
+
+        const tb = document.getElementById('tabel-bagi-hasil');
+        if (tb) {
+            const rows = [...r.setoran].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));
+            tb.innerHTML = rows.length ? rows.slice(0,250).map(t => {
+                const n = cariNasabahTransaksi(t);
+                const pn = t.persen_nasabah == null ? 100 : num(t.persen_nasabah);
+                const pp = t.persen_pengelola == null ? 0 : num(t.persen_pengelola);
+                return `<tr><td class="text-muted small">${formatTanggalSaja(t.tgl)}</td><td><b>${escapeHtml(n?.nama || t.nama || '-')}</b><br><span class="badge-sampah mt-1">${escapeHtml(t.jenis || '-')}</span><br><small class="text-muted">${num(t.berat).toFixed(2)} Kg × ${rupiah(hargaKotorBagiHasil(t))}/Kg &nbsp;|&nbsp; ${pn}% / ${pp}%</small></td><td class="text-end fw-bold">${rupiah(nilaiKotorBagiHasil(t))}</td><td class="text-end fw-bold text-success">${rupiah(nilaiNasabahBagiHasil(t))}</td><td class="text-end fw-bold" style="color:#b45309;">${rupiah(nilaiPengelolaBagiHasil(t))}</td></tr>`;
+            }).join('') : `<tr><td colspan="5" class="empty-state"><i class="bi bi-percent"></i>Belum ada setoran.</td></tr>`;
+        }
+
+        const tp = document.getElementById('tabel-penggunaan-bagi-hasil');
+        if (tp) {
+            const rows = [...(dataPenggunaanBagiHasil || [])].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));
+            tp.innerHTML = rows.length ? rows.map(x => {
+                const batal = (x.status || 'aktif') === 'dibatalkan';
+                return `<tr class="${batal?'text-muted':''}"><td>${formatTanggalSaja(x.tanggal)}<br><b>${escapeHtml(x.kategori || '-')}</b>${x.no_bukti?`<br><small>${escapeHtml(x.no_bukti)}</small>`:''}${batal?'<br><span class="badge bg-secondary">Dibatalkan</span>':''}</td><td class="text-end fw-bold ${batal?'text-decoration-line-through':'text-danger'}">${rupiah(x.nominal)}</td><td class="text-end">${batal?'':`<button class="btn btn-sm btn-outline-danger" title="Batalkan" onclick="batalkanPenggunaanBagiHasil('${escAttrJs(x.id)}')"><i class="bi bi-x-circle"></i></button>`}</td></tr>`;
+            }).join('') : `<tr><td colspan="3" class="empty-state">Belum ada penggunaan dana.</td></tr>`;
+        }
+    }
+
+    function simpanPenggunaanBagiHasil(e) {
+        e.preventDefault();
+        const r = ringkasanBagiHasilUnit();
+        const nominal = num(document.getElementById('bagiNominal').value);
+        if (nominal <= 0) return alert('Nominal penggunaan harus lebih dari nol.');
+        if (nominal > r.sisa) return alert('Dana operasional tidak mencukupi. Sisa yang tersedia: ' + rupiah(Math.max(0,r.sisa)));
+        const form = {
+            id_unit: CURRENT_UNIT_ID,
+            tanggal: document.getElementById('bagiTanggal').value,
+            kategori: document.getElementById('bagiKategori').value,
+            nominal,
+            metode: document.getElementById('bagiMetode').value,
+            no_bukti: document.getElementById('bagiBukti').value.trim(),
+            keterangan: document.getElementById('bagiKeterangan').value.trim(),
+            oleh: getPetugasSesi()
+        };
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        AdapterAPI.tambahPenggunaanBagiHasil(form).then(res => {
+            if (!String(res).includes('Sukses')) throw new Error(res);
+            alert('Penggunaan dana operasional berhasil disimpan.');
+            e.target.reset();
+            document.getElementById('bagiTanggal').value = new Date().toISOString().slice(0,10);
+            loadDataDatabase();
+        }).catch(err=>alert(err.message)).finally(()=>btn.disabled=false);
+    }
+
+    function batalkanPenggunaanBagiHasil(id) {
+        const alasan = prompt('Alasan pembatalan penggunaan dana:','Salah input');
+        if (alasan === null) return;
+        if (!confirm('Batalkan pencatatan penggunaan dana ini?')) return;
+        AdapterAPI.batalkanPenggunaanBagiHasil(id, alasan).then(res => {
+            if (!String(res).includes('Sukses')) throw new Error(res);
+            alert(res); loadDataDatabase();
+        }).catch(err=>alert(err.message));
     }
 
     function updateBukuBesar() {
@@ -3043,7 +3235,7 @@
         ['kirimMaterial','opnameMaterial'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
         const lapMat=document.getElementById('lapFilterMaterial');if(lapMat)lapMat.innerHTML='<option value="">Semua Material</option>'+dataKategori.map(k=>`<option>${escapeHtml(k.nama_kategori)}</option>`).join('');
         const lapNas=document.getElementById('lapFilterNasabah');if(lapNas)lapNas.innerHTML='<option value="">Semua Nasabah</option>'+dataNasabah.map(n=>`<option value="${escapeHtmlAttr(n.id)}">${escapeHtml(n.nama)} — ${escapeHtml(n.id)}</option>`).join('');
-        const today=new Date().toISOString().slice(0,10);['kirimTanggal','opnameTanggal','kasTanggal','rekTanggal'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
+        const today=new Date().toISOString().slice(0,10);['kirimTanggal','opnameTanggal','kasTanggal','rekTanggal','bagiTanggal'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
         const op=document.getElementById('opnamePetugas');if(op&&!op.value)op.value=getPetugasSesi();
     }
 

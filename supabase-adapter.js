@@ -160,19 +160,19 @@ async function logAudit(tabel, record_id, aksi, data_lama, data_baru, keterangan
 const TABEL_RESTORE_SEDERHANA = [
   'nasabah', 'kategori', 'transaksi', 'penjualan', 'bantuan_hibah', 'pembinaan_bsu',
   'kejadian_darurat', 'alat', 'biaya_operasional', 'pemeliharaan_investasi',
-  'neraca_pos', 'rekonsiliasi_kas', 'stock_opname', 'kas_mutasi'
+  'neraca_pos', 'rekonsiliasi_kas', 'stock_opname', 'kas_mutasi', 'bagi_hasil_penggunaan'
 ];
 // Urutan hapus (mode Ganti Total): tabel "anak" dulu, baru "induk" (bsu paling akhir)
 // supaya tidak melanggar foreign key (nasabah & transaksi merujuk ke bsu.id).
 const URUTAN_HAPUS_TOTAL = [
-  'transaksi', 'nasabah', 'penjualan', 'bantuan_hibah', 'pembinaan_bsu', 'kejadian_darurat',
+  'bagi_hasil_penggunaan', 'transaksi', 'nasabah', 'penjualan', 'bantuan_hibah', 'pembinaan_bsu', 'kejadian_darurat',
   'alat', 'biaya_operasional', 'pemeliharaan_investasi', 'neraca_pos', 'rekonsiliasi_kas',
   'stock_opname', 'kas_mutasi', 'periode_tutup_buku', 'kategori', 'bsu'
 ];
 // Urutan insert (mode Ganti Total): kebalikan dari urutan hapus (induk dulu).
 const URUTAN_INSERT_TOTAL = ['bsu', 'kategori', 'nasabah', 'transaksi', 'penjualan', 'bantuan_hibah',
   'pembinaan_bsu', 'kejadian_darurat', 'alat', 'biaya_operasional', 'pemeliharaan_investasi',
-  'neraca_pos', 'rekonsiliasi_kas', 'stock_opname', 'kas_mutasi'];
+  'neraca_pos', 'rekonsiliasi_kas', 'stock_opname', 'kas_mutasi', 'bagi_hasil_penggunaan'];
 
 // Upsert baris BSU dari backup TANPA menimpa password yang sudah ada di server.
 // BSU yang tidak ditemukan di server (berarti sebelumnya terhapus) akan dibuatkan
@@ -535,14 +535,15 @@ const AdapterAPI = {
     const { data: lama, error: errBsu } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
     if (errBsu) return 'Gagal: ' + errBsu.message;
     if (!lama) return 'Gagal: Data BSU tidak ditemukan.';
-    const [nas, trx, opn, kas, rek] = await Promise.all([
+    const [nas, trx, opn, kas, rek, bagi] = await Promise.all([
       sb.from('nasabah').select('id', { count:'exact', head:true }).eq('id_unit', id),
       sb.from('transaksi').select('id', { count:'exact', head:true }).eq('id_unit', id),
       sb.from('stock_opname').select('id', { count:'exact', head:true }).eq('id_unit', id),
       sb.from('kas_mutasi').select('id', { count:'exact', head:true }).eq('id_unit', id),
-      sb.from('rekonsiliasi_kas').select('id', { count:'exact', head:true }).eq('id_unit', id)
+      sb.from('rekonsiliasi_kas').select('id', { count:'exact', head:true }).eq('id_unit', id),
+      sb.from('bagi_hasil_penggunaan').select('id', { count:'exact', head:true }).eq('id_unit', id)
     ]);
-    const totalTerkait = [nas,trx,opn,kas,rek].reduce((a,r)=>a+Number(r.count||0),0);
+    const totalTerkait = [nas,trx,opn,kas,rek,bagi].reduce((a,r)=>a+Number(r.count||0),0);
     if (totalTerkait > 0) {
       return lama.mode_latihan === true
         ? 'Gagal: BSU latihan masih memiliki data. Gunakan tombol RESET DATA LATIHAN terlebih dahulu.'
@@ -559,12 +560,13 @@ const AdapterAPI = {
     const { data: unit, error: unitError } = await sb.from('bsu').select('id,nama,mode_latihan').eq('id', idUnit).maybeSingle();
     if (unitError) return { ok:false, error:unitError.message };
     if (!unit || unit.mode_latihan !== true) return { ok:false, error:'BSU ini bukan BSU latihan.' };
-    const [nas, trx, opn, kas, rek] = await Promise.all([
+    const [nas, trx, opn, kas, rek, bagi] = await Promise.all([
       sb.from('nasabah').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
       sb.from('transaksi').select('id,berat,total,status', { count:'exact' }).eq('id_unit', idUnit),
       sb.from('stock_opname').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
       sb.from('kas_mutasi').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
-      sb.from('rekonsiliasi_kas').select('id', { count:'exact', head:true }).eq('id_unit', idUnit)
+      sb.from('rekonsiliasi_kas').select('id', { count:'exact', head:true }).eq('id_unit', idUnit),
+      sb.from('bagi_hasil_penggunaan').select('id', { count:'exact', head:true }).eq('id_unit', idUnit)
     ]);
     const transaksi = trx.data || [];
     const aktif = transaksi.filter(t => String(t.status || 'aktif').toLowerCase() !== 'dibatalkan');
@@ -572,7 +574,7 @@ const AdapterAPI = {
       ok:true, id_unit:idUnit, nama:unit.nama,
       jumlah_nasabah:Number(nas.count||0), jumlah_transaksi:Number(trx.count||transaksi.length||0),
       jumlah_stock_opname:Number(opn.count||0), jumlah_kas_mutasi:Number(kas.count||0),
-      jumlah_rekonsiliasi:Number(rek.count||0),
+      jumlah_rekonsiliasi:Number(rek.count||0), jumlah_bagi_hasil_penggunaan:Number(bagi.count||0),
       dampak_berat_kg:aktif.reduce((a,t)=>a+(Number(t.berat)||0),0),
       dampak_nilai:aktif.reduce((a,t)=>a+(Number(t.total)||0),0)
     };
@@ -589,6 +591,101 @@ const AdapterAPI = {
       if (!res.ok || data?.ok !== true) return { ok:false, error:data?.error || ('HTTP '+res.status) };
       return data;
     } catch(e) { return { ok:false, error:e?.message || String(e) }; }
+  },
+
+
+  // ================== SKEMA BAGI HASIL BSU ==================
+  async getSkemaBagiHasilUnit(idUnit) {
+    const { data, error } = await sb.from('bsu').select('*').eq('id', idUnit).maybeSingle();
+    if (error || !data) {
+      return { id: idUnit, bagi_hasil_aktif: false, persen_nasabah: 100, persen_pengelola: 0, bagi_hasil_mulai: null, bagi_hasil_dasar: null };
+    }
+    const pn = Number(data.persen_nasabah);
+    const pp = Number(data.persen_pengelola);
+    return {
+      ...data,
+      bagi_hasil_aktif: data.bagi_hasil_aktif === true,
+      persen_nasabah: Number.isFinite(pn) ? pn : 85,
+      persen_pengelola: Number.isFinite(pp) ? pp : 15
+    };
+  },
+
+  async updateSkemaBagiHasilUnit(form) {
+    const id = String(form?.id_unit || form?.id || '').trim();
+    if (!id) return 'Gagal: ID BSU wajib diisi.';
+    const persenNasabah = Number(form.persen_nasabah);
+    const persenPengelola = Number(form.persen_pengelola);
+    if (!Number.isFinite(persenNasabah) || !Number.isFinite(persenPengelola)) return 'Gagal: Persentase wajib berupa angka.';
+    if (persenNasabah < 0 || persenPengelola < 0 || Math.abs((persenNasabah + persenPengelola) - 100) > 0.001) {
+      return 'Gagal: Persentase nasabah dan pengelola harus berjumlah tepat 100%.';
+    }
+    const { data: lama } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
+    const dataBaru = {
+      bagi_hasil_aktif: form.bagi_hasil_aktif === true,
+      persen_nasabah: persenNasabah,
+      persen_pengelola: persenPengelola,
+      bagi_hasil_mulai: form.bagi_hasil_mulai || null,
+      bagi_hasil_dasar: String(form.bagi_hasil_dasar || '').trim() || null,
+      bagi_hasil_diperbarui_at: new Date().toISOString(),
+      bagi_hasil_diperbarui_oleh: form.oleh || getPetugasSesi()
+    };
+    const { error } = await sb.from('bsu').update(dataBaru).eq('id', id);
+    if (error) return 'Gagal: ' + error.message;
+    logAudit('bsu', id, 'update', stripPasswordBsu(lama), stripPasswordBsu({ ...lama, ...dataBaru }), 'Perubahan skema bagi hasil BSU');
+    return 'Sukses diperbarui';
+  },
+
+  async getBagiHasilIndukBundle() {
+    const [{ data: bsu }, { data: transaksi }, { data: penggunaan }] = await Promise.all([
+      sb.from('bsu').select('*').order('nama'),
+      sb.from('transaksi').select('*').eq('level', 'nasabah_ke_unit'),
+      sb.from('bagi_hasil_penggunaan').select('*').order('tanggal', { ascending: false })
+    ]);
+    return { bsu: bsu || [], transaksi: transaksi || [], penggunaan: penggunaan || [] };
+  },
+
+  async tambahPenggunaanBagiHasil(form) {
+    const nominal = Number(form.nominal) || 0;
+    if (!form.id_unit) return 'Gagal: ID BSU tidak tersedia.';
+    if (!form.tanggal) return 'Gagal: Tanggal wajib diisi.';
+    if (!String(form.kategori || '').trim()) return 'Gagal: Kategori wajib diisi.';
+    if (nominal <= 0) return 'Gagal: Nominal harus lebih dari nol.';
+    const saldoKas = await this.getSaldoKasUnit(form.id_unit);
+    if (nominal > saldoKas) return 'Gagal: Saldo kas/bank unit tidak mencukupi untuk penggunaan dana operasional ini.';
+    const id = genId('BHG');
+    const row = {
+      id, id_unit: form.id_unit, tanggal: form.tanggal,
+      kategori: String(form.kategori).trim(), nominal,
+      metode: form.metode || null, no_bukti: form.no_bukti || null,
+      keterangan: form.keterangan || null, oleh: form.oleh || getPetugasSesi(),
+      status: 'aktif'
+    };
+    const { error } = await sb.from('bagi_hasil_penggunaan').insert(row);
+    if (error) return 'Gagal: ' + error.message;
+    const kasRes = await this.tambahKasMutasi({
+      id_unit: form.id_unit, tanggal: form.tanggal, arah: 'keluar',
+      kategori: 'Dana Operasional Bagi Hasil', nominal,
+      metode: form.metode, no_bukti: form.no_bukti,
+      keterangan: String(form.kategori).trim() + (form.keterangan ? ' — ' + form.keterangan : ''),
+      referensi_id: id, oleh: row.oleh
+    });
+    if (!String(kasRes).includes('Sukses')) {
+      await sb.from('bagi_hasil_penggunaan').delete().eq('id', id);
+      return kasRes;
+    }
+    logAudit('bagi_hasil_penggunaan', id, 'insert', null, row, 'Penggunaan dana operasional BSU ' + form.id_unit);
+    return 'Sukses tersimpan';
+  },
+
+  async batalkanPenggunaanBagiHasil(id, alasan) {
+    const { data: lama } = await sb.from('bagi_hasil_penggunaan').select('*').eq('id', id).maybeSingle();
+    if (!lama) return 'Gagal: Data penggunaan tidak ditemukan.';
+    const dataBaru = { status: 'dibatalkan', keterangan: [lama.keterangan, 'Dibatalkan: ' + (alasan || '-')].filter(Boolean).join(' | ') };
+    const { error } = await sb.from('bagi_hasil_penggunaan').update(dataBaru).eq('id', id);
+    if (error) return 'Gagal: ' + error.message;
+    await sb.from('kas_mutasi').update({ status:'dibatalkan' }).eq('referensi_id', id);
+    logAudit('bagi_hasil_penggunaan', id, 'update', lama, { ...lama, ...dataBaru }, 'Pembatalan penggunaan dana operasional');
+    return 'Sukses dibatalkan';
   },
 
   // ---- Kategori ----
@@ -618,7 +715,7 @@ const AdapterAPI = {
 
   // ================== DATA UNTUK UNIT.HTML ==================
   async getBundleBSU(idUnit) {
-    const [nasRes, trxRes, keluarRes, katRes, unitRes, opnameRes, kasRes, rekRes, auditRes] = await Promise.all([
+    const [nasRes, trxRes, keluarRes, katRes, unitRes, opnameRes, kasRes, rekRes, bagiRes, auditRes] = await Promise.all([
       sb.from('nasabah').select('*').eq('id_unit', idUnit),
       sb.from('transaksi').select('*').eq('id_unit', idUnit).eq('level', 'nasabah_ke_unit'),
       sb.from('transaksi').select('*').eq('id_unit', idUnit).eq('level', 'unit_ke_induk'),
@@ -627,6 +724,7 @@ const AdapterAPI = {
       sb.from('stock_opname').select('*').eq('id_unit', idUnit),
       sb.from('kas_mutasi').select('*').eq('id_unit', idUnit),
       sb.from('rekonsiliasi_kas').select('*').eq('id_unit', idUnit),
+      sb.from('bagi_hasil_penggunaan').select('*').eq('id_unit', idUnit).order('tanggal', { ascending: false }),
       sb.from('audit_log').select('*').order('waktu', { ascending: false }).limit(500)
     ]);
     const audit = (auditRes.data || []).filter(a => {
@@ -636,7 +734,8 @@ const AdapterAPI = {
     return {
       nasabah: nasRes.data || [], transaksi: trxRes.data || [], transaksiKeluar: keluarRes.data || [],
       kategori: katRes.data || [], unit: unitRes.data || [], stockOpname: opnameRes.data || [],
-      kasMutasi: kasRes.data || [], rekonsiliasi: rekRes.data || [], audit
+      kasMutasi: kasRes.data || [], rekonsiliasi: rekRes.data || [],
+      penggunaanBagiHasil: bagiRes.data || [], audit
     };
   },
 
@@ -748,10 +847,27 @@ const AdapterAPI = {
     const kunci = await cekPeriodeTerkunci(form.tgl);
     if (kunci) return pesanPeriodeTerkunci(kunci);
     const idFix = form.id != null ? String(form.id) : genId('TRX');
-    const row = { id: idFix, id_unit: form.id_unit, level: 'nasabah_ke_unit', id_nasabah: form.id_nasabah || null,
-      nama: form.nama, tgl: form.tgl, jenis: form.jenis, berat: form.berat, harga_satuan: form.harga_satuan || (form.berat ? form.total/form.berat : 0),
-      total: form.total, kelompok_id: form.kelompok_id || null, status: form.status || 'aktif', metode: form.metode || null,
-      no_dokumen: form.no_dokumen || null, catatan: form.catatan || null, created_by: form.oleh || getPetugasSesi() };
+    const berat = Number(form.berat) || 0;
+    const hargaKotor = Number(form.harga_kotor ?? form.harga_satuan ?? (berat ? Number(form.total)/berat : 0)) || 0;
+    const nilaiKotor = Math.round(Number(form.nilai_kotor ?? form.total ?? (berat * hargaKotor)) || 0);
+    const skema = await this.getSkemaBagiHasilUnit(form.id_unit);
+    const tglSingkat = String(form.tgl || '').slice(0, 10);
+    const mulai = String(skema.bagi_hasil_mulai || '').slice(0, 10);
+    const berlaku = berat > 0 && nilaiKotor >= 0 && skema.bagi_hasil_aktif === true && (!mulai || !tglSingkat || tglSingkat >= mulai);
+    const persenNasabah = berlaku ? (Number.isFinite(Number(skema.persen_nasabah)) ? Number(skema.persen_nasabah) : 85) : 100;
+    const persenPengelola = berlaku ? (Number.isFinite(Number(skema.persen_pengelola)) ? Number(skema.persen_pengelola) : 15) : 0;
+    const nilaiNasabah = Math.round(nilaiKotor * persenNasabah / 100);
+    const nilaiPengelola = nilaiKotor - nilaiNasabah;
+    const row = {
+      id: idFix, id_unit: form.id_unit, level: 'nasabah_ke_unit', id_nasabah: form.id_nasabah || null,
+      nama: form.nama, tgl: form.tgl, jenis: form.jenis, berat,
+      harga_satuan: berat ? nilaiNasabah / berat : 0, total: nilaiNasabah,
+      harga_kotor: hargaKotor, nilai_kotor: nilaiKotor,
+      persen_nasabah: persenNasabah, nilai_nasabah: nilaiNasabah,
+      persen_pengelola: persenPengelola, nilai_pengelola: nilaiPengelola,
+      kelompok_id: form.kelompok_id || null, status: form.status || 'aktif', metode: form.metode || null,
+      no_dokumen: form.no_dokumen || null, catatan: form.catatan || null, created_by: form.oleh || getPetugasSesi()
+    };
     const { error } = await sb.from('transaksi').insert(row);
     if (error) return 'Gagal: ' + error.message;
     logAudit('transaksi', idFix, 'insert', null, row, 'Unit ' + form.id_unit + ' — dicatat oleh ' + row.created_by);
@@ -763,12 +879,28 @@ const AdapterAPI = {
     const kunci = await cekPeriodeTerkunci(tgl);
     if (kunci) return pesanPeriodeTerkunci(kunci);
     if (!Array.isArray(items) || !items.length) return 'Gagal: Item setoran kosong.';
-    const rows = items.map(item => ({
-      id: genId('TRX'), id_unit, level: 'nasabah_ke_unit', id_nasabah, nama, tgl,
-      jenis: item.jenis, berat: Number(item.berat) || 0,
-      harga_satuan: Number(item.harga_satuan ?? item.harga ?? ((Number(item.berat)||0) ? Number(item.total)/(Number(item.berat)||1) : 0)) || 0,
-      total: Number(item.total) || 0, kelompok_id: kelompok_id || null, status: 'aktif', created_by: oleh || getPetugasSesi()
-    }));
+    const skema = await this.getSkemaBagiHasilUnit(id_unit);
+    const tglSingkat = String(tgl || '').slice(0, 10);
+    const mulai = String(skema.bagi_hasil_mulai || '').slice(0, 10);
+    const berlaku = skema.bagi_hasil_aktif === true && (!mulai || !tglSingkat || tglSingkat >= mulai);
+    const persenNasabah = berlaku ? (Number.isFinite(Number(skema.persen_nasabah)) ? Number(skema.persen_nasabah) : 85) : 100;
+    const persenPengelola = berlaku ? (Number.isFinite(Number(skema.persen_pengelola)) ? Number(skema.persen_pengelola) : 15) : 0;
+    const rows = items.map(item => {
+      const berat = Number(item.berat) || 0;
+      const hargaKotor = Number(item.harga_kotor ?? item.harga_satuan ?? item.harga ?? (berat ? Number(item.total)/(berat || 1) : 0)) || 0;
+      const nilaiKotor = Math.round(Number(item.nilai_kotor ?? item.total ?? (berat * hargaKotor)) || 0);
+      const nilaiNasabah = Math.round(nilaiKotor * persenNasabah / 100);
+      const nilaiPengelola = nilaiKotor - nilaiNasabah;
+      return {
+        id: genId('TRX'), id_unit, level: 'nasabah_ke_unit', id_nasabah, nama, tgl,
+        jenis: item.jenis, berat,
+        harga_satuan: berat ? nilaiNasabah / berat : 0, total: nilaiNasabah,
+        harga_kotor: hargaKotor, nilai_kotor: nilaiKotor,
+        persen_nasabah: persenNasabah, nilai_nasabah: nilaiNasabah,
+        persen_pengelola: persenPengelola, nilai_pengelola: nilaiPengelola,
+        kelompok_id: kelompok_id || null, status: 'aktif', created_by: oleh || getPetugasSesi()
+      };
+    });
     const { error } = await sb.from('transaksi').insert(rows);
     if (error) return 'Gagal: ' + error.message;
     rows.forEach(row => logAudit('transaksi', row.id, 'insert', null, row, 'Setoran batch unit ' + id_unit + ' oleh ' + row.created_by));
@@ -1112,7 +1244,7 @@ const AdapterAPI = {
       { data: kejadian_darurat }, { data: alat }, { data: biaya_operasional },
       { data: pemeliharaan_investasi }, { data: periode_tutup_buku },
       { data: neraca_pos }, { data: rekonsiliasi_kas }, { data: stock_opname },
-      { data: kas_mutasi }, { data: audit_log }
+      { data: kas_mutasi }, { data: bagi_hasil_penggunaan }, { data: audit_log }
     ] = await Promise.all([
       sb.from('admin').select('id, username'),
       sb.from('bsu').select('*'),
@@ -1131,6 +1263,7 @@ const AdapterAPI = {
       sb.from('rekonsiliasi_kas').select('*'),
       sb.from('stock_opname').select('*'),
       sb.from('kas_mutasi').select('*'),
+      sb.from('bagi_hasil_penggunaan').select('*'),
       sb.from('audit_log').select('*').order('waktu', { ascending: false }).limit(5000)
     ]);
     const stripPassBsu = (bsu || []).map(stripPasswordBsu);
@@ -1141,7 +1274,8 @@ const AdapterAPI = {
       kejadian_darurat: kejadian_darurat || [], alat: alat || [], biaya_operasional: biaya_operasional || [],
       pemeliharaan_investasi: pemeliharaan_investasi || [], periode_tutup_buku: periode_tutup_buku || [],
       neraca_pos: neraca_pos || [], rekonsiliasi_kas: rekonsiliasi_kas || [],
-      stock_opname: stock_opname || [], kas_mutasi: kas_mutasi || [], audit_log: audit_log || []
+      stock_opname: stock_opname || [], kas_mutasi: kas_mutasi || [],
+      bagi_hasil_penggunaan: bagi_hasil_penggunaan || [], audit_log: audit_log || []
     };
   },
 

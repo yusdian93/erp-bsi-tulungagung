@@ -1088,6 +1088,7 @@
                     <span class="gh-ic">💳</span><span class="gh-label">Sistem Keuangan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
+                    <button class="nav-btn" data-label="Skema Bagi Hasil BSU" data-group="grp-keuangan" onclick="pindahTab('bagihasil', this); loadBagiHasilInduk();"><span class="nav-ic">%</span> Skema Bagi Hasil BSU</button>
                     <button class="nav-btn" data-label="Saldo/Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();"><span class="nav-ic">💾</span> Saldo/Tabungan BSI</button>
                     <button class="nav-btn" data-label="Tarik Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('tarikbsu', this); loadTarikTabunganBSU();"><span class="nav-ic">💸</span> Tarik Tabungan BSI</button>
                 </div>
@@ -1705,6 +1706,27 @@
         </div>
     </div>
 
+
+    <div id="bagihasil" class="content-section">
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header" style="flex-wrap:wrap;gap:12px;">
+                <div><h2>⚖️ SKEMA BAGI HASIL BANK SAMPAH UNIT</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12.5px;">Bank Sampah Induk menentukan persentase. Perubahan hanya berlaku untuk transaksi baru dan tidak mengubah saldo transaksi lama.</p></div>
+                <button class="btn-submit" style="width:auto;padding:10px 16px;" onclick="aktifkanSemuaBagiHasil8515()">Terapkan 85% / 15% ke Semua BSU Resmi</button>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-top:18px;">
+                <div class="card card-blue"><h3>BSU Skema Aktif</h3><p id="bhiUnitAktif">0</p></div>
+                <div class="card card-green"><h3>Nilai Kotor Setoran</h3><p id="bhiNilaiKotor">Rp 0</p></div>
+                <div class="card card-blue"><h3>Hak Nasabah</h3><p id="bhiNilaiNasabah">Rp 0</p></div>
+                <div class="card card-orange"><h3>Hak Pengelola BSU</h3><p id="bhiNilaiPengelola">Rp 0</p></div>
+            </div>
+        </div>
+        <div class="panel">
+            <div class="panel-header"><h2>📋 PENGATURAN DAN RINGKASAN PER BSU</h2><button class="btn-sync" onclick="loadBagiHasilInduk()">🔄 Muat Ulang</button></div>
+            <div class="table-container" style="max-height:650px;overflow:auto;">
+                <table style="min-width:1180px;"><thead style="position:sticky;top:0;z-index:1;"><tr><th>Bank Sampah Unit</th><th>Status Skema</th><th>Persentase</th><th>Mulai Berlaku / Dasar</th><th class="text-right">Nilai Kotor</th><th class="text-right">Nasabah</th><th class="text-right">Pengelola</th><th class="text-right">Digunakan</th><th class="text-center">Aksi</th></tr></thead><tbody id="tbodyBagiHasilInduk"><tr><td colspan="9" class="text-center">Memuat...</td></tr></tbody></table>
+            </div>
+        </div>
+    </div>
 
     <div id="saldobsi" class="content-section">
         <h3 style="margin: 0 0 12px; font-size: 13px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; display:flex; align-items:center; gap:8px;">
@@ -2619,6 +2641,7 @@
     let globalNasabah = []; 
     let globalKategori = [];
     let globalPenjualan = []; // sumber: tabel `penjualan` di Supabase (dulu localStorage, sudah dimigrasikan)
+    let globalBagiHasilInduk = { bsu: [], transaksi: [], penggunaan: [] };
 
     let lineChartInstance = null; 
     let barChartInstance = null; 
@@ -3732,6 +3755,93 @@
             (pos) => { input.value = pos.coords.latitude.toFixed(6) + ',' + pos.coords.longitude.toFixed(6); },
             (err) => { alert('Gagal mengambil lokasi: ' + err.message); input.placeholder = 'Contoh: -8.0715,111.9024'; }
         );
+    }
+
+    function rpBagiHasil(v) { return 'Rp ' + Math.round(Number(v)||0).toLocaleString('id-ID'); }
+
+    function ringkasanBagiHasilBsuInduk(idUnit) {
+        const trx = (globalBagiHasilInduk.transaksi || []).filter(t => String(t.id_unit || '') === String(idUnit) && String(t.status || 'aktif').toLowerCase() !== 'dibatalkan' && Number(t.berat || 0) > 0 && Number(t.total || 0) >= 0);
+        const nilaiKotor = trx.reduce((a,t)=>a+Number(t.nilai_kotor != null ? t.nilai_kotor : t.total || 0),0);
+        const nilaiNasabah = trx.reduce((a,t)=>a+Number(t.nilai_nasabah != null ? t.nilai_nasabah : t.total || 0),0);
+        const nilaiPengelola = trx.reduce((a,t)=>a+Number(t.nilai_pengelola != null ? t.nilai_pengelola : 0),0);
+        const digunakan = (globalBagiHasilInduk.penggunaan || []).filter(x => String(x.id_unit || '') === String(idUnit) && String(x.status || 'aktif') !== 'dibatalkan').reduce((a,x)=>a+Number(x.nominal||0),0);
+        return { nilaiKotor, nilaiNasabah, nilaiPengelola, digunakan, sisa:nilaiPengelola-digunakan, jumlah:trx.length };
+    }
+
+    async function loadBagiHasilInduk() {
+        const tb = document.getElementById('tbodyBagiHasilInduk');
+        if (tb) tb.innerHTML = '<tr><td colspan="9" class="text-center">⏳ Memuat data bagi hasil...</td></tr>';
+        try {
+            globalBagiHasilInduk = await AdapterAPI.getBagiHasilIndukBundle();
+            renderBagiHasilInduk();
+        } catch (e) {
+            console.error(e);
+            if (tb) tb.innerHTML = `<tr><td colspan="9" class="text-center text-danger">Gagal memuat: ${escAttr(e.message || e)}</td></tr>`;
+        }
+    }
+
+    function renderBagiHasilInduk() {
+        const list = globalBagiHasilInduk.bsu || [];
+        const resmi = list.filter(b => b.mode_latihan !== true);
+        const aktif = resmi.filter(b => b.bagi_hasil_aktif === true).length;
+        const total = resmi.reduce((acc,b)=>{
+            const r=ringkasanBagiHasilBsuInduk(b.id);
+            acc.kotor+=r.nilaiKotor; acc.nasabah+=r.nilaiNasabah; acc.pengelola+=r.nilaiPengelola; return acc;
+        },{kotor:0,nasabah:0,pengelola:0});
+        const set = (id,val)=>{const el=document.getElementById(id);if(el)el.innerText=val;};
+        set('bhiUnitAktif', `${aktif} / ${resmi.length}`);
+        set('bhiNilaiKotor', rpBagiHasil(total.kotor));
+        set('bhiNilaiNasabah', rpBagiHasil(total.nasabah));
+        set('bhiNilaiPengelola', rpBagiHasil(total.pengelola));
+        const tb=document.getElementById('tbodyBagiHasilInduk'); if(!tb)return;
+        tb.innerHTML=list.length?list.map(b=>{
+            const r=ringkasanBagiHasilBsuInduk(b.id);
+            const pn=Number.isFinite(Number(b.persen_nasabah))?Number(b.persen_nasabah):85;
+            const pp=Number.isFinite(Number(b.persen_pengelola))?Number(b.persen_pengelola):15;
+            const aktifSkema=b.bagi_hasil_aktif===true;
+            const status=aktifSkema?'<span style="padding:5px 9px;border-radius:999px;background:#dcfce7;color:#166534;font-weight:800;font-size:10.5px;">AKTIF</span>':'<span style="padding:5px 9px;border-radius:999px;background:#f1f5f9;color:#64748b;font-weight:800;font-size:10.5px;">NONAKTIF</span>';
+            const latihan=b.mode_latihan===true?' <span style="color:#c2410c;font-size:10px;font-weight:800;">LATIHAN</span>':'';
+            return `<tr><td><b>${escAttr(b.nama||'-')}</b>${latihan}<br><small>${escAttr(b.id)}</small></td><td>${status}</td><td><b>${pn}%</b> Nasabah<br><b>${pp}%</b> Pengelola</td><td>${b.bagi_hasil_mulai?formatTglTabel(b.bagi_hasil_mulai):'-'}<br><small>${escAttr(b.bagi_hasil_dasar||'Belum ada dasar keputusan')}</small></td><td class="text-right fw-bold">${rpBagiHasil(r.nilaiKotor)}</td><td class="text-right text-success fw-bold">${rpBagiHasil(r.nilaiNasabah)}</td><td class="text-right fw-bold" style="color:#b45309;">${rpBagiHasil(r.nilaiPengelola)}</td><td class="text-right">${rpBagiHasil(r.digunakan)}<br><small>Sisa ${rpBagiHasil(r.sisa)}</small></td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:6px 10px;font-size:11px;" onclick="aturBagiHasilBsu('${escAttr(b.id)}')">⚙️ Atur</button> <button class="btn-sync" style="padding:6px 10px;font-size:11px;${aktifSkema?'background:#fee2e2;color:#991b1b;border-color:#fca5a5;':'background:#dcfce7;color:#166534;border-color:#86efac;'}" onclick="toggleBagiHasilBsu('${escAttr(b.id)}',${aktifSkema?'false':'true'})">${aktifSkema?'Nonaktifkan':'Aktifkan'}</button></td></tr>`;
+        }).join(''):'<tr><td colspan="9" class="text-center">Belum ada BSU.</td></tr>';
+    }
+
+    async function aturBagiHasilBsu(id) {
+        const b=(globalBagiHasilInduk.bsu||[]).find(x=>String(x.id)===String(id)); if(!b)return alert('BSU tidak ditemukan.');
+        const lamaNasabah=Number.isFinite(Number(b.persen_nasabah))?Number(b.persen_nasabah):85;
+        const input=prompt(`Persentase untuk NASABAH pada ${b.nama}:`,String(lamaNasabah));
+        if(input===null)return;
+        const pn=Number(String(input).replace(',','.'));
+        if(!Number.isFinite(pn)||pn<0||pn>100)return alert('Persentase nasabah harus antara 0 sampai 100.');
+        const pp=100-pn;
+        const mulai=prompt('Tanggal mulai berlaku (YYYY-MM-DD):',b.bagi_hasil_mulai||new Date().toISOString().slice(0,10));
+        if(mulai===null)return;
+        const dasar=prompt('Dasar keputusan/berita acara pengurus:',b.bagi_hasil_dasar||'Keputusan pengurus tentang skema bagi hasil');
+        if(dasar===null)return;
+        const aktif=confirm(`Simpan skema ${pn}% nasabah dan ${pp}% pengelola sebagai AKTIF?\n\nPilih OK untuk aktif, atau Cancel untuk menyimpan dalam keadaan nonaktif.`);
+        const res=await AdapterAPI.updateSkemaBagiHasilUnit({id_unit:id,bagi_hasil_aktif:aktif,persen_nasabah:pn,persen_pengelola:pp,bagi_hasil_mulai:mulai,bagi_hasil_dasar:dasar,oleh:'Admin Pusat'});
+        alert(res); if(String(res).includes('Sukses'))loadBagiHasilInduk();
+    }
+
+    async function toggleBagiHasilBsu(id,aktif) {
+        const b=(globalBagiHasilInduk.bsu||[]).find(x=>String(x.id)===String(id)); if(!b)return;
+        const aksi=aktif?'mengaktifkan':'menonaktifkan';
+        if(!confirm(`Yakin ${aksi} skema bagi hasil untuk ${b.nama}?\nPerubahan hanya berlaku pada transaksi berikutnya.`))return;
+        const res=await AdapterAPI.updateSkemaBagiHasilUnit({id_unit:id,bagi_hasil_aktif:aktif,persen_nasabah:(Number.isFinite(Number(b.persen_nasabah))?Number(b.persen_nasabah):85),persen_pengelola:(Number.isFinite(Number(b.persen_pengelola))?Number(b.persen_pengelola):15),bagi_hasil_mulai:b.bagi_hasil_mulai||new Date().toISOString().slice(0,10),bagi_hasil_dasar:b.bagi_hasil_dasar||'Keputusan pengurus tentang skema bagi hasil',oleh:'Admin Pusat'});
+        alert(res); if(String(res).includes('Sukses'))loadBagiHasilInduk();
+    }
+
+    async function aktifkanSemuaBagiHasil8515() {
+        const list=(globalBagiHasilInduk.bsu||[]).filter(b=>b.mode_latihan!==true);
+        if(!list.length)return alert('Belum ada BSU resmi.');
+        if(!confirm(`Terapkan dan aktifkan skema 85% nasabah / 15% pengelola untuk ${list.length} BSU resmi?\n\nTransaksi lama tidak dihitung ulang.`))return;
+        const mulai=prompt('Tanggal mulai berlaku untuk semua BSU (YYYY-MM-DD):',new Date().toISOString().slice(0,10));
+        if(mulai===null)return;
+        let sukses=0,gagal=0;
+        for(const b of list){
+            const res=await AdapterAPI.updateSkemaBagiHasilUnit({id_unit:b.id,bagi_hasil_aktif:true,persen_nasabah:85,persen_pengelola:15,bagi_hasil_mulai:mulai,bagi_hasil_dasar:b.bagi_hasil_dasar||'Skema standar 85% nasabah dan 15% pengelola',oleh:'Admin Pusat'});
+            String(res).includes('Sukses')?sukses++:gagal++;
+        }
+        alert(`Selesai. Berhasil: ${sukses}, gagal: ${gagal}.`); loadBagiHasilInduk();
     }
 
     function dataBsuById(id) { return globalNasabah.find(x => String(x.id) === String(id)); }
@@ -6240,7 +6350,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         ['transaksi', 'Transaksi (Setoran/Penarikan)'], ['penjualan', 'Penjualan ke Off-taker'],
         ['bantuan_hibah', 'Bantuan/Hibah'], ['pembinaan_bsu', 'Pembinaan BSU'], ['kejadian_darurat', 'Kejadian Darurat'],
         ['alat', 'Alat/Inventaris'], ['biaya_operasional', 'Biaya Operasional'], ['pemeliharaan_investasi', 'Pemeliharaan/Investasi'],
-        ['periode_tutup_buku', 'Tutup Buku Periode'], ['neraca_pos', 'Pos Neraca Manual'], ['rekonsiliasi_kas', 'Rekonsiliasi Kas']
+        ['periode_tutup_buku', 'Tutup Buku Periode'], ['neraca_pos', 'Pos Neraca Manual'], ['rekonsiliasi_kas', 'Rekonsiliasi Kas'],
+        ['bagi_hasil_penggunaan', 'Penggunaan Dana Bagi Hasil BSU']
     ];
 
     function bacaFileRestoreBackup(event) {
