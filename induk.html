@@ -1077,7 +1077,8 @@
                     <span class="gh-ic">🔄</span><span class="gh-label">Lalu Lintas Barang</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Transaksi / Setoran BSU (Masuk)" data-group="grp-barang" onclick="pindahTab('transaksi', this)"><span class="nav-ic">📥</span> Setoran BSU (Masuk)</button>
+                    <button class="nav-btn" data-label="Verifikasi Pengiriman BSU" data-group="grp-barang" onclick="pindahTab('verifikasikirim', this); loadVerifikasiPengirimanBSI();"><span class="nav-ic">✅</span> Verifikasi Pengiriman BSU</button>
+                    <button class="nav-btn" data-label="Setoran BSU Terverifikasi" data-group="grp-barang" onclick="pindahTab('transaksi', this)"><span class="nav-ic">📥</span> Setoran Terverifikasi</button>
                     <button class="nav-btn" data-label="Penjualan ke Off-taker" data-group="grp-barang" onclick="pindahTab('penjualan', this)"><span class="nav-ic">📤</span> Penjualan ke Off-taker</button>
                     <button class="nav-btn" data-label="Master Harga" data-group="grp-barang" onclick="pindahTab('harga', this)"><span class="nav-ic">🏷️</span> Master Harga</button>
                 </div>
@@ -2019,11 +2020,82 @@
         </div>
     </div>
 
+    <div id="verifikasikirim" class="content-section">
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header" style="flex-wrap:wrap;gap:12px;">
+                <div><h2>✅ VERIFIKASI PENGIRIMAN BANK SAMPAH UNIT</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12.5px;">Satu pengajuan dibuat oleh BSU dan diperiksa di sini. Hanya pengiriman yang diterima yang masuk stok, saldo, dashboard, dan laporan resmi BSI.</p></div>
+                <button class="btn-sync" onclick="loadVerifikasiPengirimanBSI()">🔄 Muat Ulang</button>
+            </div>
+            <div class="cards" style="grid-template-columns:repeat(4,minmax(170px,1fr));margin-top:18px;">
+                <div class="card card-orange"><h3>Menunggu Verifikasi</h3><p id="verifJumlahMenunggu">0</p></div>
+                <div class="card card-green"><h3>Sudah Diterima</h3><p id="verifJumlahDiterima">0</p></div>
+                <div class="card card-blue"><h3>Belum Dicairkan</h3><p id="verifJumlahBelumBayar">0</p></div>
+                <div class="card" style="border-left-color:var(--danger);"><h3>Ditolak/Dibatalkan</h3><p id="verifJumlahDitolak" style="color:var(--danger);">0</p></div>
+            </div>
+        </div>
+
+        <div class="panel" style="margin-bottom:24px;">
+            <div class="panel-header" style="flex-wrap:wrap;gap:12px;"><h2>📋 DAFTAR PENGAJUAN DARI BSU</h2></div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;background:#f8fafc;padding:12px;border-radius:10px;border:1px solid var(--border);">
+                <select id="verifFilterStatus" class="form-control" style="max-width:230px;" onchange="renderVerifikasiPengirimanBSI()">
+                    <option value="semua">Semua Status</option>
+                    <option value="menunggu_verifikasi">Menunggu Verifikasi</option>
+                    <option value="diterima">Diterima BSI</option>
+                    <option value="belum_dibayar">Diterima, Belum Dicairkan</option>
+                    <option value="lunas">Lunas/Dibayar</option>
+                    <option value="ditolak">Ditolak/Dibatalkan</option>
+                </select>
+                <input id="verifCari" class="form-control" style="max-width:340px;" placeholder="Cari BSU, material, atau surat jalan..." oninput="renderVerifikasiPengirimanBSI()">
+                <span id="verifJumlahTampil" style="margin-left:auto;color:var(--text-muted);font-size:12px;font-weight:700;"></span>
+            </div>
+            <div class="table-container" style="max-height:600px;overflow:auto;">
+                <table style="min-width:1280px;"><thead style="position:sticky;top:0;z-index:1;"><tr><th>Tanggal/Surat Jalan</th><th>Bank Sampah Unit</th><th>Material</th><th class="text-right">Berat Kirim</th><th>Status Verifikasi</th><th>Hasil Timbang & Harga BSI</th><th>Status Pembayaran</th><th class="text-center">Aksi</th></tr></thead><tbody id="tbodyVerifikasiPengiriman"><tr><td colspan="8" class="text-center">Klik Muat Ulang untuk mengambil pengajuan.</td></tr></tbody></table>
+            </div>
+        </div>
+
+        <div class="panel" id="panelVerifikasiPengiriman" style="display:none;margin-bottom:24px;border:1px solid #bfdbfe;">
+            <div class="panel-header" style="flex-wrap:wrap;gap:12px;"><div><h2>🔎 PEMERIKSAAN & PENIMBANGAN BSI</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12px;">Berat dan harga pada bagian ini menjadi nilai final yang masuk stok serta saldo BSU.</p></div><button class="btn-sync" onclick="tutupPanelVerifikasiPengiriman()">✕ Tutup</button></div>
+            <form id="formVerifikasiPengiriman" onsubmit="simpanVerifikasiPengiriman(event)">
+                <input type="hidden" id="verifId">
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:14px;margin-top:18px;">
+                    <div class="form-group"><label>Bank Sampah Unit</label><input id="verifNamaBsu" class="form-control" readonly></div>
+                    <div class="form-group"><label>Surat Jalan</label><input id="verifSuratJalan" class="form-control" readonly></div>
+                    <div class="form-group"><label>Material</label><input id="verifMaterial" class="form-control" readonly></div>
+                    <div class="form-group"><label>Berat Kirim BSU</label><input id="verifBeratKirim" class="form-control" readonly></div>
+                    <div class="form-group"><label>Keputusan BSI</label><select id="verifStatus" class="form-control" onchange="ubahStatusFormVerifikasi()"><option value="diterima">Diterima</option><option value="ditolak">Ditolak</option></select></div>
+                    <div class="form-group"><label>Berat Diterima BSI (Kg)</label><input type="number" step="0.01" min="0" id="verifBeratDiterima" class="form-control" oninput="hitungTotalVerifikasi()"></div>
+                    <div class="form-group"><label>Harga Final BSI/Kg</label><input type="number" min="0" id="verifHargaFinal" class="form-control" oninput="hitungTotalVerifikasi()"></div>
+                    <div class="form-group"><label>Total Final</label><input id="verifTotalFinal" class="form-control" readonly></div>
+                    <div class="form-group" style="grid-column:1 / -1;"><label>Catatan Verifikasi / Alasan Selisih atau Penolakan</label><textarea id="verifCatatan" class="form-control" rows="3" placeholder="Contoh: terdapat campuran material; berat diterima 49,80 kg"></textarea></div>
+                    <div class="form-group"><label>Diverifikasi Oleh</label><input id="verifOleh" class="form-control"></div>
+                </div>
+                <button type="submit" class="btn-submit" id="btnSimpanVerifikasi" style="width:auto;padding:12px 22px;">SIMPAN HASIL VERIFIKASI</button>
+            </form>
+
+            <div id="areaPembayaranPengiriman" style="display:none;margin-top:26px;padding-top:22px;border-top:1px dashed var(--border);">
+                <h3 style="margin:0 0 6px;color:#075542;font-size:15px;">💸 Pembayaran Langsung kepada BSU</h3>
+                <p style="margin:0 0 16px;color:var(--text-muted);font-size:12px;">Saat dikonfirmasi, aplikasi otomatis mencatat penarikan saldo BSU di BSI dan kas masuk pada aplikasi BSU. Jangan input ulang pada menu Tarik Tabungan.</p>
+                <div style="display:grid;grid-template-columns:repeat(4,minmax(170px,1fr));gap:14px;">
+                    <div class="form-group"><label>Jumlah Dibayar</label><input id="bayarPengirimanJumlah" class="form-control" readonly></div>
+                    <div class="form-group"><label>Tanggal Pembayaran</label><input type="date" id="bayarPengirimanTanggal" class="form-control"></div>
+                    <div class="form-group"><label>Metode</label><select id="bayarPengirimanMetode" class="form-control"><option value="Transfer">Transfer</option><option value="Tunai">Tunai</option></select></div>
+                    <div class="form-group"><label>No. Bukti/Referensi</label><input id="bayarPengirimanBukti" class="form-control" placeholder="Nomor transfer/kuitansi"></div>
+                    <div class="form-group"><label>Dikonfirmasi Oleh</label><input id="bayarPengirimanOleh" class="form-control"></div>
+                </div>
+                <button type="button" class="btn-submit" id="btnBayarPengiriman" style="width:auto;padding:12px 22px;background:linear-gradient(135deg,#0e7490,#075985);" onclick="bayarPengirimanTerpilih()">KONFIRMASI PEMBAYARAN</button>
+            </div>
+        </div>
+    </div>
+
     <div id="transaksi" class="content-section">
         <div class="grid-2">
             <div class="panel">
-                <div class="panel-header"><h2>📝 CATAT TRANSAKSI UNIT (BSU)</h2></div>
-                <form id="formTransaksi" style="margin-top:10px;" onsubmit="return false;">
+                <div class="panel-header"><h2>✅ SETORAN TERVERIFIKASI OTOMATIS</h2></div>
+                <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:16px;color:#1e3a8a;font-size:13px;line-height:1.65;">
+                    Setoran pada halaman ini berasal dari pengajuan BSU yang telah <b>diterima melalui menu Verifikasi Pengiriman BSU</b>. BSI tidak perlu memasukkan transaksi yang sama untuk kedua kalinya.
+                    <button type="button" class="btn-sync" style="display:block;margin-top:12px;" onclick="document.querySelector('[data-label=&quot;Verifikasi Pengiriman BSU&quot;]').click()">Buka Menu Verifikasi</button>
+                </div>
+                <form id="formTransaksi" style="display:none;margin-top:10px;" onsubmit="return false;">
                     <div class="form-group"><label>Tanggal Transaksi</label><input type="date" id="trxTanggal" class="form-control" required></div>
                     <div class="form-group"><label>Pilih Unit BSU</label><select id="trxBsu" class="form-control" required onchange="renderStockTrxBsu()"></select></div>
                     <div class="form-group"><label>Jenis Aktivitas</label><select id="trxJenis" class="form-control" onchange="ubahFormTransaksi()" required><option value="setor">Setoran Sampah (Saldo Masuk)</option><option value="tarik">Penarikan Saldo (Saldo Keluar)</option></select></div>
@@ -2642,6 +2714,9 @@
     let globalKategori = [];
     let globalPenjualan = []; // sumber: tabel `penjualan` di Supabase (dulu localStorage, sudah dimigrasikan)
     let globalBagiHasilInduk = { bsu: [], transaksi: [], penggunaan: [] };
+    let globalPengirimanVerifikasi = [];
+    let globalBsuVerifikasi = [];
+    let globalKategoriVerifikasi = [];
 
     let lineChartInstance = null; 
     let barChartInstance = null; 
@@ -5984,6 +6059,118 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         renderPeringkatDanKomposisi();
         try { renderKomposisiMasukChart('semua'); } catch(e) {}
         try { renderKomposisiJualChart('semua'); } catch(e) {}
+    }
+
+    // =========================================
+    // VERIFIKASI PENGIRIMAN BSU -> BSI
+    // =========================================
+    function amanHtml(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+    function angkaVerif(v){const n=parseFloat(v);return Number.isFinite(n)?n:0;}
+    function rupiahVerif(v){return 'Rp '+Math.round(angkaVerif(v)).toLocaleString('id-ID');}
+    function statusVerifPengiriman(t){
+        if((t.status||'aktif')==='dibatalkan')return t.status_verifikasi==='ditolak'?'ditolak':'dibatalkan';
+        return t.status_verifikasi||'diterima';
+    }
+    function labelStatusVerifBsi(t){const st=statusVerifPengiriman(t);return ({menunggu_verifikasi:'Menunggu Verifikasi',diterima:'Diterima BSI',ditolak:'Ditolak BSI',dibatalkan:'Dibatalkan BSU'})[st]||st.replaceAll('_',' ');}
+    function warnaStatusVerifBsi(t){const st=statusVerifPengiriman(t);if(st==='diterima')return ['#dcfce7','#166534','#86efac'];if(st==='menunggu_verifikasi')return ['#fef3c7','#92400e','#fde68a'];return ['#fee2e2','#991b1b','#fecaca'];}
+    function labelPembayaranBsi(t){const st=String(t.status_pembayaran||'belum_dibayar');return ({belum_dibayar:'Belum Dibayar',masuk_saldo_bsu:'Masuk Saldo BSU',lunas:'Lunas/Dibayar',tidak_berlaku:'Tidak Berlaku'})[st]||st.replaceAll('_',' ');}
+    function badgeVerif(label,warna){return `<span style="display:inline-flex;padding:5px 9px;border-radius:999px;background:${warna[0]};color:${warna[1]};border:1px solid ${warna[2]};font-size:10.5px;font-weight:800;white-space:nowrap;">${amanHtml(label)}</span>`;}
+
+    function loadVerifikasiPengirimanBSI(){
+        const tb=document.getElementById('tbodyVerifikasiPengiriman');if(tb)tb.innerHTML='<tr><td colspan="8" class="text-center">⏳ Memuat pengajuan dari BSU...</td></tr>';
+        AdapterAPI.getPengirimanVerifikasiBundle().then(res=>{
+            globalPengirimanVerifikasi=res.pengiriman||[];globalBsuVerifikasi=res.bsu||[];globalKategoriVerifikasi=res.kategori||[];
+            renderVerifikasiPengirimanBSI();
+        }).catch(err=>{if(tb)tb.innerHTML=`<tr><td colspan="8" class="text-center" style="color:var(--danger);">Gagal memuat: ${amanHtml(err.message||err)}</td></tr>`;});
+    }
+
+    function renderVerifikasiPengirimanBSI(){
+        const tb=document.getElementById('tbodyVerifikasiPengiriman');if(!tb)return;
+        const filter=document.getElementById('verifFilterStatus')?.value||'semua';
+        const cari=(document.getElementById('verifCari')?.value||'').trim().toLowerCase();
+        const semua=(globalPengirimanVerifikasi||[]).slice().sort((a,b)=>uraikanTanggalInput(b.tgl)-uraikanTanggalInput(a.tgl));
+        const count={menunggu:0,diterima:0,belum:0,ditolak:0};
+        semua.forEach(t=>{const st=statusVerifPengiriman(t);if(st==='menunggu_verifikasi')count.menunggu++;else if(st==='diterima'){count.diterima++;if(t.status_pembayaran!=='lunas')count.belum++;}else count.ditolak++;});
+        const set=(id,v)=>{const e=document.getElementById(id);if(e)e.innerText=v.toLocaleString('id-ID');};
+        set('verifJumlahMenunggu',count.menunggu);set('verifJumlahDiterima',count.diterima);set('verifJumlahBelumBayar',count.belum);set('verifJumlahDitolak',count.ditolak);
+        const rows=semua.filter(t=>{
+            const st=statusVerifPengiriman(t);
+            if(filter==='menunggu_verifikasi'&&st!=='menunggu_verifikasi')return false;
+            if(filter==='diterima'&&st!=='diterima')return false;
+            if(filter==='belum_dibayar'&&!(st==='diterima'&&t.status_pembayaran!=='lunas'))return false;
+            if(filter==='lunas'&&t.status_pembayaran!=='lunas')return false;
+            if(filter==='ditolak'&&!['ditolak','dibatalkan'].includes(st))return false;
+            if(cari&&!JSON.stringify([t.nama,t.id_unit,t.jenis,t.no_dokumen,t.catatan,t.catatan_verifikasi]).toLowerCase().includes(cari))return false;
+            return true;
+        });
+        const jt=document.getElementById('verifJumlahTampil');if(jt)jt.innerText=`${rows.length} dari ${semua.length} pengajuan`;
+        tb.innerHTML=rows.length?rows.map(t=>{
+            const st=statusVerifPengiriman(t),warna=warnaStatusVerifBsi(t),kirim=angkaVerif(t.berat_kirim??t.berat);
+            const diterima=st==='diterima'?angkaVerif(t.berat_diterima??t.berat):0;
+            const hasil=st==='diterima'?`<strong>${diterima.toFixed(2)} Kg</strong><br><small>${rupiahVerif(t.harga_final??t.harga_satuan)}/Kg · <b>${rupiahVerif(t.total_final??t.total)}</b></small>`:(st==='ditolak'?`<span style="color:#991b1b;font-weight:800;">Tidak diterima</span><br><small>${amanHtml(t.catatan_verifikasi||'-')}</small>`:'<span style="color:var(--text-muted);">Belum ditimbang BSI</span>');
+            const wp=t.status_pembayaran==='lunas'?['#e0f2fe','#075985','#7dd3fc']:(t.status_pembayaran==='tidak_berlaku'?['#fee2e2','#991b1b','#fecaca']:['#fef3c7','#92400e','#fde68a']);
+            const btnLabel=st==='menunggu_verifikasi'?'Periksa':(st==='diterima'&&t.status_pembayaran!=='lunas'?'Koreksi/Bayar':'Lihat');
+            return `<tr><td>${formatTglTabel(t.tgl)}<br><small style="color:var(--text-muted);">${amanHtml(t.no_dokumen||'-')}</small></td><td><strong>${amanHtml(t.nama||'-')}</strong><br><small>${amanHtml(t.id_unit||'')}</small></td><td><strong>${amanHtml(t.jenis)}</strong>${t.biaya_angkut?`<br><small>Biaya angkut BSU: ${rupiahVerif(t.biaya_angkut)}</small>`:''}</td><td class="text-right"><strong>${kirim.toFixed(2)} Kg</strong></td><td>${badgeVerif(labelStatusVerifBsi(t),warna)}${t.diverifikasi_oleh?`<br><small>oleh ${amanHtml(t.diverifikasi_oleh)}</small>`:''}</td><td>${hasil}</td><td>${badgeVerif(labelPembayaranBsi(t),wp)}${t.tanggal_pembayaran?`<br><small>${formatTglTabel(t.tanggal_pembayaran)}</small>`:''}</td><td class="text-center"><button class="btn-sync" style="padding:7px 10px;" onclick="bukaVerifikasiPengiriman('${amanHtml(t.id)}')">${btnLabel}</button></td></tr>`;
+        }).join(''):'<tr><td colspan="8" class="text-center">Tidak ada pengajuan sesuai filter.</td></tr>';
+    }
+
+    function bukaVerifikasiPengiriman(id){
+        const t=(globalPengirimanVerifikasi||[]).find(x=>String(x.id)===String(id));if(!t)return alert('Data pengajuan tidak ditemukan.');
+        const st=statusVerifPengiriman(t),kirim=angkaVerif(t.berat_kirim??t.berat);
+        const hargaMaster=angkaVerif((globalKategoriVerifikasi||[]).find(k=>k.nama_kategori===t.jenis)?.harga);
+        document.getElementById('verifId').value=t.id;
+        document.getElementById('verifNamaBsu').value=(t.nama||'-')+(t.id_unit?` (${t.id_unit})`:'');
+        document.getElementById('verifSuratJalan').value=t.no_dokumen||'-';
+        document.getElementById('verifMaterial').value=t.jenis||'-';
+        document.getElementById('verifBeratKirim').value=kirim.toFixed(2)+' Kg';
+        document.getElementById('verifStatus').value=st==='ditolak'?'ditolak':'diterima';
+        document.getElementById('verifBeratDiterima').value=angkaVerif(t.berat_diterima??(st==='diterima'?t.berat:kirim)).toFixed(2);
+        document.getElementById('verifHargaFinal').value=Math.round(angkaVerif(t.harga_final??t.harga_satuan??t.harga_usulan??hargaMaster));
+        document.getElementById('verifCatatan').value=t.catatan_verifikasi||t.catatan||'';
+        document.getElementById('verifOleh').value=t.diverifikasi_oleh||getPetugasSesi();
+        const terkunci=t.status_pembayaran==='lunas'||['ditolak','dibatalkan'].includes(st);
+        ['verifStatus','verifBeratDiterima','verifHargaFinal','verifCatatan','verifOleh'].forEach(fid=>document.getElementById(fid).disabled=terkunci);
+        document.getElementById('btnSimpanVerifikasi').disabled=terkunci;
+        document.getElementById('btnSimpanVerifikasi').style.display=terkunci?'none':'inline-block';
+        const bayar=document.getElementById('areaPembayaranPengiriman');
+        bayar.style.display=st==='diterima'?'block':'none';
+        document.getElementById('bayarPengirimanJumlah').value=rupiahVerif(t.total_final??t.total);
+        document.getElementById('bayarPengirimanTanggal').value=new Date().toISOString().slice(0,10);
+        document.getElementById('bayarPengirimanBukti').value=t.no_bukti_pembayaran||'';
+        document.getElementById('bayarPengirimanOleh').value=t.dikonfirmasi_oleh||getPetugasSesi();
+        document.getElementById('btnBayarPengiriman').disabled=t.status_pembayaran==='lunas';
+        document.getElementById('btnBayarPengiriman').innerText=t.status_pembayaran==='lunas'?'SUDAH DIBAYAR':'KONFIRMASI PEMBAYARAN';
+        document.getElementById('panelVerifikasiPengiriman').style.display='block';
+        ubahStatusFormVerifikasi();hitungTotalVerifikasi();
+        document.getElementById('panelVerifikasiPengiriman').scrollIntoView({behavior:'smooth',block:'start'});
+    }
+
+    function ubahStatusFormVerifikasi(){
+        const ditolak=document.getElementById('verifStatus').value==='ditolak';
+        document.getElementById('verifBeratDiterima').disabled=ditolak||document.getElementById('btnSimpanVerifikasi').disabled;
+        document.getElementById('verifHargaFinal').disabled=ditolak||document.getElementById('btnSimpanVerifikasi').disabled;
+        if(ditolak){document.getElementById('verifBeratDiterima').value='0';document.getElementById('verifHargaFinal').value='0';}
+        hitungTotalVerifikasi();
+    }
+    function hitungTotalVerifikasi(){const total=angkaVerif(document.getElementById('verifBeratDiterima')?.value)*angkaVerif(document.getElementById('verifHargaFinal')?.value);const el=document.getElementById('verifTotalFinal');if(el)el.value=rupiahVerif(total);}
+    function tutupPanelVerifikasiPengiriman(){document.getElementById('panelVerifikasiPengiriman').style.display='none';}
+
+    function simpanVerifikasiPengiriman(e){
+        e.preventDefault();const id=document.getElementById('verifId').value;const status=document.getElementById('verifStatus').value;
+        const form={id,status_verifikasi:status,berat_diterima:angkaVerif(document.getElementById('verifBeratDiterima').value),harga_final:angkaVerif(document.getElementById('verifHargaFinal').value),catatan:document.getElementById('verifCatatan').value.trim(),oleh:document.getElementById('verifOleh').value.trim()||getPetugasSesi()};
+        if(status==='diterima'&&form.berat_diterima<=0)return alert('Berat diterima wajib lebih dari 0 Kg.');
+        if(status==='ditolak'&&!form.catatan)return alert('Tuliskan alasan penolakan.');
+        if(!confirm(status==='diterima'?`Terima pengiriman dengan nilai final ${rupiahVerif(form.berat_diterima*form.harga_final)}?`:'Tolak pengiriman ini? Stok pengajuan akan dikembalikan pada aplikasi BSU.'))return;
+        const btn=document.getElementById('btnSimpanVerifikasi');btn.disabled=true;btn.innerText='MENYIMPAN...';
+        AdapterAPI.verifikasiPengirimanBSI(form).then(res=>{if(!res?.ok)throw new Error(res?.error||'Verifikasi gagal');alert(status==='diterima'?'Pengiriman diterima dan masuk saldo BSU.':'Pengiriman ditolak.');tutupPanelVerifikasiPengiriman();loadVerifikasiPengirimanBSI();loadDataPusat();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerText='SIMPAN HASIL VERIFIKASI';});
+    }
+
+    function bayarPengirimanTerpilih(){
+        const id=document.getElementById('verifId').value;const t=(globalPengirimanVerifikasi||[]).find(x=>String(x.id)===String(id));if(!t)return alert('Pilih pengiriman.');
+        const jumlah=angkaVerif(t.total_final??t.total);if(jumlah<=0)return alert('Nilai pembayaran tidak valid.');
+        if(!confirm(`Bayar ${rupiahVerif(jumlah)} kepada ${t.nama||'BSU'}?\n\nAplikasi akan otomatis mengurangi saldo BSU di BSI dan menambah kas masuk pada aplikasi BSU.`))return;
+        const btn=document.getElementById('btnBayarPengiriman');btn.disabled=true;btn.innerText='MEMPROSES...';
+        AdapterAPI.konfirmasiPembayaranPengirimanBSI({id,tanggal:document.getElementById('bayarPengirimanTanggal').value,metode:document.getElementById('bayarPengirimanMetode').value,no_bukti:document.getElementById('bayarPengirimanBukti').value.trim(),oleh:document.getElementById('bayarPengirimanOleh').value.trim()||getPetugasSesi()}).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pembayaran gagal');alert(`Pembayaran ${rupiahVerif(res.jumlah||jumlah)} berhasil dicatat.`);tutupPanelVerifikasiPengiriman();loadVerifikasiPengirimanBSI();loadDataPusat();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerText='KONFIRMASI PEMBAYARAN';});
     }
 
     // =========================================

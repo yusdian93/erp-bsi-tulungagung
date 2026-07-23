@@ -287,8 +287,61 @@ const AdapterAPI = {
     // Data BSU latihan tetap ditampilkan pada daftar administrasi, tetapi transaksi
     // latihan tidak dimasukkan ke dashboard dan laporan resmi Bank Sampah Induk.
     const idLatihan = new Set((bsuList || []).filter(b => b.mode_latihan === true).map(b => String(b.id)));
-    const transaksiResmi = (transaksi || []).filter(t => !idLatihan.has(String(t.id_unit || '')));
+    const transaksiResmi = (transaksi || []).filter(t => {
+      if (idLatihan.has(String(t.id_unit || ''))) return false;
+      if ((t.status || 'aktif') === 'dibatalkan') return false;
+      // Transaksi material baru hanya masuk dashboard/laporan BSI setelah diterima.
+      // Riwayat lama (status_verifikasi null) dan transaksi Penarikan Tabungan tetap dibaca.
+      return t.jenis === 'Penarikan Tabungan' || !t.status_verifikasi || t.status_verifikasi === 'diterima';
+    });
     return { kategori: kategori || [], nasabah: bsuList || [], transaksi: transaksiResmi, hibah: hibah || [] };
+  },
+
+  // Seluruh pengajuan BSU, termasuk yang masih menunggu, khusus menu verifikasi BSI.
+  async getPengirimanVerifikasiBundle() {
+    const [{ data: transaksi, error: trxError }, { data: bsuList }, { data: kategori }] = await Promise.all([
+      sb.from('transaksi').select('*').eq('level', 'unit_ke_induk').order('tgl', { ascending: false }),
+      sb.from('bsu').select('id,nama,desa,kecamatan,mode_latihan'),
+      sb.from('kategori').select('*').order('id')
+    ]);
+    if (trxError) throw trxError;
+    const pengiriman = (transaksi || []).filter(t => t.jenis !== 'Penarikan Tabungan' && Number(t.berat_kirim ?? t.berat ?? 0) > 0);
+    return { pengiriman, bsu: bsuList || [], kategori: kategori || [] };
+  },
+
+  async verifikasiPengirimanBSI(form) {
+    const { data, error } = await sb.rpc('verifikasi_pengiriman_bsu', {
+      p_id: form.id,
+      p_status: form.status_verifikasi,
+      p_berat_diterima: Number(form.berat_diterima) || 0,
+      p_harga_final: Number(form.harga_final) || 0,
+      p_catatan: form.catatan || null,
+      p_oleh: form.oleh || getPetugasSesi()
+    });
+    if (error) return { ok:false, error:error.message };
+    return data || { ok:true };
+  },
+
+  async konfirmasiPembayaranPengirimanBSI(form) {
+    const { data, error } = await sb.rpc('konfirmasi_pembayaran_pengiriman_bsu', {
+      p_id: form.id,
+      p_tanggal: form.tanggal,
+      p_metode: form.metode,
+      p_no_bukti: form.no_bukti || null,
+      p_oleh: form.oleh || getPetugasSesi()
+    });
+    if (error) return { ok:false, error:error.message };
+    return data || { ok:true };
+  },
+
+  async batalkanPengajuanPengirimanBSU(form) {
+    const { data, error } = await sb.rpc('batalkan_pengajuan_pengiriman_bsu', {
+      p_id: form.id,
+      p_alasan: form.alasan || null,
+      p_oleh: form.oleh || getPetugasSesi()
+    });
+    if (error) return { ok:false, error:error.message };
+    return data || { ok:true };
   },
 
   async tambahBantuanHibah(form) {
@@ -349,18 +402,20 @@ const AdapterAPI = {
   async getRingkasanDashboard() {
     const [{ data: bsuList }, { data: trxSemua }] = await Promise.all([
       sb.from('bsu').select('id, mode_latihan'),
-      sb.from('transaksi').select('id_unit, berat, total, tgl').eq('level', 'unit_ke_induk').gt('berat', 0)
+      sb.from('transaksi').select('id_unit, berat, total, tgl, status, status_verifikasi').eq('level', 'unit_ke_induk').gt('berat', 0)
     ]);
     const resmi = (bsuList || []).filter(b => b.mode_latihan !== true);
     const idResmi = new Set(resmi.map(b => String(b.id)));
-    const trxResmi = (trxSemua || []).filter(t => idResmi.has(String(t.id_unit || '')));
+    const trxResmi = (trxSemua || []).filter(t => idResmi.has(String(t.id_unit || '')))
+      .filter(t => (t.status || 'aktif') !== 'dibatalkan')
+      .filter(t => !t.status_verifikasi || t.status_verifikasi === 'diterima');
     const now = new Date();
     const bulanIni = trxResmi.filter(t => {
       const d = new Date(t.tgl);
       return !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
     const totalSampah = trxResmi.reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-    return { ringkasan: { unit: resmi.length, setoran_bulan: bulanIni.length, total_sampah: totalSampah.toFixed(1) } };
+    return { ringkasan: { unit: resmi.length, setoran_bulan: bulanIni.reduce((a,t)=>a+(parseFloat(t.berat)||0),0).toFixed(1), total_sampah: totalSampah.toFixed(1) } };
   },
 
   async getTransaksiInternalBSU(namaBsu) {
@@ -911,19 +966,26 @@ const AdapterAPI = {
     const kunci = await cekPeriodeTerkunci(form.tgl);
     if (kunci) return pesanPeriodeTerkunci(kunci);
     const id = genId('TRX');
-    const row = { id, id_unit: form.id_unit, level: 'unit_ke_induk', nama: form.nama, tgl: form.tgl,
-      jenis: form.jenis, berat: Number(form.berat)||0, harga_satuan: Number(form.harga_satuan)||0,
-      total: Number(form.total)||0, no_dokumen: form.no_dokumen||null, status_pembayaran: form.status_pembayaran||'belum_dibayar',
-      metode: form.metode||null, biaya_angkut: Number(form.biaya_angkut)||0, catatan: form.catatan||null,
-      status: 'aktif', created_by: form.oleh||getPetugasSesi() };
+    const beratKirim = Number(form.berat_kirim ?? form.berat) || 0;
+    const hargaUsulan = Number(form.harga_usulan ?? form.harga_satuan) || 0;
+    const row = {
+      id, id_unit: form.id_unit, level: 'unit_ke_induk', nama: form.nama, tgl: form.tgl,
+      jenis: form.jenis,
+      berat_kirim: beratKirim, berat: beratKirim,
+      harga_usulan: hargaUsulan, total_usulan: beratKirim * hargaUsulan,
+      harga_satuan: 0, total: 0,
+      no_dokumen: form.no_dokumen || null,
+      status_verifikasi: 'menunggu_verifikasi',
+      status_pembayaran: 'belum_dibayar',
+      biaya_angkut: Number(form.biaya_angkut) || 0,
+      catatan: form.catatan || null,
+      status: 'aktif', created_by: form.oleh || getPetugasSesi()
+    };
+    if (!row.jenis || beratKirim <= 0) return 'Gagal: Material dan berat kirim wajib diisi.';
     const { error } = await sb.from('transaksi').insert(row);
     if (error) return 'Gagal: ' + error.message;
-    logAudit('transaksi', id, 'insert', null, row, 'Pengiriman BSU ke BSI oleh ' + row.created_by);
-    if (row.status_pembayaran === 'lunas' && row.total > 0) {
-      await this.tambahKasMutasi({ id_unit: form.id_unit, tanggal: form.tgl, arah: 'masuk', kategori: 'Pembayaran BSI', nominal: row.total,
-        metode: row.metode, no_bukti: row.no_dokumen, keterangan: 'Pembayaran pengiriman ' + row.jenis, referensi_id: id, oleh: row.created_by });
-    }
-    return 'Sukses tersimpan';
+    logAudit('transaksi', id, 'insert', null, row, 'Pengajuan pengiriman BSU ke BSI oleh ' + row.created_by);
+    return 'Sukses: pengajuan dikirim dan menunggu verifikasi BSI';
   },
 
   async tambahStockOpname(form) {
@@ -992,6 +1054,14 @@ const AdapterAPI = {
   async batalkanTransaksiUnit({ id, alasan, oleh }) {
     const { data: lama } = await sb.from('transaksi').select('*').eq('id', id).maybeSingle();
     if (!lama) return 'Gagal: Transaksi tidak ditemukan.';
+    if (lama.level === 'unit_ke_induk') {
+      if (lama.jenis === 'Penarikan Tabungan') return 'Gagal: Transaksi pembayaran dari BSI tidak dapat dibatalkan oleh BSU.';
+      if ((lama.status_verifikasi || 'menunggu_verifikasi') !== 'menunggu_verifikasi') {
+        return 'Gagal: Pengiriman yang sudah diperiksa BSI tidak dapat dibatalkan dari BSU.';
+      }
+      const hasil = await this.batalkanPengajuanPengirimanBSU({ id, alasan, oleh });
+      return hasil?.ok ? 'Sukses: pengajuan dibatalkan.' : 'Gagal: ' + (hasil?.error || 'pembatalan gagal');
+    }
     const kunci = await cekPeriodeTerkunci(lama.tgl); if (kunci) return pesanPeriodeTerkunci(kunci);
     const dataBaru = { status:'dibatalkan', alasan_koreksi:alasan, dibatalkan_oleh:oleh||getPetugasSesi(), dibatalkan_pada:new Date().toISOString() };
     const { error } = await sb.from('transaksi').update(dataBaru).eq('id', id);

@@ -763,7 +763,7 @@
                             <ul class="dropdown-menu">
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down"></i>Setoran Nasabah</button></li>
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2"></i>Saldo & Penarikan</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('pengiriman', this)"><i class="bi bi-truck"></i>Pengiriman ke BSI</button></li>
+                                <li><button class="dropdown-item nav-btn" onclick="showTab('pengiriman', this)"><i class="bi bi-truck"></i>Pengajuan ke BSI</button></li>
                                 <li><button class="dropdown-item nav-btn" onclick="showTab('koreksi', this)"><i class="bi bi-arrow-counterclockwise"></i>Koreksi/Pembatalan</button></li>
                             </ul>
                         </li>
@@ -1209,26 +1209,27 @@
 
         <div id="pengiriman" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
-                <div class="module-title"><span class="icon-shell"><i class="bi bi-truck"></i></span><div><h4 class="m-0">Pengiriman/Penjualan ke Bank Sampah Induk</h4><div class="module-note">Mencatat material keluar dari gudang unit, nilai penjualan, surat jalan, dan status pembayaran.</div></div></div>
-                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i>Berat pengiriman tidak boleh melebihi stok aplikasi. Jika stok fisik berbeda, lakukan Stock Opname terlebih dahulu.</div>
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-truck"></i></span><div><h4 class="m-0">Pengajuan Pengiriman Sampah ke BSI</h4><div class="module-note">BSU mengajukan material dan berat kirim. Berat diterima, harga final, serta pembayaran ditetapkan oleh Bank Sampah Induk.</div></div></div>
+                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i><strong>Alur:</strong> BSU mengirim pengajuan → BSI memeriksa dan menimbang → BSI menerima/menolak → nilai masuk saldo BSU → BSI mengonfirmasi pembayaran. Pengurus BSU tidak menetapkan sendiri status lunas.</div>
                 <form id="formPengirimanBSI" class="mt-4" onsubmit="simpanPengirimanBSI(event)">
                     <div class="row g-3">
-                        <div class="col-md-3"><label>Tanggal <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" required></div>
+                        <div class="col-md-3"><label>Tanggal Pengiriman <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" required></div>
                         <div class="col-md-3"><label>No. Surat Jalan</label><input id="kirimDokumen" class="form-control" placeholder="SJ/BSU/..."></div>
                         <div class="col-md-6"><label>Material <span class="required-mark">*</span></label><select id="kirimMaterial" class="form-select" required onchange="hitungPengirimanBSI()"></select></div>
-                        <div class="col-md-3"><label>Berat Dikirim (Kg) <span class="required-mark">*</span></label><input type="number" step="0.01" min="0.01" id="kirimBerat" class="form-control" required oninput="hitungPengirimanBSI()"></div>
-                        <div class="col-md-3"><label>Harga Jual/Kg</label><input type="number" min="0" id="kirimHarga" class="form-control" oninput="hitungPengirimanBSI()"></div>
-                        <div class="col-md-3"><label>Total Penjualan</label><input id="kirimTotal" class="form-control" readonly></div>
-                        <div class="col-md-3"><label>Biaya Angkut</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
-                        <div class="col-md-3"><label>Status Pembayaran</label><select id="kirimStatusBayar" class="form-select"><option value="belum_dibayar">Belum Dibayar</option><option value="lunas">Lunas/Diterima</option></select></div>
-                        <div class="col-md-3"><label>Metode</label><select id="kirimMetode" class="form-select"><option>Tunai</option><option>Transfer</option><option>Tabungan BSU di BSI</option></select></div>
-                        <div class="col-md-6"><label>Catatan/Selisih Timbang</label><input id="kirimCatatan" class="form-control" placeholder="Contoh: hasil timbang BSI 49,80 kg"></div>
+                        <div class="col-md-3"><label>Berat Dikirim BSU (Kg) <span class="required-mark">*</span></label><input type="number" step="0.01" min="0.01" id="kirimBerat" class="form-control" required oninput="hitungPengirimanBSI()"></div>
+                        <div class="col-md-3"><label>Harga Acuan BSI</label><input id="kirimEstimasiHarga" class="form-control" readonly value="Rp 0/Kg"></div>
+                        <div class="col-md-3"><label>Estimasi Nilai</label><input id="kirimEstimasiNilai" class="form-control" readonly value="Rp 0"></div>
+                        <div class="col-md-3"><label>Biaya Angkut BSU</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
+                        <div class="col-12"><label>Catatan Pengiriman</label><input id="kirimCatatan" class="form-control" placeholder="Kondisi material, jumlah karung, nama pengemudi, atau catatan lain"></div>
                     </div>
-                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-save me-2"></i>Simpan Pengiriman</button>
+                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-send-check me-2"></i>Kirim Pengajuan ke BSI</button>
                 </form>
                 <div class="section-divider"></div>
-                <h6 class="fw-bold mb-3">Riwayat Pengiriman ke BSI</h6>
-                <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal/No. Dokumen</th><th>Material</th><th class="text-end">Berat</th><th class="text-end">Nilai</th><th>Status Bayar</th><th>Petugas</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <h6 class="fw-bold m-0">Status Pengajuan dan Hasil Verifikasi BSI</h6>
+                    <small class="text-muted">Data diperbarui otomatis dari database yang sama.</small>
+                </div>
+                <div class="table-responsive"><table class="table table-hover" style="min-width:1050px;"><thead><tr><th>Tanggal/Surat Jalan</th><th>Material</th><th class="text-end">Berat Kirim</th><th>Status Verifikasi</th><th>Hasil BSI</th><th>Status Pembayaran</th><th>Catatan</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
             </div>
         </div>
 
@@ -1505,7 +1506,7 @@
         const keluarAktif = transaksiAktif(dataTransaksiKeluar);
         const totalSaldo = trxAktif.reduce((a,t) => a + num(t.total), 0);
         const totalMasuk = trxAktif.filter(t => t.jenis !== 'Penarikan Tunai').reduce((a,t) => a + num(t.berat), 0);
-        const totalKeluar = keluarAktif.filter(t => num(t.berat) > 0).reduce((a,t) => a + num(t.berat), 0);
+        const totalKeluar = keluarAktif.filter(t => num(t.berat_kirim ?? t.berat) > 0).reduce((a,t) => a + num(t.berat_kirim ?? t.berat), 0);
         const totalStok = hitungSemuaStok().reduce((a,b) => a + b.sisa, 0);
         const saldoKas = hitungSaldoKas();
 
@@ -3114,7 +3115,7 @@
         const masuk=transaksiAktif(dataTransaksi).filter(t=>dalamRentang(t.tgl,mulai,akhir)&&(!material||t.jenis===material)&&(!nFilter||transaksiMilikNasabah(t,nFilter)));
         const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>dalamRentang(t.tgl,mulai,akhir)&&(!material||t.jenis===material));
         const totalBeratMasuk=masuk.filter(t=>t.jenis!=='Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0);
-        const totalKeluar=keluar.reduce((a,t)=>a+num(t.berat),0);
+        const totalKeluar=keluar.reduce((a,t)=>a+num(t.berat_kirim??t.berat),0);
         const totalHutang=masuk.reduce((a,t)=>a+num(t.total),0);
         const stokRows=hitungSemuaStok().filter(r=>!material||r.nama_kategori===material);
         const stokAkhir=stokRows.reduce((a,r)=>a+r.sisa,0);
@@ -3128,7 +3129,7 @@
     function eksporExcel() {
         const trx=transaksiAktif(dataTransaksi);const keluar=transaksiAktif(dataTransaksiKeluar);const stok=hitungSemuaStok();
         const rowsTrx=trx.map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),ID_Nasabah:t.id_nasabah||'',Nasabah:t.nama,Jenis:t.jenis,Berat_Kg:num(t.berat),Harga_Satuan:num(t.harga_satuan),Nilai:num(t.total),Status:t.status||'aktif'}));
-        const rowsKeluar=keluar.map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),No_Dokumen:t.no_dokumen||'',Material:t.jenis,Berat_Kg:num(t.berat),Harga_Jual:num(t.harga_satuan),Total:num(t.total),Status_Pembayaran:t.status_pembayaran||''}));
+        const rowsKeluar=keluar.filter(t=>t.jenis!=='Penarikan Tabungan').map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),No_Dokumen:t.no_dokumen||'',Material:t.jenis,Berat_Kirim_Kg:num(t.berat_kirim??t.berat),Status_Verifikasi:t.status_verifikasi||'diterima',Berat_Diterima_Kg:num(t.berat_diterima??t.berat),Harga_Final:num(t.harga_final??t.harga_satuan),Total_Final:num(t.total_final??t.total),Status_Pembayaran:t.status_pembayaran||''}));
         const rowsKas=dataKasMutasi.map(k=>({Tanggal:formatTanggalTampil(k.tanggal),Arah:k.arah,Kategori:k.kategori,Nominal:num(k.nominal),Metode:k.metode,No_Bukti:k.no_bukti,Keterangan:k.keterangan,Petugas:k.oleh}));
         if(window.XLSX){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsTrx),'Transaksi Nasabah');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsKeluar),'Pengiriman BSI');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(stok),'Stok');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsKas),'Kas');XLSX.writeFile(wb,`Laporan_BSU_${namaUnitTanpaBSU().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);}else unduhCsv(rowsTrx,'Laporan_BSU.csv');
     }
@@ -3209,7 +3210,7 @@
     function transaksiAktif(rows){return (rows||[]).filter(t=>(t.status||'aktif')!=='dibatalkan');}
     function parseTanggalUnit(v){if(!v)return new Date(NaN);if(typeof parseTanggalFleksibel==='function')return parseTanggalFleksibel(v);const s=String(v);const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return new Date(s);}
     function tanggalKeMs(v){const d=parseTanggalUnit(v);return isNaN(d)?0:d.getTime();}
-    function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});}
+    function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
     function formatTanggalSaja(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
     function dalamRentang(v,mulai,akhir){const ms=tanggalKeMs(v);if(mulai&&ms<new Date(mulai+'T00:00:00').getTime())return false;if(akhir&&ms>new Date(akhir+'T23:59:59').getTime())return false;return true;}
     function transaksiMilikNasabah(t,n){return String(t.id_nasabah||'')===String(n.id)||String(t.id_nasabah_arsip||'')===String(n.id)||(!t.id_nasabah&&!t.id_nasabah_arsip&&String(t.nama||'').trim()===String(n.nama||'').trim());}
@@ -3222,7 +3223,7 @@
     function hitungSemuaStok(){
         return (dataKategori||[]).map(k=>{
             const masuk=transaksiAktif(dataTransaksi).filter(t=>t.jenis===k.nama_kategori&&t.jenis!=='Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0);
-            const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>t.jenis===k.nama_kategori).reduce((a,t)=>a+num(t.berat),0);
+            const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>t.jenis===k.nama_kategori).reduce((a,t)=>a+num(t.berat_kirim ?? t.berat),0);
             const penyesuaian=(dataStockOpname||[]).filter(o=>(o.status||'aktif')!=='dibatalkan'&&o.material===k.nama_kategori).reduce((a,o)=>a+num(o.selisih),0);
             const sisa=masuk-keluar+penyesuaian;return{jenis_material:k.jenis_material||'-',nama_kategori:k.nama_kategori,masuk,keluar,penyesuaian,sisa,nilai:sisa*num(k.harga),harga:num(k.harga)};
         }).sort((a,b)=>b.sisa-a.sisa);
@@ -3239,9 +3240,59 @@
         const op=document.getElementById('opnamePetugas');if(op&&!op.value)op.value=getPetugasSesi();
     }
 
-    function hitungPengirimanBSI(){const sel=document.getElementById('kirimMaterial');if(!sel)return;const opt=sel.options[sel.selectedIndex];const hargaEl=document.getElementById('kirimHarga');if(opt&&opt.dataset.harga&&(!hargaEl.value||num(hargaEl.value)===0))hargaEl.value=opt.dataset.harga;setText('kirimTotal',rupiah(num(document.getElementById('kirimBerat').value)*num(hargaEl.value)));}
-    function simpanPengirimanBSI(e){e.preventDefault();const material=document.getElementById('kirimMaterial').value;const berat=num(document.getElementById('kirimBerat').value);const harga=num(document.getElementById('kirimHarga').value);if(!material||berat<=0)return alert('Material dan berat wajib diisi.');const stok=stokMaterial(material);if(berat>stok)return alert(`Stok ${material} hanya ${stok.toFixed(2)} Kg.`);const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl:document.getElementById('kirimTanggal').value,jenis:material,berat,harga_satuan:harga,total:berat*harga,no_dokumen:document.getElementById('kirimDokumen').value.trim(),status_pembayaran:document.getElementById('kirimStatusBayar').value,metode:document.getElementById('kirimMetode').value,biaya_angkut:num(document.getElementById('kirimBiayaAngkut').value),catatan:document.getElementById('kirimCatatan').value.trim(),oleh:getPetugasSesi()};AdapterAPI.tambahPengirimanBSI(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Pengiriman berhasil dicatat.');e.target.reset();isiDropdownModulBaru();loadDataDatabase();}).catch(err=>alert(err.message));}
-    function updateTabelPengiriman(){const tb=document.getElementById('tabel-pengiriman-bsi');if(!tb)return;const rows=[...dataTransaksiKeluar].sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));tb.innerHTML=rows.length?rows.map(t=>`<tr><td>${formatTanggalTampil(t.tgl)}<br><small class="text-muted">${escapeHtml(t.no_dokumen||t.id)}</small></td><td class="fw-bold">${escapeHtml(t.jenis)}</td><td class="text-end">${num(t.berat).toFixed(2)} Kg</td><td class="text-end">${rupiah(t.total)}</td><td><span class="status-chip ${t.status_pembayaran==='lunas'?'status-paid':'status-pending'}">${escapeHtml((t.status_pembayaran||'belum_dibayar').replaceAll('_',' '))}</span></td><td>${escapeHtml(t.created_by||t.oleh||'-')}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-truck"></i>Belum ada pengiriman.</td></tr>`;}
+    function labelStatusVerifikasiPengiriman(t){
+        const st=String((t.status||'aktif')==='dibatalkan'?(t.status_verifikasi==='ditolak'?'ditolak':'dibatalkan'):(t.status_verifikasi||'diterima')).toLowerCase();
+        return ({menunggu_verifikasi:'Menunggu Verifikasi BSI',diterima:'Diterima BSI',ditolak:'Ditolak BSI',dibatalkan:'Dibatalkan BSU'})[st]||st.replaceAll('_',' ');
+    }
+    function kelasStatusVerifikasiPengiriman(t){
+        const st=String(t.status_verifikasi||'diterima').toLowerCase();
+        if(st==='diterima')return 'status-active';
+        if(st==='menunggu_verifikasi')return 'status-pending';
+        return 'status-void';
+    }
+    function labelStatusPembayaranPengiriman(t){
+        const st=String(t.status_pembayaran||'belum_dibayar').toLowerCase();
+        return ({belum_dibayar:'Belum Diverifikasi/Dibayar',masuk_saldo_bsu:'Masuk Saldo BSU',lunas:'Lunas/Dibayar',tidak_berlaku:'Tidak Berlaku'})[st]||st.replaceAll('_',' ');
+    }
+    function kelasStatusPembayaranPengiriman(t){return t.status_pembayaran==='lunas'?'status-paid':(t.status_pembayaran==='tidak_berlaku'?'status-void':'status-pending');}
+    function hitungPengirimanBSI(){
+        const sel=document.getElementById('kirimMaterial');if(!sel)return;
+        const opt=sel.options[sel.selectedIndex];
+        const harga=num(opt?.dataset?.harga);
+        const berat=num(document.getElementById('kirimBerat')?.value);
+        const h=document.getElementById('kirimEstimasiHarga');if(h)h.value=rupiah(harga)+'/Kg';
+        const n=document.getElementById('kirimEstimasiNilai');if(n)n.value=rupiah(berat*harga);
+    }
+    function simpanPengirimanBSI(e){
+        e.preventDefault();
+        const material=document.getElementById('kirimMaterial').value;
+        const berat=num(document.getElementById('kirimBerat').value);
+        if(!material||berat<=0)return alert('Material dan berat kirim wajib diisi.');
+        const stok=stokMaterial(material);if(berat>stok)return alert(`Stok ${material} hanya ${stok.toFixed(2)} Kg.`);
+        const opt=document.getElementById('kirimMaterial').selectedOptions[0];
+        const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl:document.getElementById('kirimTanggal').value,jenis:material,berat_kirim:berat,harga_usulan:num(opt?.dataset?.harga),no_dokumen:document.getElementById('kirimDokumen').value.trim(),biaya_angkut:num(document.getElementById('kirimBiayaAngkut').value),catatan:document.getElementById('kirimCatatan').value.trim(),oleh:getPetugasSesi()};
+        if(!confirm(`Kirim pengajuan ${material} sebanyak ${berat.toFixed(2)} Kg ke BSI?\n\nBerat dan harga final akan ditentukan setelah verifikasi BSI.`))return;
+        const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Mengirim...';
+        AdapterAPI.tambahPengirimanBSI(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Pengajuan berhasil dikirim dan menunggu verifikasi BSI.');e.target.reset();isiDropdownModulBaru();hitungPengirimanBSI();loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-send-check me-2"></i>Kirim Pengajuan ke BSI';});
+    }
+    function updateTabelPengiriman(){
+        const tb=document.getElementById('tabel-pengiriman-bsi');if(!tb)return;
+        const rows=[...dataTransaksiKeluar].filter(t=>t.jenis!=='Penarikan Tabungan'&&num(t.berat_kirim??t.berat)>0).sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));
+        tb.innerHTML=rows.length?rows.map(t=>{
+            const kirim=num(t.berat_kirim??t.berat);
+            const diterima=t.status_verifikasi==='diterima'?num(t.berat_diterima??t.berat):0;
+            const hasil=t.status_verifikasi==='diterima'?`<strong>${diterima.toFixed(2)} Kg</strong><br><small>${rupiah(t.harga_final??t.harga_satuan)}/Kg · ${rupiah(t.total_final??t.total)}</small>`:(t.status_verifikasi==='ditolak'?'<span class="text-danger fw-bold">Tidak diterima</span>':'<span class="text-muted">Belum diperiksa</span>');
+            const cat=[t.catatan_verifikasi,t.catatan].filter(Boolean).map(escapeHtml).join('<br>')||'-';
+            const bisaBatal=(t.status||'aktif')!=='dibatalkan'&&(!t.status_verifikasi||t.status_verifikasi==='menunggu_verifikasi');
+            return `<tr><td>${formatTanggalTampil(t.tgl)}<br><small class="text-muted">${escapeHtml(t.no_dokumen||'-')}</small></td><td class="fw-bold">${escapeHtml(t.jenis)}</td><td class="text-end fw-bold">${kirim.toFixed(2)} Kg</td><td><span class="status-chip ${kelasStatusVerifikasiPengiriman(t)}">${escapeHtml(labelStatusVerifikasiPengiriman(t))}</span>${t.diverifikasi_oleh?`<br><small class="text-muted">oleh ${escapeHtml(t.diverifikasi_oleh)}</small>`:''}</td><td>${hasil}</td><td><span class="status-chip ${kelasStatusPembayaranPengiriman(t)}">${escapeHtml(labelStatusPembayaranPengiriman(t))}</span>${t.tanggal_pembayaran?`<br><small>${formatTanggalTampil(t.tanggal_pembayaran)}</small>`:''}</td><td><small>${cat}</small></td><td class="text-center">${bisaBatal?`<button class="btn btn-sm btn-outline-danger" onclick="batalkanPengajuanPengiriman('${escAttrJs(t.id)}')"><i class="bi bi-x-circle me-1"></i>Batalkan</button>`:'-'}</td></tr>`;
+        }).join(''):`<tr><td colspan="8" class="empty-state"><i class="bi bi-truck"></i>Belum ada pengajuan pengiriman.</td></tr>`;
+    }
+    function batalkanPengajuanPengiriman(id){
+        const t=dataTransaksiKeluar.find(x=>String(x.id)===String(id));if(!t)return;
+        const alasan=prompt('Alasan pembatalan pengajuan:');if(!alasan||!alasan.trim())return;
+        if(!confirm('Batalkan pengajuan ini? Stok yang sebelumnya dicadangkan akan kembali tersedia di aplikasi.'))return;
+        AdapterAPI.batalkanPengajuanPengirimanBSU({id,alasan:alasan.trim(),oleh:getPetugasSesi()}).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pembatalan gagal');alert('Pengajuan dibatalkan.');loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message));
+    }
 
     function isiStokSistemOpname(){const material=document.getElementById('opnameMaterial')?.value||'';const v=stokMaterial(material);const el=document.getElementById('opnameSistem');if(el)el.value=v.toFixed(2);}
     function simpanStockOpname(e){e.preventDefault();const material=document.getElementById('opnameMaterial').value;const sistem=stokMaterial(material);const fisik=num(document.getElementById('opnameFisik').value);if(!material)return alert('Pilih material.');AdapterAPI.tambahStockOpname({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('opnameTanggal').value,material,stok_sistem:sistem,stok_fisik:fisik,selisih:fisik-sistem,alasan:document.getElementById('opnameAlasan').value.trim(),diperiksa_oleh:document.getElementById('opnamePetugas').value.trim()||getPetugasSesi()}).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Stock opname tersimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
@@ -3251,7 +3302,19 @@
     function simpanKasMutasi(e){e.preventDefault();const form={id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('kasTanggal').value,arah:document.getElementById('kasArah').value,kategori:document.getElementById('kasKategori').value,nominal:num(document.getElementById('kasNominal').value),metode:document.getElementById('kasMetode').value,no_bukti:document.getElementById('kasBukti').value.trim(),keterangan:document.getElementById('kasKeterangan').value.trim(),oleh:getPetugasSesi()};if(form.arah==='keluar'&&form.nominal>hitungSaldoKas())return alert('Kas tidak mencukupi.');AdapterAPI.tambahKasMutasi(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Mutasi kas tersimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
     function simpanRekonsiliasiUnit(e){e.preventDefault();const sistem=hitungSaldoKas(),fisik=num(document.getElementById('rekFisik').value);AdapterAPI.tambahRekonsiliasiUnit({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('rekTanggal').value,sumber:'Kas/Bank BSU',saldo_sistem:sistem,saldo_fisik:fisik,keterangan:document.getElementById('rekKet').value.trim(),diperiksa_oleh:getPetugasSesi()}).then(res=>{alert(res);e.target.reset();loadDataDatabase();});}
 
-    function updateTabelKoreksi(){const tb=document.getElementById('tabel-koreksi');if(!tb)return;const cari=(document.getElementById('filterKoreksiCari')?.value||'').toLowerCase();const mulai=document.getElementById('filterKoreksiMulai')?.value||'';const akhir=document.getElementById('filterKoreksiAkhir')?.value||'';const status=document.getElementById('filterKoreksiStatus')?.value||'semua';const all=[...dataTransaksi,...dataTransaksiKeluar].filter(t=>dalamRentang(t.tgl,mulai,akhir)).filter(t=>status==='semua'||(t.status||'aktif')===status).filter(t=>!cari||JSON.stringify([t.id,t.nama,t.jenis,t.no_dokumen]).toLowerCase().includes(cari)).sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));tb.innerHTML=all.length?all.map(t=>`<tr><td><code>${escapeHtml(t.id)}</code><br><small>${formatTanggalTampil(t.tgl)}</small></td><td>${escapeHtml(t.nama||'-')}</td><td><strong>${escapeHtml(t.jenis)}</strong><br><small class="text-muted">${escapeHtml(t.level||'')}</small></td><td class="text-end">${num(t.berat).toFixed(2)} Kg<br><strong>${rupiah(t.total)}</strong></td><td><span class="status-chip ${(t.status||'aktif')==='dibatalkan'?'status-void':'status-active'}">${escapeHtml(t.status||'aktif')}</span>${t.alasan_koreksi?`<br><small>${escapeHtml(t.alasan_koreksi)}</small>`:''}</td><td class="text-center">${(t.status||'aktif')==='dibatalkan'?'-':`<button class="btn btn-sm btn-outline-danger" onclick="batalkanTransaksiUnit('${escAttrJs(t.id)}')"><i class="bi bi-x-octagon me-1"></i>Batalkan</button>`}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state">Tidak ada transaksi.</td></tr>`;}
+    function updateTabelKoreksi(){
+        const tb=document.getElementById('tabel-koreksi');if(!tb)return;
+        const cari=(document.getElementById('filterKoreksiCari')?.value||'').toLowerCase();const mulai=document.getElementById('filterKoreksiMulai')?.value||'';const akhir=document.getElementById('filterKoreksiAkhir')?.value||'';const status=document.getElementById('filterKoreksiStatus')?.value||'semua';
+        const all=[...dataTransaksi,...dataTransaksiKeluar].filter(t=>dalamRentang(t.tgl,mulai,akhir)).filter(t=>status==='semua'||(t.status||'aktif')===status).filter(t=>!cari||JSON.stringify([t.nama,t.jenis,t.no_dokumen]).toLowerCase().includes(cari)).sort((a,b)=>tanggalKeMs(b.tgl)-tanggalKeMs(a.tgl));
+        tb.innerHTML=all.length?all.map(t=>{
+            const transaksiBsi=t.level==='unit_ke_induk';
+            const pengiriman=transaksiBsi&&t.jenis!=='Penarikan Tabungan';
+            const pending=pengiriman&&(!t.status_verifikasi||t.status_verifikasi==='menunggu_verifikasi')&&(t.status||'aktif')!=='dibatalkan';
+            const aksi=(t.status||'aktif')==='dibatalkan'?'-':(pending?`<button class="btn btn-sm btn-outline-danger" onclick="batalkanPengajuanPengiriman('${escAttrJs(t.id)}')"><i class="bi bi-x-octagon me-1"></i>Batalkan Pengajuan</button>`:(transaksiBsi?'<small class="text-muted">Dikelola oleh BSI</small>':`<button class="btn btn-sm btn-outline-danger" onclick="batalkanTransaksiUnit('${escAttrJs(t.id)}')"><i class="bi bi-x-octagon me-1"></i>Batalkan</button>`));
+            const statusTampil=pengiriman?labelStatusVerifikasiPengiriman(t):(t.status||'aktif');
+            return `<tr><td>${formatTanggalTampil(t.tgl)}</td><td>${escapeHtml(t.nama||'-')}</td><td><strong>${escapeHtml(t.jenis)}</strong><br><small class="text-muted">${pengiriman?'Pengiriman ke BSI':'Transaksi Nasabah'}</small></td><td class="text-end">${num(t.berat_kirim??t.berat).toFixed(2)} Kg<br><strong>${rupiah(t.total_final??t.total)}</strong></td><td><span class="status-chip ${(t.status||'aktif')==='dibatalkan'?'status-void':(pengiriman?kelasStatusVerifikasiPengiriman(t):'status-active')}">${escapeHtml(statusTampil)}</span>${t.alasan_koreksi?`<br><small>${escapeHtml(t.alasan_koreksi)}</small>`:''}</td><td class="text-center">${aksi}</td></tr>`;
+        }).join(''):`<tr><td colspan="6" class="empty-state">Tidak ada transaksi.</td></tr>`;
+    }
     function batalkanTransaksiUnit(id){const alasan=prompt('Alasan pembatalan transaksi:');if(!alasan||!alasan.trim())return;const pin=prompt('Ketik BATAL untuk mengonfirmasi:');if(pin!=='BATAL')return alert('Pembatalan dibatalkan.');AdapterAPI.batalkanTransaksiUnit({id,alasan:alasan.trim(),oleh:getPetugasSesi()}).then(res=>{alert(res);loadDataDatabase();});}
 
     function updateAuditUnit(){const tb=document.getElementById('tabel-audit-unit');if(!tb)return;const tabel=document.getElementById('auditFilterTabel')?.value||'';const mulai=document.getElementById('auditFilterMulai')?.value||'';const rows=(dataAuditUnit||[]).filter(a=>!tabel||a.tabel===tabel).filter(a=>!mulai||tanggalKeMs(a.waktu)>=new Date(mulai+'T00:00:00').getTime());tb.innerHTML=rows.length?rows.map(a=>`<tr><td>${formatTanggalTampil(a.waktu)}</td><td><strong>${escapeHtml(a.tabel)}</strong><br><span class="status-chip status-active">${escapeHtml(a.aksi)}</span></td><td><code>${escapeHtml(a.record_id)}</code></td><td>${escapeHtml(a.oleh||'-')}</td><td><small>${escapeHtml(a.keterangan||ringkasAudit(a))}</small></td></tr>`).join(''):`<tr><td colspan="5" class="empty-state"><i class="bi bi-shield-check"></i>Belum ada audit untuk unit ini.</td></tr>`;}
