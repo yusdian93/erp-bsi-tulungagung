@@ -336,7 +336,71 @@
     .trx-feed-total { font-weight: 800; font-size: 13.5px; color: var(--primary-dark); white-space: nowrap; flex-shrink: 0; }
     .trx-feed-sub { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: var(--text-muted); flex-wrap: wrap; }
     .trx-feed-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  </style>
+  
+
+    /* ===== Penyederhanaan Menu BSI ===== */
+    .nav-search-wrap {
+        position: relative; display: flex; align-items: center; gap: 8px;
+        margin: 0 2px 12px; padding: 0 8px 0 11px; min-height: 42px;
+        border: 1px solid rgba(255,255,255,.14); border-radius: 12px;
+        background: rgba(255,255,255,.075); transition: .2s ease;
+    }
+    .nav-search-wrap:focus-within { background: rgba(255,255,255,.13); border-color: rgba(167,243,208,.55); box-shadow: 0 0 0 3px rgba(16,185,129,.11); }
+    .nav-search-icon { color: #a7f3d0; font-size: 18px; line-height: 1; transform: rotate(-20deg); }
+    .nav-search-wrap input { flex: 1; min-width: 0; height: 40px; border: 0; outline: 0; color: #fff; background: transparent; font: 600 12px 'Inter', sans-serif; }
+    .nav-search-wrap input::placeholder { color: rgba(209,250,229,.62); }
+    .nav-search-clear { width: 26px; height: 26px; border: 0; border-radius: 8px; cursor: pointer; color: rgba(255,255,255,.72); background: rgba(255,255,255,.07); font-size: 18px; line-height: 1; }
+    .nav-search-clear:hover { color: #fff; background: rgba(255,255,255,.14); }
+    .nav-section-label { margin-top: 13px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,.10); }
+    .nav-main-entry { margin-bottom: 2px; }
+    .nav-text { flex: 1; min-width: 0; }
+    .nav-tag { flex-shrink: 0; padding: 2px 6px; border-radius: 999px; color: #fde68a; background: rgba(245,158,11,.16); border: 1px solid rgba(253,230,138,.18); font: 800 8px/1.35 'Inter',sans-serif; letter-spacing: .35px; text-transform: uppercase; }
+    .nav-tag-main { color: #a7f3d0; background: rgba(16,185,129,.16); border-color: rgba(167,243,208,.20); }
+    .nav-btn.active .nav-tag { color: #92400e; background: #fef3c7; border-color: #fde68a; }
+    .nav-btn.active .nav-tag-main { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
+    .nav-group.search-open .nav-group-items { display: flex; }
+
+    .report-hub-hero {
+        position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 20px;
+        margin-bottom: 22px; padding: 26px 28px; border-radius: 22px; color: #fff;
+        background: linear-gradient(135deg,#052e27 0%,#075542 58%,#0f766e 100%);
+        box-shadow: 0 18px 38px rgba(5,46,39,.18);
+    }
+    .report-hub-hero::after { content:""; position:absolute; width:260px; height:260px; right:-95px; top:-130px; border-radius:50%; border:1px solid rgba(255,255,255,.12); box-shadow:0 0 0 42px rgba(255,255,255,.035),0 0 0 86px rgba(255,255,255,.018); }
+    .report-hub-hero > * { position: relative; z-index: 1; }
+    .report-hub-kicker { display:inline-flex; align-items:center; gap:8px; margin-bottom:7px; padding:5px 9px; border-radius:999px; color:#d1fae5; background:rgba(255,255,255,.10); font-size:10px; font-weight:800; letter-spacing:.8px; text-transform:uppercase; }
+    .report-hub-hero h2 { margin:0 0 7px; font-size:26px; color:#fff; }
+    .report-hub-hero p { max-width:760px; margin:0; color:rgba(255,255,255,.72); font-size:13px; line-height:1.65; }
+    .report-hub-count { flex:0 0 auto; min-width:120px; padding:15px 18px; border-radius:16px; text-align:center; background:rgba(255,255,255,.11); border:1px solid rgba(255,255,255,.14); }
+    .report-hub-count strong { display:block; color:#fef3c7; font:800 30px/1 'Outfit',sans-serif; }
+    .report-hub-count span { display:block; margin-top:6px; color:rgba(255,255,255,.68); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; }
+    .menu-hub-section { margin-bottom:24px; }
+    .menu-hub-section-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin:0 0 12px; }
+    .menu-hub-section-title h3 { margin:0; color:#0f172a; font-size:17px; }
+    .menu-hub-section-title span { color:var(--text-muted); font-size:11px; font-weight:600; }
+    .menu-hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .menu-hub-card {
+        position:relative; overflow:hidden; min-height:142px; padding:18px; border:1px solid var(--border); border-radius:17px;
+        background:#fff; box-shadow:var(--shadow-sm); cursor:pointer; text-align:left; font-family:inherit; transition:.22s ease;
+    }
+    .menu-hub-card::before { content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:linear-gradient(#10b981,#0f766e); }
+    .menu-hub-card:hover { transform:translateY(-3px); border-color:#a7f3d0; box-shadow:0 12px 26px rgba(15,118,110,.12); }
+    .menu-hub-icon { width:38px; height:38px; display:grid; place-items:center; margin-bottom:12px; border-radius:11px; color:#047857; background:#ecfdf5; font-size:19px; }
+    .menu-hub-card strong { display:block; margin-bottom:5px; color:#0f172a; font:700 14px/1.35 'Outfit',sans-serif; }
+    .menu-hub-card small { display:block; padding-right:24px; color:var(--text-muted); font-size:11px; line-height:1.5; }
+    .menu-hub-arrow { position:absolute; right:15px; bottom:14px; color:#059669; font-size:18px; font-weight:800; }
+    .menu-hub-card.is-document::before { background:linear-gradient(#3b82f6,#1d4ed8); }
+    .menu-hub-card.is-document .menu-hub-icon { color:#1d4ed8; background:#eff6ff; }
+    .menu-hub-card.is-document .menu-hub-arrow { color:#2563eb; }
+    .menu-hub-note { margin-top:8px; padding:13px 15px; border-radius:13px; color:#475569; background:#f8fafc; border:1px dashed #cbd5e1; font-size:11px; line-height:1.55; }
+
+    @media(max-width:1100px){ .menu-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(max-width:680px){
+        .report-hub-hero{align-items:flex-start; flex-direction:column; padding:22px;}
+        .report-hub-count{min-width:0; width:100%; text-align:left;}
+        .menu-hub-grid{grid-template-columns:1fr;}
+    }
+</style>
 
   <!-- =========================================================
        PREMIUM EXECUTIVE THEME — BANK SAMPAH INDUK TULUNGAGUNG
@@ -1048,113 +1112,84 @@
             </div>
         </div>
 
-        <div class="sidebar-label">Menu</div>
-        <nav class="nav-bar">
-            <div class="nav-group open" id="grp-analitik">
-                <button class="nav-group-header" onclick="toggleGroup('grp-analitik')">
-                    <span class="gh-ic">📈</span><span class="gh-label">Cakupan Analitik</span><span class="gh-arrow">›</span>
+        <nav class="nav-bar" id="menuUtamaInduk">
+            <div class="nav-search-wrap">
+                <span class="nav-search-icon">⌕</span>
+                <input type="search" id="cariMenuInduk" placeholder="Cari menu..." autocomplete="off" oninput="filterMenuInduk(this.value)" aria-label="Cari menu Bank Sampah Induk">
+                <button type="button" class="nav-search-clear" onclick="bersihkanPencarianMenuInduk()" title="Bersihkan pencarian">×</button>
+            </div>
+
+            <div class="sidebar-label">Ringkasan</div>
+            <button class="nav-btn nav-main-entry active" id="btnDashboardInduk" data-label="Dashboard BSI" onclick="pindahTab('dash', this)" title="Ringkasan utama Bank Sampah Induk">
+                <span class="nav-ic">📊</span><span class="nav-text">Dashboard BSI</span>
+            </button>
+
+            <div class="sidebar-label nav-section-label">Operasional Utama</div>
+            <div class="nav-group" id="grp-bsu">
+                <button class="nav-group-header" onclick="toggleGroup('grp-bsu')">
+                    <span class="gh-ic">🤝</span><span class="gh-label">BSU & Kemitraan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn active" data-label="Statistik" data-group="grp-analitik" onclick="pindahTab('dash', this)">
-                        <span class="nav-ic">📊</span> Statistik
-                    </button>
+                    <button class="nav-btn" data-label="Data Bank Sampah Unit" data-group="grp-bsu" onclick="pindahTab('datasu', this)" title="Daftar, status, dan pengelolaan Bank Sampah Unit"><span class="nav-ic">🏢</span><span class="nav-text">Data BSU</span></button>
+                    <button class="nav-btn" data-label="Registrasi BSU Baru" data-group="grp-bsu" onclick="pindahTab('daftar', this); siapkanIdBsuBaru();" title="Mendaftarkan Bank Sampah Unit baru"><span class="nav-ic">➕</span><span class="nav-text">Registrasi BSU</span></button>
+                    <button class="nav-btn" data-label="Monitoring Aktivitas BSU" data-group="grp-bsu" onclick="pindahTab('monitoring', this)" title="Melihat aktivitas dan perkembangan BSU"><span class="nav-ic">🔍</span><span class="nav-text">Monitoring BSU</span></button>
                 </div>
             </div>
 
-            <div class="nav-group" id="grp-kemitraan">
-                <button class="nav-group-header" onclick="toggleGroup('grp-kemitraan')">
-                    <span class="gh-ic">🤝</span><span class="gh-label">Kemitraan (BSU)</span><span class="gh-arrow">›</span>
+            <div class="nav-group" id="grp-transaksi">
+                <button class="nav-group-header" onclick="toggleGroup('grp-transaksi')">
+                    <span class="gh-ic">🔄</span><span class="gh-label">Transaksi & Barang</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Data BSU" data-group="grp-kemitraan" onclick="pindahTab('datasu', this)"><span class="nav-ic">🏢</span> Data BSU</button>
-                    <button class="nav-btn" data-label="Registrasi BSU Baru" data-group="grp-kemitraan" onclick="pindahTab('daftar', this); siapkanIdBsuBaru();"><span class="nav-ic">➕</span> Registrasi BSU Baru</button>
-                    <button class="nav-btn" data-label="Monitoring Aktivitas BSU" data-group="grp-kemitraan" onclick="pindahTab('monitoring', this)"><span class="nav-ic">🔍</span> Monitoring Aktivitas BSU</button>
-                </div>
-            </div>
-
-            <div class="nav-group" id="grp-barang">
-                <button class="nav-group-header" onclick="toggleGroup('grp-barang')">
-                    <span class="gh-ic">🔄</span><span class="gh-label">Lalu Lintas Barang</span><span class="gh-arrow">›</span>
-                </button>
-                <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Verifikasi Pengiriman BSU" data-group="grp-barang" onclick="pindahTab('verifikasikirim', this); loadVerifikasiPengirimanBSI();"><span class="nav-ic">✅</span> Verifikasi Pengiriman BSU</button>
-                    <button class="nav-btn" data-label="Setoran BSU Terverifikasi" data-group="grp-barang" onclick="pindahTab('transaksi', this)"><span class="nav-ic">📥</span> Setoran Terverifikasi</button>
-                    <button class="nav-btn" data-label="Penjualan ke Off-taker" data-group="grp-barang" onclick="pindahTab('penjualan', this)"><span class="nav-ic">📤</span> Penjualan ke Off-taker</button>
-                    <button class="nav-btn" data-label="Master Harga" data-group="grp-barang" onclick="pindahTab('harga', this)"><span class="nav-ic">🏷️</span> Master Harga</button>
+                    <button class="nav-btn" data-label="Verifikasi Pengiriman BSU" data-group="grp-transaksi" onclick="pindahTab('verifikasikirim', this); loadVerifikasiPengirimanBSI();" title="Memeriksa surat pengantar, berat, harga final, dan pembayaran"><span class="nav-ic">✅</span><span class="nav-text">Verifikasi Pengiriman</span><span class="nav-tag nav-tag-main">Utama</span></button>
+                    <button class="nav-btn" data-label="Riwayat Penerimaan Terverifikasi" data-group="grp-transaksi" onclick="pindahTab('transaksi', this)" title="Rekap material yang sudah diterima dari BSU"><span class="nav-ic">📥</span><span class="nav-text">Penerimaan Terverifikasi</span></button>
+                    <button class="nav-btn" data-label="Penjualan ke Off-taker" data-group="grp-transaksi" onclick="pindahTab('penjualan', this)" title="Mencatat penjualan material kepada pembeli atau off-taker"><span class="nav-ic">📤</span><span class="nav-text">Penjualan Off-taker</span></button>
+                    <button class="nav-btn" data-label="Master Harga Material" data-group="grp-transaksi" onclick="pindahTab('harga', this)" title="Mengatur harga acuan material untuk seluruh BSU"><span class="nav-ic">🏷️</span><span class="nav-text">Master Harga</span></button>
                 </div>
             </div>
 
             <div class="nav-group" id="grp-keuangan">
                 <button class="nav-group-header" onclick="toggleGroup('grp-keuangan')">
-                    <span class="gh-ic">💳</span><span class="gh-label">Sistem Keuangan</span><span class="gh-arrow">›</span>
+                    <span class="gh-ic">💳</span><span class="gh-label">Keuangan BSU</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Skema Bagi Hasil BSU" data-group="grp-keuangan" onclick="pindahTab('bagihasil', this); loadBagiHasilInduk();"><span class="nav-ic">%</span> Skema Bagi Hasil BSU</button>
-                    <button class="nav-btn" data-label="Saldo/Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();"><span class="nav-ic">💾</span> Saldo/Tabungan BSI</button>
-                    <button class="nav-btn" data-label="Tarik Tabungan BSI" data-group="grp-keuangan" onclick="pindahTab('tarikbsu', this); loadTarikTabunganBSU();"><span class="nav-ic">💸</span> Tarik Tabungan BSI</button>
+                    <button class="nav-btn" data-label="Skema Bagi Hasil BSU" data-group="grp-keuangan" onclick="pindahTab('bagihasil', this); loadBagiHasilInduk();" title="Mengatur persentase hak nasabah dan operasional pengelola"><span class="nav-ic">%</span><span class="nav-text">Skema Bagi Hasil</span></button>
+                    <button class="nav-btn" data-label="Saldo BSU di BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();" title="Melihat saldo dan riwayat keuangan setiap BSU"><span class="nav-ic">💾</span><span class="nav-text">Saldo BSU di BSI</span></button>
+                    <button class="nav-btn" data-label="Pencairan Saldo BSU" data-group="grp-keuangan" onclick="pindahTab('tarikbsu', this); loadTarikTabunganBSU();" title="Pencairan manual untuk saldo lama atau saldo yang tidak dibayar melalui verifikasi pengiriman"><span class="nav-ic">💸</span><span class="nav-text">Pencairan Saldo BSU</span><span class="nav-tag">Manual</span></button>
                 </div>
             </div>
-            
-            <div class="nav-group" id="grp-inventaris">
-                <button class="nav-group-header" onclick="toggleGroup('grp-inventaris')">
-                    <span class="gh-ic">🧰</span><span class="gh-label">Inventaris & Operasional</span><span class="gh-arrow">›</span>
+
+            <div class="sidebar-label nav-section-label">Pendukung & Pengendalian</div>
+            <div class="nav-group" id="grp-operasional">
+                <button class="nav-group-header" onclick="toggleGroup('grp-operasional')">
+                    <span class="gh-ic">🧰</span><span class="gh-label">Operasional & Pembinaan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Inventaris & Operasional" data-group="grp-inventaris" onclick="pindahTab('inventaris', this); loadInventarisOperasional();"><span class="nav-ic">🧰</span> Data & Rekap</button>
+                    <button class="nav-btn" data-label="Inventaris & Biaya Operasional" data-group="grp-operasional" onclick="pindahTab('inventaris', this); loadInventarisOperasional();" title="Inventaris, biaya operasional, pemeliharaan, dan investasi"><span class="nav-ic">🧰</span><span class="nav-text">Inventaris & Biaya</span></button>
+                    <button class="nav-btn" data-label="Pembinaan Bank Sampah Unit" data-group="grp-operasional" onclick="pindahTab('dok_pembinaan', this); loadDokPembinaan();" title="Mencatat kegiatan pembinaan Bank Sampah Unit"><span class="nav-ic">🎓</span><span class="nav-text">Pembinaan BSU</span></button>
+                    <button class="nav-btn" data-label="Kejadian Darurat / Kecelakaan" data-group="grp-operasional" onclick="pindahTab('dok_darurat', this); loadDokDarurat();" title="Mencatat kejadian darurat atau kecelakaan kerja"><span class="nav-ic">🚨</span><span class="nav-text">Kejadian Darurat</span></button>
                 </div>
             </div>
 
             <div class="nav-group" id="grp-laporan">
                 <button class="nav-group-header" onclick="toggleGroup('grp-laporan')">
-                    <span class="gh-ic">📁</span><span class="gh-label">Pusat Laporan</span><span class="gh-arrow">›</span>
+                    <span class="gh-ic">📁</span><span class="gh-label">Laporan & Dokumen</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Laporan Pembelian/Setoran" data-group="grp-laporan" onclick="pindahTab('lap_pembelian', this); renderLapPembelian('semua');">
-                        <span class="nav-ic">📥</span> Lap. Pembelian/Setoran
-                    </button>
-                    <button class="nav-btn" data-label="Laporan Penjualan (Offtaker)" data-group="grp-laporan" onclick="pindahTab('lap_penjualan', this); renderLapPenjualan('semua');">
-                        <span class="nav-ic">📤</span> Lap. Penjualan
-                    </button>
-                    <button class="nav-btn" data-label="Laporan Posisi Stok Gudang" data-group="grp-laporan" onclick="pindahTab('lap_stok', this); renderLapStok('semua');">
-                        <span class="nav-ic">📦</span> Lap. Stok Gudang
-                    </button>
-                    <button class="nav-btn" data-label="Laporan Keuangan (Laba/Rugi)" data-group="grp-laporan" onclick="pindahTab('lap_labarugi', this); renderLapLabaRugi('semua');">
-                        <span class="nav-ic">💰</span> Lap. Laba/Rugi
-                    </button>
-                    <button class="nav-btn" data-label="Laporan Kas Masuk" data-group="grp-laporan" onclick="pindahTab('lap_kasmasuk', this); renderLapKasMasuk('semua');">
-                        <span class="nav-ic">📥</span> Lap. Kas Masuk
-                    </button>
-                    <button class="nav-btn" data-label="Laporan Kas Keluar" data-group="grp-laporan" onclick="pindahTab('lap_kaskeluar', this); renderLapKasKeluar('semua');">
-                        <span class="nav-ic">📤</span> Lap. Kas Keluar
-                    </button>
+                    <button class="nav-btn" id="btnPusatLaporan" data-label="Pusat Laporan & Dokumen" data-group="grp-laporan" onclick="pindahTab('pusatlaporan', this)" title="Akses seluruh laporan transaksi, keuangan, stok, bulanan, dan tahunan dari satu halaman"><span class="nav-ic">🗂️</span><span class="nav-text">Pusat Laporan</span><span class="nav-tag nav-tag-main">Terpadu</span></button>
                 </div>
             </div>
 
-            <div class="nav-group" id="grp-dokumen">
-                <button class="nav-group-header" onclick="toggleGroup('grp-dokumen')">
-                    <span class="gh-ic">🗂️</span><span class="gh-label">Dokumen Laporan</span><span class="gh-arrow">›</span>
+            <div class="nav-group" id="grp-kontrol">
+                <button class="nav-group-header" onclick="toggleGroup('grp-kontrol')">
+                    <span class="gh-ic">🧮</span><span class="gh-label">Kontrol & Keamanan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Laporan Operasional Bulanan" data-group="grp-dokumen" onclick="pindahTab('dok_operasional', this); initDokOperasional();"><span class="nav-ic">📘</span> a. Operasional Bulanan</button>
-                    <button class="nav-btn" data-label="Laporan Stok & Hasil Pengolahan" data-group="grp-dokumen" onclick="pindahTab('dok_stok', this); initDokStok();"><span class="nav-ic">📦</span> b. Stok & Pengolahan</button>
-                    <button class="nav-btn" data-label="Laporan Sampah Masuk & Keluar" data-group="grp-dokumen" onclick="pindahTab('dok_sampah', this); initDokSampah();"><span class="nav-ic">♻️</span> c. Sampah Masuk & Keluar</button>
-                    <button class="nav-btn" data-label="Laporan Hasil Penjualan" data-group="grp-dokumen" onclick="pindahTab('dok_penjualan', this); initDokPenjualan();"><span class="nav-ic">💵</span> d. Hasil Penjualan</button>
-                    <button class="nav-btn" data-label="Laporan Kondisi Peralatan" data-group="grp-dokumen" onclick="pindahTab('dok_peralatan', this); initDokPeralatan();"><span class="nav-ic">🧰</span> e. Kondisi Peralatan</button>
-                    <button class="nav-btn" data-label="Laporan Pembinaan BSU" data-group="grp-dokumen" onclick="pindahTab('dok_pembinaan', this); loadDokPembinaan();"><span class="nav-ic">🎓</span> f. Pembinaan BSU</button>
-                    <button class="nav-btn" data-label="Laporan Kecelakaan/Darurat" data-group="grp-dokumen" onclick="pindahTab('dok_darurat', this); loadDokDarurat();"><span class="nav-ic">🚨</span> g. Kecelakaan/Darurat</button>
-                    <button class="nav-btn" data-label="Laporan Tahunan" data-group="grp-dokumen" onclick="pindahTab('dok_tahunan', this); initDokTahunan();"><span class="nav-ic">📅</span> h. Laporan Tahunan</button>
-                </div>
-            </div>
-            <div class="nav-group" id="grp-akuntansi">
-                <button class="nav-group-header" onclick="toggleGroup('grp-akuntansi')">
-                    <span class="gh-ic">🧮</span><span class="gh-label">Akuntansi & Kontrol</span><span class="gh-arrow">›</span>
-                </button>
-                <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Neraca (Posisi Aset & Kewajiban)" data-group="grp-akuntansi" onclick="pindahTab('neraca', this); loadNeracaPosManual();"><span class="nav-ic">⚖️</span> Neraca</button>
-                    <button class="nav-btn" data-label="Tutup Buku Periode" data-group="grp-akuntansi" onclick="pindahTab('tutupbuku', this); loadTutupBuku();"><span class="nav-ic">🔒</span> Tutup Buku Periode</button>
-                    <button class="nav-btn" data-label="Rekonsiliasi Kas/Bank" data-group="grp-akuntansi" onclick="pindahTab('rekonsiliasi', this); loadRekonsiliasi();"><span class="nav-ic">🧾</span> Rekonsiliasi Kas/Bank</button>
-                    <button class="nav-btn" data-label="Audit Trail / Log Aktivitas" data-group="grp-akuntansi" onclick="pindahTab('audittrail', this); loadAuditTrail();"><span class="nav-ic">🕵️</span> Audit Trail</button>
-                    <button class="nav-btn" data-label="Backup & Restore Data" data-group="grp-akuntansi" onclick="pindahTab('backupdata', this);"><span class="nav-ic">💾</span> Backup & Restore Data</button>
+                    <button class="nav-btn" data-label="Neraca Aset, Kewajiban & Modal" data-group="grp-kontrol" onclick="pindahTab('neraca', this); loadNeracaPosManual();" title="Posisi aset, kewajiban, dan modal"><span class="nav-ic">⚖️</span><span class="nav-text">Neraca</span></button>
+                    <button class="nav-btn" data-label="Tutup Buku Periode" data-group="grp-kontrol" onclick="pindahTab('tutupbuku', this); loadTutupBuku();" title="Mengunci transaksi pada periode yang sudah selesai"><span class="nav-ic">🔒</span><span class="nav-text">Tutup Buku</span></button>
+                    <button class="nav-btn" data-label="Rekonsiliasi Kas / Bank" data-group="grp-kontrol" onclick="pindahTab('rekonsiliasi', this); loadRekonsiliasi();" title="Mencocokkan saldo sistem dengan kas atau rekening"><span class="nav-ic">🧾</span><span class="nav-text">Rekonsiliasi Kas/Bank</span></button>
+                    <button class="nav-btn" data-label="Audit Trail / Log Aktivitas" data-group="grp-kontrol" onclick="pindahTab('audittrail', this); loadAuditTrail();" title="Melihat jejak penambahan, perubahan, dan pembatalan data"><span class="nav-ic">🕵️</span><span class="nav-text">Audit Trail</span></button>
+                    <button class="nav-btn" data-label="Backup & Restore Data" data-group="grp-kontrol" onclick="pindahTab('backupdata', this);" title="Mencadangkan dan memulihkan data sistem"><span class="nav-ic">💾</span><span class="nav-text">Backup & Restore</span></button>
                 </div>
             </div>
         </nav>
@@ -1172,8 +1207,8 @@
             <div class="topbar-left">
                 <button class="menu-toggle" onclick="toggleMenu()">☰</button>
                 <div>
-                    <h1 class="topbar-title" id="topbarTitle">Statistik</h1>
-                    <p class="topbar-sub">Dashboard Bank Sampah Induk</p>
+                    <h1 class="topbar-title" id="topbarTitle">Dashboard BSI</h1>
+                    <p class="topbar-sub" id="topbarSub">Ringkasan utama Bank Sampah Induk</p>
                 </div>
             </div>
             <div class="topbar-actions" style="display:flex; align-items:center; gap:10px;">
@@ -1188,6 +1223,68 @@
         </div>
 
     <div class="container">
+
+
+    <!-- ================= PUSAT LAPORAN & DOKUMEN TERPADU ================= -->
+    <div id="pusatlaporan" class="content-section">
+        <div class="report-hub-hero">
+            <div>
+                <div class="report-hub-kicker">🗂️ Pelaporan Terpadu</div>
+                <h2>Pusat Laporan & Dokumen BSI</h2>
+                <p>Pilih laporan yang dibutuhkan dari satu halaman. Menu rinci yang sebelumnya memenuhi sidebar tetap tersedia di sini tanpa menghapus data maupun fungsi lama.</p>
+            </div>
+            <div class="report-hub-count"><strong>12</strong><span>Laporan & Dokumen</span></div>
+        </div>
+
+        <div class="menu-hub-section">
+            <div class="menu-hub-section-title"><h3>📊 Laporan Transaksi & Keuangan</h3><span>Data otomatis dari transaksi sistem</span></div>
+            <div class="menu-hub-grid">
+                <button class="menu-hub-card" data-label="Laporan Pembelian / Setoran" onclick="bukaHalamanInduk('lap_pembelian','Laporan Pembelian / Setoran'); renderLapPembelian('semua');">
+                    <span class="menu-hub-icon">📥</span><strong>Pembelian / Setoran BSU</strong><small>Rekap penerimaan material dari seluruh Bank Sampah Unit.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Penjualan Off-taker" onclick="bukaHalamanInduk('lap_penjualan','Laporan Penjualan Off-taker'); renderLapPenjualan('semua');">
+                    <span class="menu-hub-icon">📤</span><strong>Penjualan Off-taker</strong><small>Rekap penjualan material kepada pembeli atau mitra akhir.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Posisi Stok Gudang" onclick="bukaHalamanInduk('lap_stok','Laporan Posisi Stok Gudang'); renderLapStok('semua');">
+                    <span class="menu-hub-icon">📦</span><strong>Posisi Stok Gudang</strong><small>Material masuk, keluar, dan sisa stok berdasarkan jenis.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Laba / Rugi" onclick="bukaHalamanInduk('lap_labarugi','Laporan Laba / Rugi'); renderLapLabaRugi('semua');">
+                    <span class="menu-hub-icon">💰</span><strong>Laba / Rugi</strong><small>Ringkasan pendapatan, beban, dan hasil operasional BSI.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Kas Masuk" onclick="bukaHalamanInduk('lap_kasmasuk','Laporan Kas Masuk'); renderLapKasMasuk('semua');">
+                    <span class="menu-hub-icon">↘️</span><strong>Kas Masuk</strong><small>Rincian penerimaan uang dari penjualan, bantuan, dan sumber lain.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Kas Keluar" onclick="bukaHalamanInduk('lap_kaskeluar','Laporan Kas Keluar'); renderLapKasKeluar('semua');">
+                    <span class="menu-hub-icon">↗️</span><strong>Kas Keluar</strong><small>Rincian pembayaran BSU, biaya operasional, investasi, dan pemeliharaan.</small><span class="menu-hub-arrow">›</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="menu-hub-section">
+            <div class="menu-hub-section-title"><h3>📑 Dokumen Operasional Resmi</h3><span>Format rekap untuk arsip dan pelaporan</span></div>
+            <div class="menu-hub-grid">
+                <button class="menu-hub-card is-document" data-label="Laporan Operasional Bulanan" onclick="bukaHalamanInduk('dok_operasional','Laporan Operasional Bulanan'); initDokOperasional();">
+                    <span class="menu-hub-icon">📘</span><strong>Operasional Bulanan</strong><small>Ringkasan kegiatan BSI dalam satu periode bulanan.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card is-document" data-label="Laporan Stok & Pengolahan" onclick="bukaHalamanInduk('dok_stok','Laporan Stok & Hasil Pengolahan'); initDokStok();">
+                    <span class="menu-hub-icon">📦</span><strong>Stok & Pengolahan</strong><small>Dokumen persediaan dan hasil pengolahan material.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card is-document" data-label="Laporan Sampah Masuk & Keluar" onclick="bukaHalamanInduk('dok_sampah','Laporan Sampah Masuk & Keluar'); initDokSampah();">
+                    <span class="menu-hub-icon">♻️</span><strong>Sampah Masuk & Keluar</strong><small>Rekap arus material dari BSU sampai penjualan.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card is-document" data-label="Laporan Hasil Penjualan" onclick="bukaHalamanInduk('dok_penjualan','Laporan Hasil Penjualan'); initDokPenjualan();">
+                    <span class="menu-hub-icon">💵</span><strong>Hasil Penjualan</strong><small>Dokumen nilai penjualan dan penerimaan hasil material.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card is-document" data-label="Laporan Kondisi Peralatan" onclick="bukaHalamanInduk('dok_peralatan','Laporan Kondisi Peralatan'); initDokPeralatan();">
+                    <span class="menu-hub-icon">🧰</span><strong>Kondisi Peralatan</strong><small>Rekap kondisi alat, pemeliharaan, dan kebutuhan tindak lanjut.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card is-document" data-label="Laporan Tahunan" onclick="bukaHalamanInduk('dok_tahunan','Laporan Tahunan'); initDokTahunan();">
+                    <span class="menu-hub-icon">📅</span><strong>Laporan Tahunan</strong><small>Kompilasi kinerja dan kegiatan BSI selama satu tahun.</small><span class="menu-hub-arrow">›</span>
+                </button>
+            </div>
+            <div class="menu-hub-note"><b>Pembinaan BSU</b> dan <b>Kejadian Darurat</b> dipindahkan ke kelompok <b>Operasional & Pembinaan</b> agar lebih mudah ditemukan sesuai proses kerjanya.</div>
+        </div>
+    </div>
 
     <!-- ================= NERACA ================= -->
     <div id="neraca" class="content-section">
@@ -2741,29 +2838,99 @@
 
     function toggleGroup(groupId) {
         let grp = document.getElementById(groupId);
+        if (!grp) return;
         let isOpen = grp.classList.contains('open');
         document.querySelectorAll('.nav-group').forEach(g => g.classList.remove('open'));
         if (!isOpen) { grp.classList.add('open'); }
     }
 
+    function setKonteksTopbar(judulTeks, subTeks) {
+        let judul = document.getElementById('topbarTitle');
+        let sub = document.getElementById('topbarSub');
+        if (judul && judulTeks) judul.innerText = judulTeks;
+        if (sub) sub.innerText = subTeks || 'Portal Bank Sampah Induk';
+    }
+
+    function konteksMenuDariTombol(btn) {
+        if (!btn) return 'Portal Bank Sampah Induk';
+        let group = btn.closest ? btn.closest('.nav-group') : null;
+        let label = group ? group.querySelector('.gh-label') : null;
+        return label ? label.innerText.trim() : 'Ringkasan utama Bank Sampah Induk';
+    }
+
     function pindahTab(id, btn) {
+      let target = document.getElementById(id);
+      if (!target) return alert('Halaman menu tidak ditemukan: ' + id);
       document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      btn.classList.add('active');
+      document.querySelectorAll('.menu-hub-card').forEach(b => b.classList.remove('active'));
+      target.classList.add('active');
+      if (btn) btn.classList.add('active');
 
-      let judul = document.getElementById('topbarTitle');
-      if (judul && btn.dataset.label) { judul.innerText = btn.dataset.label; }
+      let label = btn?.dataset?.label || 'Bank Sampah Induk';
+      setKonteksTopbar(label, konteksMenuDariTombol(btn));
 
-      let activeGroupId = btn.dataset.group;
+      let activeGroupId = btn?.dataset?.group;
       document.querySelectorAll('.nav-group').forEach(g => {
           if (activeGroupId && g.id === activeGroupId) { g.classList.add('open'); }
           else { g.classList.remove('open'); }
       });
       
       let nav = document.getElementById('navBar');
-      if(window.innerWidth <= 992 && nav.classList.contains('show')) nav.classList.remove('show');
+      if(window.innerWidth <= 992 && nav?.classList.contains('show')) nav.classList.remove('show');
     }
+
+    function bukaHalamanInduk(id, label) {
+        let target = document.getElementById(id);
+        if (!target) return alert('Halaman laporan tidak ditemukan: ' + id);
+        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.menu-hub-card').forEach(b => b.classList.remove('active'));
+        target.classList.add('active');
+        let parentBtn = document.getElementById('btnPusatLaporan');
+        if (parentBtn) parentBtn.classList.add('active');
+        document.querySelectorAll('.nav-group').forEach(g => g.classList.toggle('open', g.id === 'grp-laporan'));
+        setKonteksTopbar(label || 'Laporan', 'Pusat Laporan & Dokumen');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterMenuInduk(value) {
+        let q = String(value || '').trim().toLowerCase();
+        let root = document.getElementById('menuUtamaInduk');
+        if (!root) return;
+        let dash = document.getElementById('btnDashboardInduk');
+        if (dash) {
+            let cocok = !q || (dash.innerText + ' ' + (dash.dataset.label || '')).toLowerCase().includes(q);
+            dash.style.display = cocok ? '' : 'none';
+        }
+        root.querySelectorAll('.nav-group').forEach(group => {
+            let groupLabel = (group.querySelector('.gh-label')?.innerText || '').toLowerCase();
+            let groupMatch = !!q && groupLabel.includes(q);
+            let jumlah = 0;
+            group.querySelectorAll('.nav-group-items .nav-btn').forEach(btn => {
+                let hay = (btn.innerText + ' ' + (btn.dataset.label || '') + ' ' + (btn.title || '')).toLowerCase();
+                let cocok = !q || groupMatch || hay.includes(q);
+                btn.style.display = cocok ? '' : 'none';
+                if (cocok) jumlah++;
+            });
+            group.style.display = jumlah ? '' : 'none';
+            group.classList.toggle('search-open', !!q && jumlah > 0);
+        });
+    }
+
+    function bersihkanPencarianMenuInduk() {
+        let input = document.getElementById('cariMenuInduk');
+        if (input) { input.value = ''; input.focus(); }
+        filterMenuInduk('');
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')) {
+            e.preventDefault();
+            document.getElementById('cariMenuInduk')?.focus();
+        }
+        if (e.key === 'Escape' && document.activeElement?.id === 'cariMenuInduk') bersihkanPencarianMenuInduk();
+    });
 
     function logoutPusat() {
         if(confirm('Apakah Anda yakin ingin keluar dari Portal Bank Sampah Induk?')) {
