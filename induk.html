@@ -2659,9 +2659,9 @@
                         </label>
                     </div>
                     <div class="form-group">
-                        <label>Dokumen SK Bank Sampah Unit <span style="color:#ef4444;">*</span></label>
-                        <input type="file" id="regSkPdf" class="form-control" accept="application/pdf,.pdf" required onchange="tampilkanInfoPdfBsu('regSkPdf','regSkInfo','btnPreviewRegSk')">
-                        <div id="regSkInfo" style="margin-top:8px;font-size:12px;color:#64748b;">PDF maksimal 10 MB.</div>
+                        <label>Dokumen SK Bank Sampah Unit <span style="color:#64748b;font-weight:500;">(opsional)</span></label>
+                        <input type="file" id="regSkPdf" class="form-control" accept="application/pdf,.pdf" onchange="tampilkanInfoPdfBsu('regSkPdf','regSkInfo','btnPreviewRegSk')">
+                        <div id="regSkInfo" style="margin-top:8px;font-size:12px;color:#64748b;">Opsional — dapat diunggah setelah pendaftaran. PDF maksimal 10 MB.</div>
                         <button type="button" id="btnPreviewRegSk" class="btn-sync" style="margin-top:8px;display:none;" onclick="previewPdfTerpilih('regSkPdf')">📄 Preview PDF Dipilih</button>
                     </div>
                     <button type="button" class="btn-submit" id="btnSimpanBsu" onclick="simpanBsuBaru()">DAFTARKAN BSU</button>
@@ -3922,7 +3922,7 @@
         const info = document.getElementById(infoId);
         const btn = document.getElementById(btnId);
         const file = input?.files?.[0];
-        if(!file) { if(info) info.textContent='PDF maksimal 10 MB.'; if(btn) btn.style.display='none'; return; }
+        if(!file) { if(info) { info.textContent='Opsional — dapat diunggah setelah pendaftaran. PDF maksimal 10 MB.'; info.style.color='#64748b'; } if(btn) btn.style.display='none'; return; }
         const okPdf = /\.pdf$/i.test(file.name) && (!file.type || file.type === 'application/pdf');
         const ukuran = (file.size / (1024*1024)).toFixed(2);
         if(info) { info.textContent = `${file.name} • ${ukuran} MB${okPdf ? '' : ' • FORMAT TIDAK VALID'}`; info.style.color = okPdf && file.size <= 10*1024*1024 ? '#166534' : '#b91c1c'; }
@@ -3959,26 +3959,30 @@
         if(!form.nama || !form.ketua || !form.desa || !form.kecamatan || !form.alamat) return alert('Lengkapi seluruh identitas BSU!');
         if(!form.password_admin || !form.password_operator || !form.password_bendahara) return alert('Kata sandi Admin BSU, Operator, dan Bendahara wajib diisi!');
         form.password = form.password_admin; // kompatibilitas akun Admin BSU versi lama
-        if(!fileSk) return alert('Dokumen SK Bank Sampah Unit wajib diunggah.');
-        if(!/\.pdf$/i.test(fileSk.name) || (fileSk.type && fileSk.type !== 'application/pdf')) return alert('Dokumen SK harus berupa PDF.');
-        if(fileSk.size > 10*1024*1024) return alert('Ukuran PDF maksimal 10 MB.');
+        // Dokumen SK tidak wajib saat registrasi. Jika dipilih, tetap divalidasi dan diunggah.
+        if(fileSk) {
+            if(!/\.pdf$/i.test(fileSk.name) || (fileSk.type && fileSk.type !== 'application/pdf')) return alert('Dokumen SK harus berupa PDF.');
+            if(fileSk.size > 10*1024*1024) return alert('Ukuran PDF maksimal 10 MB.');
+        }
 
         let btn = document.getElementById('btnSimpanBsu');
-        btn.innerText = '⏳ MENGUNGGAH SK...'; btn.disabled = true;
+        btn.innerText = fileSk ? '⏳ MENGUNGGAH SK...' : '⏳ MENYIMPAN DATA...'; btn.disabled = true;
         let pathTerunggah = '';
         try {
-            const unggah = await AdapterAPI.uploadDokumenSkBsu({ id_unit: form.id, file: fileSk });
-            if(!unggah.ok) throw new Error(unggah.error || 'Gagal mengunggah SK.');
-            pathTerunggah = unggah.path;
-            form.sk_pdf_path = unggah.path;
-            form.sk_pdf_nama = unggah.nama;
-            form.sk_pdf_uploaded_at = new Date().toISOString();
-            btn.innerText = '⏳ MENYIMPAN DATA...';
+            if(fileSk) {
+                const unggah = await AdapterAPI.uploadDokumenSkBsu({ id_unit: form.id, file: fileSk });
+                if(!unggah.ok) throw new Error(unggah.error || 'Gagal mengunggah SK.');
+                pathTerunggah = unggah.path;
+                form.sk_pdf_path = unggah.path;
+                form.sk_pdf_nama = unggah.nama;
+                form.sk_pdf_uploaded_at = new Date().toISOString();
+                btn.innerText = '⏳ MENYIMPAN DATA...';
+            }
             const res = await postAksi(form);
             if(String(res).toLowerCase().startsWith('gagal')) throw new Error(res);
             alert('Sukses mendaftarkan BSU Baru dengan ID: ' + form.id);
             document.getElementById('formRegistrasiBsu').reset();
-            document.getElementById('regSkInfo').textContent='PDF maksimal 10 MB.';
+            document.getElementById('regSkInfo').textContent='Opsional — dapat diunggah setelah pendaftaran. PDF maksimal 10 MB.';
             document.getElementById('btnPreviewRegSk').style.display='none';
             await loadDataPusat();
         } catch(e) {
