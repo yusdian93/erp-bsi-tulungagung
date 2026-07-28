@@ -765,67 +765,241 @@
     }
     .hero-date { color:#F3E2B9 !important; }
 
-    /* STATISTIC CARDS */
+    /* STATISTIC CARDS — MODERN ATM STYLE */
     .atm-cards-container {
-      grid-template-columns:repeat(3,minmax(250px,1fr));
-      gap:18px;
-      margin-bottom:24px;
+      grid-template-columns:repeat(3,minmax(260px,1fr));
+      gap:20px;
+      margin-bottom:28px;
+      perspective:1200px;
     }
     .atm-card {
-      min-height:174px;
+      min-height:208px;
       aspect-ratio:auto;
-      padding:20px 21px;
-      border-radius:22px;
-      border:1px solid rgba(255,255,255,.13);
-      box-shadow:0 18px 38px rgba(4,38,32,.15),inset 0 1px rgba(255,255,255,.13);
-      transition:transform .3s cubic-bezier(.16,1,.3,1),box-shadow .3s,border-color .3s;
+      padding:22px 24px 20px;
+      border-radius:27px;
+      border:1px solid rgba(255,255,255,.48);
+      box-shadow:
+        0 22px 44px rgba(12,52,69,.18),
+        0 4px 10px rgba(12,52,69,.10),
+        inset 0 1px 0 rgba(255,255,255,.72),
+        inset 0 -1px 0 rgba(0,0,0,.08);
+      transition:transform .35s cubic-bezier(.16,1,.3,1),box-shadow .35s,border-color .35s,filter .35s;
+      isolation:isolate;
+      transform-style:preserve-3d;
     }
     .atm-card::before {
-      top:-65%;left:-40%;
-      background:radial-gradient(ellipse at center,rgba(255,255,255,.17),transparent 58%);
+      content:"";
+      position:absolute;
+      z-index:-1;
+      width:250px;
+      height:250px;
+      top:-135px;
+      right:-85px;
+      left:auto;
+      border-radius:50%;
+      background:radial-gradient(circle,rgba(255,255,255,.48) 0%,rgba(255,255,255,.15) 34%,transparent 69%);
+      transform:none;
+      pointer-events:none;
     }
     .atm-card::after {
       content:"";
       position:absolute;
-      left:20px;right:20px;bottom:0;height:2px;
-      z-index:2;
-      background:linear-gradient(90deg,transparent,rgba(231,199,126,.78),transparent);
+      z-index:-1;
+      width:230px;
+      height:230px;
+      right:-92px;
+      bottom:-138px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.29);
+      box-shadow:
+        0 0 0 24px rgba(255,255,255,.075),
+        0 0 0 51px rgba(255,255,255,.045);
+      background:transparent;
+      pointer-events:none;
     }
     .atm-card:hover {
-      transform:translateY(-5px);
-      border-color:rgba(231,199,126,.40);
-      box-shadow:0 25px 48px rgba(4,38,32,.22);
+      transform:translateY(-7px) rotateX(1.2deg) rotateY(-1.2deg);
+      border-color:rgba(255,255,255,.76);
+      filter:saturate(1.08) brightness(1.035);
+      box-shadow:
+        0 31px 58px rgba(12,52,69,.24),
+        0 7px 16px rgba(12,52,69,.13),
+        inset 0 1px 0 rgba(255,255,255,.78);
     }
-    .atm-blue { background:linear-gradient(135deg,#092C46,#0E5D82); }
-    .atm-green { background:linear-gradient(135deg,#063B31,#0B795B); }
-    .atm-purple { background:linear-gradient(135deg,#281743,#604098); }
-    .atm-gold { background:linear-gradient(135deg,#493109,#A27120); }
-    .atm-rose { background:linear-gradient(135deg,#4B192E,#98415F); }
-    .atm-teal { background:linear-gradient(135deg,#063841,#0E747B); }
-    .atm-header { align-items:center; }
-    .atm-logo-text {
-      color:rgba(255,255,255,.76);
-      font-size:10px;
-      font-style:normal;
-      font-weight:800;
-      letter-spacing:1.4px;
-      text-shadow:none;
+
+    /* Gradien dibuat lebih cerah, bersih, dan tetap kontras */
+    .atm-blue {
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.16),transparent 34%),
+        linear-gradient(135deg,#075FA8 0%,#0EA5E9 52%,#2563EB 100%);
+    }
+    .atm-green {
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.17),transparent 34%),
+        linear-gradient(135deg,#047857 0%,#10B981 52%,#22C55E 100%);
+    }
+    .atm-purple {
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.17),transparent 34%),
+        linear-gradient(135deg,#6D28D9 0%,#A855F7 53%,#6366F1 100%);
+    }
+    .atm-gold {
+      color:#fff;
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.24),transparent 35%),
+        linear-gradient(135deg,#B45309 0%,#F59E0B 50%,#FBBF24 100%);
+      border-color:rgba(255,246,197,.68);
+    }
+    .atm-rose {
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.18),transparent 34%),
+        linear-gradient(135deg,#BE185D 0%,#F43F5E 53%,#FB7185 100%);
+    }
+    .atm-teal {
+      background:
+        linear-gradient(145deg,rgba(255,255,255,.18),transparent 34%),
+        linear-gradient(135deg,#0E7490 0%,#06B6D4 50%,#14B8A6 100%);
+    }
+
+    .atm-header {
+      position:relative;
+      z-index:3;
+      align-items:center;
+    }
+    .atm-chip-wrapper {
+      display:flex;
+      align-items:center;
+      gap:13px;
     }
     .atm-chip {
-      width:42px;height:29px;
-      border-radius:6px;
-      background:linear-gradient(135deg,#9E7426,#F1D992 38%,#C79A3E 68%,#85601E);
+      width:51px;
+      height:37px;
+      border-radius:8px;
+      border:1px solid rgba(116,75,6,.65);
+      background:
+        linear-gradient(90deg,transparent 29%,rgba(84,52,2,.52) 30%,rgba(255,255,255,.65) 31%,transparent 32%,transparent 67%,rgba(84,52,2,.52) 68%,rgba(255,255,255,.65) 69%,transparent 70%),
+        linear-gradient(0deg,transparent 31%,rgba(84,52,2,.52) 32%,rgba(255,255,255,.64) 34%,transparent 35%,transparent 65%,rgba(84,52,2,.52) 66%,rgba(255,255,255,.64) 68%,transparent 69%),
+        linear-gradient(135deg,#A96C08 0%,#FCE7A3 28%,#E9B949 52%,#FFF0AE 72%,#B7790B 100%);
+      box-shadow:
+        0 5px 10px rgba(66,40,0,.28),
+        inset 0 1px 1px rgba(255,255,255,.88),
+        inset 0 -2px 3px rgba(92,54,0,.30);
     }
-    .atm-content h3 {
-      color:rgba(255,255,255,.67);
+    .atm-chip::before,
+    .atm-chip::after { display:none; }
+
+    .atm-contactless {
+      position:relative;
+      width:25px;
+      height:29px;
+      display:inline-block;
+      opacity:.92;
+      transform:rotate(1deg);
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.16));
+    }
+    .atm-contactless span {
+      position:absolute;
+      top:50%;
+      left:0;
+      border:2px solid rgba(255,255,255,.94);
+      border-top-color:transparent;
+      border-bottom-color:transparent;
+      border-left-color:transparent;
+      border-radius:50%;
+      transform:translateY(-50%);
+    }
+    .atm-contactless span:nth-child(1){width:9px;height:13px;left:0;}
+    .atm-contactless span:nth-child(2){width:16px;height:21px;left:1px;opacity:.88;}
+    .atm-contactless span:nth-child(3){width:23px;height:29px;left:2px;opacity:.76;}
+
+    .atm-logo-text {
+      color:rgba(255,255,255,.94);
       font-size:11px;
-      letter-spacing:.55px;
+      font-style:normal;
+      font-weight:900;
+      letter-spacing:1.55px;
+      text-shadow:0 2px 8px rgba(0,0,0,.18);
+    }
+    .atm-card-art {
+      position:absolute;
+      z-index:0;
+      left:-54px;
+      bottom:-80px;
+      width:220px;
+      height:150px;
+      border-radius:50%;
+      border:1px solid rgba(255,255,255,.20);
+      transform:rotate(16deg);
+      box-shadow:
+        0 0 0 19px rgba(255,255,255,.045),
+        0 0 0 41px rgba(255,255,255,.028);
+      pointer-events:none;
+    }
+    .atm-content {
+      z-index:3;
+      position:relative;
+      margin-top:25px;
+    }
+    .atm-content h3,
+    .atm-card h3 {
+      margin:0 0 10px;
+      color:rgba(255,255,255,.82);
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:.72px;
+      line-height:1.45;
+      text-transform:uppercase;
+      text-shadow:0 1px 5px rgba(0,0,0,.13);
     }
     .atm-card p {
+      margin:0;
       color:#fff;
-      font-size:clamp(1.65rem,2.4vw,2.25rem);
-      letter-spacing:-1.15px;
-      text-shadow:0 2px 12px rgba(0,0,0,.13);
+      font-family:'Outfit','Inter',sans-serif;
+      font-size:clamp(2rem,2.75vw,2.65rem);
+      font-weight:800;
+      line-height:1.02;
+      letter-spacing:-1.35px;
+      text-shadow:0 3px 14px rgba(0,0,0,.20);
+      font-variant-numeric:tabular-nums;
+    }
+    .atm-gold h3,
+    .atm-gold p,
+    .atm-gold .atm-logo-text {
+      color:#fff;
+      text-shadow:0 2px 10px rgba(90,48,0,.30);
+    }
+    .atm-footer {
+      position:relative;
+      z-index:3;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-top:19px;
+      padding-top:12px;
+      border-top:1px solid rgba(255,255,255,.22);
+      color:rgba(255,255,255,.82);
+      font-size:9.5px;
+      font-weight:800;
+      letter-spacing:1.1px;
+      text-transform:uppercase;
+    }
+    .atm-card-code {
+      display:inline-flex;
+      align-items:center;
+      gap:5px;
+      white-space:nowrap;
+      color:rgba(255,255,255,.93);
+      font-family:'Inter',sans-serif;
+      letter-spacing:1.5px;
+    }
+    .atm-card-code::before {
+      content:"";
+      width:6px;
+      height:6px;
+      border-radius:50%;
+      background:#DDFBEF;
+      box-shadow:0 0 0 4px rgba(255,255,255,.10),0 0 9px rgba(221,251,239,.75);
     }
 
     /* PANELS / CARDS */
@@ -1075,7 +1249,7 @@
       .topbar-actions .btn-sync { width:auto;flex:1;order:initial; }
       .executive-hero { padding:22px 20px;border-radius:21px; }
       .atm-cards-container { grid-template-columns:1fr;gap:14px; }
-      .atm-card { min-height:155px; }
+      .atm-card { min-height:196px; }
       .panel { padding:19px;border-radius:18px; }
       .panel::before { left:18px;right:18px; }
       .panel-header { align-items:flex-start;flex-direction:column; }
@@ -1090,7 +1264,9 @@
       .topbar-actions .btn-sync { min-width:0;padding:8px 9px;font-size:9.5px; }
       .executive-hero h2 { font-size:1.45rem; }
       .hero-badges span { font-size:9.5px; }
-      .atm-card { border-radius:19px; }
+      .atm-card { min-height:188px;padding:20px;border-radius:22px; }
+      .atm-card p { font-size:clamp(1.85rem,10vw,2.35rem); }
+      .atm-footer { font-size:8.8px;letter-spacing:.8px; }
     }
 
     @media print {
@@ -1655,46 +1831,76 @@
         
         <div class="atm-cards-container">
           <div class="atm-card atm-blue">
+            <div class="atm-card-art" aria-hidden="true"></div>
             <div class="atm-header">
-              <div class="atm-chip-wrapper"><div class="atm-chip"></div></div>
+              <div class="atm-chip-wrapper">
+                <div class="atm-chip" aria-hidden="true"></div>
+                <div class="atm-contactless" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <span class="atm-logo-text">BSI UNIT</span>
             </div>
             <div class="atm-content"><h3>Bank Sampah Unit</h3><p id="valUnit">0</p></div>
+            <div class="atm-footer"><span>DLH Tulungagung</span><span class="atm-card-code">Aktif</span></div>
           </div>
           <div class="atm-card atm-green">
+            <div class="atm-card-art" aria-hidden="true"></div>
             <div class="atm-header">
-              <div class="atm-chip-wrapper"><div class="atm-chip"></div></div>
+              <div class="atm-chip-wrapper">
+                <div class="atm-chip" aria-hidden="true"></div>
+                <div class="atm-contactless" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <span class="atm-logo-text">MONTHLY</span>
             </div>
             <div class="atm-content"><h3>Setoran Bulan Ini (KG)</h3><p id="valBulanIni">0</p></div>
+            <div class="atm-footer"><span>Arus Material</span><span class="atm-card-code">Real-time</span></div>
           </div>
           <div class="atm-card atm-purple">
+            <div class="atm-card-art" aria-hidden="true"></div>
             <div class="atm-header">
-              <div class="atm-chip-wrapper"><div class="atm-chip"></div></div>
+              <div class="atm-chip-wrapper">
+                <div class="atm-chip" aria-hidden="true"></div>
+                <div class="atm-contactless" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <span class="atm-logo-text">VOLUME</span>
             </div>
             <div class="atm-content"><h3>Total Sampah Masuk BSI (KG)</h3><p id="valTotalSampah">0</p></div>
+            <div class="atm-footer"><span>Volume Terkelola</span><span class="atm-card-code">Terintegrasi</span></div>
           </div>
           <div class="atm-card atm-gold">
+            <div class="atm-card-art" aria-hidden="true"></div>
             <div class="atm-header">
-              <div class="atm-chip-wrapper"><div class="atm-chip"></div></div>
+              <div class="atm-chip-wrapper">
+                <div class="atm-chip" aria-hidden="true"></div>
+                <div class="atm-contactless" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <span class="atm-logo-text">TOTAL TABUNGAN</span>
             </div>
             <div class="atm-content"><h3>Kewajiban Saldo (Rp)</h3><p id="valSaldo">Rp 0</p></div>
+            <div class="atm-footer"><span>Saldo Nasabah</span><span class="atm-card-code">Terverifikasi</span></div>
           </div>
           <div class="atm-card atm-rose">
+            <div class="atm-card-art" aria-hidden="true"></div>
             <div class="atm-header">
-              <div class="atm-chip-wrapper"><div class="atm-chip"></div></div>
+              <div class="atm-chip-wrapper">
+                <div class="atm-chip" aria-hidden="true"></div>
+                <div class="atm-contactless" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <span class="atm-logo-text">OFF-TAKER</span>
             </div>
             <div class="atm-content"><h3>Total Terjual ke Off-taker (KG)</h3><p id="valTotalJual">0</p></div>
+            <div class="atm-footer"><span>Penjualan Material</span><span class="atm-card-code">Tercatat</span></div>
           </div>
           <div class="atm-card atm-teal">
+            <div class="atm-card-art" aria-hidden="true"></div>
             <div class="atm-header">
-              <div class="atm-chip-wrapper"><div class="atm-chip"></div></div>
+              <div class="atm-chip-wrapper">
+                <div class="atm-chip" aria-hidden="true"></div>
+                <div class="atm-contactless" aria-hidden="true"><span></span><span></span><span></span></div>
+              </div>
               <span class="atm-logo-text">GUDANG</span>
             </div>
             <div class="atm-content"><h3>Sisa Stok Gudang BSI (KG)</h3><p id="valSisaStok">0</p></div>
+            <div class="atm-footer"><span>Persediaan BSI</span><span class="atm-card-code">Terkini</span></div>
           </div>
         </div>
 
