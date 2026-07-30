@@ -10,11 +10,13 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Saldo Sampah">
   <title>Aplikasi Nasabah Bank Sampah | Tulungagung</title>
-
-  <link rel="manifest" href="/manifest.json?v=4">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=4">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-nasabah-192.png?v=4">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png?v=4">
+  <link rel="manifest" href="./nasabah-v5.webmanifest">
+  <link rel="shortcut icon" type="image/png" href="./favicon-nasabah-v5-32.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-nasabah-v5-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="./favicon-nasabah-v5-48.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-nasabah-v5-192.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon-v5-180.png">
+  <link rel="apple-touch-icon-precomposed" href="./apple-touch-icon-v5-180.png">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="supabase-adapter.js" defer></script>
@@ -71,7 +73,6 @@
     .brand-mini span{display:block;margin-top:2px;color:var(--muted);font-size:.68rem}
     .top-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
     .install-btn{display:none;border:1px solid #CBE3D9;background:#EFF8F4;color:var(--green-800);border-radius:12px;padding:9px 11px;font-size:.72rem;font-weight:800;white-space:nowrap}
-    .exit-app-btn{border:1px solid #E7D5D5;background:#FFF5F5;color:#8F2525;border-radius:12px;padding:9px 11px;font-size:.72rem;font-weight:800;white-space:nowrap}
 
     .hero{
       position:relative;overflow:hidden;
@@ -184,6 +185,8 @@
     .offline-banner{display:none;margin-bottom:12px;padding:10px 12px;border:1px solid #F1D7AA;border-radius:12px;background:#FFF8E9;color:#7B591F;font-size:.72rem;text-align:center}
     body.offline .offline-banner{display:block}
 
+
+
     :focus-visible{outline:3px solid rgba(201,154,61,.58);outline-offset:2px}
     @media(max-width:390px){
       .app-shell{padding-left:10px;padding-right:10px}
@@ -193,6 +196,7 @@
       .action-card{min-height:112px}
     }
   </style>
+  <link rel="preload" as="image" href="./icon-nasabah-v5-192.png">
 </head>
 <body>
   <main class="app-shell">
@@ -203,7 +207,6 @@
       </div>
       <div class="top-actions">
         <button id="btnInstall" class="install-btn" type="button">Pasang di HP</button>
-        <button class="exit-app-btn" type="button" onclick="keluarAplikasiUtama()" aria-label="Keluar dan bersihkan data">Keluar</button>
       </div>
     </div>
 
@@ -220,6 +223,7 @@
 
     <p class="footer">© 2026 Dinas Lingkungan Hidup Kabupaten Tulungagung<br>Hubungi petugas Bank Sampah Unit apabila data atau nomor HP perlu diperbarui.</p>
   </main>
+
 
   <div id="scannerOverlay" class="scanner-overlay" role="dialog" aria-modal="true" aria-label="Pemindai QR">
     <div class="scanner-sheet">
@@ -374,14 +378,6 @@
     tampilkan(`<div class="card" style="text-align:center"><div style="font-size:46px;margin-bottom:8px">✓</div><h2 class="card-title">Selesai</h2><p class="card-lead">Informasi saldo telah dibersihkan dari layar.</p><button class="btn btn-primary" onclick="layarBeranda()">Kembali ke Beranda</button></div>`)
   }
 
-  function keluarAplikasiUtama(){
-    try{tutupScanner()}catch(e){}
-    hasilPencarianSaatIni=null;
-    idUnitAktif='';
-    idNasabahAktif='';
-    try{history.replaceState({},'',window.location.pathname)}catch(e){}
-    layarBeranda();
-  }
 
   function ambilParameterQr(raw){
     const nilai=String(raw||'').trim();if(!nilai)return null;
@@ -443,7 +439,7 @@
   window.addEventListener('offline',()=>document.body.classList.add('offline'));
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&scannerAktif)tutupScanner()});
 
-  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw-nasabah.js',{updateViaCache:'none'}).catch(()=>{}))}
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./sw-nasabah-v6.js',{scope:'./',updateViaCache:'none'}).catch(()=>{}))}
 
   window.addEventListener('load',()=>{
     if(!navigator.onLine)document.body.classList.add('offline');
