@@ -22,6 +22,54 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
 
+// ================== UTIL: HASHING PASSWORD (KEAMANAN) ==================
+// PENTING: harus identik dengan utilitas hashing di Edge Function login/
+// dan update-admin/ (format & jumlah iterasi harus sama persis), supaya
+// password yang di-hash di sini bisa diverifikasi di sana. Kalau iterasi
+// diubah di salah satu tempat, ubah juga di tempat lain.
+//
+// Dipakai saat induk.html membuat/mengedit akun BSU (tambahUnit/updateUnit)
+// -- alur ini menulis LANGSUNG ke tabel bsu dari browser (tidak lewat Edge
+// Function manapun), jadi hashing harus dilakukan di sini, sebelum data
+// dikirim ke Supabase, atau password akan tersimpan sebagai teks biasa.
+const PBKDF2_ITERASI = 210000;
+
+function _toBase64(bytes) {
+  let biner = '';
+  for (const b of bytes) biner += String.fromCharCode(b);
+  return btoa(biner);
+}
+
+async function hashPasswordPBKDF2(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: PBKDF2_ITERASI, hash: 'SHA-256' }, key, 256);
+  return `pbkdf2$${PBKDF2_ITERASI}$${_toBase64(salt)}$${_toBase64(new Uint8Array(bits))}`;
+}
+
+function sudahHashPassword(v) {
+  return typeof v === 'string' && v.startsWith('pbkdf2$');
+}
+
+// Hash nilai HANYA kalau itu password baru yang masih polos (bukan kosong,
+// dan belum berformat hash). Kalau form edit resubmit hash yang sudah ada
+// tanpa diubah (nilainya sudah berformat pbkdf2$...), dilewatkan apa adanya
+// -- supaya tidak ter-hash dua kali dan merusak login yang sudah berfungsi.
+async function hashJikaPasswordBaru(v) {
+  if (v == null || v === '') return v;
+  if (sudahHashPassword(v)) return v;
+  return await hashPasswordPBKDF2(String(v));
+}
+
+// Terapkan ke semua kolom password yang mungkin ada di form BSU (mengubah
+// objeknya langsung / in-place, lalu mengembalikannya untuk kenyamanan).
+async function hashKolomPasswordBsu(obj) {
+  for (const kolom of ['password', 'password_admin', 'password_operator', 'password_bendahara']) {
+    if (kolom in obj) obj[kolom] = await hashJikaPasswordBaru(obj[kolom]);
+  }
+  return obj;
+}
+
 // ================== UTIL: ID UNIK ==================
 // Pengganti pola lama `PREFIX + Date.now()` yang berisiko kecil bentrok
 // jika dua entri tersimpan di milidetik yang sama. crypto.randomUUID()
@@ -263,7 +311,7 @@ const AdapterAPI = {
   async getBundleBSI() {
     const [{ data: kategori }, { data: bsuList }, { data: transaksi }, { data: hibah }] = await Promise.all([
       sb.from('kategori').select('*').order('id'),
-      sb.from('bsu').select('*'),
+      sb.from('bsu_public').select('*'), // KEAMANAN: view tanpa kolom password (lihat keamanan-rls-setup.sql)
       sb.from('transaksi').select('*').eq('level', 'unit_ke_induk').order('tgl', { ascending: false }),
       sb.from('bantuan_hibah').select('*')
     ]);
@@ -524,6 +572,7 @@ const AdapterAPI = {
   async tambahUnit(form) {
     const id = form.id || ('BSU-' + genId());
     const row = { ...form, id };
+    await hashKolomPasswordBsu(row); // KEAMANAN: hash password sebelum ditulis ke database
     const { error } = await sb.from('bsu').insert(row);
     if (error) return 'Gagal: ' + error.message;
     logAudit('bsu', row.id, 'insert', null, stripPasswordBsu(row));
@@ -531,14 +580,15 @@ const AdapterAPI = {
   },
   async updateUnit(form) {
     const { id, ...rest } = form;
-    const { data: lama } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
+    await hashKolomPasswordBsu(rest); // KEAMANAN: hash password baru sebelum ditulis; nilai yang sudah ter-hash dilewatkan apa adanya
+    const { data: lama } = await sb.from('bsu_public').select('*').eq('id', id).maybeSingle(); // KEAMANAN: tanpa kolom password
     const { error } = await sb.from('bsu').update(rest).eq('id', id);
     if (error) return 'Gagal: ' + error.message;
     logAudit('bsu', id, 'update', stripPasswordBsu(lama), stripPasswordBsu({ ...lama, ...rest }));
     return 'Sukses diperbarui';
   },
   async deleteUnit(id) {
-    const { data: lama, error: errBsu } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
+    const { data: lama, error: errBsu } = await sb.from('bsu_public').select('*').eq('id', id).maybeSingle(); // KEAMANAN: tanpa kolom password
     if (errBsu) return 'Gagal: ' + errBsu.message;
     if (!lama) return 'Gagal: Data BSU tidak ditemukan.';
     const [nas, trx, opn, kas, rek, bagi] = await Promise.all([
@@ -599,9 +649,24 @@ const AdapterAPI = {
   },
 
 
+
+  // ================== KREDENSIAL BSU (KHUSUS ADMIN PUSAT) ==================
+  // KEAMANAN: fungsi ini SENGAJA terpisah dari getBundleBSI() / getBundleBSU().
+  // Hanya dipanggil oleh layar "Registrasi BSU" di induk.html (fitur kirim
+  // kredensial via WA / tampilkan password unit ke Admin Pusat). Jangan
+  // panggil fungsi ini dari unit.html atau halaman publik mana pun -- operator
+  // unit dan publik tidak pernah perlu melihat password ini.
+  async getKredensialSemuaUnit() {
+    const { data, error } = await sb.from('bsu').select('id, password, password_admin, password_operator, password_bendahara');
+    if (error) { console.error('getKredensialSemuaUnit:', error); return {}; }
+    const peta = {};
+    (data || []).forEach(r => { peta[r.id] = r; });
+    return peta;
+  },
+
   // ================== SKEMA BAGI HASIL BSU ==================
   async getSkemaBagiHasilUnit(idUnit) {
-    const { data, error } = await sb.from('bsu').select('*').eq('id', idUnit).maybeSingle();
+    const { data, error } = await sb.from('bsu_public').select('*').eq('id', idUnit).maybeSingle(); // KEAMANAN: tanpa kolom password (data ini di-spread ke hasil return)
     if (error || !data) {
       return { id: idUnit, bagi_hasil_aktif: false, persen_nasabah: 100, persen_pengelola: 0, bagi_hasil_mulai: null, bagi_hasil_dasar: null };
     }
@@ -624,7 +689,7 @@ const AdapterAPI = {
     if (persenNasabah < 0 || persenPengelola < 0 || Math.abs((persenNasabah + persenPengelola) - 100) > 0.001) {
       return 'Gagal: Persentase nasabah dan pengelola harus berjumlah tepat 100%.';
     }
-    const { data: lama } = await sb.from('bsu').select('*').eq('id', id).maybeSingle();
+    const { data: lama } = await sb.from('bsu_public').select('*').eq('id', id).maybeSingle(); // KEAMANAN: tanpa kolom password
     const dataBaru = {
       bagi_hasil_aktif: form.bagi_hasil_aktif === true,
       persen_nasabah: persenNasabah,
@@ -642,7 +707,7 @@ const AdapterAPI = {
 
   async getBagiHasilIndukBundle() {
     const [{ data: bsu }, { data: transaksi }, { data: penggunaan }] = await Promise.all([
-      sb.from('bsu').select('*').order('nama'),
+      sb.from('bsu_public').select('*').order('nama'), // KEAMANAN: tanpa kolom password
       sb.from('transaksi').select('*').eq('level', 'nasabah_ke_unit'),
       sb.from('bagi_hasil_penggunaan').select('*').order('tanggal', { ascending: false })
     ]);
@@ -725,7 +790,7 @@ const AdapterAPI = {
       sb.from('transaksi').select('*').eq('id_unit', idUnit).eq('level', 'nasabah_ke_unit'),
       sb.from('transaksi').select('*').eq('id_unit', idUnit).eq('level', 'unit_ke_induk'),
       sb.from('kategori').select('*').order('id'),
-      sb.from('bsu').select('*').eq('id', idUnit),
+      sb.from('bsu_public').select('*').eq('id', idUnit), // KEAMANAN: tanpa kolom password (lihat keamanan-rls-setup.sql)
       sb.from('stock_opname').select('*').eq('id_unit', idUnit),
       sb.from('kas_mutasi').select('*').eq('id_unit', idUnit),
       sb.from('rekonsiliasi_kas').select('*').eq('id_unit', idUnit),
@@ -1298,7 +1363,7 @@ const AdapterAPI = {
       { data: kas_mutasi }, { data: bagi_hasil_penggunaan }, { data: audit_log }
     ] = await Promise.all([
       sb.from('admin').select('id, username'),
-      sb.from('bsu').select('*'),
+      sb.from('bsu_public').select('*'), // KEAMANAN: tanpa kolom password (stripPasswordBsu di bawah jadi lapisan cadangan saja)
       sb.from('nasabah').select('*'),
       sb.from('kategori').select('*'),
       sb.from('transaksi').select('*'),
@@ -1380,75 +1445,69 @@ const AdapterAPI = {
   },
 
   // ================== CEK SALDO MANDIRI (HALAMAN PUBLIK cek-saldo.html) ==================
-  // Dipakai oleh nasabah lewat scan QR, TANPA login. Sengaja hanya mengembalikan
-  // field yang aman ditampilkan ke publik (bukan seluruh baris tabel bsu/nasabah).
+  // Dipakai oleh nasabah lewat scan QR, TANPA login.
+  //
+  // === PERUBAHAN KEAMANAN PENTING ===
+  // Versi sebelumnya melakukan sb.from('nasabah').select('*') dan sb.from('transaksi').select(...)
+  // LANGSUNG dari browser, hanya disaring lewat .eq('hp', ...) di JavaScript. Karena
+  // SUPABASE_ANON_KEY yang dipakai di sini memang publik (siapa pun bisa membacanya dari
+  // Lihat Sumber Halaman), pengecekan "HP harus cocok" itu SAMA SEKALI TIDAK MENGIKAT --
+  // siapa pun bisa membuka console browser dan memanggil sb.from('nasabah').select('*')
+  // sendiri untuk mengunduh SELURUH nama+HP+saldo nasabah dari SEMUA unit sekaligus.
+  //
+  // Sekarang keempat fungsi ini memanggil fungsi database (RPC) yang SECURITY DEFINER.
+  // Pencocokan HP dilakukan DI DALAM DATABASE, dan tabel nasabah/transaksi/bsu tidak lagi
+  // perlu bisa dibaca langsung oleh anon key sama sekali -- lihat keamanan-rls-setup.sql
+  // untuk definisi RPC-nya. WAJIB menjalankan file SQL tersebut di Supabase SQL Editor
+  // SEBELUM menggunakan versi adapter ini, kalau tidak halaman cek-saldo.html akan gagal
+  // memuat data (RPC belum ada).
 
-  // Daftar nama unit saja (untuk dropdown pilih unit di halaman cek saldo, kalau
-  // nasabah membuka halamannya langsung tanpa scan QR / parameter URL kosong).
   async getDaftarUnitPublik() {
-    const { data, error } = await sb.from('bsu').select('id, nama').order('nama');
-    if (error) return [];
+    const { data, error } = await sb.rpc('rpc_daftar_unit_publik');
+    if (error) { console.error('getDaftarUnitPublik:', error); return []; }
     return data || [];
   },
 
-  // Info dasar unit (nama & lokasi saja) untuk ditampilkan di halaman cek saldo.
   async getInfoUnitPublik(idUnit) {
-    const { data, error } = await sb.from('bsu').select('id, nama, desa, kecamatan').eq('id', idUnit).maybeSingle();
-    if (error || !data) return null;
-    return data;
+    const { data, error } = await sb.rpc('rpc_info_unit_publik', { p_id_unit: idUnit });
+    if (error || !data || !data.length) return null;
+    return data[0];
   },
 
-  // Nama nasabah saja (untuk layar konfirmasi "Halo, [nama], ini Anda?" pada QR
-  // pribadi) -- TIDAK mengembalikan HP atau saldo, supaya id_nasabah yang mungkin
-  // difoto/disebar dari QR tidak otomatis membocorkan data finansialnya.
   async getInfoNasabahRingkas(idUnit, idNasabah) {
-    const { data, error } = await sb.from('nasabah').select('id, nama').eq('id_unit', idUnit).eq('id', idNasabah).maybeSingle();
-    if (error || !data) return null;
-    return data;
+    const { data, error } = await sb.rpc('rpc_info_nasabah_ringkas', { p_id_unit: idUnit, p_id_nasabah: idNasabah });
+    if (error || !data || !data.length) return null;
+    return data[0];
   },
 
-  // Pengecekan saldo sesungguhnya -- WAJIB nomor HP cocok persis dengan yang
-  // terdaftar (baik mode QR Unit maupun QR pribadi per nasabah). idNasabah bersifat
-  // opsional: kalau diisi (mode QR pribadi), pencarian dipersempit ke nasabah itu
-  // saja; kalau kosong (mode QR Unit), semua nasabah di unit tsb dengan HP yang
-  // cocok akan dikembalikan (biasanya 1, tapi bisa lebih dari 1 kalau ada anggota
-  // keluarga terdaftar dengan HP yang sama).
+  // Pembatasan percobaan sisi-browser (lapisan tambahan saja, BUKAN pengganti rate
+  // limiting di server -- lihat catatan di keamanan-rls-setup.sql / README keamanan).
+  // Mencegah satu tab mencoba banyak nomor HP secara berturut-turut dalam waktu singkat.
+  _percobaanCekSaldo: [],
+  _cekBatasPercobaan() {
+    const SEKARANG = Date.now();
+    const JENDELA_MS = 60 * 1000;
+    const BATAS = 8;
+    this._percobaanCekSaldo = this._percobaanCekSaldo.filter(t => SEKARANG - t < JENDELA_MS);
+    if (this._percobaanCekSaldo.length >= BATAS) {
+      return 'Terlalu banyak percobaan dalam waktu singkat. Silakan tunggu sebentar lalu coba lagi.';
+    }
+    this._percobaanCekSaldo.push(SEKARANG);
+    return null;
+  },
+
   async cekSaldoNasabahPublik({ idUnit, nomorHp, idNasabah }) {
     if (!idUnit || !nomorHp) return { ok: false, error: 'Data tidak lengkap.' };
     const hpBersih = String(nomorHp).trim();
     if (!hpBersih) return { ok: false, error: 'Nomor HP wajib diisi.' };
 
-    let q = sb.from('nasabah').select('*').eq('id_unit', idUnit).eq('hp', hpBersih);
-    if (idNasabah) q = q.eq('id', idNasabah);
-    const { data: nasabahList, error } = await q;
+    const pesanBatas = this._cekBatasPercobaan();
+    if (pesanBatas) return { ok: false, error: pesanBatas };
+
+    const { data, error } = await sb.rpc('rpc_cek_saldo_publik', {
+      p_id_unit: idUnit, p_hp: hpBersih, p_id_nasabah: idNasabah || null
+    });
     if (error) return { ok: false, error: error.message };
-    if (!nasabahList || !nasabahList.length) {
-      return { ok: false, error: 'Nomor HP tidak cocok dengan data yang terdaftar. Pastikan nomor HP sesuai yang didaftarkan di Bank Sampah Unit (hubungi petugas kalau nomor HP Anda berubah).' };
-    }
-
-    const unitInfo = await this.getInfoUnitPublik(idUnit);
-
-    // Catatan: transaksi dikaitkan ke nasabah lewat kecocokan NAMA (bukan id nasabah),
-    // konsisten dengan cara kerja unit.html yang sudah ada. Kalau ada 2 nasabah dengan
-    // nama PERSIS SAMA di satu unit, riwayat keduanya akan tergabung -- ini keterbatasan
-    // data model lama, bukan sesuatu yang baru dari fitur ini.
-    const hasil = [];
-    for (const n of nasabahList) {
-      let { data: trx } = await sb.from('transaksi').select('id, id_nasabah, tgl, jenis, berat, harga_satuan, total, status, created_at')
-        .eq('id_unit', idUnit).eq('level', 'nasabah_ke_unit').eq('id_nasabah', n.id)
-        .order('created_at', { ascending: false });
-      // Fallback hanya untuk transaksi lama yang belum memiliki id_nasabah.
-      if (!trx || !trx.length) {
-        const lama = await sb.from('transaksi').select('id, id_nasabah, tgl, jenis, berat, harga_satuan, total, status, created_at')
-          .eq('id_unit', idUnit).eq('level', 'nasabah_ke_unit').eq('nama', n.nama)
-          .order('created_at', { ascending: false });
-        trx = lama.data || [];
-      }
-      const rows = (trx || []).filter(t => (t.status || 'aktif') !== 'dibatalkan');
-      const saldo = rows.reduce((a, t) => a + (parseFloat(t.total) || 0), 0);
-      const totalBeratSetor = rows.filter(t => (parseFloat(t.total) || 0) >= 0).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-      hasil.push({ nasabah: { id: n.id, nama: n.nama }, saldo, totalBeratSetor, riwayat: rows });
-    }
-    return { ok: true, unit: unitInfo, data: hasil };
+    return data; // RPC sudah mengembalikan bentuk { ok, unit, data } atau { ok:false, error }
   }
 };

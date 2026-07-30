@@ -2890,6 +2890,7 @@
             <div class="form-group"><label>Kata Sandi Admin BSU</label><input type="text" id="editBsuPasswordAdmin" class="form-control"></div>
             <div class="form-group"><label>Kata Sandi Operator</label><input type="text" id="editBsuPasswordOperator" class="form-control"></div>
             <div class="form-group"><label>Kata Sandi Bendahara</label><input type="text" id="editBsuPasswordBendahara" class="form-control"></div>
+            <div style="margin:-4px 0 15px;padding:10px 12px;border-radius:10px;background:#fef2f2;color:#991b1b;font-size:11.5px;line-height:1.5;">⚠️ Kolom yang sudah tampil sebagai kode acak panjang (diawali <code>pbkdf2$</code>) artinya password SUDAH di-hash (aman, tidak bisa dibaca ulang). <b>Jangan diedit sebagian</b> — biarkan persis apa adanya kalau tidak ingin diubah, atau HAPUS SELURUHNYA lalu ketik password baru kalau ingin menggantinya.</div>
             <div style="margin:-4px 0 15px;padding:10px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:11.5px;line-height:1.5;">Semua akun memakai ID BSU yang sama. Pengguna memilih jenis akses pada halaman login.</div>
             <div class="form-group" style="padding:12px 13px;border-radius:11px;background:#fff7ed;border:1px solid #fdba74;">
                 <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;margin:0;">
@@ -3295,7 +3296,7 @@
         let selMat = document.getElementById('trxMaterial');
         selMat.innerHTML = '';
         globalKategori.filter(k => k.jenis_material === utama || !utama).forEach(k => {
-            selMat.innerHTML += `<option value="${k.nama_kategori}" data-harga="${k.harga}">${k.nama_kategori} - Rp ${parseFloat(k.harga).toLocaleString('id-ID')}/kg</option>`;
+            selMat.innerHTML += `<option value="${escAttr(k.nama_kategori)}" data-harga="${k.harga}">${escHtml(k.nama_kategori)} - Rp ${parseFloat(k.harga).toLocaleString('id-ID')}/kg</option>`;
         });
     }
 
@@ -3308,7 +3309,7 @@
         let stok = getStokGudangMap();
         selMat.innerHTML = filtered.map(k => {
             let sisa = stok[k.nama_kategori] || 0;
-            return `<option value="${escAttr(k.nama_kategori)}">${k.nama_kategori} — Stok: ${sisa.toLocaleString('id-ID')} Kg</option>`;
+            return `<option value="${escAttr(k.nama_kategori)}">${escHtml(k.nama_kategori)} — Stok: ${sisa.toLocaleString('id-ID')} Kg</option>`;
         }).join('');
         cekStokJual();
     }
@@ -3386,11 +3387,11 @@
                 <div class="trx-feed-icon">♻️</div>
                 <div class="trx-feed-body">
                     <div class="trx-feed-top">
-                        <span class="trx-feed-bsu" title="${escAttr(t.nama)}">${t.nama || 'Tanpa Nama'}</span>
+                        <span class="trx-feed-bsu" title="${escAttr(t.nama)}">${escHtml(t.nama || 'Tanpa Nama')}</span>
                         <span class="trx-feed-total">+Rp ${parseFloat(t.total).toLocaleString('id-ID')}</span>
                     </div>
                     <div class="trx-feed-sub">
-                        <span class="badge-material">${t.jenis}</span>
+                        <span class="badge-material">${escHtml(t.jenis)}</span>
                         <span>⚖️ ${parseFloat(t.berat).toLocaleString('id-ID')} Kg</span>
                     </div>
                 </div>
@@ -3416,7 +3417,7 @@
             html += '<tr><td colspan="5" class="text-center text-muted">Belum ada riwayat setoran.</td></tr>';
         } else {
             list.forEach(t => {
-                html += `<tr><td>${formatTglTabel(t.tgl)}</td><td>${t.nama || '-'}</td><td>${t.jenis || '-'}</td><td>${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-success" style="font-weight:700;">Rp ${parseFloat(t.total).toLocaleString('id-ID')}</td></tr>`;
+                html += `<tr><td>${formatTglTabel(t.tgl)}</td><td>${escHtml(t.nama || '-')}</td><td>${escHtml(t.jenis || '-')}</td><td>${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-success" style="font-weight:700;">Rp ${parseFloat(t.total).toLocaleString('id-ID')}</td></tr>`;
             });
         }
         el.innerHTML = html + '</tbody>';
@@ -3436,9 +3437,9 @@
         document.getElementById('editTrxTanggal').value = formatTglInput(t.tgl);
 
         let selMat = document.getElementById('editTrxMaterial');
-        selMat.innerHTML = globalKategori.map(k => `<option value="${escAttr(k.nama_kategori)}" data-harga="${k.harga}" ${k.nama_kategori === t.jenis ? 'selected' : ''}>${k.nama_kategori} - Rp ${parseFloat(k.harga).toLocaleString('id-ID')}/kg</option>`).join('');
+        selMat.innerHTML = globalKategori.map(k => `<option value="${escAttr(k.nama_kategori)}" data-harga="${k.harga}" ${k.nama_kategori === t.jenis ? 'selected' : ''}>${escHtml(k.nama_kategori)} - Rp ${parseFloat(k.harga).toLocaleString('id-ID')}/kg</option>`).join('');
         if(![...selMat.options].some(o => o.value === t.jenis)) {
-            selMat.innerHTML += `<option value="${escAttr(t.jenis)}" data-harga="0" selected>${t.jenis} (kategori lama/tidak terdaftar)</option>`;
+            selMat.innerHTML += `<option value="${escAttr(t.jenis)}" data-harga="0" selected>${escHtml(t.jenis)} (kategori lama/tidak terdaftar)</option>`;
         }
 
         document.getElementById('editTrxBerat').value = t.berat;
@@ -3552,7 +3553,7 @@
         let stok = getStokGudangMap();
         let sisaStok = stok[form.material] || 0;
         if(form.berat > sisaStok) {
-            let lanjut = confirm(`⚠️ Peringatan Stok\n\nBerat yang diinput (${form.berat.toLocaleString('id-ID')} Kg) melebihi sisa stok gudang untuk "${form.material}" (${sisaStok.toLocaleString('id-ID')} Kg).\n\nTetap simpan penjualan ini?`);
+            let lanjut = confirm(`⚠️ Peringatan Stok\n\nBerat yang diinput (${form.berat.toLocaleString('id-ID')} Kg) melebihi sisa stok gudang untuk "${escHtml(form.material)}" (${sisaStok.toLocaleString('id-ID')} Kg).\n\nTetap simpan penjualan ini?`);
             if(!lanjut) return;
         }
 
@@ -3598,11 +3599,11 @@
                 <div class="trx-feed-icon">📤</div>
                 <div class="trx-feed-body">
                     <div class="trx-feed-top">
-                        <span class="trx-feed-bsu" title="${escAttr(d.pembeli)}">${d.pembeli || 'Tanpa Nama'}</span>
+                        <span class="trx-feed-bsu" title="${escAttr(d.pembeli)}">${escHtml(d.pembeli || 'Tanpa Nama')}</span>
                         <span class="trx-feed-total">+Rp ${parseFloat(d.total).toLocaleString('id-ID')}</span>
                     </div>
                     <div class="trx-feed-sub">
-                        <span class="badge-material">${d.material}</span>
+                        <span class="badge-material">${escHtml(d.material)}</span>
                         <span>⚖️ ${parseFloat(d.berat).toLocaleString('id-ID')} Kg</span>
                     </div>
                 </div>
@@ -3715,7 +3716,7 @@
         let html = ''; let saldoBerjalan = 0;
         filterDataByDateRange(globalTransaksi.filter(t => t.nama === namaBsu), 'tgl', filterType, tgl, bln, null).forEach(t => {
             let mut = parseFloat(t.total)||0; saldoBerjalan += mut;
-            html += `<tr><td>${formatTglTabel(t.tgl)}</td><td>${t.jenis}</td><td class="text-right ${mut >= 0 ? 'text-success' : 'text-danger'}">${mut >= 0 ? '+' : '-'} Rp ${Math.abs(mut).toLocaleString('id-ID')}</td><td class="text-right fw-bold">Rp ${saldoBerjalan.toLocaleString('id-ID')}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(t.tgl)}</td><td>${escHtml(t.jenis)}</td><td class="text-right ${mut >= 0 ? 'text-success' : 'text-danger'}">${mut >= 0 ? '+' : '-'} Rp ${Math.abs(mut).toLocaleString('id-ID')}</td><td class="text-right fw-bold">Rp ${saldoBerjalan.toLocaleString('id-ID')}</td></tr>`;
         });
         
         document.getElementById('tabelRiwayatBsu').innerHTML = html || '<tr><td colspan="4" class="text-center">Belum ada riwayat transaksi</td></tr>';
@@ -3782,7 +3783,7 @@
     function waStrukTarik() {
         if(!lastStrukTarik) return alert('Belum ada transaksi penarikan untuk dikirim. Silakan proses penarikan saldo terlebih dahulu.');
         let s = lastStrukTarik;
-        let pesan = `*STRUK PENARIKAN SALDO*\nBank Sampah Induk - DLH Kab. Tulungagung\n\nUnit BSU: ${s.nama}\nTanggal: ${s.tanggal.toLocaleString('id-ID')}\nNominal Tarik: Rp ${s.nominal.toLocaleString('id-ID')}\nSisa Saldo: Rp ${s.saldoSetelah.toLocaleString('id-ID')}\n\nTerima kasih.`;
+        let pesan = `*STRUK PENARIKAN SALDO*\nBank Sampah Induk - DLH Kab. Tulungagung\n\nUnit BSU: ${escHtml(s.nama)}\nTanggal: ${s.tanggal.toLocaleString('id-ID')}\nNominal Tarik: Rp ${s.nominal.toLocaleString('id-ID')}\nSisa Saldo: Rp ${s.saldoSetelah.toLocaleString('id-ID')}\n\nTerima kasih.`;
 
         let hp = String(s.hp || '').replace(/[^0-9]/g, '');
         if(hp.startsWith('0')) hp = '62' + hp.slice(1);
@@ -3933,7 +3934,7 @@
         let html = ''; let totBerat = 0, totNominal = 0;
         filterDataByDateRange(globalTransaksi.filter(t => t.total > 0 && t.berat > 0), 'tgl', filterType, tgl, bln, thn).slice().reverse().forEach(t => {
             totBerat += parseFloat(t.berat)||0; totNominal += parseFloat(t.total)||0;
-            html += `<tr><td>${formatTglTabel(t.tgl)}</td><td style="font-weight:bold;">${t.nama}</td><td>${t.jenis}</td><td class="text-right">${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-right text-success fw-bold">Rp ${parseInt(t.total).toLocaleString('id-ID')}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(t.tgl)}</td><td style="font-weight:bold;">${escHtml(t.nama)}</td><td>${escHtml(t.jenis)}</td><td class="text-right">${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-right text-success fw-bold">Rp ${parseInt(t.total).toLocaleString('id-ID')}</td></tr>`;
         });
         
         if(!html) html = '<tr><td colspan="5" class="text-center text-muted">Tidak ada data di periode ini.</td></tr>';
@@ -3949,7 +3950,7 @@
         let html = ''; let totBerat = 0, totNominal = 0;
         filterDataByDateRange(globalPenjualan, 'tanggal', filterType, tgl, bln, thn).slice().sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal)).forEach(d => {
             totBerat += parseFloat(d.berat)||0; totNominal += parseFloat(d.total)||0;
-            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:bold;">${d.pembeli}</td><td>${d.material}</td><td class="text-right">${parseFloat(d.berat).toLocaleString('id-ID')}</td><td class="text-right text-success fw-bold">Rp ${parseInt(d.total).toLocaleString('id-ID')}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:bold;">${escHtml(d.pembeli)}</td><td>${escHtml(d.material)}</td><td class="text-right">${parseFloat(d.berat).toLocaleString('id-ID')}</td><td class="text-right text-success fw-bold">Rp ${parseInt(d.total).toLocaleString('id-ID')}</td></tr>`;
         });
         
         if(!html) html = '<tr><td colspan="5" class="text-center text-muted">Tidak ada data di periode ini.</td></tr>';
@@ -4010,14 +4011,14 @@
         if (!globalHibah || globalHibah.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada catatan bantuan/hibah</td></tr>'; return; }
         let terurut = globalHibah.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
         tbody.innerHTML = terurut.map(h => `<tr>
-            <td>${new Date(h.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${h.sumber || '-'}</td>
-            <td>${h.keterangan || '-'}</td><td class="text-right" style="color:var(--secondary); font-weight:700;">Rp ${parseFloat(h.jumlah).toLocaleString('id-ID')}</td>
+            <td>${new Date(h.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${escHtml(h.sumber || '-')}</td>
+            <td>${escHtml(h.keterangan || '-')}</td><td class="text-right" style="color:var(--secondary); font-weight:700;">Rp ${parseFloat(h.jumlah).toLocaleString('id-ID')}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBantuanHibah('${escAttr(h.id)}')">🗑️</button></td>
         </tr>`).join('');
     }
 
     function getDataKasIndukOtomatis() {
-        let entriMasuk = globalPenjualan.map(d => ({ tanggalObj: uraikanTanggalInput(d.tanggal), tanggal: d.tanggal, jenis: 'masuk', kategori: 'Penjualan Sampah', keterangan: `${d.material || '-'} ke ${d.pembeli || '-'}`, nominal: parseFloat(d.total) || 0 }));
+        let entriMasuk = globalPenjualan.map(d => ({ tanggalObj: uraikanTanggalInput(d.tanggal), tanggal: d.tanggal, jenis: 'masuk', kategori: 'Penjualan Sampah', keterangan: `${escHtml(d.material || '-')} ke ${escHtml(d.pembeli || '-')}`, nominal: parseFloat(d.total) || 0 }));
         let entriHibah = (globalHibah || []).map(h => ({ tanggalObj: new Date(h.tanggal), tanggal: h.tanggal, jenis: 'masuk', kategori: 'Bantuan/Hibah', keterangan: (h.sumber || '-') + (h.keterangan ? ' - ' + h.keterangan : ''), nominal: parseFloat(h.jumlah) || 0 }));
         let entriKeluar = globalTransaksi.filter(t => (parseFloat(t.total) || 0) < 0 || t.jenis === 'Penarikan Tunai').map(t => ({ tanggalObj: uraikanTanggalInput(t.tgl), tanggal: t.tgl, jenis: 'keluar', kategori: 'Pembayaran ke BSU (Tarik Tabungan)', keterangan: 'Pencairan ke ' + (t.nama || '-'), nominal: Math.abs(parseFloat(t.total) || 0) }));
         let entriBiayaOp = (globalBiayaOp || []).map(b => ({ tanggalObj: new Date(b.tanggal), tanggal: b.tanggal, jenis: 'keluar', kategori: 'Biaya Operasional', keterangan: (b.jenis_biaya || '-') + (b.keterangan ? ' - ' + b.keterangan : ''), nominal: parseFloat(b.jumlah) || 0 }));
@@ -4039,7 +4040,7 @@
         let html = ''; let total = 0;
         list.slice().reverse().forEach(d => {
             total += d.nominal;
-            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${d.kategori}</td><td>${d.keterangan}</td><td class="text-right text-success fw-bold">Rp ${d.nominal.toLocaleString('id-ID')}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${escHtml(d.kategori)}</td><td>${escHtml(d.keterangan)}</td><td class="text-right text-success fw-bold">Rp ${d.nominal.toLocaleString('id-ID')}</td></tr>`;
         });
         if(!html) html = '<tr><td colspan="4" class="text-center text-muted">Tidak ada data kas masuk di periode ini.</td></tr>';
         else html += `<tr style="background:#f1f5f9; font-weight:900;"><td colspan="3" class="text-right">TOTAL KAS MASUK</td><td class="text-right text-success">Rp ${total.toLocaleString('id-ID')}</td></tr>`;
@@ -4057,7 +4058,7 @@
         let html = ''; let total = 0;
         list.slice().reverse().forEach(d => {
             total += d.nominal;
-            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${d.kategori}</td><td>${d.keterangan}</td><td class="text-right text-danger fw-bold">Rp ${d.nominal.toLocaleString('id-ID')}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${escHtml(d.kategori)}</td><td>${escHtml(d.keterangan)}</td><td class="text-right text-danger fw-bold">Rp ${d.nominal.toLocaleString('id-ID')}</td></tr>`;
         });
         if(!html) html = '<tr><td colspan="4" class="text-center text-muted">Tidak ada data kas keluar di periode ini.</td></tr>';
         else html += `<tr style="background:#f1f5f9; font-weight:900;"><td colspan="3" class="text-right">TOTAL KAS KELUAR</td><td class="text-right text-danger">Rp ${total.toLocaleString('id-ID')}</td></tr>`;
@@ -4072,7 +4073,7 @@
         let html = ''; let totMasuk = 0, totKeluar = 0;
         filterDataByDateRange(getDataKasIndukOtomatis(), 'tanggal', filterType, tgl, bln, thn).slice().reverse().forEach(d => {
             if(d.jenis === 'masuk') totMasuk += d.nominal; else totKeluar += d.nominal;
-            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${d.kategori}</td><td>${d.keterangan}</td><td class="text-right text-success">${d.jenis === 'masuk' ? `Rp ${d.nominal.toLocaleString('id-ID')}` : '-'}</td><td class="text-right text-danger">${d.jenis === 'keluar' ? `Rp ${d.nominal.toLocaleString('id-ID')}` : '-'}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${escHtml(d.kategori)}</td><td>${escHtml(d.keterangan)}</td><td class="text-right text-success">${d.jenis === 'masuk' ? `Rp ${d.nominal.toLocaleString('id-ID')}` : '-'}</td><td class="text-right text-danger">${d.jenis === 'keluar' ? `Rp ${d.nominal.toLocaleString('id-ID')}` : '-'}</td></tr>`;
         });
         
         let labaRugi = totMasuk - totKeluar;
@@ -4202,7 +4203,7 @@
     async function aturBagiHasilBsu(id) {
         const b=(globalBagiHasilInduk.bsu||[]).find(x=>String(x.id)===String(id)); if(!b)return alert('BSU tidak ditemukan.');
         const lamaNasabah=Number.isFinite(Number(b.persen_nasabah))?Number(b.persen_nasabah):85;
-        const input=prompt(`Persentase untuk NASABAH pada ${b.nama}:`,String(lamaNasabah));
+        const input=prompt(`Persentase untuk NASABAH pada ${escHtml(b.nama)}:`,String(lamaNasabah));
         if(input===null)return;
         const pn=Number(String(input).replace(',','.'));
         if(!Number.isFinite(pn)||pn<0||pn>100)return alert('Persentase nasabah harus antara 0 sampai 100.');
@@ -4219,7 +4220,7 @@
     async function toggleBagiHasilBsu(id,aktif) {
         const b=(globalBagiHasilInduk.bsu||[]).find(x=>String(x.id)===String(id)); if(!b)return;
         const aksi=aktif?'mengaktifkan':'menonaktifkan';
-        if(!confirm(`Yakin ${aksi} skema bagi hasil untuk ${b.nama}?\nPerubahan hanya berlaku pada transaksi berikutnya.`))return;
+        if(!confirm(`Yakin ${aksi} skema bagi hasil untuk ${escHtml(b.nama)}?\nPerubahan hanya berlaku pada transaksi berikutnya.`))return;
         const res=await AdapterAPI.updateSkemaBagiHasilUnit({id_unit:id,bagi_hasil_aktif:aktif,persen_nasabah:(Number.isFinite(Number(b.persen_nasabah))?Number(b.persen_nasabah):85),persen_pengelola:(Number.isFinite(Number(b.persen_pengelola))?Number(b.persen_pengelola):15),bagi_hasil_mulai:b.bagi_hasil_mulai||new Date().toISOString().slice(0,10),bagi_hasil_dasar:b.bagi_hasil_dasar||'Keputusan pengurus tentang skema bagi hasil',oleh:'Admin Pusat'});
         alert(res); if(String(res).includes('Sukses'))loadBagiHasilInduk();
     }
@@ -4265,6 +4266,19 @@
         let n = globalNasabah.find(x => String(x.id) === String(id));
         if(!n) return alert('Data BSU tidak ditemukan.');
 
+        // KEAMANAN: sejak pembaruan keamanan, password disimpan dalam bentuk hash
+        // (satu arah, tidak bisa dibaca ulang -- ini memang tujuan hashing). Kalau
+        // kredensial unit ini sudah ter-hash, TIDAK BISA dikirim apa adanya lewat WA
+        // (isinya akan berupa teks acak, bukan password asli, dan tidak akan bisa
+        // dipakai login). Admin harus mengatur PASSWORD BARU dulu lewat tombol Edit,
+        // baru kirim password baru itu ke unit.
+        const adaYangHash = [n.password_admin, n.password_operator, n.password_bendahara]
+            .some(p => typeof p === 'string' && p.startsWith('pbkdf2$'));
+        if (adaYangHash) {
+            alert('Kata sandi akun ini sudah di-hash (tidak bisa ditampilkan ulang demi keamanan).\n\nUntuk mengirim kredensial ke unit ini, klik tombol "Edit" terlebih dahulu, isi KATA SANDI BARU pada ketiga kolom akun, simpan, lalu gunakan kata sandi baru tersebut untuk diberikan ke unit.');
+            return;
+        }
+
         let pesan = `*DATA AKUN BANK SAMPAH UNIT*
 Bank Sampah Induk - DLH Kab. Tulungagung
 
@@ -4275,11 +4289,11 @@ Operator: ${n.password_operator || '-'}
 Bendahara: ${n.password_bendahara || '-'}
 
 Pada halaman login, pilih jenis akses sesuai akun yang digunakan.
-Nama BSU: ${n.nama}${n.mode_latihan === true ? ' (MODE LATIHAN)' : ''}
-Ketua: ${n.ketua}
-Kontak WA: ${n.hp}
-Desa: ${n.desa}
-Kecamatan: ${n.kecamatan}
+Nama BSU: ${escHtml(n.nama)}${n.mode_latihan === true ? ' (MODE LATIHAN)' : ''}
+Ketua: ${escHtml(n.ketua)}
+Kontak WA: ${escHtml(n.hp)}
+Desa: ${escHtml(n.desa)}
+Kecamatan: ${escHtml(n.kecamatan)}
 
 Simpan data ini baik-baik untuk login ke sistem.`;
 
@@ -4445,16 +4459,16 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             <div class="bsu-card">
                 <div class="bsu-card-head">
                     <div style="min-width:0;">
-                        <h3 class="bsu-card-title" title="${escAttr(n.nama)}">${n.nama}${badgeModeLatihanBsu(n)}</h3>
+                        <h3 class="bsu-card-title" title="${escAttr(n.nama)}">${escHtml(n.nama)}${badgeModeLatihanBsu(n)}</h3>
                         <span class="bsu-card-id">${n.id}</span>
                     </div>
                     <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end;font-size:10px;"><span class="pw-mask" data-pw="${escAttr(n.password_admin || n.password)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Admin BSU">A: ••••••</span><span class="pw-mask" data-pw="${escAttr(n.password_operator)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Operator">O: ••••••</span><span class="pw-mask" data-pw="${escAttr(n.password_bendahara)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Bendahara">B: ••••••</span></div>
                 </div>
                 <div class="bsu-card-info">
-                    <div class="info-row"><span class="ic">👤</span><span class="val" title="${escAttr(n.ketua)}">${n.ketua || '-'}</span></div>
-                    <div class="info-row"><span class="ic">📱</span><span class="val" title="${escAttr(n.hp)}">${n.hp || '-'}</span></div>
-                    <div class="info-row"><span class="ic">📍</span><span class="val" title="${escAttr(n.desa)}, Kec. ${escAttr(n.kecamatan)}">${n.desa || '-'}, Kec. ${n.kecamatan || '-'}</span></div>
-                    <div class="info-row"><span class="ic">🏠</span><span class="val" title="${escAttr(n.alamat)}">${n.alamat || '-'}</span></div>
+                    <div class="info-row"><span class="ic">👤</span><span class="val" title="${escAttr(n.ketua)}">${escHtml(n.ketua || '-')}</span></div>
+                    <div class="info-row"><span class="ic">📱</span><span class="val" title="${escAttr(n.hp)}">${escHtml(n.hp || '-')}</span></div>
+                    <div class="info-row"><span class="ic">📍</span><span class="val" title="${escAttr(n.desa)}, Kec. ${escAttr(n.kecamatan)}">${escHtml(n.desa || '-')}, Kec. ${escHtml(n.kecamatan || '-')}</span></div>
+                    <div class="info-row"><span class="ic">🏠</span><span class="val" title="${escAttr(n.alamat)}">${escHtml(n.alamat || '-')}</span></div>
                 </div>
                 <div class="bsu-stats">
                     <div class="bsu-stat-box"><span class="num">${n.jumlah_pengurus || 0}</span><span class="lbl">Pengurus</span></div>
@@ -4540,7 +4554,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
 
             let selBsu = document.getElementById('saldoBsuPilihBsu');
             let prevVal = selBsu.value;
-            selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.id)}">${n.nama}</option>`).join('');
+            selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.id)}">${escHtml(n.nama)}</option>`).join('');
             if (prevVal) selBsu.value = prevVal;
 
             if (!document.getElementById('rekapSaldoBulan').value) {
@@ -4563,7 +4577,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         }
         let selBsu = document.getElementById('saldoBSIPilihBsu');
         let prevVal = selBsu.value;
-        selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${n.nama}</option>`).join('');
+        selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${escHtml(n.nama)}</option>`).join('');
         if (prevVal) selBsu.value = prevVal;
 
         renderRekapSaldoBSI();
@@ -4611,7 +4625,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         document.getElementById('tbodyDetailSaldoBSI').innerHTML = baris.length === 0
             ? '<tr><td colspan="7" class="text-center text-muted">Belum ada transaksi</td></tr>'
             : baris.map(b => `<tr>
-                <td>${formatTglTabel(b.tgl)}</td><td><span class="badge-material">${b.jenis}</span></td>
+                <td>${formatTglTabel(b.tgl)}</td><td><span class="badge-material">${escHtml(b.jenis)}</span></td>
                 <td class="text-right">${b.berat.toLocaleString('id-ID')}</td>
                 <td class="text-right">Rp ${Math.round(b.hargaKg).toLocaleString('id-ID')}</td>
                 <td class="text-right" style="font-weight:700; color:${b.nilai < 0 ? 'var(--danger)' : 'var(--secondary)'};">Rp ${b.nilai.toLocaleString('id-ID')}</td>
@@ -4704,7 +4718,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             return;
         }
         let daftarNasabah = globalSemuaNasabahLintasUnit.filter(n => n.id_unit === idBsu);
-        selNasabah.innerHTML = '<option value="">-- Semua Nasabah --</option>' + daftarNasabah.map(n => `<option value="${escAttr(n.id)}">${n.nama}</option>`).join('');
+        selNasabah.innerHTML = '<option value="">-- Semua Nasabah --</option>' + daftarNasabah.map(n => `<option value="${escAttr(n.id)}">${escHtml(n.nama)}</option>`).join('');
         renderDetailSaldoNasabah();
     }
 
@@ -4743,8 +4757,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
 
         tbody.innerHTML = semuaBaris.length === 0 ? '<tr><td colspan="10" class="text-center text-muted">Belum ada transaksi</td></tr>' :
             semuaBaris.map((b, i) => `<tr>
-                <td>${i + 1}</td><td>${formatTglTabel(b.tgl)}</td><td style="font-weight:700;">${b.nama}</td><td>${b.idNasabah}</td>
-                <td><span class="badge-material">${b.jenis}</span></td><td class="text-right">${b.berat.toLocaleString('id-ID')}</td>
+                <td>${i + 1}</td><td>${formatTglTabel(b.tgl)}</td><td style="font-weight:700;">${escHtml(b.nama)}</td><td>${escHtml(b.idNasabah)}</td>
+                <td><span class="badge-material">${escHtml(b.jenis)}</span></td><td class="text-right">${b.berat.toLocaleString('id-ID')}</td>
                 <td class="text-right">Rp ${Math.round(b.hargaKg).toLocaleString('id-ID')}</td>
                 <td class="text-right" style="font-weight:700; color:${b.nilai < 0 ? 'var(--danger)' : 'var(--secondary)'};">Rp ${b.nilai.toLocaleString('id-ID')}</td>
                 <td class="text-right">Rp ${b.saldoSebelum.toLocaleString('id-ID')}</td>
@@ -4806,7 +4820,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         });
 
         tbody.innerHTML = baris.map(b => `<tr>
-            <td>${b.no}</td><td style="font-weight:700;">${b.nama}</td><td>${b.id}</td>
+            <td>${b.no}</td><td style="font-weight:700;">${escHtml(b.nama)}</td><td>${escHtml(b.id)}</td>
             <td class="text-right" style="color:var(--secondary);">Rp ${b.setoranBulan.toLocaleString('id-ID')}</td>
             <td class="text-right" style="color:var(--danger);">Rp ${b.tarikBulan.toLocaleString('id-ID')}</td>
             <td class="text-right">Rp ${b.saldoAwal.toLocaleString('id-ID')}</td>
@@ -4919,7 +4933,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         });
 
         tbody.innerHTML = baris.map(b => `<tr>
-            <td>${b.no}</td><td style="font-weight:700;">${b.nama}</td><td>${b.id}</td>
+            <td>${b.no}</td><td style="font-weight:700;">${escHtml(b.nama)}</td><td>${escHtml(b.id)}</td>
             <td class="text-right" style="color:var(--secondary);">Rp ${b.setoranBulan.toLocaleString('id-ID')}</td>
             <td class="text-right" style="color:var(--danger);">Rp ${b.tarikBulan.toLocaleString('id-ID')}</td>
             <td class="text-right">Rp ${b.saldoAwal.toLocaleString('id-ID')}</td>
@@ -5007,7 +5021,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
     function loadTarikTabunganBSU() {
         let sel = document.getElementById('tarikBsuPilih');
         let prevVal = sel.value;
-        sel.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${n.nama}</option>`).join('');
+        sel.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${escHtml(n.nama)}</option>`).join('');
         if (prevVal) sel.value = prevVal;
 
         if (!document.getElementById('tarikBsuTanggal').value) {
@@ -5096,9 +5110,9 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             let bsuInfo = globalNasabah.find(n => n.nama === p.nama) || {};
             let warnaStatus = p.status === 'Disetujui' ? 'var(--secondary)' : (p.status === 'Ditolak' ? 'var(--danger)' : '#b45309');
             return `<tr>
-                <td>${baris.length - i}</td><td>${formatTglTabel(p.tgl)}</td><td style="font-weight:700;">${p.nama}</td><td>${bsuInfo.id || p.id_unit || '-'}</td>
+                <td>${baris.length - i}</td><td>${formatTglTabel(p.tgl)}</td><td style="font-weight:700;">${escHtml(p.nama)}</td><td>${escHtml(bsuInfo.id || p.id_unit || '-')}</td>
                 <td>${p.id}</td><td class="text-right" style="color:var(--danger); font-weight:700;">Rp ${Math.abs(p.total).toLocaleString('id-ID')}</td>
-                <td>${p.metode || '-'}</td><td>${p.disetujui_oleh || '-'}</td>
+                <td>${escHtml(p.metode || '-')}</td><td>${escHtml(p.disetujui_oleh || '-')}</td>
                 <td style="color:${warnaStatus}; font-weight:700;">${p.status || '-'}</td>
                 <td class="text-right" style="font-weight:800;">Rp ${p.saldoAkhir.toLocaleString('id-ID')}</td>
                 <td class="text-center"><div style="display:flex; gap:3px; justify-content:center; flex-wrap:wrap;">
@@ -5166,7 +5180,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let saldoBerjalan = 0;
         for (let t of semuaTrxBsu) { saldoBerjalan += parseFloat(t.total) || 0; if (t.id === p.id) break; }
 
-        let pesan = `*BUKTI PENARIKAN TABUNGAN BSU*\nBank Sampah Induk - DLH Kab. Tulungagung\n\nNomor Transaksi: ${p.id}\nTanggal: ${formatTglTabel(p.tgl)}\nNama BSU: *${p.nama}*\nID BSU: ${bsuInfo.id || p.id_unit || '-'}\n\nJumlah Penarikan: *Rp ${Math.abs(p.total).toLocaleString('id-ID')}*\nMetode: ${p.metode || '-'}\nDisetujui Oleh: ${p.disetujui_oleh || '-'}\nStatus: ${p.status || '-'}\n\nSaldo Akhir: Rp ${saldoBerjalan.toLocaleString('id-ID')}\n\nTerima kasih.`;
+        let pesan = `*BUKTI PENARIKAN TABUNGAN BSU*\nBank Sampah Induk - DLH Kab. Tulungagung\n\nNomor Transaksi: ${p.id}\nTanggal: ${formatTglTabel(p.tgl)}\nNama BSU: *${escHtml(p.nama)}*\nID BSU: ${bsuInfo.id || p.id_unit || '-'}\n\nJumlah Penarikan: *Rp ${Math.abs(p.total).toLocaleString('id-ID')}*\nMetode: ${escHtml(p.metode || '-')}\nDisetujui Oleh: ${escHtml(p.disetujui_oleh || '-')}\nStatus: ${p.status || '-'}\n\nSaldo Akhir: Rp ${saldoBerjalan.toLocaleString('id-ID')}\n\nTerima kasih.`;
 
         let hp = String(bsuInfo.hp || '').replace(/[^0-9]/g, '');
         if (hp.startsWith('0')) hp = '62' + hp.slice(1);
@@ -5194,7 +5208,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             if (!document.getElementById('pmlTanggal').value) document.getElementById('pmlTanggal').value = new Date().toISOString().slice(0, 10);
 
             let selAlat = document.getElementById('pmlNamaAlat');
-            selAlat.innerHTML = '<option value="">-- Pilih dari Data Alat (opsional) --</option>' + globalAlat.map(a => `<option value="${escAttr(a.nama_alat)}">${a.nama_alat}</option>`).join('');
+            selAlat.innerHTML = '<option value="">-- Pilih dari Data Alat (opsional) --</option>' + globalAlat.map(a => `<option value="${escAttr(a.nama_alat)}">${escHtml(a.nama_alat)}</option>`).join('');
 
             renderTabelAlat();
             renderTabelBiaya();
@@ -5234,8 +5248,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let tbody = document.getElementById('tbodyDataAlat');
         if (globalAlat.length === 0) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada data alat</td></tr>'; return; }
         tbody.innerHTML = globalAlat.map((a, i) => `<tr>
-            <td>${i + 1}</td><td style="font-weight:700;">${a.nama_alat}</td><td>${a.kode_alat || '-'}</td><td>${a.jumlah}</td>
-            <td>${a.kondisi || '-'}</td><td>${a.lokasi || '-'}</td><td>${a.keterangan || '-'}</td>
+            <td>${i + 1}</td><td style="font-weight:700;">${escHtml(a.nama_alat)}</td><td>${escHtml(a.kode_alat || '-')}</td><td>${a.jumlah}</td>
+            <td>${escHtml(a.kondisi || '-')}</td><td>${escHtml(a.lokasi || '-')}</td><td>${escHtml(a.keterangan || '-')}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusAlat(${a.id})">🗑️</button></td>
         </tr>`).join('');
     }
@@ -5286,8 +5300,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
 
         tbody.innerHTML = baris.slice().reverse().map((b, i) => `<tr>
             <td>${baris.length - i}</td><td>${new Date(b.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${b.jenis_biaya}</td>
-            <td>${b.keterangan || '-'}</td><td class="text-right" style="color:var(--danger); font-weight:700;">Rp ${parseFloat(b.jumlah).toLocaleString('id-ID')}</td>
-            <td>${b.disetujui_oleh || '-'}</td><td class="text-right" style="font-weight:800;">Rp ${b.saldoAkhir.toLocaleString('id-ID')}</td>
+            <td>${escHtml(b.keterangan || '-')}</td><td class="text-right" style="color:var(--danger); font-weight:700;">Rp ${parseFloat(b.jumlah).toLocaleString('id-ID')}</td>
+            <td>${escHtml(b.disetujui_oleh || '-')}</td><td class="text-right" style="font-weight:800;">Rp ${b.saldoAkhir.toLocaleString('id-ID')}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBiayaOperasional('${escAttr(b.id)}')">🗑️</button></td>
         </tr>`).join('');
     }
@@ -5328,8 +5342,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             let warnaJenis = p.jenis === 'Investasi Alat' ? 'var(--primary)' : '#b45309';
             return `<tr>
                 <td>${terurut.length - i}</td><td>${new Date(p.tanggal).toLocaleDateString('id-ID')}</td>
-                <td style="color:${warnaJenis}; font-weight:700;">${p.jenis}</td><td style="font-weight:700;">${p.nama_alat}</td>
-                <td>${p.keterangan || '-'}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(p.biaya).toLocaleString('id-ID')}</td>
+                <td style="color:${warnaJenis}; font-weight:700;">${escHtml(p.jenis)}</td><td style="font-weight:700;">${escHtml(p.nama_alat)}</td>
+                <td>${escHtml(p.keterangan || '-')}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(p.biaya).toLocaleString('id-ID')}</td>
                 <td>${p.status || '-'}</td>
                 <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPemeliharaan('${escAttr(p.id)}')">🗑️</button></td>
             </tr>`;
@@ -5629,7 +5643,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let list = ambilDataDokPenjualan(document.getElementById('dokJualBulan').value);
         let tbody = document.getElementById('tbodyDokPenjualan');
         if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Tidak ada data</td></tr>'; return; }
-        tbody.innerHTML = list.map(d => `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${d.pembeli}</td><td>${d.material}</td><td class="text-right">${parseFloat(d.berat).toLocaleString('id-ID')}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(d.total).toLocaleString('id-ID')}</td></tr>`).join('');
+        tbody.innerHTML = list.map(d => `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${escHtml(d.pembeli)}</td><td>${escHtml(d.material)}</td><td class="text-right">${parseFloat(d.berat).toLocaleString('id-ID')}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(d.total).toLocaleString('id-ID')}</td></tr>`).join('');
     }
 
     function cetakDokPenjualan() {
@@ -5652,7 +5666,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
     function renderTabelDokPeralatan() {
         let tbody = document.getElementById('tbodyDokPeralatan');
         if ((globalAlat || []).length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada data alat</td></tr>'; return; }
-        tbody.innerHTML = globalAlat.map(a => `<tr><td style="font-weight:700;">${a.nama_alat}</td><td>${a.kode_alat || '-'}</td><td>${a.jumlah}</td><td>${a.kondisi || '-'}</td><td>${a.lokasi || '-'}</td><td>${a.keterangan || '-'}</td></tr>`).join('');
+        tbody.innerHTML = globalAlat.map(a => `<tr><td style="font-weight:700;">${escHtml(a.nama_alat)}</td><td>${escHtml(a.kode_alat || '-')}</td><td>${a.jumlah}</td><td>${escHtml(a.kondisi || '-')}</td><td>${escHtml(a.lokasi || '-')}</td><td>${escHtml(a.keterangan || '-')}</td></tr>`).join('');
     }
 
     function cetakDokPeralatan() {
@@ -5672,7 +5686,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             if (!document.getElementById('pbnTanggal').value) document.getElementById('pbnTanggal').value = new Date().toISOString().slice(0, 10);
             let selBsu = document.getElementById('pbnBsu');
             let prevVal = selBsu.value;
-            selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${n.nama}</option>`).join('');
+            selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${escHtml(n.nama)}</option>`).join('');
             if (prevVal) selBsu.value = prevVal;
             renderTabelDokPembinaan();
             renderTabelDokDarurat();
@@ -5707,7 +5721,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let terurut = globalPembinaan.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
         tbody.innerHTML = terurut.map(p => `<tr>
             <td>${new Date(p.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${p.nama_bsu || '-'}</td>
-            <td>${p.jenis_pembinaan || '-'}</td><td>${p.petugas || '-'}</td><td>${p.hasil_catatan || '-'}</td>
+            <td>${p.jenis_pembinaan || '-'}</td><td>${escHtml(p.petugas || '-')}</td><td>${p.hasil_catatan || '-'}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPembinaan('${escAttr(p.id)}')">🗑️</button></td>
         </tr>`).join('');
     }
@@ -5760,7 +5774,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         if ((globalDarurat || []).length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada catatan kejadian</td></tr>'; return; }
         let terurut = globalDarurat.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
         tbody.innerHTML = terurut.map(d => `<tr>
-            <td>${new Date(d.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${d.lokasi || '-'}</td>
+            <td>${new Date(d.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${escHtml(d.lokasi || '-')}</td>
             <td>${d.jenis_kejadian || '-'}</td><td>${d.korban || '-'}</td><td>${d.kronologi || '-'}</td><td>${d.tindak_lanjut || '-'}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusKejadianDarurat('${escAttr(d.id)}')">🗑️</button></td>
         </tr>`).join('');
@@ -5866,7 +5880,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
 
             document.getElementById('tbodyStockTrxBsu').innerHTML = baris.map(b => {
                 let warna = b.sisa <= 0 ? 'text-muted' : (b.sisa < 5 ? 'text-warning' : 'text-success');
-                return `<tr><td>${b.jenis_material}</td><td style="font-weight:700;">${b.nama_kategori}</td><td class="text-right">${b.masuk.toLocaleString('id-ID')}</td><td class="text-right">${b.keluar.toLocaleString('id-ID')}</td><td class="text-right ${warna}" style="font-weight:700;">${b.sisa.toLocaleString('id-ID')} Kg</td><td class="text-right">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td></tr>`;
+                return `<tr><td>${escHtml(b.jenis_material)}</td><td style="font-weight:700;">${escHtml(b.nama_kategori)}</td><td class="text-right">${b.masuk.toLocaleString('id-ID')}</td><td class="text-right">${b.keluar.toLocaleString('id-ID')}</td><td class="text-right ${warna}" style="font-weight:700;">${b.sisa.toLocaleString('id-ID')} Kg</td><td class="text-right">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td></tr>`;
             }).join('') || '<tr><td colspan="6" class="text-center text-muted">Belum ada aktivitas untuk BSU ini</td></tr>';
 
             if(elKosong) elKosong.style.display = 'none';
@@ -5888,7 +5902,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let trxKeluarKeInduk = globalTransaksi.filter(t => t.nama === namaBsu && t.total > 0 && t.berat > 0);
         trxKeluarKeInduk.slice().reverse().forEach(t => {
             totalBerat += parseFloat(t.berat)||0; totalSaldo += parseFloat(t.total)||0;
-            html += `<tr><td>${formatTglTabel(t.tgl)}</td><td><span class="badge-material">${t.jenis}</span></td><td class="text-right">${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-right text-success" style="font-weight:700;">Rp ${parseFloat(t.total).toLocaleString('id-ID')}</td></tr>`;
+            html += `<tr><td>${formatTglTabel(t.tgl)}</td><td><span class="badge-material">${escHtml(t.jenis)}</span></td><td class="text-right">${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-right text-success" style="font-weight:700;">Rp ${parseFloat(t.total).toLocaleString('id-ID')}</td></tr>`;
         });
 
         document.getElementById('monTotalSampah').innerText = totalBerat.toFixed(1);
@@ -5912,7 +5926,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             let totalBeratNsb = 0, totalSaldoNsb = 0, htmlNsb = '';
             trxNasabah.slice().sort((a,b) => uraikanTanggalInput(b.tgl) - uraikanTanggalInput(a.tgl)).forEach(t => {
                 totalBeratNsb += parseFloat(t.berat)||0; totalSaldoNsb += parseFloat(t.total)||0;
-                htmlNsb += `<tr><td>${formatTglTabel(t.tgl)}</td><td style="font-weight:700;">${t.nama}</td><td><span class="badge-material">${t.jenis}</span></td><td class="text-right">${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-right text-success" style="font-weight:700;">Rp ${parseFloat(t.total).toLocaleString('id-ID')}</td></tr>`;
+                htmlNsb += `<tr><td>${formatTglTabel(t.tgl)}</td><td style="font-weight:700;">${escHtml(t.nama)}</td><td><span class="badge-material">${escHtml(t.jenis)}</span></td><td class="text-right">${parseFloat(t.berat).toLocaleString('id-ID')}</td><td class="text-right text-success" style="font-weight:700;">Rp ${parseFloat(t.total).toLocaleString('id-ID')}</td></tr>`;
             });
 
             document.getElementById('monNsbTotalSampah').innerText = totalBeratNsb.toFixed(1);
@@ -5935,7 +5949,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
 
             document.getElementById('tbodyMonitoringStock').innerHTML = barisStock.map(b => {
                 let warna = b.sisa <= 0 ? 'text-muted' : (b.sisa < 5 ? 'text-warning' : 'text-success');
-                return `<tr><td>${b.jenis_material}</td><td style="font-weight:700;">${b.nama_kategori}</td><td class="text-right">${b.masuk.toLocaleString('id-ID')}</td><td class="text-right">${b.keluar.toLocaleString('id-ID')}</td><td class="text-right ${warna}" style="font-weight:700;">${b.sisa.toLocaleString('id-ID')} Kg</td><td class="text-right">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td></tr>`;
+                return `<tr><td>${escHtml(b.jenis_material)}</td><td style="font-weight:700;">${escHtml(b.nama_kategori)}</td><td class="text-right">${b.masuk.toLocaleString('id-ID')}</td><td class="text-right">${b.keluar.toLocaleString('id-ID')}</td><td class="text-right ${warna}" style="font-weight:700;">${b.sisa.toLocaleString('id-ID')} Kg</td><td class="text-right">Rp ${Math.round(b.nilai).toLocaleString('id-ID')}</td></tr>`;
             }).join('') || '<tr><td colspan="6" class="text-center text-muted">Belum ada aktivitas untuk BSU ini</td></tr>';
         })
         .catch(e => {
@@ -6251,11 +6265,17 @@ Simpan data ini baik-baik untuk login ke sistem.`;
     // MODUL POPULATE UI KESELURUHAN
     // =========================================
     function escAttr(str) { return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    // KEAMANAN: escAttr di atas TIDAK meng-escape < dan > sehingga tidak aman dipakai
+    // untuk menyisipkan teks (mis. nama nasabah) sebagai KONTEN HTML lewat innerHTML --
+    // hanya aman untuk nilai di dalam atribut yang sudah diberi kutip. Pakai escHtml ini
+    // untuk konten (di antara tag), supaya nama/keterangan yang berisi karakter seperti
+    // <script> atau <img onerror=...> tidak dieksekusi sebagai HTML saat ditampilkan.
+    function escHtml(str) { return String(str == null ? '' : str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
     function populateUI() {
         // 1. Dropdown BSU (pertahankan pilihan yang sedang aktif saat data di-refresh)
         let opts = '<option value="" disabled selected>-- Pilih BSU --</option>';
-        globalNasabah.forEach(n => opts += `<option value="${escAttr(n.nama)}" data-id="${escAttr(n.id)}">${n.nama}</option>`);
+        globalNasabah.forEach(n => opts += `<option value="${escAttr(n.nama)}" data-id="${escAttr(n.id)}">${escHtml(n.nama)}</option>`);
         ['trxBsu', 'selectKeuanganBsu', 'selectMonitoringBsu'].forEach(id => {
             let el = document.getElementById(id);
             if(el) { let prev = el.value; el.innerHTML = opts; if(prev) el.value = prev; }
@@ -6288,7 +6308,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         renderDirektoriBsuCards(document.getElementById('cariBsuInput')?.value || '');
         
         let hargaHtml = '<thead><tr><th style="width:17%; white-space:nowrap;">Jenis Material Utama</th><th style="width:41%; white-space:nowrap;">Nama Kategori Produk</th><th style="width:17%; white-space:nowrap;">Harga/Kg</th><th style="width:25%; white-space:nowrap;" class="text-center">Aksi</th></tr></thead><tbody>';
-        globalKategori.forEach(k => hargaHtml += `<tr><td style="white-space:nowrap;">${k.jenis_material}</td><td style="white-space:normal; line-height:1.5;">${k.nama_kategori}</td><td class="text-success fw-bold" style="white-space:nowrap;">Rp ${parseFloat(k.harga).toLocaleString('id-ID')}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-icon" title="Edit Kategori" onclick="bukaModalEditKategori('${escAttr(k.id)}')">✏️</button> <button class="btn-danger" onclick="hapusKategori('${escAttr(k.id)}', '${escAttr(k.nama_kategori)}')">🗑️ Hapus</button></td></tr>`);
+        globalKategori.forEach(k => hargaHtml += `<tr><td style="white-space:nowrap;">${escHtml(k.jenis_material)}</td><td style="white-space:normal; line-height:1.5;">${escHtml(k.nama_kategori)}</td><td class="text-success fw-bold" style="white-space:nowrap;">Rp ${parseFloat(k.harga).toLocaleString('id-ID')}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-icon" title="Edit Kategori" onclick="bukaModalEditKategori('${escAttr(k.id)}')">✏️</button> <button class="btn-danger" onclick="hapusKategori('${escAttr(k.id)}', '${escAttr(k.nama_kategori)}')">🗑️ Hapus</button></td></tr>`);
         if(document.getElementById('tabelMasterHarga')) document.getElementById('tabelMasterHarga').innerHTML = hargaHtml + '</tbody>';
 
         // 4. Keuangan, Pie Chart & Kas Induk
@@ -6321,13 +6341,14 @@ Simpan data ini baik-baik untuk login ke sistem.`;
 
         // 5. Tabel Offline & BSU Baru
         let jualHtml = '<thead style="background:#f8fafc;"><tr><th>Tanggal</th><th>Pembeli</th><th>Material</th><th>Berat (Kg)</th><th>Total</th></tr></thead><tbody>';
-        getDataPenjualanNormalized().slice().reverse().forEach(d => jualHtml += `<tr><td>${formatTglTabel(d.tanggal)}</td><td>${d.pembeli}</td><td>${d.material}</td><td>${d.berat}</td><td class="text-success" style="font-weight:700;">Rp ${d.total.toLocaleString('id-ID')}</td></tr>`);
+        getDataPenjualanNormalized().slice().reverse().forEach(d => jualHtml += `<tr><td>${formatTglTabel(d.tanggal)}</td><td>${escHtml(d.pembeli)}</td><td>${escHtml(d.material)}</td><td>${d.berat}</td><td class="text-success" style="font-weight:700;">Rp ${d.total.toLocaleString('id-ID')}</td></tr>`);
         if(document.getElementById('tabelPenjualan')) document.getElementById('tabelPenjualan').innerHTML = jualHtml + '</tbody>';
         renderRiwayatPenjualanHariIni();
         
         let regHtml = ''; globalNasabah.slice().reverse().forEach(n => {
-            const akunHtml = `<div style="font-family:monospace;font-size:10.5px;line-height:1.8;min-width:155px;"><div><b>Admin:</b> ${escAttr(n.password_admin || n.password || '-')}</div><div><b>Operator:</b> ${escAttr(n.password_operator || '-')}</div><div><b>Bendahara:</b> ${escAttr(n.password_bendahara || '-')}</div></div>`;
-            regHtml += `<tr><td>${n.id}</td><td>${akunHtml}</td><td style="font-weight:bold;">${n.nama}${badgeModeLatihanBsu(n)}</td><td>${n.ketua}</td><td>${n.hp}</td><td>${n.desa}</td><td>${n.kecamatan}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>${n.mode_latihan === true ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ffedd5;color:#9a3412;border-color:#fdba74;" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset Latihan</button>` : `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button>`}</td></tr>`;
+            const tampilPass = (v) => (typeof v === 'string' && v.startsWith('pbkdf2$')) ? '🔒 <span class="text-muted" title="Password sudah di-hash, tidak bisa ditampilkan ulang. Pakai Edit untuk atur ulang.">(ter-hash)</span>' : escHtml(v || '-');
+            const akunHtml = `<div style="font-family:monospace;font-size:10.5px;line-height:1.8;min-width:155px;"><div><b>Admin:</b> ${tampilPass(n.password_admin || n.password)}</div><div><b>Operator:</b> ${tampilPass(n.password_operator)}</div><div><b>Bendahara:</b> ${tampilPass(n.password_bendahara)}</div></div>`;
+            regHtml += `<tr><td>${escHtml(n.id)}</td><td>${akunHtml}</td><td style="font-weight:bold;">${escHtml(n.nama)}${badgeModeLatihanBsu(n)}</td><td>${escHtml(n.ketua)}</td><td>${escHtml(n.hp)}</td><td>${escHtml(n.desa)}</td><td>${escHtml(n.kecamatan)}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>${n.mode_latihan === true ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ffedd5;color:#9a3412;border-color:#fdba74;" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset Latihan</button>` : `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button>`}</td></tr>`;
         });
         if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="8" class="text-center">Belum ada data</td></tr>';
 
@@ -6402,7 +6423,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         Promise.resolve(req).then(res=>{if(!res?.ok)throw new Error(res?.error||'Verifikasi gagal');alert(status==='diterima'?`Surat diterima. Total final ${rupiahVerif(res.total_final??total)} masuk saldo BSU.`:'Seluruh material dalam surat ditolak.');tutupPanelVerifikasiPengiriman();loadVerifikasiPengirimanBSI();loadDataPusat();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerText='SIMPAN HASIL VERIFIKASI';});
     }
     function bayarPengirimanTerpilih(){
-        const g=grupPengirimanAktif;if(!g)return alert('Pilih surat pengantar.');const jumlah=g.total_final;if(jumlah<=0)return alert('Nilai pembayaran tidak valid.');if(!confirm(`Bayar total ${rupiahVerif(jumlah)} kepada ${g.wakil.nama||'BSU'} untuk ${g.items.length} material dalam surat ${g.wakil.no_dokumen||'-'}?\n\nAplikasi akan membuat satu pencairan dan satu kas masuk BSU.`))return;
+        const g=grupPengirimanAktif;if(!g)return alert('Pilih surat pengantar.');const jumlah=g.total_final;if(jumlah<=0)return alert('Nilai pembayaran tidak valid.');if(!confirm(`Bayar total ${rupiahVerif(jumlah)} kepada ${escHtml(g.wakil.nama ||'BSU')} untuk ${g.items.length} material dalam surat ${escHtml(g.wakil.no_dokumen ||'-')}?\n\nAplikasi akan membuat satu pencairan dan satu kas masuk BSU.`))return;
         const form={tanggal:document.getElementById('bayarPengirimanTanggal').value,metode:document.getElementById('bayarPengirimanMetode').value,no_bukti:document.getElementById('bayarPengirimanBukti').value.trim(),oleh:document.getElementById('bayarPengirimanOleh').value.trim()||getPetugasSesi()};const btn=document.getElementById('btnBayarPengiriman');btn.disabled=true;btn.innerText='MEMPROSES...';const req=g.kelompok_id?AdapterAPI.konfirmasiPembayaranPengirimanBatchBSI({...form,kelompok_id:g.kelompok_id}):AdapterAPI.konfirmasiPembayaranPengirimanBSI({...form,id:g.wakil.id});
         Promise.resolve(req).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pembayaran gagal');alert(`Pembayaran total ${rupiahVerif(res.jumlah||jumlah)} berhasil dicatat.`);tutupPanelVerifikasiPengiriman();loadVerifikasiPengirimanBSI();loadDataPusat();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerText='KONFIRMASI PEMBAYARAN TOTAL';});
     }
@@ -6438,6 +6459,17 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
             cekDataPenjualanLokalBelumMigrasi();
+            // KEAMANAN: kredensial (password) unit sengaja TIDAK ikut di getBundleBSI().
+            // Dimuat terpisah di sini khusus untuk tabel Registrasi BSU, lalu digabungkan
+            // ke globalNasabah supaya kode render (fitur kirim kredensial via WA) tetap
+            // berfungsi tanpa perlu diubah.
+            AdapterAPI.getKredensialSemuaUnit().then(peta => {
+                globalNasabah.forEach(n => {
+                    const k = peta[n.id];
+                    if (k) { n.password = k.password; n.password_admin = k.password_admin; n.password_operator = k.password_operator; n.password_bendahara = k.password_bendahara; }
+                });
+                populateUI();
+            }).catch(err => console.error('Gagal memuat kredensial BSU:', err));
         }).catch(err => console.error("Gagal memuat data:", err));
     }
 
@@ -6623,7 +6655,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
                 <td>${statusBadge}</td>
                 <td>${p.ditutup_oleh || '-'}</td>
                 <td>${p.ditutup_pada ? new Date(p.ditutup_pada).toLocaleString('id-ID') : '-'}</td>
-                <td>${p.catatan || '-'}</td>
+                <td>${escHtml(p.catatan || '-')}</td>
                 <td class="text-center">${aksi}</td>
             </tr>`;
         }).join('');
@@ -6691,11 +6723,11 @@ Simpan data ini baik-baik untuk login ke sistem.`;
                 ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:800;">✓ COCOK</span>`
                 : `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:800;">⚠ SELISIH</span>`;
             return `<tr>
-                <td>${formatTglTabel(r.tanggal)}</td><td>${r.sumber || '-'}</td>
+                <td>${formatTglTabel(r.tanggal)}</td><td>${escHtml(r.sumber || '-')}</td>
                 <td class="text-right">Rp ${Math.round(r.saldo_sistem || 0).toLocaleString('id-ID')}</td>
                 <td class="text-right">Rp ${Math.round(r.saldo_fisik || 0).toLocaleString('id-ID')}</td>
                 <td class="text-right" style="font-weight:800; color:${cocok ? '#166534' : '#991b1b'};">${selisih >= 0 ? '+' : ''}Rp ${Math.round(selisih).toLocaleString('id-ID')} ${badge}</td>
-                <td>${r.diperiksa_oleh || '-'}</td><td>${r.keterangan || '-'}</td>
+                <td>${r.diperiksa_oleh || '-'}</td><td>${escHtml(r.keterangan || '-')}</td>
                 <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusRekonsiliasi('${escAttr(r.id)}')">🗑️</button></td>
             </tr>`;
         }).join('');
@@ -6753,9 +6785,9 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             <td style="white-space:nowrap;">${new Date(e.waktu).toLocaleString('id-ID')}</td>
             <td style="font-weight:700;">${e.tabel}</td>
             <td style="color:${warnaAksi[e.aksi] || '#334155'}; font-weight:800;">${labelAksi[e.aksi] || e.aksi}</td>
-            <td>${e.oleh || '-'}</td>
+            <td>${escHtml(e.oleh || '-')}</td>
             <td style="font-size:11.5px; max-width:360px;">${ringkasPerubahanAudit(e)}</td>
-            <td>${e.keterangan || '-'}</td>
+            <td>${escHtml(e.keterangan || '-')}</td>
         </tr>`).join('');
     }
 
