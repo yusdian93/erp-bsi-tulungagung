@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#073B32">
     <title>Bank Sampah Unit | DLH Tulungagung</title>
+    <!-- Versi menu sederhana: 30 Juli 2026 -->
     
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -901,6 +902,39 @@
             .table-pengiriman-rapi tbody td small { font-size: .80rem !important; }
             .table-pengiriman-rapi tbody td { padding: 12px 10px !important; }
         }
+
+
+        /* ===== MENU BSU TERSUSUN BERDASARKAN ALUR KERJA ===== */
+        .menu-bsu-sederhana { flex-wrap:wrap; justify-content:flex-end; gap:2px; }
+        .menu-bsu-final { row-gap:3px; }
+        .menu-bsu-final .nav-link { font-size:.73rem; padding:8px 8px !important; }
+        .menu-bsu-sederhana .nav-link { white-space:nowrap; font-size:.78rem; padding:9px 10px !important; }
+        .menu-dropdown-bsu { min-width:230px; max-height:72vh; overflow-y:auto; }
+        .menu-dropdown-bsu .dropdown-item { display:flex; align-items:center; gap:9px; padding:10px 14px; }
+        .menu-dropdown-bsu .dropdown-item i { width:18px; text-align:center; }
+        .quick-menu-panel { margin-top:22px; padding:20px; border-radius:22px; background:rgba(255,255,255,.94); border:1px solid rgba(7,59,50,.10); box-shadow:0 14px 38px rgba(4,40,32,.08); }
+        .quick-menu-title { color:var(--primary-dark); font-size:1rem; font-weight:800; margin:0; }
+        .quick-menu-note { color:#64748b; font-size:.78rem; margin:3px 0 0; }
+        .quick-menu-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:12px; margin-top:16px; }
+        .quick-action-card { width:100%; min-height:112px; display:flex; flex-direction:column; align-items:flex-start; justify-content:space-between; gap:12px; padding:16px; border-radius:17px; border:1px solid #dce7e2; background:linear-gradient(145deg,#fff,#f5faf7); color:#173b33; text-align:left; font-weight:800; transition:.22s; }
+        .quick-action-card:hover { transform:translateY(-3px); border-color:#9fcbb9; box-shadow:0 12px 25px rgba(7,85,66,.12); }
+        .quick-action-card i { width:38px; height:38px; display:grid; place-items:center; border-radius:12px; color:#08745a; background:#e5f7ef; font-size:1.12rem; }
+        .quick-action-card small { color:#71837d; font-size:.68rem; line-height:1.35; font-weight:600; }
+        .simple-info-box { padding:14px 16px; border-radius:14px; background:#effaf5; border:1px solid #ccebdd; color:#145c48; font-size:.82rem; line-height:1.55; }
+        .simple-warning-box { padding:14px 16px; border-radius:14px; background:#fffbeb; border:1px solid #fde68a; color:#854d0e; font-size:.82rem; line-height:1.55; }
+        details.optional-check { border:1px solid #dce7e2; border-radius:16px; background:#fbfdfc; overflow:hidden; }
+        details.optional-check summary { cursor:pointer; padding:15px 17px; color:#31564c; font-weight:800; list-style:none; }
+        details.optional-check summary::-webkit-details-marker { display:none; }
+        details.optional-check summary::after { content:'+'; float:right; font-size:1.2rem; }
+        details.optional-check[open] summary::after { content:'−'; }
+        details.optional-check .optional-check-body { padding:0 17px 17px; }
+        @media(max-width:1399px){ .quick-menu-grid{grid-template-columns:repeat(3,minmax(0,1fr));} }
+        @media(max-width:767px){
+            .quick-menu-panel{padding:16px;border-radius:18px;}
+            .quick-menu-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;}
+            .quick-action-card{min-height:104px;padding:13px;font-size:.79rem;}
+            .menu-bsu-sederhana .nav-link{font-size:.86rem;padding:11px 12px !important;}
+        }
     </style>
 </head>
 <body>
@@ -927,55 +961,18 @@
                     <i class="bi bi-list fs-1 text-dark"></i>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center" style="flex-wrap:wrap;justify-content:flex-end;">
+                    <ul class="navbar-nav ms-auto mt-3 mt-xl-0 align-items-center menu-bsu-sederhana menu-bsu-final">
                         <li class="nav-item"><button class="nav-link nav-btn dashboard-tab active-tab border-0" onclick="showTab('dashboard', this)"><i class="bi bi-grid-1x2 me-2"></i>Dashboard</button></li>
-
-                        <li class="nav-item dropdown">
-                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-database me-2"></i>Master Data</button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('nasabah', this); siapkanIdNasabahBaru();"><i class="bi bi-people"></i>Nasabah</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('hargasampah', this)"><i class="bi bi-tags"></i>Harga Material</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('profil', this)"><i class="bi bi-building-gear"></i>Profil & Petugas</button></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-arrow-left-right me-2"></i>Transaksi</button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down"></i>Setoran Nasabah</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2"></i>Saldo & Penarikan</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('pengiriman', this)"><i class="bi bi-truck"></i>Pengajuan ke BSI</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('koreksi', this)"><i class="bi bi-arrow-counterclockwise"></i>Koreksi/Pembatalan</button></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-boxes me-2"></i>Persediaan</button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('stock', this)"><i class="bi bi-box-seam"></i>Kartu Stok</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('stockopname', this)"><i class="bi bi-clipboard2-check"></i>Stock Opname</button></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-cash-stack me-2"></i>Keuangan</button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('kas', this); loadDataDatabase();"><i class="bi bi-cash-coin"></i>Kas & Bank</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('bagihasil', this)"><i class="bi bi-percent"></i>Bagi Hasil</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark"></i>Buku Besar</button></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item dropdown">
-                            <button class="nav-link dropdown-toggle border-0" data-bs-toggle="dropdown"><i class="bi bi-megaphone me-2"></i>Komunikasi</button>
-                            <ul class="dropdown-menu">
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('jadwal', this)"><i class="bi bi-calendar-event"></i>Jadwal Setoran</button></li>
-                                <li><button class="dropdown-item nav-btn" onclick="showTab('broadcast-harga', this)"><i class="bi bi-tags-fill"></i>Kirim Informasi Harga</button></li>
-                            </ul>
-                        </li>
-
-                        <li class="nav-item"><button class="nav-link nav-btn rekap-tab border-0" onclick="showTab('laporan', this)"><i class="bi bi-bar-chart-fill me-2"></i>Laporan</button></li>
-                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('audit', this)"><i class="bi bi-shield-check me-2"></i>Audit</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('profil', this)"><i class="bi bi-building-gear me-2"></i>Profil Bank Sampah</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('nasabah', this); siapkanIdNasabahBaru();"><i class="bi bi-people me-2"></i>Nasabah</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('setor', this)"><i class="bi bi-box-arrow-in-down me-2"></i>Setoran</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet2 me-2"></i>Saldo</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('pengiriman', this)"><i class="bi bi-truck me-2"></i>Kirim ke BSI</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('stock', this)"><i class="bi bi-box-seam me-2"></i>Stok Sampah</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('jadwal', this)"><i class="bi bi-calendar-event me-2"></i>Jadwal Setoran</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('kas', this); loadDataDatabase();"><i class="bi bi-cash-coin me-2"></i>Keuangan Unit</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn border-0" onclick="showTab('bukubesar', this)"><i class="bi bi-journal-bookmark me-2"></i>Buku Besar</button></li>
+                        <li class="nav-item"><button class="nav-link nav-btn rekap-tab border-0" onclick="showTab('laporan', this)"><i class="bi bi-bar-chart-fill me-2"></i>Laporan Neraca &amp; Rekapitulasi</button></li>
                         <li class="nav-item"><button class="nav-link nav-btn logout-link border-0" onclick="prosesLogout()"><i class="bi bi-box-arrow-right me-2"></i>Keluar</button></li>
                     </ul>
                 </div>
@@ -1009,6 +1006,20 @@
                             </select>
                         </div>
                     </div>
+                </div>
+            </section>
+
+            <section class="quick-menu-panel" aria-label="Akses cepat menu utama">
+                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                    <div><h2 class="quick-menu-title"><i class="bi bi-lightning-charge-fill me-2 text-warning"></i>Akses Cepat</h2><p class="quick-menu-note">Pilih pekerjaan yang akan dilakukan. Tombol menyesuaikan hak akses petugas.</p></div>
+                </div>
+                <div class="quick-menu-grid">
+                    <button type="button" class="quick-action-card" data-tab-target="nasabah" onclick="showTab('nasabah', this); siapkanIdNasabahBaru();"><i class="bi bi-person-plus-fill"></i><span>Data Nasabah</span><small>Daftar, cari, dan kelola nasabah.</small></button>
+                    <button type="button" class="quick-action-card" data-tab-target="setor" onclick="showTab('setor', this)"><i class="bi bi-plus-circle-fill"></i><span>Catat Setoran</span><small>Timbang dan catat sampah masuk.</small></button>
+                    <button type="button" class="quick-action-card" data-tab-target="ceksaldo" onclick="showTab('ceksaldo', this)"><i class="bi bi-wallet-fill"></i><span>Saldo & Penarikan</span><small>Lihat saldo dan catat pembayaran.</small></button>
+                    <button type="button" class="quick-action-card" data-tab-target="pengiriman" onclick="showTab('pengiriman', this)"><i class="bi bi-truck-front-fill"></i><span>Kirim ke BSI</span><small>Buat surat pengantar pengiriman.</small></button>
+                    <button type="button" class="quick-action-card" data-tab-target="stock" onclick="showTab('stock', this)"><i class="bi bi-box-seam-fill"></i><span>Stok Sampah</span><small>Lihat sisa material di gudang.</small></button>
+                    <button type="button" class="quick-action-card" data-tab-target="kas" onclick="showTab('kas', this); loadDataDatabase();"><i class="bi bi-cash-stack"></i><span>Keuangan Unit</span><small>Catat uang masuk dan biaya unit.</small></button>
                 </div>
             </section>
 
@@ -1064,7 +1075,7 @@
 
             <div class="row mt-4 g-3">
                 <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-box-seam me-1"></i>Stok Gudang Saat Ini</div><div class="value" id="dash-stok-aktif">0 Kg</div></div></div>
-                <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-cash-stack me-1"></i>Kas/Bank Tercatat</div><div class="value" id="dash-kas">Rp 0</div></div></div>
+                <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-cash-stack me-1"></i>Keuangan Unit Tercatat</div><div class="value" id="dash-kas">Rp 0</div></div></div>
                 <div class="col-12 col-md-4"><div class="metric-soft"><div class="label"><i class="bi bi-truck me-1"></i>Terkirim ke BSI</div><div class="value" id="dash-keluar-bsi">0 Kg</div></div></div>
             </div>
 
@@ -1136,20 +1147,22 @@
             <div class="row justify-content-center">
                 <div class="col-lg-10">
                     <div class="card p-4 p-md-5">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h5 class="fw-bold m-0" style="color: var(--primary-dark);"><i class="bi bi-boxes me-2 text-success"></i>Stock Sampah di Gudang Unit</h5>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                            <h5 class="fw-bold m-0" style="color: var(--primary-dark);"><i class="bi bi-boxes me-2 text-success"></i>Stok Sampah di Gudang Unit</h5>
+                            <button type="button" class="btn btn-outline-success btn-sm nav-btn" data-tab-target="stockopname" onclick="showTab('stockopname', this)"><i class="bi bi-clipboard2-check me-1"></i>Cek Stok Fisik</button>
                         </div>
-                        <p class="text-muted small mb-4">Sisa stock = total diterima dari nasabah &minus; total yang sudah disetor/terjual ke Bank Sampah Induk. Gunakan ini untuk memantau material yang masih ada di gudang sebelum dijual/disetor ke Induk.</p>
+                        <p class="text-muted small mb-3">Sisa stok dihitung otomatis dari sampah yang diterima, pengiriman ke BSI, dan penyesuaian hasil pemeriksaan fisik.</p>
+                        <div class="simple-info-box mb-4"><i class="bi bi-info-circle-fill me-2"></i><strong>Cek Stok Fisik</strong> cukup dilakukan berkala, misalnya akhir bulan, sebelum pengiriman besar, atau ketika hasil timbang gudang berbeda dengan aplikasi.</div>
                         <div class="row g-3 mb-4">
                             <div class="col-6 col-md-3">
                                 <div class="p-3 rounded-3" style="background:#f0fdf4; border:1px solid #bbf7d0;">
-                                    <div class="small text-muted">Total Sisa Stock</div>
+                                    <div class="small text-muted">Total Sisa Stok</div>
                                     <div class="fw-bold fs-5" style="color:#166534;" id="stock-total-kg">0 Kg</div>
                                 </div>
                             </div>
                             <div class="col-6 col-md-3">
                                 <div class="p-3 rounded-3" style="background:#eff6ff; border:1px solid #bfdbfe;">
-                                    <div class="small text-muted">Estimasi Nilai Stock</div>
+                                    <div class="small text-muted">Estimasi Nilai Stok</div>
                                     <div class="fw-bold fs-5" style="color:#1e40af;" id="stock-total-rp">Rp 0</div>
                                 </div>
                             </div>
@@ -1163,7 +1176,7 @@
                                         <th class="text-end">Masuk (Kg)</th>
                                         <th class="text-end">Sudah ke Induk (Kg)</th>
                                         <th class="text-end">Penyesuaian (Kg)</th>
-                                        <th class="text-end">Sisa Stock (Kg)</th>
+                                        <th class="text-end">Sisa Stok (Kg)</th>
                                         <th class="text-end">Estimasi Nilai</th>
                                     </tr>
                                 </thead>
@@ -1434,7 +1447,7 @@
 
         <div id="stockopname" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
-                <div class="module-title"><span class="icon-shell"><i class="bi bi-clipboard2-check"></i></span><div><h4 class="m-0">Stock Opname & Penyesuaian</h4><div class="module-note">Mencocokkan stok sistem dengan hasil timbang fisik gudang. Selisih menjadi penyesuaian stok dengan jejak audit.</div></div></div>
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-clipboard2-check"></i></span><div><h4 class="m-0">Cek Stok Fisik Gudang</h4><div class="module-note">Bandingkan catatan aplikasi dengan hasil timbang yang benar-benar ada di gudang. Selisih akan disimpan sebagai penyesuaian.</div></div></div>
                 <form id="formStockOpname" class="mt-4" onsubmit="simpanStockOpname(event)">
                     <div class="row g-3">
                         <div class="col-md-3"><label>Tanggal</label><input type="date" id="opnameTanggal" class="form-control" required></div>
@@ -1444,7 +1457,7 @@
                         <div class="col-md-9"><label>Alasan Selisih</label><input id="opnameAlasan" class="form-control" placeholder="Susut, tercecer, salah timbang, material tercampur, dll."></div>
                         <div class="col-md-3"><label>Diperiksa Oleh</label><input id="opnamePetugas" class="form-control"></div>
                     </div>
-                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-check2-square me-2"></i>Simpan Stock Opname</button>
+                    <div class="d-flex gap-2 flex-wrap mt-4"><button class="btn btn-success px-4" type="submit"><i class="bi bi-check2-square me-2"></i>Simpan Hasil Pemeriksaan</button><button type="button" class="btn btn-outline-secondary px-4" onclick="showTab('stock', this)"><i class="bi bi-arrow-left me-2"></i>Kembali ke Stok</button></div>
                 </form>
                 <div class="section-divider"></div>
                 <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal</th><th>Material</th><th class="text-end">Sistem</th><th class="text-end">Fisik</th><th class="text-end">Selisih</th><th>Alasan/Pemeriksa</th></tr></thead><tbody id="tabel-stock-opname"></tbody></table></div>
@@ -1453,28 +1466,38 @@
 
         <div id="kas" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
-                <div class="module-title d-flex justify-content-between align-items-center flex-wrap gap-3"><div class="d-flex align-items-center gap-3"><span class="icon-shell"><i class="bi bi-cash-coin"></i></span><div><h4 class="m-0">Kas & Bank Unit</h4><div class="module-note">Mencatat saldo awal, penerimaan, pengeluaran, pembayaran saldo nasabah, dan rekonsiliasi fisik.</div></div></div><button type="button" class="btn btn-outline-success btn-sm px-3" onclick="loadDataDatabase()"><i class="bi bi-arrow-clockwise me-1"></i>Muat Ulang Kas</button></div>
-                <div class="row g-3 mt-3 mb-4">
-                    <div class="col-md-4"><div class="metric-soft"><div class="label">Saldo Kas/Bank</div><div class="value" id="kas-saldo">Rp 0</div></div></div>
-                    <div class="col-md-4"><div class="metric-soft"><div class="label">Total Kas Masuk</div><div class="value cash-positive" id="kas-total-masuk">Rp 0</div></div></div>
-                    <div class="col-md-4"><div class="metric-soft"><div class="label">Total Kas Keluar</div><div class="value cash-negative" id="kas-total-keluar">Rp 0</div></div></div>
+                <div class="module-title d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-3"><span class="icon-shell"><i class="bi bi-cash-coin"></i></span><div><h4 class="m-0">Keuangan Unit</h4><div class="module-note">Catat saldo awal, penerimaan dari BSI, modal/swadaya, dan biaya operasional unit.</div></div></div>
+                    <button type="button" class="btn btn-outline-success btn-sm px-3" onclick="loadDataDatabase()"><i class="bi bi-arrow-clockwise me-1"></i>Muat Ulang</button>
                 </div>
+                <div class="simple-warning-box mt-4"><i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Penting:</strong> pembayaran penarikan saldo nasabah dicatat otomatis oleh sistem. Jangan mencatatnya lagi sebagai pengeluaran manual agar saldo keuangan tidak berkurang dua kali.</div>
+                <div class="row g-3 mt-2 mb-4">
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Saldo Uang Unit</div><div class="value" id="kas-saldo">Rp 0</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Total Uang Masuk</div><div class="value cash-positive" id="kas-total-masuk">Rp 0</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Total Uang Keluar</div><div class="value cash-negative" id="kas-total-keluar">Rp 0</div></div></div>
+                </div>
+                <h6 class="fw-bold mb-3" style="color:var(--primary-dark);">Tambah Pencatatan Keuangan</h6>
                 <form id="formKasMutasi" onsubmit="simpanKasMutasi(event)">
                     <div class="row g-3">
                         <div class="col-md-2"><label>Tanggal</label><input type="date" id="kasTanggal" class="form-control" required></div>
-                        <div class="col-md-2"><label>Arah</label><select id="kasArah" class="form-select"><option value="masuk">Kas Masuk</option><option value="keluar">Kas Keluar</option></select></div>
-                        <div class="col-md-3"><label>Kategori</label><select id="kasKategori" class="form-select"><option>Saldo Awal</option><option>Pembayaran BSI</option><option>Modal/Swadaya</option><option>Biaya Operasional</option><option>Pembayaran Nasabah</option><option>Lainnya</option></select></div>
+                        <div class="col-md-2"><label>Jenis</label><select id="kasArah" class="form-select"><option value="masuk">Uang Masuk</option><option value="keluar">Uang Keluar</option></select></div>
+                        <div class="col-md-3"><label>Kategori</label><select id="kasKategori" class="form-select"><option>Saldo Awal</option><option>Pembayaran BSI</option><option>Modal/Swadaya</option><option>Biaya Operasional</option><option>Lainnya</option></select></div>
                         <div class="col-md-2"><label>Nominal</label><input type="number" min="1" id="kasNominal" class="form-control" required></div>
-                        <div class="col-md-3"><label>Metode</label><select id="kasMetode" class="form-select"><option>Tunai</option><option>Transfer/Rekening</option></select></div>
-                        <div class="col-md-4"><label>No. Bukti</label><input id="kasBukti" class="form-control"></div>
-                        <div class="col-md-8"><label>Keterangan</label><input id="kasKeterangan" class="form-control"></div>
+                        <div class="col-md-3"><label>Disimpan/Dibayar Melalui</label><select id="kasMetode" class="form-select"><option>Tunai</option><option>Transfer/Rekening</option></select></div>
+                        <div class="col-md-4"><label>Nomor Bukti <span class="text-muted fw-normal">(opsional)</span></label><input id="kasBukti" class="form-control"></div>
+                        <div class="col-md-8"><label>Keterangan</label><input id="kasKeterangan" class="form-control" placeholder="Contoh: pembayaran hasil penjualan dari BSI atau pembelian ATK"></div>
                     </div>
-                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-plus-circle me-2"></i>Catat Mutasi Kas</button>
+                    <button class="btn btn-success mt-4 px-4" type="submit"><i class="bi bi-save me-2"></i>Simpan Pencatatan Keuangan</button>
                 </form>
                 <div class="section-divider"></div>
                 <div class="row g-4">
-                    <div class="col-lg-8"><h6 class="fw-bold mb-3">Riwayat Mutasi Kas</h6><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal/Bukti</th><th>Kategori</th><th>Metode</th><th class="text-end">Masuk</th><th class="text-end">Keluar</th><th>Petugas</th></tr></thead><tbody id="tabel-kas-mutasi"></tbody></table></div></div>
-                    <div class="col-lg-4"><div class="operational-card"><h6 class="fw-bold">Rekonsiliasi Kas Harian</h6><p class="module-note">Bandingkan saldo sistem dengan uang/rekening yang benar-benar tersedia.</p><form onsubmit="simpanRekonsiliasiUnit(event)"><div class="mb-3"><label>Tanggal</label><input type="date" id="rekTanggal" class="form-control" required></div><div class="mb-3"><label>Saldo Sistem</label><input id="rekSistem" class="form-control" readonly></div><div class="mb-3"><label>Saldo Fisik/Rekening</label><input type="number" id="rekFisik" class="form-control" required></div><div class="mb-3"><label>Keterangan</label><textarea id="rekKet" class="form-control" rows="2"></textarea></div><button class="btn btn-outline-success w-100">Simpan Rekonsiliasi</button></form></div></div>
+                    <div class="col-lg-8"><h6 class="fw-bold mb-3">Riwayat Uang Masuk dan Keluar</h6><div class="table-responsive"><table class="table table-hover"><thead><tr><th>Tanggal/Bukti</th><th>Kategori</th><th>Metode</th><th class="text-end">Masuk</th><th class="text-end">Keluar</th><th>Petugas</th></tr></thead><tbody id="tabel-kas-mutasi"></tbody></table></div></div>
+                    <div class="col-lg-4">
+                        <details class="optional-check">
+                            <summary><i class="bi bi-check2-circle me-2"></i>Pemeriksaan Saldo (Opsional)</summary>
+                            <div class="optional-check-body"><p class="module-note">Digunakan bendahara untuk membandingkan saldo aplikasi dengan uang tunai dan rekening yang benar-benar tersedia.</p><form onsubmit="simpanRekonsiliasiUnit(event)"><div class="mb-3"><label>Tanggal</label><input type="date" id="rekTanggal" class="form-control" required></div><div class="mb-3"><label>Saldo Menurut Aplikasi</label><input id="rekSistem" class="form-control" readonly></div><div class="mb-3"><label>Saldo Tunai/Rekening Sebenarnya</label><input type="number" id="rekFisik" class="form-control" required></div><div class="mb-3"><label>Keterangan</label><textarea id="rekKet" class="form-control" rows="2"></textarea></div><button class="btn btn-outline-success w-100">Simpan Hasil Pemeriksaan</button></form></div>
+                        </details>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1489,8 +1512,8 @@
 
         <div id="audit" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
-                <div class="module-title"><span class="icon-shell"><i class="bi bi-shield-check"></i></span><div><h4 class="m-0">Audit Log Unit</h4><div class="module-note">Jejak siapa melakukan penambahan, perubahan, pembatalan, stock opname, dan mutasi kas.</div></div></div>
-                <div class="row g-3 mt-3 mb-4"><div class="col-md-4"><select id="auditFilterTabel" class="form-select" onchange="updateAuditUnit()"><option value="">Semua Modul</option><option value="transaksi">Transaksi</option><option value="nasabah">Nasabah</option><option value="stock_opname">Stock Opname</option><option value="kas_mutasi">Kas</option><option value="rekonsiliasi_kas">Rekonsiliasi</option></select></div><div class="col-md-4"><input type="date" id="auditFilterMulai" class="form-control" onchange="updateAuditUnit()"></div><div class="col-md-4"><button class="btn btn-outline-success w-100" onclick="muatAuditUnit()"><i class="bi bi-arrow-clockwise me-2"></i>Muat Ulang Audit</button></div></div>
+                <div class="module-title"><span class="icon-shell"><i class="bi bi-shield-check"></i></span><div><h4 class="m-0">Audit Log Unit</h4><div class="module-note">Jejak penambahan, perubahan, pembatalan, cek stok fisik, dan pencatatan keuangan.</div></div></div>
+                <div class="row g-3 mt-3 mb-4"><div class="col-md-4"><select id="auditFilterTabel" class="form-select" onchange="updateAuditUnit()"><option value="">Semua Modul</option><option value="transaksi">Transaksi</option><option value="nasabah">Nasabah</option><option value="stock_opname">Cek Stok Fisik</option><option value="kas_mutasi">Keuangan Unit</option><option value="rekonsiliasi_kas">Pemeriksaan Saldo</option></select></div><div class="col-md-4"><input type="date" id="auditFilterMulai" class="form-control" onchange="updateAuditUnit()"></div><div class="col-md-4"><button class="btn btn-outline-success w-100" onclick="muatAuditUnit()"><i class="bi bi-arrow-clockwise me-2"></i>Muat Ulang Audit</button></div></div>
                 <div class="table-responsive"><table class="table table-hover"><thead><tr><th>Waktu</th><th>Modul/Aksi</th><th>Referensi</th><th>Petugas</th><th>Keterangan</th></tr></thead><tbody id="tabel-audit-unit"></tbody></table></div>
             </div>
         </div>
@@ -1550,7 +1573,7 @@
                 <div class="row g-3 mb-2">
                     <div class="col-md-4"><div class="metric-soft"><div class="label">Dikirim ke BSI</div><div class="value" id="lap-keluar">0 Kg</div></div></div>
                     <div class="col-md-4"><div class="metric-soft"><div class="label">Stok Akhir</div><div class="value" id="lap-stok-akhir">0 Kg</div></div></div>
-                    <div class="col-md-4"><div class="metric-soft"><div class="label">Kas/Bank Tercatat</div><div class="value" id="lap-kas">Rp 0</div></div></div>
+                    <div class="col-md-4"><div class="metric-soft"><div class="label">Keuangan Unit Tercatat</div><div class="value" id="lap-kas">Rp 0</div></div></div>
                 </div>
 
                 <h6 class="fw-bold mb-3 mt-5" style="color: var(--primary-dark);"><i class="bi bi-pie-chart me-2 text-success"></i>Matriks Inventaris Persediaan</h6>
@@ -1877,8 +1900,11 @@
     // FUNGSI LAINNYA LENGKAP
     // ==========================================
     const MATRIKS_HAK_AKSES_UNIT = {
+        // Admin BSU: seluruh operasional dan administrasi unit.
         ADMIN_BSU: ['dashboard','nasabah','hargasampah','profil','setor','ceksaldo','pengiriman','koreksi','stock','stockopname','kas','bagihasil','bukubesar','jadwal','broadcast-harga','laporan','audit'],
-        OPERATOR: ['dashboard','nasabah','hargasampah','profil','setor','stock','jadwal','broadcast-harga','laporan'],
+        // Operator: pelayanan nasabah, setoran, pengiriman dan pemantauan stok. Tidak mengubah stok fisik/keuangan.
+        OPERATOR: ['dashboard','nasabah','hargasampah','profil','setor','pengiriman','stock','jadwal','broadcast-harga','laporan'],
+        // Bendahara: saldo nasabah, keuangan, bagi hasil, buku besar dan laporan.
         BENDAHARA: ['dashboard','profil','ceksaldo','kas','bagihasil','bukubesar','laporan']
     };
 
@@ -1909,13 +1935,31 @@
             const cocok = String(btn.getAttribute('onclick') || '').match(/showTab\('([^']+)'/);
             if (!cocok) return;
             const tab = cocok[1];
+            const diizinkan = bolehAksesTab(tab);
             const li = btn.closest('li');
-            if (li) li.style.display = bolehAksesTab(tab) ? '' : 'none';
+            const quick = btn.closest('.quick-action-card');
+            if (li) li.style.display = diizinkan ? '' : 'none';
+            if (quick) quick.style.display = diizinkan ? '' : 'none';
+            // Tombol fitur khusus di dalam halaman (misalnya Cek Stok Fisik).
+            if (!li && !quick && btn.dataset.tabTarget) btn.style.display = diizinkan ? '' : 'none';
         });
 
         document.querySelectorAll('.nav-item.dropdown').forEach(group => {
-            const submenu = Array.from(group.querySelectorAll('.dropdown-menu > li'));
-            group.style.display = submenu.some(li => li.style.display !== 'none') ? '' : 'none';
+            const submenuAksi = Array.from(group.querySelectorAll('.dropdown-menu > li')).filter(li => li.querySelector('button.nav-btn'));
+            group.style.display = submenuAksi.some(li => li.style.display !== 'none') ? '' : 'none';
+        });
+
+        // Sembunyikan judul/pemisah dropdown yang tidak lagi memiliki item terlihat di bawahnya.
+        document.querySelectorAll('.menu-lainnya-bsu .dropdown-header').forEach(header => {
+            const liHeader = header.closest('li');
+            let berikut = liHeader ? liHeader.nextElementSibling : null;
+            let adaItem = false;
+            while (berikut && !berikut.querySelector('.dropdown-header')) {
+                const tombol = berikut.querySelector('button.nav-btn');
+                if (tombol && berikut.style.display !== 'none') { adaItem = true; break; }
+                berikut = berikut.nextElementSibling;
+            }
+            if (liHeader) liHeader.style.display = adaItem ? '' : 'none';
         });
 
         const aktif = document.querySelector('.tab-content[style*="display:block"], .tab-content[style*="display: block"]');
@@ -1940,6 +1984,11 @@
         if (tabId === 'koreksi') updateTabelKoreksi();
         if (tabId === 'audit') updateAuditUnit();
         if (tabId === 'laporan') updateLaporan();
+        // Tutup menu navigasi otomatis di layar kecil setelah pilihan diklik.
+        const navCollapse = document.getElementById('navbarNav');
+        if (navCollapse && navCollapse.classList.contains('show') && window.bootstrap?.Collapse) {
+            bootstrap.Collapse.getOrCreateInstance(navCollapse).hide();
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -3177,7 +3226,7 @@
         const nominal=num(document.getElementById('nominalTarik').value);if(!n||nominal<=0)return alert('Pilih nasabah dan isi nominal.');
         const saldo=transaksiAktif(dataTransaksi).filter(t=>transaksiMilikNasabah(t,n)).reduce((a,t)=>a+num(t.total),0);
         if(nominal>saldo)return alert('Saldo nasabah tidak mencukupi. Maksimal '+rupiah(saldo));
-        if(nominal>hitungSaldoKas())return alert('Kas unit tidak mencukupi. Catat saldo awal/penerimaan pada menu Kas & Bank terlebih dahulu.');
+        if(nominal>hitungSaldoKas())return alert('Kas unit tidak mencukupi. Catat saldo awal atau penerimaan pada menu Keuangan Unit terlebih dahulu.');
         const metode=prompt('Metode pembayaran: Tunai atau Transfer?','Tunai')||'Tunai';
         const noBukti=prompt('Nomor bukti pembayaran (opsional):','')||'';
         const tgl=new Date().toISOString(); if(cekPeringatanPeriodeTerkunci(tgl))return;
@@ -3541,11 +3590,11 @@
 
     function isiStokSistemOpname(){const material=document.getElementById('opnameMaterial')?.value||'';const v=stokMaterial(material);const el=document.getElementById('opnameSistem');if(el)el.value=v.toFixed(2);}
     function simpanStockOpname(e){e.preventDefault();const material=document.getElementById('opnameMaterial').value;const sistem=stokMaterial(material);const fisik=num(document.getElementById('opnameFisik').value);if(!material)return alert('Pilih material.');AdapterAPI.tambahStockOpname({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('opnameTanggal').value,material,stok_sistem:sistem,stok_fisik:fisik,selisih:fisik-sistem,alasan:document.getElementById('opnameAlasan').value.trim(),diperiksa_oleh:document.getElementById('opnamePetugas').value.trim()||getPetugasSesi()}).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Stock opname tersimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
-    function updateTabelStockOpname(){const tb=document.getElementById('tabel-stock-opname');if(!tb)return;const rows=[...dataStockOpname].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));tb.innerHTML=rows.length?rows.map(o=>`<tr><td>${formatTanggalTampil(o.tanggal)}</td><td class="fw-bold">${escapeHtml(o.material)}</td><td class="text-end">${num(o.stok_sistem).toFixed(2)}</td><td class="text-end">${num(o.stok_fisik).toFixed(2)}</td><td class="text-end fw-bold ${num(o.selisih)<0?'text-danger':'text-success'}">${num(o.selisih)>=0?'+':''}${num(o.selisih).toFixed(2)}</td><td>${escapeHtml(o.alasan||'-')}<br><small class="text-muted">${escapeHtml(o.diperiksa_oleh||'-')}</small></td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-clipboard-check"></i>Belum ada stock opname.</td></tr>`;}
+    function updateTabelStockOpname(){const tb=document.getElementById('tabel-stock-opname');if(!tb)return;const rows=[...dataStockOpname].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));tb.innerHTML=rows.length?rows.map(o=>`<tr><td>${formatTanggalTampil(o.tanggal)}</td><td class="fw-bold">${escapeHtml(o.material)}</td><td class="text-end">${num(o.stok_sistem).toFixed(2)}</td><td class="text-end">${num(o.stok_fisik).toFixed(2)}</td><td class="text-end fw-bold ${num(o.selisih)<0?'text-danger':'text-success'}">${num(o.selisih)>=0?'+':''}${num(o.selisih).toFixed(2)}</td><td>${escapeHtml(o.alasan||'-')}<br><small class="text-muted">${escapeHtml(o.diperiksa_oleh||'-')}</small></td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-clipboard-check"></i>Belum ada hasil cek stok fisik.</td></tr>`;}
 
-    function updateKasUnit(){const masuk=dataKasMutasi.filter(k=>(k.status||'aktif')!=='dibatalkan'&&k.arah==='masuk').reduce((a,k)=>a+num(k.nominal),0);const keluar=dataKasMutasi.filter(k=>(k.status||'aktif')!=='dibatalkan'&&k.arah==='keluar').reduce((a,k)=>a+num(k.nominal),0);setText('kas-saldo',rupiah(masuk-keluar));setText('kas-total-masuk',rupiah(masuk));setText('kas-total-keluar',rupiah(keluar));const rek=document.getElementById('rekSistem');if(rek)rek.value=Math.round(masuk-keluar);const tb=document.getElementById('tabel-kas-mutasi');if(tb){const rows=[...dataKasMutasi].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));tb.innerHTML=rows.length?rows.map(k=>`<tr><td>${formatTanggalTampil(k.tanggal)}<br><small>${escapeHtml(k.no_bukti||k.id)}</small></td><td class="fw-bold">${escapeHtml(k.kategori)}</td><td>${escapeHtml(k.metode||'-')}</td><td class="text-end text-success fw-bold">${k.arah==='masuk'?rupiah(k.nominal):'-'}</td><td class="text-end text-danger fw-bold">${k.arah==='keluar'?rupiah(k.nominal):'-'}</td><td>${escapeHtml(k.oleh||'-')}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-cash"></i>Belum ada mutasi kas. Masukkan Saldo Awal terlebih dahulu.</td></tr>`;}}
-    function simpanKasMutasi(e){e.preventDefault();const form={id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('kasTanggal').value,arah:document.getElementById('kasArah').value,kategori:document.getElementById('kasKategori').value,nominal:num(document.getElementById('kasNominal').value),metode:document.getElementById('kasMetode').value,no_bukti:document.getElementById('kasBukti').value.trim(),keterangan:document.getElementById('kasKeterangan').value.trim(),oleh:getPetugasSesi()};if(form.arah==='keluar'&&form.nominal>hitungSaldoKas())return alert('Kas tidak mencukupi.');AdapterAPI.tambahKasMutasi(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Mutasi kas tersimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
-    function simpanRekonsiliasiUnit(e){e.preventDefault();const sistem=hitungSaldoKas(),fisik=num(document.getElementById('rekFisik').value);AdapterAPI.tambahRekonsiliasiUnit({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('rekTanggal').value,sumber:'Kas/Bank BSU',saldo_sistem:sistem,saldo_fisik:fisik,keterangan:document.getElementById('rekKet').value.trim(),diperiksa_oleh:getPetugasSesi()}).then(res=>{alert(res);e.target.reset();loadDataDatabase();});}
+    function updateKasUnit(){const masuk=dataKasMutasi.filter(k=>(k.status||'aktif')!=='dibatalkan'&&k.arah==='masuk').reduce((a,k)=>a+num(k.nominal),0);const keluar=dataKasMutasi.filter(k=>(k.status||'aktif')!=='dibatalkan'&&k.arah==='keluar').reduce((a,k)=>a+num(k.nominal),0);setText('kas-saldo',rupiah(masuk-keluar));setText('kas-total-masuk',rupiah(masuk));setText('kas-total-keluar',rupiah(keluar));const rek=document.getElementById('rekSistem');if(rek)rek.value=Math.round(masuk-keluar);const tb=document.getElementById('tabel-kas-mutasi');if(tb){const rows=[...dataKasMutasi].sort((a,b)=>tanggalKeMs(b.tanggal)-tanggalKeMs(a.tanggal));tb.innerHTML=rows.length?rows.map(k=>`<tr><td>${formatTanggalTampil(k.tanggal)}<br><small>${escapeHtml(k.no_bukti||k.id)}</small></td><td class="fw-bold">${escapeHtml(k.kategori)}</td><td>${escapeHtml(k.metode||'-')}</td><td class="text-end text-success fw-bold">${k.arah==='masuk'?rupiah(k.nominal):'-'}</td><td class="text-end text-danger fw-bold">${k.arah==='keluar'?rupiah(k.nominal):'-'}</td><td>${escapeHtml(k.oleh||'-')}</td></tr>`).join(''):`<tr><td colspan="6" class="empty-state"><i class="bi bi-cash"></i>Belum ada pencatatan keuangan. Masukkan Saldo Awal terlebih dahulu.</td></tr>`;}}
+    function simpanKasMutasi(e){e.preventDefault();const form={id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('kasTanggal').value,arah:document.getElementById('kasArah').value,kategori:document.getElementById('kasKategori').value,nominal:num(document.getElementById('kasNominal').value),metode:document.getElementById('kasMetode').value,no_bukti:document.getElementById('kasBukti').value.trim(),keterangan:document.getElementById('kasKeterangan').value.trim(),oleh:getPetugasSesi()};if(form.arah==='keluar'&&form.nominal>hitungSaldoKas())return alert('Kas tidak mencukupi.');AdapterAPI.tambahKasMutasi(form).then(res=>{if(!String(res).includes('Sukses'))throw new Error(res);alert('Pencatatan keuangan berhasil disimpan.');e.target.reset();loadDataDatabase();}).catch(err=>alert(err.message));}
+    function simpanRekonsiliasiUnit(e){e.preventDefault();const sistem=hitungSaldoKas(),fisik=num(document.getElementById('rekFisik').value);AdapterAPI.tambahRekonsiliasiUnit({id_unit:CURRENT_UNIT_ID,tanggal:document.getElementById('rekTanggal').value,sumber:'Keuangan Unit BSU',saldo_sistem:sistem,saldo_fisik:fisik,keterangan:document.getElementById('rekKet').value.trim(),diperiksa_oleh:getPetugasSesi()}).then(res=>{alert(res);e.target.reset();loadDataDatabase();});}
 
     function updateTabelKoreksi(){
         const tb=document.getElementById('tabel-koreksi');if(!tb)return;
@@ -3715,7 +3764,7 @@
                         Saldo, stok, dan kas unit akan berubah mengikuti data yang tersisa. Tindakan ini tidak dapat dipulihkan dari aplikasi.
                     </div>
                     <div class="alert alert-secondary small">
-                        Data tingkat unit yang tidak mempunyai hubungan khusus dengan satu nasabah—seperti stock opname gudang, pengiriman ke BSI, dan rekonsiliasi kas—tidak ikut dihapus.
+                        Data tingkat unit yang tidak mempunyai hubungan khusus dengan satu nasabah—seperti cek stok fisik gudang, pengiriman ke BSI, dan rekonsiliasi kas—tidak ikut dihapus.
                     </div>
                     <div class="row g-3 mb-4">
                         <div class="col-md-4"><div class="metric-soft h-100"><div class="label">Nama Nasabah</div><div class="value fs-5" id="hapusAdminNamaNasabah">-</div><small class="text-muted" id="hapusAdminKodeNasabah">-</small></div></div>
