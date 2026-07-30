@@ -1,0 +1,19 @@
+{
+  "id": "/cek-saldo.html",
+  "name": "Aplikasi Nasabah Bank Sampah Tulungagung",
+  "short_name": "Saldo Sampah",
+  "description": "Layanan nasabah untuk melihat saldo dan riwayat tabungan sampah melalui QR atau nomor HP terdaftar.",
+  "start_url": "/cek-saldo.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#EAF1ED",
+  "theme_color": "#073B32",
+  "lang": "id-ID",
+  "icons": [
+    {"src":"/icon-nasabah-192.png","sizes":"192x192","type":"image/png","purpose":"any"},
+    {"src":"/icon-nasabah-192.png","sizes":"192x192","type":"image/png","purpose":"maskable"},
+    {"src":"/icon-nasabah-512.png","sizes":"512x512","type":"image/png","purpose":"any"},
+    {"src":"/icon-nasabah-512.png","sizes":"512x512","type":"image/png","purpose":"maskable"}
+  ]
+}

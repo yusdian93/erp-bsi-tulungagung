@@ -11,9 +11,10 @@
   <meta name="apple-mobile-web-app-title" content="Saldo Sampah">
   <title>Aplikasi Nasabah Bank Sampah | Tulungagung</title>
 
-  <link rel="manifest" href="manifest-nasabah.webmanifest">
-  <link rel="icon" href="icon-192.png" sizes="192x192">
-  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="manifest" href="/manifest.json?v=4">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=4">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-nasabah-192.png?v=4">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180.png?v=4">
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="supabase-adapter.js" defer></script>
@@ -68,7 +69,9 @@
     .brand-mini img{width:42px;height:42px;object-fit:contain;border-radius:12px;background:#fff;padding:3px;box-shadow:0 6px 15px rgba(4,40,32,.12)}
     .brand-mini strong{display:block;font-size:.88rem;line-height:1.18}
     .brand-mini span{display:block;margin-top:2px;color:var(--muted);font-size:.68rem}
+    .top-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
     .install-btn{display:none;border:1px solid #CBE3D9;background:#EFF8F4;color:var(--green-800);border-radius:12px;padding:9px 11px;font-size:.72rem;font-weight:800;white-space:nowrap}
+    .exit-app-btn{border:1px solid #E7D5D5;background:#FFF5F5;color:#8F2525;border-radius:12px;padding:9px 11px;font-size:.72rem;font-weight:800;white-space:nowrap}
 
     .hero{
       position:relative;overflow:hidden;
@@ -198,7 +201,10 @@
         <img src="logo_dlh.png" alt="Logo DLH Kabupaten Tulungagung">
         <div><strong>Tabungan Sampah</strong><span>Layanan Nasabah Mandiri</span></div>
       </div>
-      <button id="btnInstall" class="install-btn" type="button">Pasang di HP</button>
+      <div class="top-actions">
+        <button id="btnInstall" class="install-btn" type="button">Pasang di HP</button>
+        <button class="exit-app-btn" type="button" onclick="keluarAplikasiUtama()" aria-label="Keluar dan bersihkan data">Keluar</button>
+      </div>
     </div>
 
     <div class="offline-banner">Perangkat sedang tidak terhubung ke internet. Data saldo hanya dapat dimuat saat jaringan tersedia.</div>
@@ -368,6 +374,15 @@
     tampilkan(`<div class="card" style="text-align:center"><div style="font-size:46px;margin-bottom:8px">✓</div><h2 class="card-title">Selesai</h2><p class="card-lead">Informasi saldo telah dibersihkan dari layar.</p><button class="btn btn-primary" onclick="layarBeranda()">Kembali ke Beranda</button></div>`)
   }
 
+  function keluarAplikasiUtama(){
+    try{tutupScanner()}catch(e){}
+    hasilPencarianSaatIni=null;
+    idUnitAktif='';
+    idNasabahAktif='';
+    try{history.replaceState({},'',window.location.pathname)}catch(e){}
+    layarBeranda();
+  }
+
   function ambilParameterQr(raw){
     const nilai=String(raw||'').trim();if(!nilai)return null;
     try{
@@ -428,7 +443,7 @@
   window.addEventListener('offline',()=>document.body.classList.add('offline'));
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&scannerAktif)tutupScanner()});
 
-  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw-nasabah.js').catch(()=>{}))}
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/sw-nasabah.js',{updateViaCache:'none'}).catch(()=>{}))}
 
   window.addEventListener('load',()=>{
     if(!navigator.onLine)document.body.classList.add('offline');

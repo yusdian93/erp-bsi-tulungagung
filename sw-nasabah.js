@@ -1,11 +1,13 @@
-const CACHE_NAME = 'nasabah-bank-sampah-v1';
+const CACHE_NAME = 'nasabah-bank-sampah-v4-tanpa-pin';
 const APP_SHELL = [
-  './cek-saldo.html',
-  './manifest-nasabah.webmanifest',
-  './logo_dlh.png',
-  './icon-192.png',
-  './icon-512.png',
-  './supabase-adapter.js'
+  '/cek-saldo.html',
+  '/manifest.json',
+  '/logo_dlh.png',
+  '/icon-nasabah-192.png',
+  '/icon-nasabah-512.png',
+  '/apple-touch-icon-180.png',
+  '/favicon-32.png',
+  '/supabase-adapter.js'
 ];
 
 self.addEventListener('install', event => {
@@ -26,9 +28,9 @@ self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate') {
     event.respondWith(fetch(event.request).then(response => {
       const copy = response.clone();
-      caches.open(CACHE_NAME).then(cache => cache.put('./cek-saldo.html', copy));
+      caches.open(CACHE_NAME).then(cache => cache.put('/cek-saldo.html', copy));
       return response;
-    }).catch(() => caches.match('./cek-saldo.html')));
+    }).catch(() => caches.match('/cek-saldo.html')));
     return;
   }
   event.respondWith(caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
