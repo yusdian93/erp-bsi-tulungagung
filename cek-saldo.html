@@ -1,510 +1,439 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#073B32">
-    <title>Cek Saldo Tabungan Sampah | Tulungagung</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#073B32">
+  <meta name="description" content="Aplikasi Nasabah Bank Sampah Kabupaten Tulungagung untuk melihat saldo dan riwayat tabungan sampah melalui QR atau nomor HP terdaftar.">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Saldo Sampah">
+  <title>Aplikasi Nasabah Bank Sampah | Tulungagung</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <script src="supabase-adapter.js" defer></script>
+  <link rel="manifest" href="manifest-nasabah.webmanifest">
+  <link rel="icon" href="icon-192.png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
-    
-    <style>
-        :root {
-            --green-950:#041F1A;
-            --green-900:#073B32;
-            --green-700:#0B7156;
-            --green-600:#0E8A67;
-            --gold:#C99A3D;
-            --gold-soft:#F3E2B9;
-            --ink:#071A17;
-            --muted:#677C76;
-            --line:#DCE7E2;
-        }
-        * { box-sizing:border-box; }
-        body {
-            min-height:100vh;
-            margin:0;
-            padding:24px 16px 38px;
-            font-family:'Plus Jakarta Sans',sans-serif;
-            color:var(--ink);
-            background:
-                radial-gradient(circle at 5% 0%,rgba(201,154,61,.20),transparent 22rem),
-                radial-gradient(circle at 95% 15%,rgba(14,138,103,.17),transparent 25rem),
-                linear-gradient(145deg,#F8FAF8,#E9F0EC);
-        }
-        body::before {
-            content:"";
-            position:fixed;
-            inset:0;
-            z-index:-1;
-            opacity:.32;
-            background-image:
-                linear-gradient(rgba(7,59,50,.03) 1px,transparent 1px),
-                linear-gradient(90deg,rgba(7,59,50,.03) 1px,transparent 1px);
-            background-size:32px 32px;
-            mask-image:linear-gradient(to bottom,black,transparent 78%);
-        }
-        .wrap { max-width:520px;margin:0 auto; }
-        .brand-header {
-            position:relative;
-            overflow:hidden;
-            margin-bottom:18px;
-            padding:22px;
-            display:flex;
-            align-items:center;
-            gap:16px;
-            border-radius:25px;
-            color:#fff;
-            text-align:left;
-            background:
-                radial-gradient(circle at 92% 5%,rgba(226,190,113,.26),transparent 10rem),
-                linear-gradient(135deg,#041F1A,#084A3C);
-            border:1px solid rgba(255,255,255,.13);
-            box-shadow:0 22px 55px rgba(4,40,32,.22);
-        }
-        .brand-header::after {
-            content:"";
-            position:absolute;
-            left:0;right:0;top:0;height:2px;
-            background:linear-gradient(90deg,transparent,#E7C77E,transparent);
-        }
-        .logo-shell {
-            width:76px;height:76px;
-            flex:0 0 76px;
-            display:grid;place-items:center;
-            border-radius:20px;
-            background:linear-gradient(145deg,#fff,#EAF2EE);
-            box-shadow:0 12px 25px rgba(0,0,0,.20),inset 0 1px #fff;
-        }
-        .logo-shell img { width:68px;height:68px;object-fit:contain; }
-        .brand-kicker {
-            color:var(--gold-soft);
-            font-size:.65rem;
-            font-weight:800;
-            letter-spacing:1.5px;
-            text-transform:uppercase;
-        }
-        .brand-title {
-            margin:4px 0 5px;
-            font-size:1.02rem;
-            font-weight:800;
-            letter-spacing:-.25px;
-        }
-        .brand-subtitle {
-            color:rgba(255,255,255,.63);
-            font-size:.69rem;
-            font-weight:600;
-            line-height:1.45;
-        }
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="supabase-adapter.js" defer></script>
 
-        .card-utama {
-            position:relative;
-            overflow:hidden;
-            margin-bottom:18px;
-            padding:28px 25px;
-            border-radius:24px;
-            background:rgba(255,255,255,.94);
-            border:1px solid rgba(7,59,50,.10);
-            box-shadow:0 18px 45px rgba(4,40,32,.11);
-            backdrop-filter:blur(20px);
-            -webkit-backdrop-filter:blur(20px);
-            animation:fadeUp .35s ease;
-        }
-        .card-utama::before {
-            content:"";
-            position:absolute;
-            left:24px;right:24px;top:0;height:2px;
-            background:linear-gradient(90deg,transparent,rgba(201,154,61,.75),transparent);
-        }
-        @keyframes fadeUp {
-            from{opacity:0;transform:translateY(7px)}
-            to{opacity:1;transform:translateY(0)}
-        }
-        .form-control {
-            min-height:52px;
-            border-radius:14px;
-            padding:13px 16px;
-            color:var(--ink);
-            background:#FBFCFB;
-            border:1px solid var(--line);
-            font-weight:600;
-            box-shadow:none;
-        }
-        .form-control:hover { border-color:#BCCFC7; }
-        .form-control:focus {
-            border-color:var(--green-600);
-            box-shadow:0 0 0 4px rgba(14,138,103,.10);
-            background:#fff;
-        }
-        .btn-utama {
-            min-height:52px;
-            width:100%;
-            padding:14px 18px;
-            border:0;
-            border-radius:14px;
-            color:#fff;
-            font-weight:800;
-            letter-spacing:.35px;
-            background:linear-gradient(135deg,#0E8A67,#075542);
-            box-shadow:0 11px 24px rgba(7,85,66,.23);
-            transition:.25s;
-        }
-        .btn-utama:hover:not(:disabled) {
-            transform:translateY(-2px);
-            box-shadow:0 15px 30px rgba(7,85,66,.30);
-        }
-        .btn-utama:disabled { opacity:.58; }
-        .kartu-saldo {
-            position:relative;
-            overflow:hidden;
-            margin-bottom:20px;
-            padding:26px 22px;
-            border-radius:21px;
-            color:#fff;
-            text-align:left;
-            background:
-                radial-gradient(circle at 95% 0%,rgba(231,199,126,.25),transparent 10rem),
-                linear-gradient(135deg,#063B31,#0A765A);
-            border:1px solid rgba(255,255,255,.14);
-            box-shadow:0 18px 38px rgba(4,56,44,.24);
-        }
-        .kartu-saldo::before {
-            content:"";
-            position:absolute;
-            width:140px;height:140px;
-            right:-55px;top:-70px;
-            border-radius:50%;
-            border:1px solid rgba(255,255,255,.12);
-            box-shadow:0 0 0 28px rgba(255,255,255,.025);
-        }
-        .saldo-besar {
-            color:#fff;
-            font-size:clamp(2rem,8vw,2.75rem);
-            font-weight:800;
-            letter-spacing:-1.5px;
-            line-height:1.12;
-        }
-        .riwayat-item {
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:14px;
-            padding:13px 0;
-            border-bottom:1px solid #E9EFEC;
-            font-size:13.5px;
-        }
-        .riwayat-item:last-child { border-bottom:0; }
-        .badge-jenis,.badge-tarik {
-            display:inline-flex;
-            align-items:center;
-            padding:4px 9px;
-            border-radius:999px;
-            font-size:10px;
-            font-weight:800;
-            letter-spacing:.45px;
-        }
-        .badge-jenis { background:#E4F5EE;color:#075542;border:1px solid #C2E6D7; }
-        .badge-tarik { background:#FDECEC;color:#9C2424;border:1px solid #F5CCCC; }
-        .pilih-nasabah-btn {
-            width:100%;
-            margin-bottom:10px;
-            padding:14px 15px;
-            border-radius:14px;
-            border:1px solid var(--line);
-            color:var(--ink);
-            background:#FBFCFB;
-            font-weight:800;
-            text-align:left;
-            transition:.22s;
-        }
-        .pilih-nasabah-btn:hover {
-            transform:translateY(-1px);
-            border-color:#A7C8BB;
-            background:#F0F8F4;
-        }
-        .txt-muted { color:var(--muted);font-size:12.5px; }
-        .error-box {
-            margin-top:13px;
-            padding:12px 14px;
-            border-radius:13px;
-            color:#8F2525;
-            background:#FFF2F2;
-            border:1px solid #F4CACA;
-            font-size:13px;
-            line-height:1.5;
-        }
-        .privacy-note {
-            display:flex;
-            align-items:flex-start;
-            gap:9px;
-            margin-top:12px;
-            padding:11px 12px;
-            border-radius:12px;
-            color:#63766F;
-            background:#F5F8F6;
-            border:1px solid #E5ECE8;
-            font-size:11.5px;
-            line-height:1.5;
-        }
-        .privacy-note i { color:var(--green-700);margin-top:1px; }
-        .footer-copy {
-            color:#758781;
-            font-size:11.5px;
-            font-weight:600;
-            text-align:center;
-        }
-        :focus-visible { outline:3px solid rgba(201,154,61,.55);outline-offset:2px; }
-        @media(max-width:480px){
-            body{padding:12px 11px 28px;}
-            .brand-header{padding:18px;border-radius:20px;}
-            .logo-shell{width:62px;height:62px;flex-basis:62px;border-radius:17px;}
-            .logo-shell img{width:56px;height:56px;}
-            .brand-title{font-size:.91rem;}
-            .card-utama{padding:23px 19px;border-radius:20px;}
-        }
-    </style>
+  <style>
+    :root {
+      --green-950:#041F1A;
+      --green-900:#073B32;
+      --green-800:#075542;
+      --green-700:#0B7156;
+      --green-600:#0E8A67;
+      --green-100:#E6F5EF;
+      --gold:#C99A3D;
+      --gold-soft:#F3E2B9;
+      --ink:#071A17;
+      --muted:#667B75;
+      --line:#DCE7E2;
+      --danger:#9C2424;
+      --surface:#FFFFFF;
+      --shadow:0 18px 45px rgba(4,40,32,.12);
+    }
+
+    *{box-sizing:border-box}
+    html{min-height:100%;background:#EAF1ED}
+    body{
+      min-height:100vh;
+      margin:0;
+      padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+      font-family:Arial,"Segoe UI",sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 4% 0%,rgba(201,154,61,.19),transparent 23rem),
+        radial-gradient(circle at 96% 10%,rgba(14,138,103,.18),transparent 25rem),
+        linear-gradient(145deg,#F8FAF8,#E9F0EC);
+    }
+
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    .app-shell{width:min(560px,100%);min-height:100vh;margin:0 auto;padding:15px 14px 28px}
+
+    .topbar{
+      position:sticky;top:0;z-index:20;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      margin:0 -4px 16px;padding:11px 10px;
+      border-radius:20px;
+      background:rgba(248,250,248,.84);
+      border:1px solid rgba(7,59,50,.08);
+      backdrop-filter:blur(18px);
+      box-shadow:0 8px 24px rgba(4,40,32,.08);
+    }
+    .brand-mini{display:flex;align-items:center;gap:10px;min-width:0}
+    .brand-mini img{width:42px;height:42px;object-fit:contain;border-radius:12px;background:#fff;padding:3px;box-shadow:0 6px 15px rgba(4,40,32,.12)}
+    .brand-mini strong{display:block;font-size:.88rem;line-height:1.18}
+    .brand-mini span{display:block;margin-top:2px;color:var(--muted);font-size:.68rem}
+    .install-btn{display:none;border:1px solid #CBE3D9;background:#EFF8F4;color:var(--green-800);border-radius:12px;padding:9px 11px;font-size:.72rem;font-weight:800;white-space:nowrap}
+
+    .hero{
+      position:relative;overflow:hidden;
+      margin-bottom:16px;padding:25px 22px;
+      border-radius:27px;color:#fff;
+      background:
+        radial-gradient(circle at 92% 2%,rgba(231,199,126,.28),transparent 12rem),
+        radial-gradient(circle at 15% 110%,rgba(40,169,123,.27),transparent 18rem),
+        linear-gradient(145deg,#041F1A,#073B32 58%,#0A5B48);
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 24px 60px rgba(4,40,32,.23);
+    }
+    .hero:after{content:"";position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,transparent,#E7C77E,transparent)}
+    .hero-kicker{font-size:.68rem;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold-soft)}
+    .hero h1{margin:8px 0 8px;font-size:clamp(1.6rem,7vw,2.35rem);line-height:1.05;letter-spacing:-1px}
+    .hero p{margin:0;max-width:430px;color:rgba(255,255,255,.72);font-size:.86rem;line-height:1.62}
+    .hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:17px}
+    .tag{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.10);font-size:.69rem;font-weight:700;color:rgba(255,255,255,.86)}
+
+    .card{
+      position:relative;overflow:hidden;
+      margin-bottom:15px;padding:23px 20px;
+      border-radius:23px;background:rgba(255,255,255,.95);
+      border:1px solid rgba(7,59,50,.10);
+      box-shadow:var(--shadow);
+      animation:fadeUp .28s ease;
+    }
+    .card:before{content:"";position:absolute;left:22px;right:22px;top:0;height:2px;background:linear-gradient(90deg,transparent,rgba(201,154,61,.72),transparent)}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
+    .card-title{margin:0 0 6px;font-size:1.07rem;font-weight:800}
+    .card-lead{margin:0 0 18px;color:var(--muted);font-size:.81rem;line-height:1.6}
+
+    .action-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .action-card{
+      min-height:142px;padding:18px 15px;border-radius:18px;border:1px solid var(--line);
+      text-align:left;background:#FAFCFB;color:var(--ink);transition:.2s;
+    }
+    .action-card:hover{transform:translateY(-2px);border-color:#A9CABD;box-shadow:0 12px 25px rgba(4,40,32,.09)}
+    .action-card.primary{color:#fff;background:linear-gradient(145deg,#0E8A67,#075542);border-color:transparent;box-shadow:0 14px 28px rgba(7,85,66,.20)}
+    .action-icon{display:grid;place-items:center;width:42px;height:42px;margin-bottom:14px;border-radius:13px;background:#E8F5EF;color:var(--green-700);font-size:1.35rem}
+    .primary .action-icon{background:rgba(255,255,255,.14);color:#fff}
+    .action-card strong{display:block;font-size:.9rem}
+    .action-card span{display:block;margin-top:5px;font-size:.7rem;line-height:1.45;color:var(--muted)}
+    .primary span{color:rgba(255,255,255,.72)}
+
+    label{display:block;margin:0 0 7px;color:#173B33;font-size:.76rem;font-weight:800}
+    .field{width:100%;min-height:51px;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#FBFCFB;color:var(--ink);font-weight:600;outline:none;transition:.2s}
+    .field:focus{border-color:var(--green-600);background:#fff;box-shadow:0 0 0 4px rgba(14,138,103,.10)}
+    .field-row{margin-bottom:14px}
+
+    .btn{
+      width:100%;min-height:51px;border:0;border-radius:14px;padding:13px 16px;
+      font-weight:800;letter-spacing:.2px;transition:.2s;
+    }
+    .btn:hover:not(:disabled){transform:translateY(-1px)}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    .btn-primary{color:#fff;background:linear-gradient(135deg,#0E8A67,#075542);box-shadow:0 11px 24px rgba(7,85,66,.22)}
+    .btn-secondary{color:var(--green-800);background:#EDF7F3;border:1px solid #D2EADF}
+    .btn-dark{color:#fff;background:linear-gradient(135deg,#475569,#1E293B)}
+    .btn-link{width:auto;min-height:0;padding:7px 0;border:0;background:transparent;color:var(--green-700);font-weight:800;font-size:.76rem}
+    .button-stack{display:grid;gap:10px}
+
+    .privacy{display:flex;gap:9px;margin-top:13px;padding:11px 12px;border:1px solid #E4ECE8;border-radius:12px;background:#F5F8F6;color:#61736D;font-size:.69rem;line-height:1.5}
+    .error{margin-top:13px;padding:12px 13px;border:1px solid #F2C8C8;border-radius:12px;background:#FFF2F2;color:#8F2525;font-size:.78rem;line-height:1.5}
+    .success-note{margin-top:13px;padding:12px 13px;border:1px solid #CBE7DA;border-radius:12px;background:#EFF9F4;color:#075542;font-size:.78rem;line-height:1.5}
+
+    .saldo-card{position:relative;overflow:hidden;padding:24px 20px;border-radius:21px;color:#fff;background:radial-gradient(circle at 95% 0%,rgba(231,199,126,.26),transparent 10rem),linear-gradient(135deg,#063B31,#0A765A);box-shadow:0 18px 38px rgba(4,56,44,.23)}
+    .saldo-card:before{content:"";position:absolute;width:145px;height:145px;right:-55px;top:-70px;border-radius:50%;border:1px solid rgba(255,255,255,.12);box-shadow:0 0 0 30px rgba(255,255,255,.025)}
+    .saldo-label{position:relative;font-size:.69rem;font-weight:800;letter-spacing:.9px;color:rgba(255,255,255,.82)}
+    .saldo-value{position:relative;margin-top:5px;font-size:clamp(2rem,10vw,2.8rem);font-weight:800;letter-spacing:-1.4px;line-height:1.1}
+    .saldo-meta{position:relative;margin-top:8px;font-size:.73rem;color:rgba(255,255,255,.84)}
+    .profile-line{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+    .avatar{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:#E9F5F0;color:var(--green-700);font-weight:800}
+    .profile-line strong{display:block;font-size:.94rem}
+    .profile-line span{display:block;margin-top:3px;color:var(--muted);font-size:.71rem}
+
+    .section-title{margin:19px 0 8px;font-size:.86rem;font-weight:800}
+    .history{max-height:365px;overflow:auto;border-top:1px solid #E9EFEC}
+    .history-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 0;border-bottom:1px solid #E9EFEC}
+    .history-item:last-child{border-bottom:0}
+    .history-main{min-width:0}
+    .history-main strong{display:block;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .history-main span{display:block;margin-top:4px;color:var(--muted);font-size:.68rem}
+    .history-amount{font-size:.78rem;font-weight:800;white-space:nowrap}
+    .plus{color:#166534}.minus{color:#991B1B}
+    .badge{display:inline-flex;padding:4px 8px;border-radius:999px;background:#E4F5EE;color:#075542;border:1px solid #C2E6D7;font-size:.58rem;font-weight:800;letter-spacing:.35px}
+    .badge.withdraw{background:#FDECEC;color:#9C2424;border-color:#F5CCCC}
+
+    .person-option{width:100%;margin-bottom:9px;padding:13px 14px;border:1px solid var(--line);border-radius:14px;text-align:left;background:#FBFCFB;color:var(--ink);font-weight:800}
+    .person-option:hover{background:#F0F8F4;border-color:#A7C8BB}
+
+    .scanner-overlay{position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;background:rgba(1,15,12,.75);backdrop-filter:blur(6px)}
+    .scanner-overlay.open{display:flex}
+    .scanner-sheet{width:min(560px,100%);padding:16px 15px calc(20px + env(safe-area-inset-bottom));border-radius:25px 25px 0 0;background:#fff;box-shadow:0 -20px 55px rgba(0,0,0,.25)}
+    .scanner-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+    .scanner-head strong{font-size:1rem}
+    .close-btn{width:39px;height:39px;border:0;border-radius:12px;background:#EEF3F0;color:#243D36;font-size:1.1rem}
+    .video-wrap{position:relative;overflow:hidden;aspect-ratio:1/1;border-radius:20px;background:#071A17}
+    #videoScanner{width:100%;height:100%;object-fit:cover}
+    .scan-frame{position:absolute;inset:16%;border:3px solid #F3E2B9;border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
+    .scan-line{position:absolute;left:19%;right:19%;top:50%;height:2px;background:#35E7A4;box-shadow:0 0 12px #35E7A4;animation:scan 1.8s ease-in-out infinite alternate}
+    @keyframes scan{from{transform:translateY(-90px)}to{transform:translateY(90px)}}
+    .scanner-status{margin:12px 2px 0;color:var(--muted);font-size:.75rem;line-height:1.5;text-align:center}
+
+    .loader{display:grid;place-items:center;padding:24px 0;color:var(--muted);font-size:.78rem}
+    .spinner{width:34px;height:34px;margin-bottom:11px;border:3px solid #D8E6DF;border-top-color:var(--green-600);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .footer{padding:6px 10px 0;color:#758781;text-align:center;font-size:.67rem;line-height:1.55}
+    .offline-banner{display:none;margin-bottom:12px;padding:10px 12px;border:1px solid #F1D7AA;border-radius:12px;background:#FFF8E9;color:#7B591F;font-size:.72rem;text-align:center}
+    body.offline .offline-banner{display:block}
+
+    :focus-visible{outline:3px solid rgba(201,154,61,.58);outline-offset:2px}
+    @media(max-width:390px){
+      .app-shell{padding-left:10px;padding-right:10px}
+      .hero{padding:22px 18px}
+      .card{padding:21px 17px}
+      .action-grid{grid-template-columns:1fr}
+      .action-card{min-height:112px}
+    }
+  </style>
 </head>
 <body>
-<div class="wrap">
+  <main class="app-shell">
+    <div class="topbar">
+      <div class="brand-mini">
+        <img src="logo_dlh.png" alt="Logo DLH Kabupaten Tulungagung">
+        <div><strong>Tabungan Sampah</strong><span>Layanan Nasabah Mandiri</span></div>
+      </div>
+      <button id="btnInstall" class="install-btn" type="button">Pasang di HP</button>
+    </div>
 
-    <header class="brand-header">
-        <div class="logo-shell">
-            <img src="logo_dlh.png" alt="Logo DLH Tulungagung" onerror="this.style.display='none';">
-        </div>
-        <div>
-            <div class="brand-kicker">Layanan Mandiri</div>
-            <div class="brand-title">CEK SALDO TABUNGAN SAMPAH</div>
-            <div class="brand-subtitle">Bank Sampah Kabupaten Tulungagung</div>
-        </div>
-    </header>
+    <div class="offline-banner">Perangkat sedang tidak terhubung ke internet. Data saldo hanya dapat dimuat saat jaringan tersedia.</div>
 
-    <div id="areaUtama"></div>
+    <section class="hero">
+      <div class="hero-kicker">Bank Sampah Kabupaten Tulungagung</div>
+      <h1>Saldo sampah dalam genggaman.</h1>
+      <p>Lihat saldo, riwayat setoran, dan total sampah tertabung menggunakan QR nasabah atau nomor HP yang terdaftar.</p>
+      <div class="hero-tags"><span class="tag">Tanpa akun tambahan</span><span class="tag">Verifikasi nomor HP</span><span class="tag">Data langsung dari BSU</span></div>
+    </section>
 
-    <p class="footer-copy" style="margin-top:12px;">
-        &copy; 2026 Dinas Lingkungan Hidup Kabupaten Tulungagung
-    </p>
-</div>
+    <section id="areaUtama" aria-live="polite"></section>
+
+    <p class="footer">© 2026 Dinas Lingkungan Hidup Kabupaten Tulungagung<br>Hubungi petugas Bank Sampah Unit apabila data atau nomor HP perlu diperbarui.</p>
+  </main>
+
+  <div id="scannerOverlay" class="scanner-overlay" role="dialog" aria-modal="true" aria-label="Pemindai QR">
+    <div class="scanner-sheet">
+      <div class="scanner-head"><strong>Scan QR Nasabah</strong><button class="close-btn" type="button" onclick="tutupScanner()" aria-label="Tutup pemindai">✕</button></div>
+      <div class="video-wrap">
+        <video id="videoScanner" autoplay muted playsinline></video>
+        <div class="scan-frame"></div><div class="scan-line"></div>
+      </div>
+      <div id="scannerStatus" class="scanner-status">Arahkan kamera ke QR yang dicetak oleh Bank Sampah Unit.</div>
+      <button class="btn btn-secondary" style="margin-top:12px" type="button" onclick="tutupScanner()">Batalkan</button>
+    </div>
+  </div>
 
 <script>
-    // ================== STATE & UTIL ==================
-    const params = new URLSearchParams(window.location.search);
-    let idUnitAktif = params.get('unit') || '';
-    let idNasabahAktif = params.get('nasabah') || '';
-    let hasilPencarianSaatIni = null; // dipakai saat ada >1 nasabah cocok (HP sama)
+  const paramsAwal = new URLSearchParams(window.location.search);
+  let idUnitAktif = paramsAwal.get('unit') || '';
+  let idNasabahAktif = paramsAwal.get('nasabah') || '';
+  let hasilPencarianSaatIni = null;
+  let deferredInstallPrompt = null;
+  let scannerStream = null;
+  let scannerFrameId = null;
+  let scannerAktif = false;
 
-    function rp(v) { return 'Rp ' + Math.round(v || 0).toLocaleString('id-ID'); }
-    function formatTgl(t) {
-        let d = new Date(t);
-        if (isNaN(d.getTime())) return t;
-        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+  function esc(v){return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+  function rp(v){return 'Rp ' + Math.round(Number(v)||0).toLocaleString('id-ID')}
+  function angka(v){return (Number(v)||0).toLocaleString('id-ID')}
+  function formatTgl(v){const d=new Date(v);return isNaN(d.getTime())?String(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}
+  function samarkanNama(nama){if(!nama)return '-';return String(nama).split(' ').map(k=>k.length<=2?k:k.slice(0,2)+'*'.repeat(Math.max(1,k.length-2))).join(' ')}
+  function tampilkan(html){document.getElementById('areaUtama').innerHTML=html;window.scrollTo({top:0,behavior:'smooth'})}
+  function tampilkanError(pesan){const el=document.getElementById('areaError');if(el)el.innerHTML=`<div class="error">${esc(pesan)}</div>`}
+  function layarMemuat(pesan){tampilkan(`<div class="card"><div class="loader"><div class="spinner"></div>${esc(pesan||'Memuat...')}</div></div>`)}
+  function normalisasiHp(v){let x=String(v||'').replace(/[^0-9+]/g,'');if(x.startsWith('+62'))x='0'+x.slice(3);else if(x.startsWith('62'))x='0'+x.slice(2);else if(x.startsWith('8'))x='0'+x;return x}
+
+  function layarBeranda(){
+    tampilkan(`
+      <div class="card">
+        <h2 class="card-title">Cek tabungan Anda</h2>
+        <p class="card-lead">Gunakan QR pribadi dari kartu nasabah, atau pilih Bank Sampah Unit lalu masukkan nomor HP terdaftar.</p>
+        <div class="action-grid">
+          <button class="action-card primary" type="button" onclick="bukaScanner()">
+            <span class="action-icon">⌗</span><strong>Scan QR Nasabah</strong><span>Arahkan kamera ke QR pada kartu atau poster Bank Sampah.</span>
+          </button>
+          <button class="action-card" type="button" onclick="tampilkanModeManual()">
+            <span class="action-icon">☎</span><strong>Cek dengan Nomor HP</strong><span>Pilih unit dan verifikasi menggunakan nomor HP terdaftar.</span>
+          </button>
+        </div>
+        <div class="privacy">🛡️ QR tidak langsung menampilkan saldo. Nomor HP tetap diperlukan sebagai verifikasi agar data tabungan tidak mudah dilihat orang lain.</div>
+      </div>`);
+  }
+
+  async function tampilkanFormCek(){
+    if(!idUnitAktif)return layarBeranda();
+    layarMemuat('Memuat informasi Bank Sampah Unit...');
+    try{
+      const unit=await AdapterAPI.getInfoUnitPublik(idUnitAktif);
+      if(!unit){
+        tampilkan(`<div class="card"><h2 class="card-title">QR tidak dikenali</h2><p class="card-lead">Bank Sampah Unit tidak ditemukan. Silakan scan ulang atau pilih unit secara manual.</p><div class="button-stack"><button class="btn btn-primary" onclick="bukaScanner()">Scan Ulang</button><button class="btn btn-secondary" onclick="tampilkanModeManual()">Pilih Unit Manual</button></div></div>`);
+        return;
+      }
+      let infoNasabah=null;
+      if(idNasabahAktif)infoNasabah=await AdapterAPI.getInfoNasabahRingkas(idUnitAktif,idNasabahAktif);
+      const konteks=infoNasabah
+        ? `<div class="profile-line"><div class="avatar">👤</div><div><strong>${esc(samarkanNama(infoNasabah.nama))}</strong><span>${esc(unit.nama)}</span></div></div>`
+        : `<div class="profile-line"><div class="avatar">BSU</div><div><strong>${esc(unit.nama)}</strong><span>${esc([unit.desa,unit.kecamatan].filter(Boolean).join(', '))}</span></div></div>`;
+      tampilkan(`
+        <div class="card">
+          ${konteks}
+          <h2 class="card-title">Verifikasi nomor HP</h2>
+          <p class="card-lead">Masukkan nomor HP yang terdaftar pada Bank Sampah Unit untuk membuka saldo dan riwayat transaksi.</p>
+          <div class="field-row"><label for="inputHp">Nomor HP terdaftar</label><input id="inputHp" class="field" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Contoh: 081234567890" maxlength="18"></div>
+          <button id="btnCek" class="btn btn-primary" type="button" onclick="prosesCekSaldo()">Lihat Saldo Saya</button>
+          <div class="privacy">🛡️ Data saldo hanya ditampilkan apabila nomor HP cocok dengan data nasabah pada unit yang dipilih.</div>
+          <div id="areaError"></div>
+          <div style="display:flex;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap"><button class="btn-link" onclick="bukaScanner()">Scan QR lain</button><button class="btn-link" onclick="tampilkanModeManual()">Pilih unit manual</button></div>
+        </div>`);
+      const input=document.getElementById('inputHp');
+      input.addEventListener('keydown',e=>{if(e.key==='Enter')prosesCekSaldo()});
+      input.focus();
+    }catch(e){tampilkan(`<div class="card"><div class="error">Gagal memuat data unit: ${esc(e.message||e)}</div><button class="btn btn-secondary" style="margin-top:12px" onclick="tampilkanFormCek()">Coba Lagi</button></div>`)}
+  }
+
+  async function tampilkanModeManual(){
+    idUnitAktif='';idNasabahAktif='';hasilPencarianSaatIni=null;
+    history.replaceState({},'',window.location.pathname);
+    layarMemuat('Memuat daftar Bank Sampah Unit...');
+    try{
+      const daftar=await AdapterAPI.getDaftarUnitPublik();
+      const opsi=(daftar||[]).map(u=>`<option value="${esc(u.id)}">${esc(u.nama)}</option>`).join('');
+      tampilkan(`
+        <div class="card">
+          <h2 class="card-title">Cek dengan nomor HP</h2>
+          <p class="card-lead">Pilih Bank Sampah Unit tempat Anda terdaftar, lalu masukkan nomor HP.</p>
+          <div class="field-row"><label for="pilihUnitManual">Bank Sampah Unit</label><select id="pilihUnitManual" class="field"><option value="">-- Pilih Bank Sampah Unit --</option>${opsi}</select></div>
+          <div class="field-row"><label for="inputHpManual">Nomor HP terdaftar</label><input id="inputHpManual" class="field" type="tel" inputmode="numeric" autocomplete="tel" placeholder="Contoh: 081234567890" maxlength="18"></div>
+          <button id="btnCekManual" class="btn btn-primary" type="button" onclick="prosesCekSaldoManual()">Lihat Saldo Saya</button>
+          <button class="btn btn-secondary" style="margin-top:10px" type="button" onclick="bukaScanner()">Scan QR Nasabah</button>
+          <div class="privacy">🛡️ Nomor HP digunakan hanya untuk mencocokkan data tabungan pada unit yang dipilih.</div><div id="areaError"></div>
+          <button class="btn-link" style="margin-top:8px" onclick="layarBeranda()">← Kembali</button>
+        </div>`);
+      const hp=document.getElementById('inputHpManual');hp.addEventListener('keydown',e=>{if(e.key==='Enter')prosesCekSaldoManual()});
+    }catch(e){tampilkan(`<div class="card"><div class="error">Daftar unit belum dapat dimuat: ${esc(e.message||e)}</div><button class="btn btn-secondary" style="margin-top:12px" onclick="tampilkanModeManual()">Coba Lagi</button></div>`)}
+  }
+
+  function prosesCekSaldo(){const el=document.getElementById('inputHp');jalankanPencarian(el?el.value:'','btnCek')}
+  function prosesCekSaldoManual(){
+    const unit=document.getElementById('pilihUnitManual')?.value||'';
+    const hp=document.getElementById('inputHpManual')?.value||'';
+    if(!unit)return tampilkanError('Pilih Bank Sampah Unit terlebih dahulu.');
+    idUnitAktif=unit;idNasabahAktif='';
+    history.replaceState({},'',`${window.location.pathname}?unit=${encodeURIComponent(unit)}`);
+    jalankanPencarian(hp,'btnCekManual');
+  }
+
+  async function jalankanPencarian(nomorHp,idTombol){
+    const hp=normalisasiHp(nomorHp);
+    if(!hp)return tampilkanError('Nomor HP wajib diisi.');
+    const btn=document.getElementById(idTombol||'btnCek');
+    const teks=btn?btn.textContent:'';
+    if(btn){btn.disabled=true;btn.textContent='Memeriksa data...'}
+    try{
+      const res=await AdapterAPI.cekSaldoNasabahPublik({idUnit:idUnitAktif,nomorHp:hp,idNasabah:idNasabahAktif||null});
+      if(!res||res.ok!==true){tampilkanError(res?.error||'Data saldo tidak ditemukan.');return}
+      hasilPencarianSaatIni=res;
+      if(res.data.length===1)tampilkanHasil(res.unit,res.data[0]);else tampilkanPilihNasabah(res.unit,res.data);
+    }catch(e){tampilkanError('Terjadi kesalahan saat memuat saldo: '+(e.message||e))}
+    finally{if(btn){btn.disabled=false;btn.textContent=teks||'Lihat Saldo Saya'}}
+  }
+
+  function tampilkanPilihNasabah(unit,daftar){
+    const opsi=(daftar||[]).map((d,i)=>`<button class="person-option" onclick="tampilkanHasilDariIndex(${i})">👤 ${esc(samarkanNama(d.nasabah.nama))}</button>`).join('');
+    tampilkan(`<div class="card"><h2 class="card-title">Pilih nama nasabah</h2><p class="card-lead">Nomor HP ini digunakan oleh ${daftar.length} nasabah pada ${esc(unit?.nama||'unit ini')}.</p>${opsi}<button class="btn-link" onclick="tampilkanFormCek()">← Kembali</button></div>`)
+  }
+  function tampilkanHasilDariIndex(i){if(hasilPencarianSaatIni)tampilkanHasil(hasilPencarianSaatIni.unit,hasilPencarianSaatIni.data[i])}
+
+  function tampilkanHasil(unit,d){
+    const riwayat=(d.riwayat||[]).length?(d.riwayat||[]).map(t=>{
+      const nilai=Number(t.total)||0;const tarik=nilai<0;
+      return `<div class="history-item"><div class="history-main"><span class="badge ${tarik?'withdraw':''}">${tarik?'PENARIKAN':esc(t.jenis||'SETORAN')}</span><strong style="margin-top:6px">${tarik?'Penarikan saldo':esc(t.jenis||'Setoran sampah')}</strong><span>${formatTgl(t.tgl)}${!tarik&&Number(t.berat)?' · '+angka(t.berat)+' kg':''}</span></div><div class="history-amount ${tarik?'minus':'plus'}">${tarik?'-':'+'}${rp(Math.abs(nilai))}</div></div>`
+    }).join(''):`<div style="padding:23px 0;text-align:center;color:var(--muted);font-size:.76rem">Belum ada riwayat transaksi.</div>`;
+    tampilkan(`
+      <div class="card">
+        <div class="profile-line"><div class="avatar">👤</div><div><strong>${esc(d.nasabah.nama)}</strong><span>${esc(unit?.nama||'')}</span></div></div>
+        <div class="saldo-card"><div class="saldo-label">SALDO TABUNGAN SAAT INI</div><div class="saldo-value">${rp(d.saldo)}</div><div class="saldo-meta">Total sampah tertabung: ${angka(d.totalBeratSetor)} kg</div></div>
+        <h3 class="section-title">Riwayat Transaksi</h3><div class="history">${riwayat}</div>
+        <div class="button-stack" style="margin-top:16px"><button class="btn btn-dark" onclick="keluarDariAplikasi()">Selesai &amp; Bersihkan Layar</button><button class="btn btn-secondary" onclick="tampilkanFormCek()">Cek Nomor Lain</button></div>
+        <div class="privacy">🛡️ Demi privasi, gunakan tombol “Selesai & Bersihkan Layar” setelah selesai melihat saldo pada perangkat bersama.</div>
+      </div>`)
+  }
+
+  function keluarDariAplikasi(){
+    hasilPencarianSaatIni=null;idNasabahAktif='';
+    tampilkan(`<div class="card" style="text-align:center"><div style="font-size:46px;margin-bottom:8px">✓</div><h2 class="card-title">Selesai</h2><p class="card-lead">Informasi saldo telah dibersihkan dari layar.</p><button class="btn btn-primary" onclick="layarBeranda()">Kembali ke Beranda</button></div>`)
+  }
+
+  function ambilParameterQr(raw){
+    const nilai=String(raw||'').trim();if(!nilai)return null;
+    try{
+      const u=new URL(nilai,window.location.href);const unit=u.searchParams.get('unit');const nasabah=u.searchParams.get('nasabah')||'';
+      if(unit)return{unit,nasabah};
+    }catch(e){}
+    const m=nilai.match(/(?:^|[?&])unit=([^&]+)(?:.*?[?&]nasabah=([^&]+))?/i);
+    if(m)return{unit:decodeURIComponent(m[1]),nasabah:m[2]?decodeURIComponent(m[2]):''};
+    return null;
+  }
+
+  async function bukaScanner(){
+    const overlay=document.getElementById('scannerOverlay');const status=document.getElementById('scannerStatus');
+    overlay.classList.add('open');scannerAktif=true;
+    status.textContent='Menyiapkan kamera...';
+    if(!('BarcodeDetector' in window)){
+      status.innerHTML='Pemindai QR dalam aplikasi belum tersedia pada browser ini. Gunakan kamera bawaan HP untuk memindai QR, atau pilih unit secara manual.';
+      return;
     }
-    function samarkanNama(nama) {
-        if (!nama) return '-';
-        return nama.split(' ').map(kata => kata.length <= 2 ? kata : kata.slice(0, 2) + '*'.repeat(Math.max(1, kata.length - 2))).join(' ');
-    }
-    function tampilkan(html) { document.getElementById('areaUtama').innerHTML = html; }
-    function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-
-    // ================== LAYAR: MEMUAT ==================
-    function layarMemuat(pesan) {
-        tampilkan(`<div class="card-utama text-center"><div class="spinner-border text-primary mb-2"></div><p class="txt-muted mb-0">${pesan || 'Memuat...'}</p></div>`);
-    }
-
-    // ================== LAYAR: FORM CEK SALDO (mode Unit / mode Personal) ==================
-    async function tampilkanFormCek() {
-        if (!idUnitAktif) return tampilkanModeManual();
-
-        layarMemuat('Memuat info Bank Sampah Unit...');
-        let unit = await AdapterAPI.getInfoUnitPublik(idUnitAktif);
-        if (!unit) {
-            tampilkan(`<div class="card-utama"><div class="error-box">Bank Sampah Unit tidak ditemukan. Coba scan ulang QR-nya, atau hubungi petugas unit Anda.</div>
-                <button class="btn btn-link mt-2 p-0" onclick="tampilkanModeManual()">Pilih unit secara manual</button></div>`);
-            return;
-        }
-
-        let infoNasabah = null;
-        if (idNasabahAktif) {
-            infoNasabah = await AdapterAPI.getInfoNasabahRingkas(idUnitAktif, idNasabahAktif);
-        }
-
-        let judulKonteks = infoNasabah
-            ? `Halo, <b>${esc(samarkanNama(infoNasabah.nama))}</b>!<br><span class="txt-muted">Bank Sampah Unit: ${esc(unit.nama)}</span>`
-            : `<span class="txt-muted">Bank Sampah Unit</span><br><b style="font-size:1.15rem;">${esc(unit.nama)}</b>`;
-
-        tampilkan(`
-            <div class="card-utama">
-                <p style="line-height:1.5;">${judulKonteks}</p>
-                <p class="txt-muted" style="margin-bottom:14px;">
-                    Masukkan nomor HP Anda yang terdaftar di Bank Sampah Unit ini untuk melihat saldo &amp; rincian tabungan sampah.
-                </p>
-                <div class="mb-3">
-                    <input type="tel" id="inputHp" class="form-control" placeholder="Contoh: 081234567890" inputmode="numeric">
-                </div>
-                <button class="btn-utama" id="btnCek" onclick="prosesCekSaldo()"><i class="bi bi-search me-2"></i>CEK SALDO SAYA</button>
-                <div class="privacy-note"><i class="bi bi-shield-lock-fill"></i><span>Nomor HP digunakan hanya untuk verifikasi data tabungan pada unit yang dipilih.</span></div>
-                <div id="areaError"></div>
-                ${!idNasabahAktif ? '' : `<button class="btn btn-link txt-muted mt-2 p-0" onclick="idNasabahAktif=''; idUnitAktif='${esc(idUnitAktif)}'; tampilkanFormCek();">Bukan Anda? Cek dengan cara lain</button>`}
-            </div>
-        `);
-        document.getElementById('inputHp').addEventListener('keydown', (e) => { if (e.key === 'Enter') prosesCekSaldo(); });
-        document.getElementById('inputHp').focus();
-    }
-
-    // ================== LAYAR: MODE MANUAL (tanpa parameter URL sama sekali) ==================
-    async function tampilkanModeManual() {
-        layarMemuat('Memuat daftar Bank Sampah Unit...');
-        let daftar = await AdapterAPI.getDaftarUnitPublik();
-        let opsi = daftar.map(u => `<option value="${esc(u.id)}">${esc(u.nama)}</option>`).join('');
-        tampilkan(`
-            <div class="card-utama">
-                <p class="mb-2"><i class="bi bi-qr-code-scan"></i> Biasanya halaman ini dibuka lewat scan QR yang dipasang di lokasi Bank Sampah Unit.
-                Kalau Anda membuka langsung tanpa scan, silakan pilih unit Anda secara manual:</p>
-                <div class="mb-3">
-                    <label class="txt-muted mb-1 d-block">Bank Sampah Unit</label>
-                    <select id="pilihUnitManual" class="form-control">
-                        <option value="">-- Pilih Bank Sampah Unit --</option>
-                        ${opsi}
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <input type="tel" id="inputHpManual" class="form-control" placeholder="Nomor HP terdaftar" inputmode="numeric">
-                </div>
-                <button class="btn-utama" onclick="prosesCekSaldoManual()"><i class="bi bi-search me-2"></i>CEK SALDO SAYA</button>
-                <div class="privacy-note"><i class="bi bi-shield-lock-fill"></i><span>Nomor HP digunakan hanya untuk verifikasi data tabungan pada unit yang dipilih.</span></div>
-                <div id="areaError"></div>
-            </div>
-        `);
-    }
-
-    function prosesCekSaldoManual() {
-        let unit = document.getElementById('pilihUnitManual').value;
-        let hp = document.getElementById('inputHpManual').value;
-        if (!unit) return tampilkanError('Pilih Bank Sampah Unit terlebih dahulu.');
-        idUnitAktif = unit;
-        jalankanPencarian(hp);
-    }
-
-    function prosesCekSaldo() {
-        let hp = document.getElementById('inputHp').value;
-        jalankanPencarian(hp);
-    }
-
-    function tampilkanError(pesan) {
-        let el = document.getElementById('areaError');
-        if (el) el.innerHTML = `<div class="error-box">${esc(pesan)}</div>`;
-    }
-
-    // ================== PROSES PENCARIAN ==================
-    async function jalankanPencarian(nomorHp) {
-        nomorHp = (nomorHp || '').trim();
-        if (!nomorHp) return tampilkanError('Nomor HP wajib diisi.');
-
-        let btn = document.getElementById('btnCek');
-        if (btn) { btn.disabled = true; btn.innerText = 'Mencari...'; }
-
-        try {
-            let res = await AdapterAPI.cekSaldoNasabahPublik({ idUnit: idUnitAktif, nomorHp: nomorHp, idNasabah: idNasabahAktif || null });
-            if (!res.ok) { tampilkanError(res.error); return; }
-
-            hasilPencarianSaatIni = res;
-            if (res.data.length === 1) {
-                tampilkanHasil(res.unit, res.data[0]);
-            } else {
-                tampilkanPilihNasabah(res.unit, res.data);
+    if(!navigator.mediaDevices?.getUserMedia){status.textContent='Kamera tidak dapat diakses pada perangkat ini.';return}
+    try{
+      const detector=new BarcodeDetector({formats:['qr_code']});
+      scannerStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:1280}},audio:false});
+      const video=document.getElementById('videoScanner');video.srcObject=scannerStream;await video.play();status.textContent='Arahkan kamera ke QR. Pastikan QR terlihat jelas di dalam kotak.';
+      const deteksi=async()=>{
+        if(!scannerAktif)return;
+        try{
+          if(video.readyState>=2){
+            const hasil=await detector.detect(video);
+            if(hasil&&hasil.length){
+              const p=ambilParameterQr(hasil[0].rawValue);
+              if(p){
+                idUnitAktif=p.unit;idNasabahAktif=p.nasabah||'';
+                history.replaceState({},'',`${window.location.pathname}?unit=${encodeURIComponent(idUnitAktif)}${idNasabahAktif?'&nasabah='+encodeURIComponent(idNasabahAktif):''}`);
+                tutupScanner();tampilkanFormCek();return;
+              }
+              status.textContent='QR terbaca, tetapi bukan QR aplikasi Bank Sampah. Coba QR yang lain.';
             }
-        } catch (e) {
-            tampilkanError('Terjadi kesalahan: ' + e);
-        } finally {
-            if (btn) { btn.disabled = false; btn.innerText = 'CEK SALDO SAYA'; }
-        }
-    }
+          }
+        }catch(e){}
+        scannerFrameId=requestAnimationFrame(deteksi);
+      };
+      scannerFrameId=requestAnimationFrame(deteksi);
+    }catch(e){status.textContent='Kamera belum dapat dibuka. Periksa izin kamera pada browser, lalu coba lagi.'}
+  }
 
-    // Kalau satu nomor HP terdaftar untuk lebih dari satu nasabah (mis. satu keluarga)
-    function tampilkanPilihNasabah(unit, daftar) {
-        let opsi = daftar.map((d, i) => `<button class="pilih-nasabah-btn" onclick="tampilkanHasilDariIndex(${i})">👤 ${esc(samarkanNama(d.nasabah.nama))}</button>`).join('');
-        tampilkan(`
-            <div class="card-utama">
-                <p class="mb-3">Nomor HP ini terdaftar untuk <b>${daftar.length} nasabah</b> di ${esc(unit ? unit.nama : '')}. Pilih nama Anda:</p>
-                ${opsi}
-                <button class="btn btn-link txt-muted mt-1 p-0" onclick="tampilkanFormCek()">← Kembali</button>
-            </div>
-        `);
-    }
-    // ================== KELUAR (setelah selesai cek saldo) ==================
-    // Membersihkan seluruh data saldo/riwayat dari layar (demi privasi, terutama
-    // kalau halaman ini dibuka di HP yang dipakai bergantian), lalu mencoba
-    // menutup tab. window.close() cuma berhasil kalau tab ini dibuka lewat
-    // script (mis. dari menu Bagikan/scan QR di sebagian browser) -- browser
-    // modern sengaja tidak izinkan menutup tab hasil navigasi biasa. Kalau
-    // gagal ditutup, tampilkan layar "selesai" yang bersih tanpa data pribadi.
-    function keluarDariAplikasi() {
-        idNasabahAktif = ''; idUnitAktif = params.get('unit') || ''; hasilPencarianSaatIni = null;
+  function tutupScanner(){
+    scannerAktif=false;if(scannerFrameId)cancelAnimationFrame(scannerFrameId);scannerFrameId=null;
+    if(scannerStream){scannerStream.getTracks().forEach(t=>t.stop());scannerStream=null}
+    const video=document.getElementById('videoScanner');if(video)video.srcObject=null;
+    document.getElementById('scannerOverlay').classList.remove('open');
+  }
 
-        window.close();
+  window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;document.getElementById('btnInstall').style.display='block'});
+  document.getElementById('btnInstall').addEventListener('click',async()=>{if(!deferredInstallPrompt)return;deferredInstallPrompt.prompt();await deferredInstallPrompt.userChoice;deferredInstallPrompt=null;document.getElementById('btnInstall').style.display='none'});
+  window.addEventListener('appinstalled',()=>{document.getElementById('btnInstall').style.display='none'});
+  window.addEventListener('online',()=>document.body.classList.remove('offline'));
+  window.addEventListener('offline',()=>document.body.classList.add('offline'));
+  document.addEventListener('visibilitychange',()=>{if(document.hidden&&scannerAktif)tutupScanner()});
 
-        setTimeout(() => {
-            tampilkan(`
-                <div class="card-utama text-center">
-                    <div style="font-size:42px; margin-bottom:8px;">✅</div>
-                    <h5 style="font-weight:800; margin-bottom:6px;">Selesai</h5>
-                    <p class="txt-muted mb-1">Terima kasih sudah menggunakan layanan Cek Saldo Mandiri.</p>
-                    <p class="txt-muted" style="font-size:12px;">Anda bisa menutup tab/jendela ini sekarang.</p>
-                </div>
-            `);
-        }, 150);
-    }
+  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('sw-nasabah.js').catch(()=>{}))}
 
-    function tampilkanHasilDariIndex(i) {
-        tampilkanHasil(hasilPencarianSaatIni.unit, hasilPencarianSaatIni.data[i]);
-    }
-
-    // ================== LAYAR: HASIL SALDO ==================
-    function tampilkanHasil(unit, d) {
-        let riwayatHtml = d.riwayat.length
-            ? d.riwayat.map(t => {
-                let nilai = parseFloat(t.total) || 0;
-                let tarik = nilai < 0;
-                return `<div class="riwayat-item">
-                    <div>
-                        <div>${tarik ? '<span class="badge-tarik">PENARIKAN</span>' : `<span class="badge-jenis">${esc(t.jenis || 'Setoran')}</span>`}</div>
-                        <div class="txt-muted" style="margin-top:3px;">${formatTgl(t.tgl)} ${!tarik && t.berat ? '· ' + parseFloat(t.berat).toLocaleString('id-ID') + ' Kg' : ''}</div>
-                    </div>
-                    <div style="font-weight:800; color:${tarik ? '#991b1b' : '#166534'};">${tarik ? '-' : '+'}${rp(Math.abs(nilai))}</div>
-                </div>`;
-            }).join('')
-            : '<p class="txt-muted text-center py-3 mb-0">Belum ada riwayat transaksi.</p>';
-
-        tampilkan(`
-            <div class="card-utama">
-                <p class="txt-muted mb-1">${esc(unit ? unit.nama : '')}</p>
-                <h5 style="font-weight:800; margin-bottom:16px;">👤 ${esc(d.nasabah.nama)}</h5>
-
-                <div class="kartu-saldo">
-                    <div style="font-size:12.5px; opacity:0.9; margin-bottom:4px;">SALDO TABUNGAN SAAT INI</div>
-                    <div class="saldo-besar">${rp(d.saldo)}</div>
-                    <div style="font-size:12px; opacity:0.9; margin-top:6px;">Total sampah tertabung: ${(d.totalBeratSetor || 0).toLocaleString('id-ID')} Kg</div>
-                </div>
-
-                <h6 style="font-weight:800; margin-bottom:8px;">Rincian Transaksi</h6>
-                <div style="max-height:340px; overflow-y:auto;">${riwayatHtml}</div>
-
-                <button class="btn-utama" style="margin-top:16px; background:linear-gradient(135deg,#475569,#1e293b);" onclick="keluarDariAplikasi()"><i class="bi bi-box-arrow-right me-1"></i> Keluar</button>
-                <button class="btn btn-link txt-muted mt-2 p-0 d-block text-center w-100" onclick="idNasabahAktif=''; tampilkanFormCek();">← Cek nomor lain</button>
-            </div>
-        `);
-    }
-
-    // ================== MULAI ==================
-    window.onload = function() {
-        setTimeout(() => { // beri jeda singkat supaya AdapterAPI (deferred script) pasti sudah termuat
-            tampilkanFormCek();
-        }, 50);
-    };
+  window.addEventListener('load',()=>{
+    if(!navigator.onLine)document.body.classList.add('offline');
+    setTimeout(()=>{if(idUnitAktif)tampilkanFormCek();else layarBeranda()},80);
+  });
 </script>
 </body>
 </html>
