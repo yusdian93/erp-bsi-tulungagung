@@ -250,7 +250,7 @@
   function esc(v){return String(v == null ? '' : v).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
   function rp(v){return 'Rp ' + Math.round(Number(v)||0).toLocaleString('id-ID')}
   function angka(v){return (Number(v)||0).toLocaleString('id-ID')}
-  function formatTgl(v){const d=new Date(v);return isNaN(d.getTime())?String(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'})}
+    function formatTgl(v){const d=new Date(v);return isNaN(d.getTime())?String(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'})}
   function samarkanNama(nama){if(!nama)return '-';return String(nama).split(' ').map(k=>k.length<=2?k:k.slice(0,2)+'*'.repeat(Math.max(1,k.length-2))).join(' ')}
   function tampilkan(html){document.getElementById('areaUtama').innerHTML=html;window.scrollTo({top:0,behavior:'smooth'})}
   function tampilkanError(pesan){const el=document.getElementById('areaError');if(el)el.innerHTML=`<div class="error">${esc(pesan)}</div>`}

@@ -3590,7 +3590,7 @@
     function buatBroadcast() {
         let tglInput = document.getElementById('tglJadwal').value; let pesanTamb = document.getElementById('pesanTambahan').value;
         if(!tglInput) return alert("Harap isi Tanggal Pelaksanaan!");
-        let tglObj = new Date(tglInput); let opsiTgl = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }; let tglFormat = tglObj.toLocaleDateString('id-ID', opsiTgl);
+        let tglObj = new Date(tglInput); let tglFormat = tglObj.toLocaleDateString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric'});
         pesanBroadcastGlobal = `*PENGUMUMAN BANK SAMPAH*\n\nHalo Bapak/Ibu Warga,\nJadwal penyetoran Bank Sampah:\n\n📅 *Tanggal:* ${tglFormat}\n\n`;
         if (pesanTamb.trim() !== "") { pesanBroadcastGlobal += `📝 *Catatan:* ${pesanTamb}\n\n`; }
         pesanBroadcastGlobal += `Mari kita jaga kebersihan lingkungan! ♻️`;
@@ -3656,8 +3656,8 @@
     function transaksiAktif(rows){return (rows||[]).filter(t=>(t.status||'aktif')!=='dibatalkan');}
     function parseTanggalUnit(v){if(!v)return new Date(NaN);if(typeof parseTanggalFleksibel==='function')return parseTanggalFleksibel(v);const s=String(v);const m=s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);if(m)return new Date(+m[3],+m[2]-1,+m[1]);return new Date(s);}
     function tanggalKeMs(v){const d=parseTanggalUnit(v);return isNaN(d)?0:d.getTime();}
-    function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
-    function formatTanggalSaja(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});}
+    function formatTanggalTampil(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});}
+    function formatTanggalSaja(v){const d=parseTanggalUnit(v);return isNaN(d)?escapeHtml(v||'-'):d.toLocaleDateString('id-ID',{day:'2-digit',month:'2-digit',year:'numeric'});}
     function dalamRentang(v,mulai,akhir){const ms=tanggalKeMs(v);if(mulai&&ms<new Date(mulai+'T00:00:00').getTime())return false;if(akhir&&ms>new Date(akhir+'T23:59:59').getTime())return false;return true;}
     function transaksiMilikNasabah(t,n){return String(t.id_nasabah||'')===String(n.id)||String(t.id_nasabah_arsip||'')===String(n.id)||(!t.id_nasabah&&!t.id_nasabah_arsip&&String(t.nama||'').trim()===String(n.nama||'').trim());}
     function cariNasabahTransaksi(t){return dataNasabah.find(n=>transaksiMilikNasabah(t,n));}
@@ -4100,5 +4100,75 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script id="semuaTanggalFormatIndonesia">
+(function(){
+    const pasanganTanggal=[];
+    function ymdKeIndonesia(v){
+        const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        return m?`${m[3]}/${m[2]}/${m[1]}`:'';
+    }
+    function indonesiaKeYmd(v){
+        const m=String(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if(!m)return '';
+        const hari=Number(m[1]),bulan=Number(m[2]),tahun=Number(m[3]),d=new Date(tahun,bulan-1,hari);
+        if(d.getFullYear()!==tahun||d.getMonth()!==bulan-1||d.getDate()!==hari)return '';
+        return `${m[3]}-${m[2]}-${m[1]}`;
+    }
+    function beriGarisMiring(input){
+        const angka=String(input.value||'').replace(/\D/g,'').slice(0,8);
+        input.value=angka.length>4?`${angka.slice(0,2)}/${angka.slice(2,4)}/${angka.slice(4)}`:(angka.length>2?`${angka.slice(0,2)}/${angka.slice(2)}`:angka);
+    }
+    function aktifkanTanggalIndonesia(){
+        document.querySelectorAll('input[type="date"]:not([data-format-indonesia])').forEach(asli=>{
+            asli.dataset.formatIndonesia='1';
+            const tampilan=document.createElement('input');
+            tampilan.type='text';
+            tampilan.inputMode='numeric';
+            tampilan.maxLength=10;
+            tampilan.placeholder='DD/MM/YYYY';
+            tampilan.pattern='\\d{2}/\\d{2}/\\d{4}';
+            tampilan.className=asli.className;
+            if(asli.getAttribute('style'))tampilan.setAttribute('style',asli.getAttribute('style'));
+            if(asli.getAttribute('title'))tampilan.setAttribute('title',asli.getAttribute('title'));
+            tampilan.setAttribute('aria-label',(asli.getAttribute('aria-label')||'Tanggal')+' format DD/MM/YYYY');
+            tampilan.required=asli.required;
+            asli.required=false;
+            tampilan.disabled=asli.disabled;
+            tampilan.value=ymdKeIndonesia(asli.value);
+            asli.type='hidden';
+            asli.insertAdjacentElement('beforebegin',tampilan);
+            tampilan.addEventListener('input',()=>{
+                beriGarisMiring(tampilan);
+                const ymd=indonesiaKeYmd(tampilan.value);
+                tampilan.setCustomValidity(tampilan.value&&!ymd?'Tanggal tidak valid. Gunakan DD/MM/YYYY.':'');
+                if(ymd||!tampilan.value){
+                    asli.value=ymd;
+                    asli.dispatchEvent(new Event('input',{bubbles:true}));
+                }
+            });
+            tampilan.addEventListener('change',()=>{
+                const ymd=indonesiaKeYmd(tampilan.value);
+                if(tampilan.value&&!ymd){tampilan.setCustomValidity('Tanggal tidak valid. Gunakan DD/MM/YYYY.');tampilan.reportValidity();return;}
+                tampilan.setCustomValidity('');
+                asli.value=ymd;
+                asli.dispatchEvent(new Event('change',{bubbles:true}));
+            });
+            pasanganTanggal.push({asli,tampilan,wajib:tampilan.required});
+        });
+    }
+    function sinkronkanTanggal(){
+        pasanganTanggal.forEach(p=>{
+            p.tampilan.disabled=p.asli.disabled;
+            p.tampilan.required=p.wajib&&!p.asli.disabled;
+            if(document.activeElement!==p.tampilan){
+                const nilai=ymdKeIndonesia(p.asli.value);
+                if(p.tampilan.value!==nilai)p.tampilan.value=nilai;
+            }
+        });
+    }
+    function mulai(){aktifkanTanggalIndonesia();sinkronkanTanggal();setInterval(sinkronkanTanggal,120);}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mulai);else mulai();
+})();
+</script>
 </body>
 </html>

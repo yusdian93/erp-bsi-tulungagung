@@ -3386,7 +3386,7 @@
             .slice()
             .sort((a, b) => String(b.id).localeCompare(String(a.id))); // id mengandung timestamp -> urutan terbaru di atas
 
-        let tglHariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        let tglHariIni = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
         if(counter) counter.innerText = `${list.length} setoran tercatat • ${tglHariIni}`;
 
         if(list.length === 0) {
@@ -3598,7 +3598,7 @@
             .slice()
             .sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)); // terbaru diinput di atas
 
-        let tglHariIni = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        let tglHariIni = new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
         if(counter) counter.innerText = `${list.length} penjualan tercatat • ${tglHariIni}`;
 
         if(list.length === 0) {
@@ -4023,7 +4023,7 @@
         if (!globalHibah || globalHibah.length === 0) { tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada catatan bantuan/hibah</td></tr>'; return; }
         let terurut = globalHibah.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
         tbody.innerHTML = terurut.map(h => `<tr>
-            <td>${new Date(h.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${escHtml(h.sumber || '-')}</td>
+                    <td>${formatTglTabel(h.tanggal)}</td><td style="font-weight:700;">${escHtml(h.sumber || '-')}</td>
             <td>${escHtml(h.keterangan || '-')}</td><td class="text-right" style="color:var(--secondary); font-weight:700;">Rp ${parseFloat(h.jumlah).toLocaleString('id-ID')}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBantuanHibah('${escAttr(h.id)}')">🗑️</button></td>
         </tr>`).join('');
@@ -5080,7 +5080,7 @@
         }
 
         let tglObj = new Date(tglInput + 'T' + new Date().toTimeString().slice(0, 5));
-        let tglFormatted = tglObj.toLocaleDateString('id-ID') + ' ' + new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0');
+        let tglFormatted = formatTglTabel(tglObj) + ' ' + new Date().getHours().toString().padStart(2, '0') + ':' + new Date().getMinutes().toString().padStart(2, '0');
         let nomorTransaksi = genId('TRX-' + tglInput.replace(/-/g, ''));
 
         let btn = document.getElementById('btnSimpanTarikBSU');
@@ -5311,7 +5311,7 @@
         });
 
         tbody.innerHTML = baris.slice().reverse().map((b, i) => `<tr>
-            <td>${baris.length - i}</td><td>${new Date(b.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${b.jenis_biaya}</td>
+                <td>${baris.length - i}</td><td>${formatTglTabel(b.tanggal)}</td><td style="font-weight:700;">${b.jenis_biaya}</td>
             <td>${escHtml(b.keterangan || '-')}</td><td class="text-right" style="color:var(--danger); font-weight:700;">Rp ${parseFloat(b.jumlah).toLocaleString('id-ID')}</td>
             <td>${escHtml(b.disetujui_oleh || '-')}</td><td class="text-right" style="font-weight:800;">Rp ${b.saldoAkhir.toLocaleString('id-ID')}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusBiayaOperasional('${escAttr(b.id)}')">🗑️</button></td>
@@ -5353,7 +5353,7 @@
         tbody.innerHTML = terurut.map((p, i) => {
             let warnaJenis = p.jenis === 'Investasi Alat' ? 'var(--primary)' : '#b45309';
             return `<tr>
-                <td>${terurut.length - i}</td><td>${new Date(p.tanggal).toLocaleDateString('id-ID')}</td>
+                    <td>${terurut.length - i}</td><td>${formatTglTabel(p.tanggal)}</td>
                 <td style="color:${warnaJenis}; font-weight:700;">${escHtml(p.jenis)}</td><td style="font-weight:700;">${escHtml(p.nama_alat)}</td>
                 <td>${escHtml(p.keterangan || '-')}</td><td class="text-right" style="font-weight:700;">Rp ${parseFloat(p.biaya).toLocaleString('id-ID')}</td>
                 <td>${p.status || '-'}</td>
@@ -5486,7 +5486,7 @@
         if (y > 250) { doc.addPage(); y = 18; }
         y += 8;
         doc.setFont(undefined, 'normal'); doc.setFontSize(9);
-        doc.text('Tulungagung, ' + new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }), pageW - 75, y); y += 6;
+        doc.text('Tulungagung, ' + new Date().toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }), pageW - 75, y); y += 6;
         doc.text('Mengetahui,', pageW - 75, y); y += 22;
         doc.setFont(undefined, 'bold'); doc.text('( ................................... )', pageW - 75, y); y += 5;
         doc.setFont(undefined, 'normal'); doc.text('Admin Bank Sampah Induk', pageW - 75, y);
@@ -5685,7 +5685,7 @@
         renderTabelDokPeralatan();
         if ((globalAlat || []).length === 0) return alert('Belum ada data alat untuk dicetak.');
         let rows = globalAlat.map(a => [a.nama_alat, a.kode_alat || '-', a.jumlah, a.kondisi || '-', a.lokasi || '-', a.keterangan || '-']);
-        bukaPreviewDokumen('LAPORAN KONDISI PERALATAN DAN BARANG', 'Per ' + new Date().toLocaleDateString('id-ID'), [
+        bukaPreviewDokumen('LAPORAN KONDISI PERALATAN DAN BARANG', 'Per ' + formatTglTabel(new Date()), [
             { headers: ['Nama Alat', 'Kode', 'Jumlah', 'Kondisi', 'Lokasi', 'Keterangan'], rows }
         ]);
     }
@@ -5732,7 +5732,7 @@
         if ((globalPembinaan || []).length === 0) { tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">Belum ada catatan pembinaan</td></tr>'; return; }
         let terurut = globalPembinaan.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
         tbody.innerHTML = terurut.map(p => `<tr>
-            <td>${new Date(p.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${p.nama_bsu || '-'}</td>
+                    <td>${formatTglTabel(p.tanggal)}</td><td style="font-weight:700;">${p.nama_bsu || '-'}</td>
             <td>${p.jenis_pembinaan || '-'}</td><td>${escHtml(p.petugas || '-')}</td><td>${p.hasil_catatan || '-'}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPembinaan('${escAttr(p.id)}')">🗑️</button></td>
         </tr>`).join('');
@@ -5740,7 +5740,7 @@
 
     function cetakDokPembinaan() {
         let rows = (globalPembinaan || []).slice().sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)).map(p => [
-            new Date(p.tanggal).toLocaleDateString('id-ID'), p.nama_bsu || '-', p.jenis_pembinaan || '-', p.petugas || '-', p.hasil_catatan || '-'
+                formatTglTabel(p.tanggal), p.nama_bsu || '-', p.jenis_pembinaan || '-', p.petugas || '-', p.hasil_catatan || '-'
         ]);
         if (rows.length === 0) return alert('Belum ada data pembinaan untuk dicetak.');
         bukaPreviewDokumen('LAPORAN PEMBINAAN BANK SAMPAH UNIT', 'Seluruh Catatan Pembinaan', [
@@ -5786,7 +5786,7 @@
         if ((globalDarurat || []).length === 0) { tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">Belum ada catatan kejadian</td></tr>'; return; }
         let terurut = globalDarurat.slice().sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
         tbody.innerHTML = terurut.map(d => `<tr>
-            <td>${new Date(d.tanggal).toLocaleDateString('id-ID')}</td><td style="font-weight:700;">${escHtml(d.lokasi || '-')}</td>
+                    <td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${escHtml(d.lokasi || '-')}</td>
             <td>${d.jenis_kejadian || '-'}</td><td>${d.korban || '-'}</td><td>${d.kronologi || '-'}</td><td>${d.tindak_lanjut || '-'}</td>
             <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusKejadianDarurat('${escAttr(d.id)}')">🗑️</button></td>
         </tr>`).join('');
@@ -5794,7 +5794,7 @@
 
     function cetakDokDarurat() {
         let rows = (globalDarurat || []).slice().sort((a, b) => new Date(a.tanggal) - new Date(b.tanggal)).map(d => [
-            new Date(d.tanggal).toLocaleDateString('id-ID'), d.lokasi || '-', d.jenis_kejadian || '-', d.korban || '-', d.kronologi || '-', d.tindak_lanjut || '-'
+                formatTglTabel(d.tanggal), d.lokasi || '-', d.jenis_kejadian || '-', d.korban || '-', d.kronologi || '-', d.tindak_lanjut || '-'
         ]);
         if (rows.length === 0) return alert('Belum ada data kejadian untuk dicetak.');
         bukaPreviewDokumen('LAPORAN KECELAKAAN ATAU KEADAAN DARURAT', 'Seluruh Catatan Kejadian', [
@@ -6992,10 +6992,80 @@
       var tanggal = document.getElementById('premiumDate');
       if (tanggal) {
         tanggal.textContent = new Intl.DateTimeFormat('id-ID', {
-          weekday:'long', day:'2-digit', month:'long', year:'numeric'
+          day:'2-digit', month:'2-digit', year:'numeric'
         }).format(new Date());
       }
     });
   </script>
+<script id="semuaTanggalFormatIndonesia">
+(function(){
+    const pasanganTanggal=[];
+    function ymdKeIndonesia(v){
+        const m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        return m?`${m[3]}/${m[2]}/${m[1]}`:'';
+    }
+    function indonesiaKeYmd(v){
+        const m=String(v||'').trim().match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if(!m)return '';
+        const hari=Number(m[1]),bulan=Number(m[2]),tahun=Number(m[3]),d=new Date(tahun,bulan-1,hari);
+        if(d.getFullYear()!==tahun||d.getMonth()!==bulan-1||d.getDate()!==hari)return '';
+        return `${m[3]}-${m[2]}-${m[1]}`;
+    }
+    function beriGarisMiring(input){
+        const angka=String(input.value||'').replace(/\D/g,'').slice(0,8);
+        input.value=angka.length>4?`${angka.slice(0,2)}/${angka.slice(2,4)}/${angka.slice(4)}`:(angka.length>2?`${angka.slice(0,2)}/${angka.slice(2)}`:angka);
+    }
+    function aktifkanTanggalIndonesia(){
+        document.querySelectorAll('input[type="date"]:not([data-format-indonesia])').forEach(asli=>{
+            asli.dataset.formatIndonesia='1';
+            const tampilan=document.createElement('input');
+            tampilan.type='text';
+            tampilan.inputMode='numeric';
+            tampilan.maxLength=10;
+            tampilan.placeholder='DD/MM/YYYY';
+            tampilan.pattern='\\d{2}/\\d{2}/\\d{4}';
+            tampilan.className=asli.className;
+            if(asli.getAttribute('style'))tampilan.setAttribute('style',asli.getAttribute('style'));
+            if(asli.getAttribute('title'))tampilan.setAttribute('title',asli.getAttribute('title'));
+            tampilan.setAttribute('aria-label',(asli.getAttribute('aria-label')||'Tanggal')+' format DD/MM/YYYY');
+            tampilan.required=asli.required;
+            asli.required=false;
+            tampilan.disabled=asli.disabled;
+            tampilan.value=ymdKeIndonesia(asli.value);
+            asli.type='hidden';
+            asli.insertAdjacentElement('beforebegin',tampilan);
+            tampilan.addEventListener('input',()=>{
+                beriGarisMiring(tampilan);
+                const ymd=indonesiaKeYmd(tampilan.value);
+                tampilan.setCustomValidity(tampilan.value&&!ymd?'Tanggal tidak valid. Gunakan DD/MM/YYYY.':'');
+                if(ymd||!tampilan.value){
+                    asli.value=ymd;
+                    asli.dispatchEvent(new Event('input',{bubbles:true}));
+                }
+            });
+            tampilan.addEventListener('change',()=>{
+                const ymd=indonesiaKeYmd(tampilan.value);
+                if(tampilan.value&&!ymd){tampilan.setCustomValidity('Tanggal tidak valid. Gunakan DD/MM/YYYY.');tampilan.reportValidity();return;}
+                tampilan.setCustomValidity('');
+                asli.value=ymd;
+                asli.dispatchEvent(new Event('change',{bubbles:true}));
+            });
+            pasanganTanggal.push({asli,tampilan,wajib:tampilan.required});
+        });
+    }
+    function sinkronkanTanggal(){
+        pasanganTanggal.forEach(p=>{
+            p.tampilan.disabled=p.asli.disabled;
+            p.tampilan.required=p.wajib&&!p.asli.disabled;
+            if(document.activeElement!==p.tampilan){
+                const nilai=ymdKeIndonesia(p.asli.value);
+                if(p.tampilan.value!==nilai)p.tampilan.value=nilai;
+            }
+        });
+    }
+    function mulai(){aktifkanTanggalIndonesia();sinkronkanTanggal();setInterval(sinkronkanTanggal,120);}
+    if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',mulai);else mulai();
+})();
+</script>
 </body>
 </html>
