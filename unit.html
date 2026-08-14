@@ -1236,8 +1236,8 @@
                             <div class="mb-4"><label>Identitas Nasabah</label><select id="pilihNasabah" class="form-select" required onchange="onGantiNasabahSetor()"></select></div>
                             <div class="mb-4">
                                 <label>Tanggal Setoran (Tanggal / Bulan / Tahun)</label>
-                                <input type="date" id="tanggalSetoran" class="form-control" required onchange="renderKeranjangSetor()">
-                                <small class="text-muted">Pilih tanggal setoran yang sebenarnya. Tanggal ini akan tersimpan pada riwayat transaksi, laporan, saldo, dan stok.</small>
+                                <input type="text" id="tanggalSetoran" class="form-control" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required oninput="formatTanggalIndonesiaInput(this)" onchange="renderKeranjangSetor()">
+                                <small class="text-muted">Format Indonesia: DD/MM/YYYY, contoh 14/08/2026. Tanggal ini tersimpan pada riwayat transaksi, laporan, saldo, dan stok.</small>
                             </div>
                             <div class="mb-4">
                                 <label>Pilih Jenis Material</label>
@@ -1845,17 +1845,39 @@
         return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
     }
 
+    function tanggalIndonesia(d) {
+        const x = d instanceof Date && !isNaN(d) ? d : new Date();
+        return `${String(x.getDate()).padStart(2,'0')}/${String(x.getMonth()+1).padStart(2,'0')}/${x.getFullYear()}`;
+    }
+
+    function formatTanggalIndonesiaInput(input) {
+        const angka = String(input?.value || '').replace(/\D/g,'').slice(0,8);
+        input.value = angka.length > 4 ? `${angka.slice(0,2)}/${angka.slice(2,4)}/${angka.slice(4)}` : (angka.length > 2 ? `${angka.slice(0,2)}/${angka.slice(2)}` : angka);
+    }
+
+    function tanggalIndonesiaKeYmd(v) {
+        const s = String(v || '').trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if (!m) return '';
+        const hari=Number(m[1]),bulan=Number(m[2]),tahun=Number(m[3]);
+        const d=new Date(tahun,bulan-1,hari);
+        if(d.getFullYear()!==tahun||d.getMonth()!==bulan-1||d.getDate()!==hari)return '';
+        return `${m[3]}-${m[2]}-${m[1]}`;
+    }
+
     function setTanggalSetoranHariIni(force = false) {
         const input = document.getElementById('tanggalSetoran');
-        if (input && (force || !input.value)) input.value = tanggalLokalYmd(new Date());
+        if (input && (force || !input.value)) input.value = tanggalIndonesia(new Date());
     }
 
     function tanggalInputDariTransaksi(v) {
         const d = parseTanggalUnit(v);
-        return isNaN(d) ? tanggalLokalYmd(new Date()) : tanggalLokalYmd(d);
+        return isNaN(d) ? tanggalIndonesia(new Date()) : tanggalIndonesia(d);
     }
 
-    function isoTanggalSetoran(tanggalYmd, sumberWaktu) {
+    function isoTanggalSetoran(tanggalTampil, sumberWaktu) {
+        const tanggalYmd = tanggalIndonesiaKeYmd(tanggalTampil);
         const m = String(tanggalYmd || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
         if (!m) return '';
         // Simpan sebagai datetime lokal TANPA konversi UTC agar tanggal yang dipilih
@@ -1945,7 +1967,8 @@
         const tanggal = document.getElementById('editSetoranTanggal').value;
         if (!tanggal) return alert('Tanggal setoran wajib diisi.');
         const tglIso = isoTanggalSetoran(tanggal, itemsLama[0].tgl);
-        if (!tglIso || cekPeringatanPeriodeTerkunci(tglIso)) return;
+        if (!tglIso) return alert('Format tanggal tidak valid. Gunakan DD/MM/YYYY, contoh 14/08/2026.');
+        if (cekPeringatanPeriodeTerkunci(tglIso)) return;
 
         const idNasabah = document.getElementById('editSetoranNasabah').value;
         const nasabah = dataNasabah.find(n => String(n.id) === String(idNasabah));
@@ -3252,7 +3275,7 @@
         if (keranjangSetor.length === 0) { area.style.display = 'none'; tbody.innerHTML = ''; return; }
         area.style.display = 'block';
         const sk = skemaBagiHasilUnit();
-        const tanggalAcuan = document.getElementById('tanggalSetoran')?.value || tanggalLokalYmd(new Date());
+        const tanggalAcuan = tanggalIndonesiaKeYmd(document.getElementById('tanggalSetoran')?.value) || tanggalLokalYmd(new Date());
         const berlaku = sk.aktif && (!sk.mulai || tanggalAcuan >= String(sk.mulai).slice(0,10));
         const pn = berlaku ? sk.persenNasabah : 100;
         const pp = berlaku ? sk.persenPengelola : 0;
@@ -3287,7 +3310,8 @@
         const tanggalInput=document.getElementById('tanggalSetoran')?.value;
         if(!tanggalInput) return alert('Tanggal setoran wajib diisi.');
         const tgl=isoTanggalSetoran(tanggalInput,new Date());
-        if(!tgl || cekPeringatanPeriodeTerkunci(tgl)) return;
+        if(!tgl) return alert('Format tanggal tidak valid. Gunakan DD/MM/YYYY, contoh 14/08/2026.');
+        if(cekPeringatanPeriodeTerkunci(tgl)) return;
         const kelompokId=semuaItem.length>1?genId('GRP'):null;
         const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;btn.innerHTML='Memproses...';
         AdapterAPI.tambahSetoranBatchUnit({id_unit:CURRENT_UNIT_ID,id_nasabah:nasabah.id,nama:nasabah.nama,tgl,kelompok_id:kelompokId,oleh:getPetugasSesi(),items:semuaItem}).then(res=>{
@@ -3877,7 +3901,7 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-5">
                             <label>Tanggal Setoran (Tanggal / Bulan / Tahun)</label>
-                            <input type="date" id="editSetoranTanggal" class="form-control" required>
+                            <input type="text" id="editSetoranTanggal" class="form-control" inputmode="numeric" maxlength="10" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" required oninput="formatTanggalIndonesiaInput(this)">
                         </div>
                         <div class="col-md-7">
                             <label>Nasabah</label>
