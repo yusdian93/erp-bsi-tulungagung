@@ -1235,6 +1235,11 @@
                         <form id="formSetor" onsubmit="simpanSetoran(event)">
                             <div class="mb-4"><label>Identitas Nasabah</label><select id="pilihNasabah" class="form-select" required onchange="onGantiNasabahSetor()"></select></div>
                             <div class="mb-4">
+                                <label>Tanggal Setoran (Tanggal / Bulan / Tahun)</label>
+                                <input type="date" id="tanggalSetoran" class="form-control" required onchange="renderKeranjangSetor()">
+                                <small class="text-muted">Pilih tanggal setoran yang sebenarnya. Tanggal ini akan tersimpan pada riwayat transaksi, laporan, saldo, dan stok.</small>
+                            </div>
+                            <div class="mb-4">
                                 <label>Pilih Jenis Material</label>
                                 <select id="pilihJenisMaterialSetor" class="form-select" onchange="filterDropdownKategori()">
                                     <option value="" disabled selected>-- Klik Pilih Jenis Material --</option>
@@ -1281,10 +1286,10 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th style="min-width:180px;">Waktu Transaksi</th>
+                                <th style="min-width:180px;">Tanggal Setoran</th>
                                 <th style="min-width:420px;">Nasabah &amp; Rincian Material</th>
                                 <th style="min-width:180px;" class="text-end">Total Nominal</th>
-                                <th style="min-width:140px;" class="text-center">Aksi Struk</th>
+                                <th style="min-width:245px;" class="text-center">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="tabel-riwayat"></tbody>
@@ -1619,6 +1624,7 @@
         } catch (e) {}
 
         // Panggil database
+        setTanggalSetoranHariIni();
         loadDataDatabase();
     }
     // ==========================================================
@@ -1782,6 +1788,7 @@
                 </div>`;
             }).join('');
             const kunciAman = escAttrJs(encodeURIComponent(grup.kunci));
+            const setoranMurni = grup.items.every(t => String(t.level || '') === 'nasabah_ke_unit' && num(t.berat) > 0 && num(t.total) >= 0);
             return `<tr>
                 <td class="text-muted small" style="vertical-align:top;">${formatTanggalSaja(utama.tgl)}</td>
                 <td style="vertical-align:top;">
@@ -1793,8 +1800,11 @@
                     ${totalBerat>0?`<br><small class="text-muted fw-semibold">Saldo Nasabah · Total Berat: ${totalBerat.toFixed(2)} Kg</small>`:''}
                 </td>
                 <td class="text-center" style="vertical-align:top;">
-                    <button class="btn btn-sm btn-outline-danger" title="Cetak struk gabungan" onclick="cetakStrukRiwayat('${kunciAman}')"><i class="bi bi-printer"></i></button>
-                    <button class="btn btn-sm btn-outline-success" title="Kirim struk gabungan melalui WhatsApp" onclick="kirimWaStrukRiwayat('${kunciAman}')"><i class="bi bi-whatsapp"></i></button>
+                    <div class="d-flex flex-wrap justify-content-center gap-1">
+                        <button class="btn btn-sm btn-outline-danger" title="Cetak struk gabungan" onclick="cetakStrukRiwayat('${kunciAman}')"><i class="bi bi-printer"></i></button>
+                        <button class="btn btn-sm btn-outline-success" title="Kirim struk gabungan melalui WhatsApp" onclick="kirimWaStrukRiwayat('${kunciAman}')"><i class="bi bi-whatsapp"></i></button>
+                        ${setoranMurni ? `<button class="btn btn-sm btn-outline-primary" title="Edit setoran" onclick="bukaEditRiwayat('${kunciAman}')"><i class="bi bi-pencil-square"></i> Edit</button><button class="btn btn-sm btn-outline-danger" title="Hapus setoran" onclick="hapusRiwayatSetoran('${kunciAman}')"><i class="bi bi-trash3"></i> Hapus</button>` : ''}
+                    </div>
                 </td>
             </tr>`;
         }).join('') : `<tr><td colspan="4" class="empty-state"><i class="bi bi-inbox"></i>Belum ada aktivitas.</td></tr>`;
@@ -1828,6 +1838,166 @@
         return transaksiAktif(dataTransaksi)
             .filter(t => kunciRiwayatTransaksi(t) === kunci)
             .sort((a,b)=>tanggalKeMs(a.tgl)-tanggalKeMs(b.tgl));
+    }
+
+    function tanggalLokalYmd(d) {
+        const x = d instanceof Date && !isNaN(d) ? d : new Date();
+        return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+    }
+
+    function setTanggalSetoranHariIni(force = false) {
+        const input = document.getElementById('tanggalSetoran');
+        if (input && (force || !input.value)) input.value = tanggalLokalYmd(new Date());
+    }
+
+    function tanggalInputDariTransaksi(v) {
+        const d = parseTanggalUnit(v);
+        return isNaN(d) ? tanggalLokalYmd(new Date()) : tanggalLokalYmd(d);
+    }
+
+    function isoTanggalSetoran(tanggalYmd, sumberWaktu) {
+        const m = String(tanggalYmd || '').match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!m) return '';
+        // Simpan sebagai datetime lokal TANPA konversi UTC agar tanggal yang dipilih
+        // tidak bergeser sehari pada zona waktu Indonesia. Waktu tetap dipakai agar
+        // dua setoran nasabah yang sama pada tanggal yang sama tidak tergabung keliru.
+        const sumber = String(sumberWaktu || '');
+        const mt = sumber.match(/T(\d{2}):(\d{2})(?::(\d{2}))?/);
+        const sekarang = new Date();
+        const hh = mt ? mt[1] : String(sekarang.getHours()).padStart(2,'0');
+        const mm = mt ? mt[2] : String(sekarang.getMinutes()).padStart(2,'0');
+        const ss = mt && mt[3] ? mt[3] : String(sekarang.getSeconds()).padStart(2,'0');
+        return `${tanggalYmd}T${hh}:${mm}:${ss}`;
+    }
+
+    let modalEditSetoranInstance = null;
+    function getModalEditSetoran() {
+        const el = document.getElementById('modalEditSetoran');
+        if (!el || typeof bootstrap === 'undefined') return null;
+        modalEditSetoranInstance = bootstrap.Modal.getOrCreateInstance(el, { backdrop: 'static' });
+        return modalEditSetoranInstance;
+    }
+
+    function opsiMaterialEditSetoran(namaSaatIni, hargaSaatIni) {
+        const ada = dataKategori.some(k => String(k.nama_kategori) === String(namaSaatIni));
+        let html = '';
+        if (!ada && namaSaatIni) {
+            html += `<option value="${escapeHtmlAttr(namaSaatIni)}" data-harga="${num(hargaSaatIni)}" selected>${escapeHtml(namaSaatIni)} (riwayat)</option>`;
+        }
+        html += dataKategori.slice().sort((a,b)=>String(a.nama_kategori||'').localeCompare(String(b.nama_kategori||''))).map(k => {
+            const terpilih = String(k.nama_kategori) === String(namaSaatIni);
+            const hargaOpsi = terpilih ? num(hargaSaatIni) : num(k.harga);
+            return `<option value="${escapeHtmlAttr(k.nama_kategori)}" data-harga="${hargaOpsi}" ${terpilih?'selected':''}>${escapeHtml(k.nama_kategori)} — ${rupiah(hargaOpsi)}/Kg${terpilih && num(k.harga)!==num(hargaSaatIni)?' (harga transaksi)':''}</option>`;
+        }).join('');
+        return html;
+    }
+
+    function perbaruiHargaEditSetoran(selectEl) {
+        const row = selectEl?.closest('tr');
+        if (!row) return;
+        const opt = selectEl.options[selectEl.selectedIndex];
+        const harga = num(opt?.dataset?.harga);
+        row.dataset.harga = String(harga);
+        const el = row.querySelector('.edit-setoran-harga');
+        if (el) el.textContent = rupiah(harga) + '/Kg';
+    }
+
+    function bukaEditRiwayat(kunciTerenkode) {
+        const items = ambilItemRiwayat(kunciTerenkode);
+        if (!items.length) return alert('Data setoran tidak ditemukan.');
+        if (!items.every(t => String(t.level || '') === 'nasabah_ke_unit' && num(t.berat) > 0 && num(t.total) >= 0)) {
+            return alert('Tombol Edit hanya digunakan untuk koreksi setoran sampah.');
+        }
+        if (items.some(t => cekPeringatanPeriodeTerkunci(t.tgl))) return;
+
+        const utama = items[0];
+        const nSaatIni = cariNasabahTransaksi(utama);
+        const idSaatIni = String(utama.id_nasabah || nSaatIni?.id || '');
+        document.getElementById('editSetoranKunci').value = String(kunciTerenkode || '');
+        document.getElementById('editSetoranTanggal').value = tanggalInputDariTransaksi(utama.tgl);
+
+        const selNasabah = document.getElementById('editSetoranNasabah');
+        const semuaNasabah = dataNasabah.slice().sort((a,b)=>String(a.nama||'').localeCompare(String(b.nama||'')));
+        selNasabah.innerHTML = semuaNasabah.map(n => `<option value="${escapeHtmlAttr(n.id)}" ${String(n.id)===idSaatIni?'selected':''}>${escapeHtml(n.nama)} — ${escapeHtml(n.id)}${String(n.status||'aktif')==='nonaktif'?' (NONAKTIF)':''}</option>`).join('');
+        if (!selNasabah.value && semuaNasabah.length) selNasabah.value = semuaNasabah[0].id;
+
+        const tbody = document.getElementById('editSetoranItems');
+        tbody.innerHTML = items.map((t, idx) => {
+            const harga = hargaKotorBagiHasil(t);
+            return `<tr data-id="${escapeHtmlAttr(t.id)}" data-harga="${num(harga)}">
+                <td class="text-muted small align-middle">${idx+1}</td>
+                <td><select class="form-select form-select-sm edit-setoran-material" onchange="perbaruiHargaEditSetoran(this)">${opsiMaterialEditSetoran(t.jenis, harga)}</select></td>
+                <td><input type="number" class="form-control form-control-sm edit-setoran-berat" min="0.001" step="any" value="${num(t.berat)}" required></td>
+                <td class="edit-setoran-harga text-end small fw-bold align-middle">${rupiah(harga)}/Kg</td>
+            </tr>`;
+        }).join('');
+
+        const modal = getModalEditSetoran();
+        if (!modal) return alert('Komponen formulir edit belum siap. Muat ulang halaman lalu coba kembali.');
+        modal.show();
+    }
+
+    async function simpanEditRiwayat(e) {
+        e.preventDefault();
+        const kunci = document.getElementById('editSetoranKunci').value;
+        const itemsLama = ambilItemRiwayat(kunci);
+        if (!itemsLama.length) return alert('Data setoran tidak ditemukan atau sudah berubah.');
+        const tanggal = document.getElementById('editSetoranTanggal').value;
+        if (!tanggal) return alert('Tanggal setoran wajib diisi.');
+        const tglIso = isoTanggalSetoran(tanggal, itemsLama[0].tgl);
+        if (!tglIso || cekPeringatanPeriodeTerkunci(tglIso)) return;
+
+        const idNasabah = document.getElementById('editSetoranNasabah').value;
+        const nasabah = dataNasabah.find(n => String(n.id) === String(idNasabah));
+        if (!nasabah) return alert('Nasabah tidak ditemukan.');
+
+        const rows = Array.from(document.querySelectorAll('#editSetoranItems tr[data-id]'));
+        const items = rows.map(row => {
+            const material = row.querySelector('.edit-setoran-material');
+            const berat = num(row.querySelector('.edit-setoran-berat')?.value);
+            const harga = num(material?.options?.[material.selectedIndex]?.dataset?.harga ?? row.dataset.harga);
+            return { id: row.dataset.id, jenis: material?.value || '', berat, harga_kotor: harga };
+        });
+        if (!items.length || items.some(x => !x.id || !x.jenis || x.berat <= 0 || x.harga_kotor < 0)) {
+            return alert('Periksa kembali material, berat, dan harga setoran.');
+        }
+
+        const btn = document.getElementById('btnSimpanEditSetoran');
+        const awal = btn.innerHTML; btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Menyimpan...';
+        try {
+            const res = await AdapterAPI.updateSetoranBatchUnit({ id_unit: CURRENT_UNIT_ID, id_nasabah: nasabah.id, nama: nasabah.nama, tgl: tglIso, items, oleh: getPetugasSesi() });
+            if (!String(res).toLowerCase().includes('sukses')) throw new Error(String(res));
+            getModalEditSetoran()?.hide();
+            alert('Setoran berhasil diperbarui. Saldo, nilai operasional, stok, dan laporan sudah dihitung ulang.');
+            await loadDataDatabase();
+        } catch (err) {
+            alert('Gagal memperbarui setoran: ' + (err?.message || err));
+        } finally {
+            btn.disabled = false; btn.innerHTML = awal;
+        }
+    }
+
+    async function hapusRiwayatSetoran(kunciTerenkode) {
+        const items = ambilItemRiwayat(kunciTerenkode);
+        if (!items.length) return alert('Data setoran tidak ditemukan.');
+        if (!items.every(t => String(t.level || '') === 'nasabah_ke_unit' && num(t.berat) > 0 && num(t.total) >= 0)) {
+            return alert('Tombol Hapus hanya digunakan untuk koreksi setoran sampah.');
+        }
+        if (items.some(t => cekPeringatanPeriodeTerkunci(t.tgl))) return;
+        const nama = cariNasabahTransaksi(items[0])?.nama || items[0].nama || '-';
+        const totalKg = items.reduce((a,t)=>a+num(t.berat),0);
+        const totalRp = items.reduce((a,t)=>a+num(t.total),0);
+        if (!confirm(`Hapus permanen setoran ${nama}\n${items.length} material · ${totalKg.toFixed(2)} Kg · ${rupiah(totalRp)}?\n\nData akan hilang dari saldo, stok, dan laporan, tetapi jejak penghapusan tetap dicatat di Audit Log.`)) return;
+        const frasa = prompt('Untuk mengonfirmasi, ketik: HAPUS SETORAN');
+        if (frasa !== 'HAPUS SETORAN') return alert('Penghapusan dibatalkan.');
+        try {
+            const res = await AdapterAPI.deleteSetoranBatchUnit({ id_unit: CURRENT_UNIT_ID, ids: items.map(t=>t.id), oleh: getPetugasSesi() });
+            if (!String(res).toLowerCase().includes('sukses')) throw new Error(String(res));
+            alert('Setoran berhasil dihapus. Saldo, stok, dan laporan telah diperbarui.');
+            await loadDataDatabase();
+        } catch (err) {
+            alert('Gagal menghapus setoran: ' + (err?.message || err));
+        }
     }
 
     function cetakStrukRiwayat(kunciTerenkode) {
@@ -3081,8 +3251,8 @@
         if (keranjangSetor.length === 0) { area.style.display = 'none'; tbody.innerHTML = ''; return; }
         area.style.display = 'block';
         const sk = skemaBagiHasilUnit();
-        const hariIni = new Date().toISOString().slice(0,10);
-        const berlaku = sk.aktif && (!sk.mulai || hariIni >= String(sk.mulai).slice(0,10));
+        const tanggalAcuan = document.getElementById('tanggalSetoran')?.value || tanggalLokalYmd(new Date());
+        const berlaku = sk.aktif && (!sk.mulai || tanggalAcuan >= String(sk.mulai).slice(0,10));
         const pn = berlaku ? sk.persenNasabah : 100;
         const pp = berlaku ? sk.persenPengelola : 0;
         tbody.innerHTML = keranjangSetor.map((it, i) => {
@@ -3113,13 +3283,15 @@
         const itemSaatIni=ambilItemFormSetorSaatIni();
         const semuaItem=keranjangSetor.slice(); if(itemSaatIni) semuaItem.push(itemSaatIni);
         if(!semuaItem.length) return alert('Lengkapi minimal satu material.');
-        const now=new Date(); const tgl=now.toISOString();
-        if(cekPeringatanPeriodeTerkunci(tgl)) return;
+        const tanggalInput=document.getElementById('tanggalSetoran')?.value;
+        if(!tanggalInput) return alert('Tanggal setoran wajib diisi.');
+        const tgl=isoTanggalSetoran(tanggalInput,new Date());
+        if(!tgl || cekPeringatanPeriodeTerkunci(tgl)) return;
         const kelompokId=semuaItem.length>1?genId('GRP'):null;
         const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;btn.innerHTML='Memproses...';
         AdapterAPI.tambahSetoranBatchUnit({id_unit:CURRENT_UNIT_ID,id_nasabah:nasabah.id,nama:nasabah.nama,tgl,kelompok_id:kelompokId,oleh:getPetugasSesi(),items:semuaItem}).then(res=>{
             if(!String(res).includes('Sukses')) throw new Error(res);
-            alert(`Setoran berhasil disimpan (${semuaItem.length} material).`);keranjangSetor=[];renderKeranjangSetor();e.target.reset();updateDropdownKategori();loadDataDatabase();
+            alert(`Setoran berhasil disimpan (${semuaItem.length} material).`);keranjangSetor=[];renderKeranjangSetor();e.target.reset();setTanggalSetoranHariIni(true);updateDropdownKategori();loadDataDatabase();
         }).catch(err=>alert('Gagal menyimpan: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-save-check me-2"></i>Proses Semua Setoran & Cetak Struk';});
     }
 
@@ -3671,6 +3843,51 @@
     }
 </script>
 
+
+<!-- ===== MODAL EDIT SETORAN ===== -->
+<div class="modal fade" id="modalEditSetoran" tabindex="-1" aria-labelledby="judulModalEditSetoran" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content" style="border:0; border-radius:24px; overflow:hidden; box-shadow:0 28px 75px rgba(2,44,34,.28);">
+            <form id="formEditSetoran" onsubmit="simpanEditRiwayat(event)">
+                <input type="hidden" id="editSetoranKunci">
+                <div class="modal-header text-white" style="background:linear-gradient(120deg,#064e3b,#0f766e); border:0; padding:22px 25px;">
+                    <div>
+                        <div class="small text-uppercase fw-bold" style="letter-spacing:1.4px; color:#a7f3d0;">Koreksi Transaksi</div>
+                        <h5 class="modal-title fw-bold mt-1" id="judulModalEditSetoran"><i class="bi bi-pencil-square me-2"></i>Edit Setoran Sampah</h5>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body p-4 p-md-5">
+                    <div class="alert alert-info border-info small">
+                        Perubahan akan menghitung ulang saldo nasabah, bagian operasional pengelola, stok material, dan laporan. Periode yang sudah tutup buku tidak dapat diubah.
+                    </div>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-5">
+                            <label>Tanggal Setoran (Tanggal / Bulan / Tahun)</label>
+                            <input type="date" id="editSetoranTanggal" class="form-control" required>
+                        </div>
+                        <div class="col-md-7">
+                            <label>Nasabah</label>
+                            <select id="editSetoranNasabah" class="form-select" required></select>
+                        </div>
+                    </div>
+                    <label class="fw-bold mb-2">Rincian Material</label>
+                    <div class="table-responsive">
+                        <table class="table table-bordered align-middle mb-0">
+                            <thead class="table-light"><tr><th style="width:55px;">No.</th><th style="min-width:280px;">Material</th><th style="min-width:150px;">Berat (Kg)</th><th style="min-width:160px;" class="text-end">Harga Dasar</th></tr></thead>
+                            <tbody id="editSetoranItems"></tbody>
+                        </table>
+                    </div>
+                    <div class="small text-muted mt-3"><i class="bi bi-info-circle me-1"></i>Jika jenis material diganti, sistem memakai harga material yang berlaku pada master harga saat ini. Jika hanya berat yang diperbaiki, harga dasar transaksi lama tetap dipertahankan selama material tidak diganti.</div>
+                </div>
+                <div class="modal-footer border-0 px-4 px-md-5 pb-4 pb-md-5 pt-0">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal"><i class="bi bi-x-circle me-2"></i>Batal</button>
+                    <button type="submit" class="btn btn-success px-4" id="btnSimpanEditSetoran"><i class="bi bi-check2-circle me-2"></i>Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- ===== MODAL EDIT NASABAH ===== -->
 <div class="modal fade" id="modalEditNasabah" tabindex="-1" aria-labelledby="judulModalEditNasabah" aria-hidden="true">

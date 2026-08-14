@@ -977,6 +977,105 @@ const AdapterAPI = {
     return 'Sukses: ' + rows.length + ' item tersimpan';
   },
 
+  // Koreksi satu setoran (bisa terdiri dari beberapa material) dari menu Riwayat Transaksi BSU.
+  // Nilai keuangan dihitung ulang agar saldo, bagi hasil, stok dan laporan tetap konsisten.
+  async updateSetoranBatchUnit({ id_unit, id_nasabah, nama, tgl, items, oleh }) {
+    if (!id_unit || !tgl || !Array.isArray(items) || !items.length) return 'Gagal: Data koreksi setoran tidak lengkap.';
+    const ids = [...new Set(items.map(x => String(x.id || '')).filter(Boolean))];
+    if (!ids.length || ids.length !== items.length) return 'Gagal: ID transaksi setoran tidak valid.';
+
+    const { data: lamaRows, error: errBaca } = await sb.from('transaksi').select('*').in('id', ids);
+    if (errBaca) return 'Gagal: ' + errBaca.message;
+    if (!lamaRows || lamaRows.length !== ids.length) return 'Gagal: Sebagian data setoran tidak ditemukan.';
+    if (lamaRows.some(r => String(r.id_unit) !== String(id_unit) || String(r.level) !== 'nasabah_ke_unit')) {
+      return 'Gagal: Transaksi bukan setoran milik Bank Sampah Unit ini.';
+    }
+    if (lamaRows.some(r => String(r.status || 'aktif').toLowerCase() === 'dibatalkan')) {
+      return 'Gagal: Transaksi yang sudah dibatalkan tidak dapat diedit.';
+    }
+
+    for (const lama of lamaRows) {
+      const kunciLama = await cekPeriodeTerkunci(lama.tgl);
+      if (kunciLama) return pesanPeriodeTerkunci(kunciLama);
+    }
+    const kunciBaru = await cekPeriodeTerkunci(tgl);
+    if (kunciBaru) return pesanPeriodeTerkunci(kunciBaru);
+
+    const skema = await this.getSkemaBagiHasilUnit(id_unit);
+    const tglSingkat = String(tgl || '').slice(0, 10);
+    const mulai = String(skema.bagi_hasil_mulai || '').slice(0, 10);
+    const berlaku = skema.bagi_hasil_aktif === true && (!mulai || !tglSingkat || tglSingkat >= mulai);
+    const persenNasabah = berlaku ? (Number.isFinite(Number(skema.persen_nasabah)) ? Number(skema.persen_nasabah) : 85) : 100;
+    const persenPengelola = berlaku ? (Number.isFinite(Number(skema.persen_pengelola)) ? Number(skema.persen_pengelola) : 15) : 0;
+    const itemMap = new Map(items.map(x => [String(x.id), x]));
+    const petugas = oleh || getPetugasSesi();
+
+    const rowsUpdate = lamaRows.map(lama => {
+      const item = itemMap.get(String(lama.id));
+      const berat = Number(item.berat) || 0;
+      const hargaKotor = Number(item.harga_kotor) || 0;
+      if (!item.jenis || berat <= 0 || hargaKotor < 0) throw new Error('Material, berat, atau harga tidak valid.');
+      const nilaiKotor = Math.round(berat * hargaKotor);
+      const nilaiNasabah = Math.round(nilaiKotor * persenNasabah / 100);
+      const nilaiPengelola = nilaiKotor - nilaiNasabah;
+      return {
+        id: lama.id,
+        id_unit,
+        level: 'nasabah_ke_unit',
+        id_nasabah: id_nasabah || null,
+        nama,
+        tgl,
+        jenis: String(item.jenis).trim(),
+        berat,
+        harga_satuan: berat ? nilaiNasabah / berat : 0,
+        total: nilaiNasabah,
+        harga_kotor: hargaKotor,
+        nilai_kotor: nilaiKotor,
+        persen_nasabah: persenNasabah,
+        nilai_nasabah: nilaiNasabah,
+        persen_pengelola: persenPengelola,
+        nilai_pengelola: nilaiPengelola,
+        kelompok_id: lama.kelompok_id || null,
+        status: lama.status || 'aktif',
+        created_by: lama.created_by || petugas
+      };
+    });
+
+    let error;
+    try {
+      ({ error } = await sb.from('transaksi').upsert(rowsUpdate, { onConflict: 'id' }));
+    } catch (e) {
+      return 'Gagal: ' + (e?.message || e);
+    }
+    if (error) return 'Gagal: ' + error.message;
+    rowsUpdate.forEach(row => {
+      const lama = lamaRows.find(x => String(x.id) === String(row.id));
+      logAudit('transaksi', row.id, 'update', lama || null, { ...(lama || {}), ...row }, 'Koreksi setoran BSU oleh ' + petugas);
+    });
+    return 'Sukses: ' + rowsUpdate.length + ' item diperbarui';
+  },
+
+  // Penghapusan permanen setoran yang salah input. Audit log tetap menyimpan data lama.
+  async deleteSetoranBatchUnit({ id_unit, ids, oleh }) {
+    const daftarId = [...new Set((ids || []).map(x => String(x || '')).filter(Boolean))];
+    if (!id_unit || !daftarId.length) return 'Gagal: Data penghapusan setoran tidak lengkap.';
+    const { data: lamaRows, error: errBaca } = await sb.from('transaksi').select('*').in('id', daftarId);
+    if (errBaca) return 'Gagal: ' + errBaca.message;
+    if (!lamaRows || lamaRows.length !== daftarId.length) return 'Gagal: Sebagian data setoran tidak ditemukan.';
+    if (lamaRows.some(r => String(r.id_unit) !== String(id_unit) || String(r.level) !== 'nasabah_ke_unit')) {
+      return 'Gagal: Transaksi bukan setoran milik Bank Sampah Unit ini.';
+    }
+    for (const lama of lamaRows) {
+      const kunci = await cekPeriodeTerkunci(lama.tgl);
+      if (kunci) return pesanPeriodeTerkunci(kunci);
+    }
+    const { error } = await sb.from('transaksi').delete().eq('id_unit', id_unit).in('id', daftarId);
+    if (error) return 'Gagal: ' + error.message;
+    const petugas = oleh || getPetugasSesi();
+    lamaRows.forEach(lama => logAudit('transaksi', lama.id, 'delete', lama, null, 'Setoran salah input dihapus oleh ' + petugas));
+    return 'Sukses: ' + lamaRows.length + ' item dihapus';
+  },
+
   async tambahPengirimanBatchBSI({ id_unit, nama, tgl, no_dokumen, biaya_angkut, catatan, items, kelompok_id, oleh }) {
     const kunci = await cekPeriodeTerkunci(tgl);
     if (kunci) return { ok:false, error:pesanPeriodeTerkunci(kunci) };
