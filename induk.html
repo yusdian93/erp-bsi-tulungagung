@@ -2887,11 +2887,7 @@
             </div>
             <input type="hidden" id="editBsuId">
             <div class="form-group"><label>Nama BSU</label><input type="text" id="editBsuNama" class="form-control" required></div>
-            <div class="form-group"><label>Kata Sandi Admin BSU</label><input type="text" id="editBsuPasswordAdmin" class="form-control"></div>
-            <div class="form-group"><label>Kata Sandi Operator</label><input type="text" id="editBsuPasswordOperator" class="form-control"></div>
-            <div class="form-group"><label>Kata Sandi Bendahara</label><input type="text" id="editBsuPasswordBendahara" class="form-control"></div>
-            <div style="margin:-4px 0 15px;padding:10px 12px;border-radius:10px;background:#fef2f2;color:#991b1b;font-size:11.5px;line-height:1.5;">⚠️ Kolom yang sudah tampil sebagai kode acak panjang (diawali <code>pbkdf2$</code>) artinya password SUDAH di-hash (aman, tidak bisa dibaca ulang). <b>Jangan diedit sebagian</b> — biarkan persis apa adanya kalau tidak ingin diubah, atau HAPUS SELURUHNYA lalu ketik password baru kalau ingin menggantinya.</div>
-            <div style="margin:-4px 0 15px;padding:10px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:11.5px;line-height:1.5;">Semua akun memakai ID BSU yang sama. Pengguna memilih jenis akses pada halaman login.</div>
+            <div style="margin:-4px 0 15px;padding:10px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:11.5px;line-height:1.5;">Kata sandi dikelola terpisah melalui tombol <b>Reset Password</b> pada tabel BSU.</div>
             <div class="form-group" style="padding:12px 13px;border-radius:11px;background:#fff7ed;border:1px solid #fdba74;">
                 <label style="display:flex;align-items:flex-start;gap:9px;cursor:pointer;margin:0;">
                     <input type="checkbox" id="editBsuModeLatihan" style="width:18px;height:18px;margin-top:2px;">
@@ -2906,6 +2902,22 @@
             <div class="form-group"><label>Alamat Lengkap</label><input type="text" id="editBsuAlamat" class="form-control"></div>
             <div class="form-group"><label>Koordinat (opsional)</label><input type="text" id="editBsuKoordinat" class="form-control"></div>
             <button type="button" class="btn-submit" id="btnSimpanEditBsu" onclick="simpanEditBsu()">SIMPAN PERUBAHAN</button>
+        </div>
+    </div>
+
+    <div id="modalResetPasswordBsu" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-box-header"><h3>Reset Password BSU</h3><button type="button" class="modal-close-btn" onclick="tutupModalResetPasswordBsu()">&times;</button></div>
+            <input type="hidden" id="resetPasswordBsuId">
+            <div style="margin-bottom:14px;padding:11px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:12px;line-height:1.5;">ID akun: <b id="resetPasswordBsuIdLabel"></b>. Masukkan password baru untuk setiap jenis akses. Setelah disimpan, password akan tetap terlihat pada Portal Induk.</div>
+            <div class="form-group"><label>Password Baru Admin BSU</label><input type="text" id="resetPasswordAdmin" class="form-control" autocomplete="new-password" minlength="6"></div>
+            <div class="form-group"><label>Password Baru Operator</label><input type="text" id="resetPasswordOperator" class="form-control" autocomplete="new-password" minlength="6"></div>
+            <div class="form-group"><label>Password Baru Bendahara</label><input type="text" id="resetPasswordBendahara" class="form-control" autocomplete="new-password" minlength="6"></div>
+            <hr style="border:0;border-top:1px solid #e2e8f0;margin:18px 0;">
+            <div class="form-group"><label>Username Super Admin</label><input type="text" id="resetPasswordAdminUser" class="form-control" autocomplete="username"></div>
+            <div class="form-group"><label>Password Super Admin (verifikasi)</label><input type="password" id="resetPasswordAdminPass" class="form-control" autocomplete="current-password"></div>
+            <button type="button" class="btn-submit" id="btnResetPasswordBsu" onclick="simpanResetPasswordBsu()">RESET PASSWORD</button>
+            <div id="hasilResetPasswordBsu" style="display:none;margin-top:16px;padding:13px;border-radius:10px;background:#dcfce7;color:#14532d;font-size:12px;line-height:1.7;"></div>
         </div>
     </div>
 
@@ -4241,6 +4253,13 @@
 
     function dataBsuById(id) { return globalNasabah.find(x => String(x.id) === String(id)); }
 
+    function tampilPasswordBsu(nilai) {
+        const v = String(nilai || '');
+        if (!v) return '<span style="color:#94a3b8;">-</span>';
+        if (v.startsWith('pbkdf2$')) return '<span style="color:#b45309;" title="Password lama tidak dapat dikembalikan. Gunakan Reset Password.">(lama ter-hash — reset)</span>';
+        return escHtml(v);
+    }
+
 
     function normalisasiHakAksesBsu(nilai) {
         const kode = String(nilai || 'ADMIN_BSU').trim().toUpperCase();
@@ -4262,46 +4281,46 @@
         return `<span style="display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:10.5px;font-weight:800;${gaya}">${labelHakAksesBsu(kode)}</span>`;
     }
 
-    function waKirimKredensialBsu(id) {
-        let n = globalNasabah.find(x => String(x.id) === String(id));
+    function bukaModalResetPasswordBsu(id) {
+        const n = globalNasabah.find(x => String(x.id) === String(id));
         if(!n) return alert('Data BSU tidak ditemukan.');
+        document.getElementById('resetPasswordBsuId').value = n.id;
+        document.getElementById('resetPasswordBsuIdLabel').textContent = n.id;
+        ['resetPasswordAdmin','resetPasswordOperator','resetPasswordBendahara','resetPasswordAdminUser','resetPasswordAdminPass'].forEach(k => document.getElementById(k).value = '');
+        const hasil = document.getElementById('hasilResetPasswordBsu'); hasil.style.display = 'none'; hasil.innerHTML = '';
+        document.getElementById('modalResetPasswordBsu').classList.add('show');
+    }
 
-        // KEAMANAN: sejak pembaruan keamanan, password disimpan dalam bentuk hash
-        // (satu arah, tidak bisa dibaca ulang -- ini memang tujuan hashing). Kalau
-        // kredensial unit ini sudah ter-hash, TIDAK BISA dikirim apa adanya lewat WA
-        // (isinya akan berupa teks acak, bukan password asli, dan tidak akan bisa
-        // dipakai login). Admin harus mengatur PASSWORD BARU dulu lewat tombol Edit,
-        // baru kirim password baru itu ke unit.
-        const adaYangHash = [n.password_admin, n.password_operator, n.password_bendahara]
-            .some(p => typeof p === 'string' && p.startsWith('pbkdf2$'));
-        if (adaYangHash) {
-            alert('Kata sandi akun ini sudah di-hash (tidak bisa ditampilkan ulang demi keamanan).\n\nUntuk mengirim kredensial ke unit ini, klik tombol "Edit" terlebih dahulu, isi KATA SANDI BARU pada ketiga kolom akun, simpan, lalu gunakan kata sandi baru tersebut untuk diberikan ke unit.');
-            return;
-        }
+    function tutupModalResetPasswordBsu() {
+        document.getElementById('modalResetPasswordBsu').classList.remove('show');
+        ['resetPasswordAdmin','resetPasswordOperator','resetPasswordBendahara','resetPasswordAdminPass'].forEach(k => document.getElementById(k).value = '');
+        const hasil = document.getElementById('hasilResetPasswordBsu'); hasil.style.display = 'none'; hasil.innerHTML = '';
+    }
 
-        let pesan = `*DATA AKUN BANK SAMPAH UNIT*
-Bank Sampah Induk - DLH Kab. Tulungagung
-
-ID Register (sama untuk semua akun): ${n.id}
-
-Admin BSU: ${n.password_admin || n.password || '-'}
-Operator: ${n.password_operator || '-'}
-Bendahara: ${n.password_bendahara || '-'}
-
-Pada halaman login, pilih jenis akses sesuai akun yang digunakan.
-Nama BSU: ${escHtml(n.nama)}${n.mode_latihan === true ? ' (MODE LATIHAN)' : ''}
-Ketua: ${escHtml(n.ketua)}
-Kontak WA: ${escHtml(n.hp)}
-Desa: ${escHtml(n.desa)}
-Kecamatan: ${escHtml(n.kecamatan)}
-
-Simpan data ini baik-baik untuk login ke sistem.`;
-
-        let hp = String(n.hp || '').replace(/[^0-9]/g, '');
-        if(hp.startsWith('0')) hp = '62' + hp.slice(1);
-
-        let url = hp ? `https://wa.me/${hp}?text=${encodeURIComponent(pesan)}` : `https://wa.me/?text=${encodeURIComponent(pesan)}`;
-        window.open(url, '_blank');
+    async function simpanResetPasswordBsu() {
+        const form = {
+            id: document.getElementById('resetPasswordBsuId').value,
+            password_admin: document.getElementById('resetPasswordAdmin').value,
+            password_operator: document.getElementById('resetPasswordOperator').value,
+            password_bendahara: document.getElementById('resetPasswordBendahara').value,
+            admin_username: document.getElementById('resetPasswordAdminUser').value.trim(),
+            admin_password: document.getElementById('resetPasswordAdminPass').value
+        };
+        if ([form.password_admin, form.password_operator, form.password_bendahara].some(v => v.length < 6)) return alert('Setiap password baru minimal 6 karakter.');
+        if (!form.admin_username || !form.admin_password) return alert('Masukkan username dan password Super Admin untuk verifikasi.');
+        if (!confirm(`Reset tiga password untuk BSU ${form.id}?`)) return;
+        const btn = document.getElementById('btnResetPasswordBsu'); btn.disabled = true; btn.textContent = 'MEMPROSES...';
+        try {
+            const res = await AdapterAPI.resetPasswordBsuSuperAdmin(form);
+            if (!res?.ok) throw new Error(res?.error || 'Reset password gagal.');
+            const hasil = document.getElementById('hasilResetPasswordBsu');
+            hasil.innerHTML = `<b>Password berhasil direset:</b><br>ID/Akun: <code>${escHtml(form.id)}</code><br>Admin BSU: <code>${escHtml(form.password_admin)}</code><br>Operator: <code>${escHtml(form.password_operator)}</code><br>Bendahara: <code>${escHtml(form.password_bendahara)}</code>`;
+            hasil.style.display = 'block';
+            document.getElementById('resetPasswordAdminPass').value = '';
+            alert('Password berhasil direset dan akan tetap terlihat pada Portal Induk.');
+            await loadDataTambahan();
+        } catch(e) { alert('Gagal mereset password: ' + (e.message || e)); }
+        finally { btn.disabled = false; btn.textContent = 'RESET PASSWORD'; }
     }
 
     // =========================================
@@ -4312,9 +4331,6 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         if(!n) return alert('Data BSU tidak ditemukan. Coba muat ulang halaman.');
         document.getElementById('editBsuId').value = n.id;
         document.getElementById('editBsuNama').value = n.nama || '';
-        document.getElementById('editBsuPasswordAdmin').value = n.password_admin || n.password || '';
-        document.getElementById('editBsuPasswordOperator').value = n.password_operator || '';
-        document.getElementById('editBsuPasswordBendahara').value = n.password_bendahara || '';
         document.getElementById('editBsuModeLatihan').checked = n.mode_latihan === true;
         document.getElementById('editBsuKetua').value = n.ketua || '';
         document.getElementById('editBsuHp').value = n.hp || '';
@@ -4335,9 +4351,6 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         let form = {
             action: 'updateUnit', id,
             nama: document.getElementById('editBsuNama').value.trim(),
-            password_admin: document.getElementById('editBsuPasswordAdmin').value.trim(),
-            password_operator: document.getElementById('editBsuPasswordOperator').value.trim(),
-            password_bendahara: document.getElementById('editBsuPasswordBendahara').value.trim(),
             ketua: document.getElementById('editBsuKetua').value.trim(),
             hp: document.getElementById('editBsuHp').value.trim(),
             jumlah_pengurus: Number(document.getElementById('editBsuPengurus').value)||0,
@@ -4348,8 +4361,6 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             mode_latihan: document.getElementById('editBsuModeLatihan').checked
         };
         if(!form.nama || !form.ketua) return alert('Nama BSU dan Ketua wajib diisi!');
-        if(!form.password_admin || !form.password_operator || !form.password_bendahara) return alert('Ketiga kata sandi akun wajib diisi!');
-        form.password = form.password_admin; // kompatibilitas akun Admin BSU versi lama
 
         let btn = document.getElementById('btnSimpanEditBsu');
         btn.innerText = '⏳ MENYIMPAN...'; btn.disabled = true;
@@ -4462,7 +4473,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
                         <h3 class="bsu-card-title" title="${escAttr(n.nama)}">${escHtml(n.nama)}${badgeModeLatihanBsu(n)}</h3>
                         <span class="bsu-card-id">${n.id}</span>
                     </div>
-                    <div style="display:flex;flex-direction:column;gap:3px;align-items:flex-end;font-size:10px;"><span class="pw-mask" data-pw="${escAttr(n.password_admin || n.password)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Admin BSU">A: ••••••</span><span class="pw-mask" data-pw="${escAttr(n.password_operator)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Operator">O: ••••••</span><span class="pw-mask" data-pw="${escAttr(n.password_bendahara)}" data-shown="0" onclick="togglePw(this)" title="Kata sandi Bendahara">B: ••••••</span></div>
+                    <div style="font-family:monospace;font-size:9.5px;line-height:1.45;text-align:right;"><b>A:</b> ${tampilPasswordBsu(n.password_admin || n.password)}<br><b>O:</b> ${tampilPasswordBsu(n.password_operator)}<br><b>B:</b> ${tampilPasswordBsu(n.password_bendahara)}</div>
                 </div>
                 <div class="bsu-card-info">
                     <div class="info-row"><span class="ic">👤</span><span class="val" title="${escAttr(n.ketua)}">${escHtml(n.ketua || '-')}</span></div>
@@ -4477,6 +4488,7 @@ Simpan data ini baik-baik untuk login ke sistem.`;
                 <div class="bsu-card-foot">
                     <button type="button" class="btn-icon" title="Lihat Peta Lokasi" onclick="bukaPetaBsu('${escAttr(n.koordinat)}')">📍</button>
                     <button type="button" class="btn-icon" title="Cetak QR Cek Saldo" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲</button>
+                    <button type="button" class="btn-text-icon" title="Reset Password BSU" onclick="bukaModalResetPasswordBsu('${escAttr(n.id)}')">🔑 Password</button>
                     <button type="button" class="btn-text-icon" title="Edit Data BSU" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>
                     ${n.mode_latihan === true ? `<button type="button" class="btn-text-icon" style="background:#ffedd5;color:#9a3412;border:1px solid #fdba74;" title="Reset Data Latihan" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset</button>` : `<button type="button" class="btn-icon danger" title="Hapus BSU" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️</button>`}
                 </div>
@@ -6346,9 +6358,8 @@ Simpan data ini baik-baik untuk login ke sistem.`;
         renderRiwayatPenjualanHariIni();
         
         let regHtml = ''; globalNasabah.slice().reverse().forEach(n => {
-            const tampilPass = (v) => (typeof v === 'string' && v.startsWith('pbkdf2$')) ? '🔒 <span class="text-muted" title="Password sudah di-hash, tidak bisa ditampilkan ulang. Pakai Edit untuk atur ulang.">(ter-hash)</span>' : escHtml(v || '-');
-            const akunHtml = `<div style="font-family:monospace;font-size:10.5px;line-height:1.8;min-width:155px;"><div><b>Admin:</b> ${tampilPass(n.password_admin || n.password)}</div><div><b>Operator:</b> ${tampilPass(n.password_operator)}</div><div><b>Bendahara:</b> ${tampilPass(n.password_bendahara)}</div></div>`;
-            regHtml += `<tr><td>${escHtml(n.id)}</td><td>${akunHtml}</td><td style="font-weight:bold;">${escHtml(n.nama)}${badgeModeLatihanBsu(n)}</td><td>${escHtml(n.ketua)}</td><td>${escHtml(n.hp)}</td><td>${escHtml(n.desa)}</td><td>${escHtml(n.kecamatan)}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="waKirimKredensialBsu('${escAttr(n.id)}')">💬 WA</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>${n.mode_latihan === true ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ffedd5;color:#9a3412;border-color:#fdba74;" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset Latihan</button>` : `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button>`}</td></tr>`;
+            const akunHtml = `<div style="font-family:monospace;font-size:10.5px;line-height:1.8;min-width:175px;"><div><b>ID/Akun:</b> ${escHtml(n.id)}</div><div><b>Admin:</b> ${tampilPasswordBsu(n.password_admin || n.password)}</div><div><b>Operator:</b> ${tampilPasswordBsu(n.password_operator)}</div><div><b>Bendahara:</b> ${tampilPasswordBsu(n.password_bendahara)}</div></div>`;
+            regHtml += `<tr><td>${escHtml(n.id)}</td><td>${akunHtml}</td><td style="font-weight:bold;">${escHtml(n.nama)}${badgeModeLatihanBsu(n)}</td><td>${escHtml(n.ketua)}</td><td>${escHtml(n.hp)}</td><td>${escHtml(n.desa)}</td><td>${escHtml(n.kecamatan)}</td><td class="text-center" style="white-space:nowrap;"><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dcfce7;color:#166534;border-color:#86efac;margin-right:4px;" onclick="bukaModalResetPasswordBsu('${escAttr(n.id)}')">🔑 Reset Password</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ede9fe;color:#5b21b6;border-color:#c4b5fd;margin-right:4px;" onclick="cetakQrUnit('${escAttr(n.id)}', '${escAttr(n.nama)}')">🔲 QR</button><button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#dbeafe;color:#1e40af;border-color:#93c5fd;margin-right:4px;" onclick="bukaModalEditBsu('${escAttr(n.id)}')">✏️ Edit</button>${n.mode_latihan === true ? `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#ffedd5;color:#9a3412;border-color:#fdba74;" onclick="bukaModalResetBsuLatihan('${escAttr(n.id)}')">♻️ Reset Latihan</button>` : `<button class="btn-sync" style="padding:5px 10px;font-size:11px;background:#fee2e2;color:#991b1b;border-color:#fca5a5;" onclick="hapusBSU('${escAttr(n.id)}', '${escAttr(n.nama)}')">🗑️ Hapus</button>`}</td></tr>`;
         });
         if(document.getElementById('tbodyBsuBaru')) document.getElementById('tbodyBsuBaru').innerHTML = regHtml || '<tr><td colspan="8" class="text-center">Belum ada data</td></tr>';
 
@@ -6459,14 +6470,10 @@ Simpan data ini baik-baik untuk login ke sistem.`;
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
             cekDataPenjualanLokalBelumMigrasi();
-            // KEAMANAN: kredensial (password) unit sengaja TIDAK ikut di getBundleBSI().
-            // Dimuat terpisah di sini khusus untuk tabel Registrasi BSU, lalu digabungkan
-            // ke globalNasabah supaya kode render (fitur kirim kredensial via WA) tetap
-            // berfungsi tanpa perlu diubah.
             AdapterAPI.getKredensialSemuaUnit().then(peta => {
                 globalNasabah.forEach(n => {
                     const k = peta[n.id];
-                    if (k) { n.password = k.password; n.password_admin = k.password_admin; n.password_operator = k.password_operator; n.password_bendahara = k.password_bendahara; }
+                    if (k) Object.assign(n, k);
                 });
                 populateUI();
             }).catch(err => console.error('Gagal memuat kredensial BSU:', err));

@@ -64,9 +64,8 @@ async function hashJikaPasswordBaru(v) {
 // Terapkan ke semua kolom password yang mungkin ada di form BSU (mengubah
 // objeknya langsung / in-place, lalu mengembalikannya untuk kenyamanan).
 async function hashKolomPasswordBsu(obj) {
-  for (const kolom of ['password', 'password_admin', 'password_operator', 'password_bendahara']) {
-    if (kolom in obj) obj[kolom] = await hashJikaPasswordBaru(obj[kolom]);
-  }
+  // Kredensial BSU disimpan apa adanya agar dapat dibaca Super Admin.
+  // Password Admin Pusat tetap dikelola terpisah oleh Edge Function.
   return obj;
 }
 
@@ -572,7 +571,7 @@ const AdapterAPI = {
   async tambahUnit(form) {
     const id = form.id || ('BSU-' + genId());
     const row = { ...form, id };
-    await hashKolomPasswordBsu(row); // KEAMANAN: hash password sebelum ditulis ke database
+    await hashKolomPasswordBsu(row); // Kredensial BSU disimpan sesuai kebijakan aplikasi
     const { error } = await sb.from('bsu').insert(row);
     if (error) return 'Gagal: ' + error.message;
     logAudit('bsu', row.id, 'insert', null, stripPasswordBsu(row));
@@ -580,7 +579,7 @@ const AdapterAPI = {
   },
   async updateUnit(form) {
     const { id, ...rest } = form;
-    await hashKolomPasswordBsu(rest); // KEAMANAN: hash password baru sebelum ditulis; nilai yang sudah ter-hash dilewatkan apa adanya
+    await hashKolomPasswordBsu(rest); // Kredensial BSU disimpan sesuai kebijakan aplikasi
     const { data: lama } = await sb.from('bsu_public').select('*').eq('id', id).maybeSingle(); // KEAMANAN: tanpa kolom password
     const { error } = await sb.from('bsu').update(rest).eq('id', id);
     if (error) return 'Gagal: ' + error.message;
@@ -650,12 +649,32 @@ const AdapterAPI = {
 
 
 
-  // ================== KREDENSIAL BSU (KHUSUS ADMIN PUSAT) ==================
-  // KEAMANAN: fungsi ini SENGAJA terpisah dari getBundleBSI() / getBundleBSU().
-  // Hanya dipanggil oleh layar "Registrasi BSU" di induk.html (fitur kirim
-  // kredensial via WA / tampilkan password unit ke Admin Pusat). Jangan
-  // panggil fungsi ini dari unit.html atau halaman publik mana pun -- operator
-  // unit dan publik tidak pernah perlu melihat password ini.
+  // ================== RESET KATA SANDI BSU (KHUSUS ADMIN PUSAT) ==================
+  // Admin Pusat diverifikasi terlebih dahulu. Password BSU kemudian disimpan
+  // sebagai teks biasa sesuai kebijakan operasional pemilik aplikasi.
+  async resetPasswordBsuSuperAdmin(form) {
+    const id = String(form?.id || '').trim();
+    const adminUsername = String(form?.admin_username || '').trim();
+    const adminPassword = String(form?.admin_password || '');
+    const passwordAdmin = String(form?.password_admin || '');
+    const passwordOperator = String(form?.password_operator || '');
+    const passwordBendahara = String(form?.password_bendahara || '');
+    if (!id || !adminUsername || !adminPassword) return { ok:false, error:'Verifikasi Super Admin wajib diisi.' };
+    if ([passwordAdmin, passwordOperator, passwordBendahara].some(v => v.length < 6)) return { ok:false, error:'Setiap password baru minimal 6 karakter.' };
+    const verifikasi = await this.loginServer(adminUsername, adminPassword, 'BSI');
+    if (!verifikasi?.ok) return { ok:false, error:verifikasi?.error || 'Verifikasi Super Admin gagal.' };
+    const dataBaru = {
+      password: passwordAdmin,
+      password_admin: passwordAdmin,
+      password_operator: passwordOperator,
+      password_bendahara: passwordBendahara
+    };
+    const { error } = await sb.from('bsu').update(dataBaru).eq('id', id);
+    if (error) return { ok:false, error:error.message || String(error) };
+    logAudit('bsu', id, 'update', null, { id, password_diubah:true }, 'Reset kata sandi BSU oleh Super Admin');
+    return { ok:true };
+  },
+
   async getKredensialSemuaUnit() {
     const { data, error } = await sb.from('bsu').select('id, password, password_admin, password_operator, password_bendahara');
     if (error) { console.error('getKredensialSemuaUnit:', error); return {}; }
