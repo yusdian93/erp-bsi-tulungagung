@@ -7020,43 +7020,38 @@
             asli.dataset.formatIndonesia='1';
             const tampilan=document.createElement('input');
             tampilan.type='text';
-            tampilan.inputMode='numeric';
-            tampilan.maxLength=10;
-            tampilan.placeholder='DD/MM/YYYY';
-            tampilan.pattern='\\d{2}/\\d{2}/\\d{4}';
+            tampilan.readOnly=true;
+            tampilan.placeholder='Pilih tanggal (DD/MM/YYYY)';
             tampilan.className=asli.className;
             if(asli.getAttribute('style'))tampilan.setAttribute('style',asli.getAttribute('style'));
             if(asli.getAttribute('title'))tampilan.setAttribute('title',asli.getAttribute('title'));
-            tampilan.setAttribute('aria-label',(asli.getAttribute('aria-label')||'Tanggal')+' format DD/MM/YYYY');
-            tampilan.required=asli.required;
-            asli.required=false;
+            tampilan.setAttribute('aria-label',(asli.getAttribute('aria-label')||'Tanggal')+' — klik untuk memilih dari kalender');
+            tampilan.title='Klik untuk memilih tanggal dari kalender. Tekan Delete untuk mengosongkan filter tanggal.';
+            tampilan.style.cursor='pointer';
             tampilan.disabled=asli.disabled;
             tampilan.value=ymdKeIndonesia(asli.value);
-            asli.type='hidden';
+            asli.style.position='absolute';
+            asli.style.opacity='0';
+            asli.style.pointerEvents='none';
+            asli.style.width='1px';
+            asli.style.height='1px';
+            asli.style.padding='0';
+            asli.style.border='0';
+            asli.tabIndex=-1;
             asli.insertAdjacentElement('beforebegin',tampilan);
-            tampilan.addEventListener('input',()=>{
-                beriGarisMiring(tampilan);
-                const ymd=indonesiaKeYmd(tampilan.value);
-                tampilan.setCustomValidity(tampilan.value&&!ymd?'Tanggal tidak valid. Gunakan DD/MM/YYYY.':'');
-                if(ymd||!tampilan.value){
-                    asli.value=ymd;
-                    asli.dispatchEvent(new Event('input',{bubbles:true}));
-                }
-            });
-            tampilan.addEventListener('change',()=>{
-                const ymd=indonesiaKeYmd(tampilan.value);
-                if(tampilan.value&&!ymd){tampilan.setCustomValidity('Tanggal tidak valid. Gunakan DD/MM/YYYY.');tampilan.reportValidity();return;}
-                tampilan.setCustomValidity('');
-                asli.value=ymd;
-                asli.dispatchEvent(new Event('change',{bubbles:true}));
-            });
-            pasanganTanggal.push({asli,tampilan,wajib:tampilan.required});
+            function bukaKalender(){
+                if(asli.disabled)return;
+                try{if(typeof asli.showPicker==='function')asli.showPicker();else{asli.focus();asli.click();}}catch(e){asli.focus();asli.click();}
+            }
+            tampilan.addEventListener('click',bukaKalender);
+            tampilan.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();bukaKalender();}else if((e.key==='Delete'||e.key==='Backspace')&&!asli.required){e.preventDefault();asli.value='';tampilan.value='';asli.dispatchEvent(new Event('change',{bubbles:true}));}});
+            asli.addEventListener('change',()=>{tampilan.value=ymdKeIndonesia(asli.value);});
+            pasanganTanggal.push({asli,tampilan});
         });
     }
     function sinkronkanTanggal(){
         pasanganTanggal.forEach(p=>{
             p.tampilan.disabled=p.asli.disabled;
-            p.tampilan.required=p.wajib&&!p.asli.disabled;
             if(document.activeElement!==p.tampilan){
                 const nilai=ymdKeIndonesia(p.asli.value);
                 if(p.tampilan.value!==nilai)p.tampilan.value=nilai;
