@@ -2200,7 +2200,7 @@
         selNama.innerHTML = '<option value="" disabled selected>-- Pilih Nama Material --</option>';
         let dataDisaring = dataKategori.filter(k => k.jenis_material === jenisDipilih);
         if(dataDisaring.length === 0) { selNama.innerHTML = '<option value="" disabled selected>-- Belum ada material di jenis ini --</option>'; return; }
-        dataDisaring.forEach(k => { selNama.innerHTML += `<option value="${escAttrUnit(k.harga)}">${escapeHtml(k.nama_kategori)} (Rp ${parseInt(k.harga).toLocaleString('id-ID')} / Kg)</option>`; });
+        dataDisaring.forEach(k => { selNama.innerHTML += `<option value="${escAttrUnit(k.harga)}" data-nama-material="${escAttrUnit(k.nama_kategori)}" data-harga="${escAttrUnit(k.harga)}">${escapeHtml(k.nama_kategori)} (Rp ${parseInt(k.harga).toLocaleString('id-ID')} / Kg)</option>`; });
     }
 
     // =========================================
@@ -3221,10 +3221,11 @@
         let selSampah = document.getElementById('pilihSampah');
         let berat = parseFloat(document.getElementById('beratSampah').value);
         if (!selSampah || !selSampah.value || isNaN(berat) || berat <= 0) return null;
-        let jenisSampah = selSampah.options[selSampah.selectedIndex].text;
-        let harga = parseInt(selSampah.value);
-        let jenisBersih = jenisSampah.split(' (')[0];
-        return { jenis: jenisBersih, berat: berat, harga_satuan: harga, harga_kotor: harga, total: harga * berat, nilai_kotor: harga * berat };
+        const opsi = selSampah.options[selSampah.selectedIndex];
+        const jenisLengkap = String(opsi.dataset.namaMaterial || '').trim();
+        const harga = parseInt(opsi.dataset.harga || selSampah.value);
+        if (!jenisLengkap || !Number.isFinite(harga)) return null;
+        return { jenis: jenisLengkap, berat: berat, harga_satuan: harga, harga_kotor: harga, total: harga * berat, nilai_kotor: harga * berat };
     }
 
     function tambahKeKeranjang() {
@@ -3641,11 +3642,23 @@
     function bukaWhatsApp(hp,pesan){const no=hpWa(hp);if(!no)return alert('Nomor WhatsApp tidak tersedia.');window.open(`https://wa.me/${no}?text=${encodeURIComponent(pesan)}`,'_blank');}
     function unduhCsv(rows,nama){if(!rows.length)return alert('Tidak ada data.');const keys=Object.keys(rows[0]);const body=[keys.join(';'),...rows.map(r=>keys.map(k=>`"${String(r[k]??'').replace(/"/g,'""')}"`).join(';'))].join('\n');const blob=new Blob(['\ufeff'+body],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nama;a.click();URL.revokeObjectURL(a.href);}
 
+    function normalisasiKunciMaterial(nama){return String(nama||'').trim().toLowerCase().replace(/\s+/g,' ');}
+    function namaMaterialKanonik(nama){
+        const asli=String(nama||'').trim(),kunci=normalisasiKunciMaterial(asli);
+        if(!kunci)return asli;
+        const persis=(dataKategori||[]).find(k=>normalisasiKunciMaterial(k.nama_kategori)===kunci);
+        if(persis)return persis.nama_kategori;
+        // Kompatibilitas data lama: versi sebelumnya memotong nama pada " (".
+        const calon=(dataKategori||[]).filter(k=>normalisasiKunciMaterial(k.nama_kategori).startsWith(kunci+' ('));
+        return calon.length===1?calon[0].nama_kategori:asli;
+    }
+    function materialSama(a,b){return normalisasiKunciMaterial(namaMaterialKanonik(a))===normalisasiKunciMaterial(namaMaterialKanonik(b));}
+
     function hitungSemuaStok(){
         return (dataKategori||[]).map(k=>{
-            const masuk=transaksiAktif(dataTransaksi).filter(t=>t.jenis===k.nama_kategori&&t.jenis!=='Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0);
-            const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>t.jenis===k.nama_kategori).reduce((a,t)=>a+num(t.berat_kirim ?? t.berat),0);
-            const penyesuaian=(dataStockOpname||[]).filter(o=>(o.status||'aktif')!=='dibatalkan'&&o.material===k.nama_kategori).reduce((a,o)=>a+num(o.selisih),0);
+            const masuk=transaksiAktif(dataTransaksi).filter(t=>materialSama(t.jenis,k.nama_kategori)&&t.jenis!=='Penarikan Tunai').reduce((a,t)=>a+num(t.berat),0);
+            const keluar=transaksiAktif(dataTransaksiKeluar).filter(t=>materialSama(t.jenis,k.nama_kategori)).reduce((a,t)=>a+num(t.berat_kirim ?? t.berat),0);
+            const penyesuaian=(dataStockOpname||[]).filter(o=>(o.status||'aktif')!=='dibatalkan'&&materialSama(o.material,k.nama_kategori)).reduce((a,o)=>a+num(o.selisih),0);
             const sisa=masuk-keluar+penyesuaian;return{jenis_material:k.jenis_material||'-',nama_kategori:k.nama_kategori,masuk,keluar,penyesuaian,sisa,nilai:sisa*num(k.harga),harga:num(k.harga)};
         }).sort((a,b)=>b.sisa-a.sisa);
     }
