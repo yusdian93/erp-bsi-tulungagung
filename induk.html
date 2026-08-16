@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="supabase-adapter.js?v=20260816-dashboard-operasional-1" defer></script>
+  <script src="supabase-adapter.js?v=20260816-password-terlihat-1" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -2893,7 +2893,7 @@
         <div class="modal-box">
             <div class="modal-box-header"><h3>Reset Password BSU</h3><button type="button" class="modal-close-btn" onclick="tutupModalResetPasswordBsu()">&times;</button></div>
             <input type="hidden" id="resetPasswordBsuId">
-            <div style="margin-bottom:14px;padding:11px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:12px;line-height:1.5;">ID akun: <b id="resetPasswordBsuIdLabel"></b>. Masukkan password baru untuk setiap jenis akses. Setelah disimpan, password akan tetap terlihat pada Portal Induk.</div>
+            <div style="margin-bottom:14px;padding:11px 12px;border-radius:10px;background:#eff6ff;color:#1e40af;font-size:12px;line-height:1.5;">ID akun: <b id="resetPasswordBsuIdLabel"></b>. Password disimpan apa adanya dan tetap terlihat pada Portal Induk. Password yang sudah terlanjur berupa hash harus diganti satu kali melalui form ini.</div>
             <div class="form-group"><label>Password Baru Admin BSU</label><input type="text" id="resetPasswordAdmin" class="form-control" autocomplete="new-password" minlength="6"></div>
             <div class="form-group"><label>Password Baru Operator</label><input type="text" id="resetPasswordOperator" class="form-control" autocomplete="new-password" minlength="6"></div>
             <div class="form-group"><label>Password Baru Bendahara</label><input type="text" id="resetPasswordBendahara" class="form-control" autocomplete="new-password" minlength="6"></div>
@@ -4242,7 +4242,7 @@
     function tampilPasswordBsu(nilai) {
         const v = String(nilai || '');
         if (!v) return '<span style="color:#94a3b8;">-</span>';
-        if (v.startsWith('pbkdf2$')) return '<span style="color:#b45309;" title="Password lama tidak dapat dikembalikan. Gunakan Reset Password.">(lama ter-hash — reset)</span>';
+        if (v.startsWith('pbkdf2$')) return '<span style="color:#94a3b8;">-</span>';
         return escHtml(v);
     }
 
@@ -4272,7 +4272,15 @@
         if(!n) return alert('Data BSU tidak ditemukan.');
         document.getElementById('resetPasswordBsuId').value = n.id;
         document.getElementById('resetPasswordBsuIdLabel').textContent = n.id;
-        ['resetPasswordAdmin','resetPasswordOperator','resetPasswordBendahara','resetPasswordAdminUser','resetPasswordAdminPass'].forEach(k => document.getElementById(k).value = '');
+        const passwordTerlihat = nilai => {
+            const v = String(nilai || '');
+            return v.startsWith('pbkdf2$') ? '' : v;
+        };
+        document.getElementById('resetPasswordAdmin').value = passwordTerlihat(n.password_admin || n.password);
+        document.getElementById('resetPasswordOperator').value = passwordTerlihat(n.password_operator);
+        document.getElementById('resetPasswordBendahara').value = passwordTerlihat(n.password_bendahara);
+        document.getElementById('resetPasswordAdminUser').value = '';
+        document.getElementById('resetPasswordAdminPass').value = '';
         const hasil = document.getElementById('hasilResetPasswordBsu'); hasil.style.display = 'none'; hasil.innerHTML = '';
         document.getElementById('modalResetPasswordBsu').classList.add('show');
     }

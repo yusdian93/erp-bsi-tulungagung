@@ -22,50 +22,16 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 
 
-// ================== UTIL: HASHING PASSWORD (KEAMANAN) ==================
-// PENTING: harus identik dengan utilitas hashing di Edge Function login/
-// dan update-admin/ (format & jumlah iterasi harus sama persis), supaya
-// password yang di-hash di sini bisa diverifikasi di sana. Kalau iterasi
-// diubah di salah satu tempat, ubah juga di tempat lain.
-//
-// Dipakai saat induk.html membuat/mengedit akun BSU (tambahUnit/updateUnit)
-// -- alur ini menulis LANGSUNG ke tabel bsu dari browser (tidak lewat Edge
-// Function manapun), jadi hashing harus dilakukan di sini, sebelum data
-// dikirim ke Supabase, atau password akan tersimpan sebagai teks biasa.
-const PBKDF2_ITERASI = 210000;
-
-function _toBase64(bytes) {
-  let biner = '';
-  for (const b of bytes) biner += String.fromCharCode(b);
-  return btoa(biner);
-}
-
-async function hashPasswordPBKDF2(password) {
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: PBKDF2_ITERASI, hash: 'SHA-256' }, key, 256);
-  return `pbkdf2$${PBKDF2_ITERASI}$${_toBase64(salt)}$${_toBase64(new Uint8Array(bits))}`;
-}
-
-function sudahHashPassword(v) {
-  return typeof v === 'string' && v.startsWith('pbkdf2$');
-}
-
-// Hash nilai HANYA kalau itu password baru yang masih polos (bukan kosong,
-// dan belum berformat hash). Kalau form edit resubmit hash yang sudah ada
-// tanpa diubah (nilainya sudah berformat pbkdf2$...), dilewatkan apa adanya
-// -- supaya tidak ter-hash dua kali dan merusak login yang sudah berfungsi.
-async function hashJikaPasswordBaru(v) {
-  if (v == null || v === '') return v;
-  if (sudahHashPassword(v)) return v;
-  return await hashPasswordPBKDF2(String(v));
-}
-
-// Terapkan ke semua kolom password yang mungkin ada di form BSU (mengubah
-// objeknya langsung / in-place, lalu mengembalikannya untuk kenyamanan).
-async function hashKolomPasswordBsu(obj) {
-  // Kredensial BSU disimpan apa adanya agar dapat dibaca Super Admin.
-  // Password Admin Pusat tetap dikelola terpisah oleh Edge Function.
+// ================== KREDENSIAL BSU TERLIHAT DI PORTAL INDUK ==================
+// Sesuai kebijakan operasional aplikasi, password akun BSU disimpan sebagai
+// teks biasa agar Super Admin dapat melihatnya kembali pada Portal Induk.
+// Password Admin Pusat tetap dikelola terpisah oleh Edge Function.
+function simpanKolomPasswordBsuApaAdanya(obj) {
+  ['password', 'password_admin', 'password_operator', 'password_bendahara'].forEach(kolom => {
+    if (Object.prototype.hasOwnProperty.call(obj, kolom) && obj[kolom] != null) {
+      obj[kolom] = String(obj[kolom]);
+    }
+  });
   return obj;
 }
 
@@ -608,7 +574,7 @@ const AdapterAPI = {
   async tambahUnit(form) {
     const id = form.id || ('BSU-' + genId());
     const row = { ...form, id };
-    await hashKolomPasswordBsu(row); // Kredensial BSU disimpan sesuai kebijakan aplikasi
+    simpanKolomPasswordBsuApaAdanya(row);
     const { error } = await sb.from('bsu').insert(row);
     if (error) return 'Gagal: ' + error.message;
     logAudit('bsu', row.id, 'insert', null, stripPasswordBsu(row));
@@ -616,7 +582,7 @@ const AdapterAPI = {
   },
   async updateUnit(form) {
     const { id, ...rest } = form;
-    await hashKolomPasswordBsu(rest); // Kredensial BSU disimpan sesuai kebijakan aplikasi
+    simpanKolomPasswordBsuApaAdanya(rest);
     const { data: lama } = await sb.from('bsu_public').select('*').eq('id', id).maybeSingle(); // KEAMANAN: tanpa kolom password
     const { error } = await sb.from('bsu').update(rest).eq('id', id);
     if (error) return 'Gagal: ' + error.message;
