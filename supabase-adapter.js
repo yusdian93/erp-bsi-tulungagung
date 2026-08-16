@@ -333,8 +333,9 @@ const AdapterAPI = {
       sb.from('transaksi').select('*').eq('level', 'unit_ke_induk').order('tgl', { ascending: false }),
       sb.from('bantuan_hibah').select('*')
     ]);
-    // Data BSU latihan tetap ditampilkan pada daftar administrasi, tetapi transaksi
-    // latihan tidak dimasukkan ke dashboard dan laporan resmi Bank Sampah Induk.
+    // Data BSU latihan tetap ditampilkan pada daftar administrasi. Dashboard dan
+    // menu saldo memakai data operasional lengkap, sedangkan laporan resmi tetap
+    // memakai transaksi yang mengecualikan BSU latihan.
     const idLatihan = new Set((bsuList || []).filter(b => b.mode_latihan === true).map(b => String(b.id)));
     const normalisasiTransaksiBsi = t => {
       // Pengajuan baru dibuat dengan total/harga_satuan = 0. Setelah BSI menerima,
@@ -355,10 +356,17 @@ const AdapterAPI = {
       // Saldo hanya berasal dari material yang diterima, riwayat lama, dan pencairan.
       return t.jenis === 'Penarikan Tabungan' || !t.status_verifikasi || t.status_verifikasi === 'diterima';
     }).map(normalisasiTransaksiBsi);
-    // Dashboard dan laporan resmi tetap mengecualikan BSU latihan. Dua menu keuangan
-    // memakai transaksi_keuangan agar saldo BSU latihan tetap dapat diuji dan dicairkan.
+    // Laporan resmi tetap mengecualikan BSU latihan. Dashboard dan dua menu keuangan
+    // memakai sumber operasional agar saldo BSU latihan dapat dilihat dan diuji.
     const transaksiResmi = transaksiKeuangan.filter(t => !idLatihan.has(String(t.id_unit || '')));
-    return { kategori: kategori || [], nasabah: bsuList || [], transaksi: transaksiResmi, transaksi_keuangan: transaksiKeuangan, hibah: hibah || [] };
+    return {
+      kategori: kategori || [],
+      nasabah: bsuList || [],
+      transaksi: transaksiResmi,
+      transaksi_dashboard: transaksiKeuangan,
+      transaksi_keuangan: transaksiKeuangan,
+      hibah: hibah || []
+    };
   },
 
   // Seluruh pengajuan BSU, termasuk yang masih menunggu, khusus menu verifikasi BSI.
@@ -475,22 +483,40 @@ const AdapterAPI = {
   },
 
   async getRingkasanDashboard() {
-    const [{ data: bsuList }, { data: trxSemua }] = await Promise.all([
-      sb.from('bsu').select('id, mode_latihan'),
-      sb.from('transaksi').select('id_unit, berat, total, tgl, status, status_verifikasi').eq('level', 'unit_ke_induk').gt('berat', 0)
+    const [bsuRes, trxRes] = await Promise.all([
+      sb.from('bsu_public').select('id'),
+      sb.from('transaksi')
+        .select('id_unit, jenis, berat, berat_diterima, total, total_final, tgl, status, status_verifikasi')
+        .eq('level', 'unit_ke_induk')
     ]);
-    const resmi = (bsuList || []).filter(b => b.mode_latihan !== true);
-    const idResmi = new Set(resmi.map(b => String(b.id)));
-    const trxResmi = (trxSemua || []).filter(t => idResmi.has(String(t.id_unit || '')))
+    if (bsuRes.error) throw bsuRes.error;
+    if (trxRes.error) throw trxRes.error;
+
+    // Dashboard adalah tampilan operasional, sehingga seluruh BSU (termasuk mode
+    // latihan) ikut terlihat. Pengajuan menunggu/ditolak dan transaksi pencairan
+    // tidak dihitung sebagai volume sampah masuk.
+    const trxDashboard = (trxRes.data || [])
       .filter(t => (t.status || 'aktif') !== 'dibatalkan')
-      .filter(t => !t.status_verifikasi || t.status_verifikasi === 'diterima');
+      .filter(t => t.jenis !== 'Penarikan Tabungan')
+      .filter(t => !t.status_verifikasi || t.status_verifikasi === 'diterima')
+      .map(t => ({
+        ...t,
+        berat_dashboard: Number(t.berat_diterima) > 0 ? Number(t.berat_diterima) : (Number(t.berat) || 0)
+      }))
+      .filter(t => t.berat_dashboard > 0);
     const now = new Date();
-    const bulanIni = trxResmi.filter(t => {
+    const bulanIni = trxDashboard.filter(t => {
       const d = new Date(t.tgl);
       return !isNaN(d) && d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
     });
-    const totalSampah = trxResmi.reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
-    return { ringkasan: { unit: resmi.length, setoran_bulan: bulanIni.reduce((a,t)=>a+(parseFloat(t.berat)||0),0).toFixed(1), total_sampah: totalSampah.toFixed(1) } };
+    const totalSampah = trxDashboard.reduce((a, t) => a + t.berat_dashboard, 0);
+    return {
+      ringkasan: {
+        unit: (bsuRes.data || []).length,
+        setoran_bulan: bulanIni.reduce((a, t) => a + t.berat_dashboard, 0).toFixed(1),
+        total_sampah: totalSampah.toFixed(1)
+      }
+    };
   },
 
   async getTransaksiInternalBSU(namaBsu) {

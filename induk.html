@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="supabase-adapter.js?v=20260816-surat-otomatis-3" defer></script>
+  <script src="supabase-adapter.js?v=20260816-dashboard-operasional-1" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -2991,6 +2991,7 @@
 
     let globalDataDashboard = null;
     let globalTransaksi = [];
+    let globalTransaksiDashboard = [];
     let globalTransaksiKeuangan = [];
     let globalNasabah = []; 
     let globalKategori = [];
@@ -3896,7 +3897,7 @@
         if(filterType === 'semua') { tgl=''; bln=''; thn=''; document.getElementById('filterTgl_komposisiMasuk').value=''; document.getElementById('filterBln_komposisiMasuk').value=''; document.getElementById('filterThn_komposisiMasuk').value=''; }
         else if(filterType === 'tgl') { bln=''; thn=''; } else if(filterType === 'bln') { tgl=''; thn=''; } else if(filterType === 'thn') { tgl=''; bln=''; }
 
-        let list = filterDataByDateRange(globalTransaksi.filter(t => (parseFloat(t.berat)||0) > 0 && (parseFloat(t.total)||0) > 0), 'tgl', filterType, tgl, bln, thn);
+        let list = filterDataByDateRange((globalTransaksiDashboard || []).filter(t => (parseFloat(t.berat)||0) > 0 && (parseFloat(t.total)||0) > 0), 'tgl', filterType, tgl, bln, thn);
 
         let rekap = {};
         list.forEach(t => {
@@ -4581,6 +4582,24 @@
         });
     }
 
+    function perbaruiRingkasanDashboardDariBundle() {
+        const transaksiMaterial = (globalTransaksiDashboard || []).filter(t => (parseFloat(t.berat) || 0) > 0);
+        const now = new Date();
+        const setoranBulanIni = transaksiMaterial.reduce((total, t) => {
+            const d = uraikanTanggalInput(t.tgl);
+            if (isNaN(d) || d.getMonth() !== now.getMonth() || d.getFullYear() !== now.getFullYear()) return total;
+            return total + (parseFloat(t.berat) || 0);
+        }, 0);
+        const totalSampah = transaksiMaterial.reduce((total, t) => total + (parseFloat(t.berat) || 0), 0);
+
+        const elUnit = document.getElementById('valUnit');
+        const elBulan = document.getElementById('valBulanIni');
+        const elTotal = document.getElementById('valTotalSampah');
+        if (elUnit) elUnit.innerText = globalNasabah.length.toLocaleString('id-ID');
+        if (elBulan) elBulan.innerText = setoranBulanIni.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        if (elTotal) elTotal.innerText = totalSampah.toLocaleString('id-ID', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    }
+
     function loadSaldoTabunganBSI() {
         if (!document.getElementById('rekapSaldoBSIBulan').value) {
             let now = new Date();
@@ -4963,13 +4982,14 @@
     }
 
     function renderMultiBulanSaldoBSI() {
-        if (!globalTransaksi || globalTransaksi.length === 0) {
+        const transaksiDashboard = globalTransaksiDashboard || [];
+        if (transaksiDashboard.length === 0) {
             document.getElementById('tbodyMultiBulanSaldoBSI').innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada data setoran BSU ke Induk</td></tr>';
             if (saldoBSIChartInstance) saldoBSIChartInstance.destroy();
             return;
         }
 
-        let semuaTgl = globalTransaksi.map(t => uraikanTanggalInput(t.tgl)).filter(d => !isNaN(d));
+        let semuaTgl = transaksiDashboard.map(t => uraikanTanggalInput(t.tgl)).filter(d => !isNaN(d));
         let tglMin = semuaTgl.length ? new Date(Math.min(...semuaTgl)) : new Date();
         let now = new Date();
         let daftarBulan = [];
@@ -4990,7 +5010,7 @@
             let akhirBulan = new Date(bln.getFullYear(), bln.getMonth() + 1, 1);
             let setoran = 0, tarik = 0, saldoAwal = 0, saldoAkhir = 0;
 
-            globalTransaksi.forEach(t => {
+            transaksiDashboard.forEach(t => {
                 let tgl = uraikanTanggalInput(t.tgl);
                 if (isNaN(tgl)) return;
                 let nilai = parseFloat(t.total) || 0;
@@ -5991,9 +6011,9 @@
     // (Total Disetor ke BSI − Total Dijual ke Off-taker, tidak boleh minus).
     // Dipakai baik oleh chart "Kondisi Stok Gudang BSI" maupun form Penjualan ke Off-taker,
     // supaya kedua tempat selalu menampilkan angka yang konsisten.
-    function getStokGudangMap() {
+    function getStokGudangMap(sumberTransaksi = globalTransaksi) {
         let masuk = {}, keluar = {};
-        globalTransaksi.forEach(t => {
+        sumberTransaksi.forEach(t => {
             if(t.jenis !== 'Penarikan Tunai' && (parseFloat(t.berat) || 0) > 0) {
                 let jns = t.jenis || 'Lainnya';
                 masuk[jns] = (masuk[jns] || 0) + parseFloat(t.berat);
@@ -6011,7 +6031,8 @@
 
     function renderPeringkatDanKomposisi() {
         let stats = {}, komposisi = {}, totalSemua = 0;
-        globalTransaksi.forEach(t => {
+        const transaksiDashboard = globalTransaksiDashboard || [];
+        transaksiDashboard.forEach(t => {
             let nama = t.nama || 'Tanpa Nama';
             if(!stats[nama]) stats[nama] = { berat: 0, saldo: 0 };
             stats[nama].berat += parseFloat(t.berat) || 0; stats[nama].saldo += parseFloat(t.total) || 0;
@@ -6040,7 +6061,7 @@
 
         // Komposisi & hierarki KONDISI STOK GUDANG BSI = Disetor ke BSI − Dijual ke Off-taker,
         // dihitung per Kategori Produk yang sama persis (supaya bisa saling dikurangi dengan benar).
-        let stokMap = getStokGudangMap();
+        let stokMap = getStokGudangMap(transaksiDashboard);
         let komposisiStok = {}, totalStok = 0;
         Object.keys(stokMap).forEach(k => { if(stokMap[k] > 0) { komposisiStok[k] = stokMap[k]; totalStok += stokMap[k]; } });
         renderHierarkiKomposisiChart('hierarkiStokChart', 'hierarkiStokChartWrap', 'hierarkiStokEmpty', komposisiStok, totalStok);
@@ -6172,7 +6193,7 @@
         if(existBar) existBar.destroy();
 
         // 2. Ambil data yang valid (berat > 0)
-        let trxMasuk = globalTransaksi.filter(t => (parseFloat(t.berat) > 0));
+        let trxMasuk = (globalTransaksiDashboard || []).filter(t => (parseFloat(t.berat) > 0));
         let labels = [], dataValues = [];
 
         // 3. Kalkulasi dan Pengurutan (Sorting) Absolut
@@ -6335,7 +6356,7 @@
 
         // 4. Keuangan, Pie Chart & Kas Induk
         let saldoMap = {}, totalKeu = 0, keuHtml = '', pieLabels = [], pieData = [];
-        globalTransaksi.forEach(t => { let n = t.nama || 'Tanpa Nama'; if(!saldoMap[n]) saldoMap[n] = 0; saldoMap[n] += (parseFloat(t.total)||0); });
+        (globalTransaksiDashboard || []).forEach(t => { let n = t.nama || 'Tanpa Nama'; if(!saldoMap[n]) saldoMap[n] = 0; saldoMap[n] += (parseFloat(t.total)||0); });
         
         Object.keys(saldoMap).forEach(k => {
             let sal = saldoMap[k]; totalKeu += sal;
@@ -6471,11 +6492,16 @@
     function loadDataTambahan() {
         return Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle()])
         .then(([res, resInv, resDok, resJual]) => {
-            globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || []; globalTransaksiKeuangan = res.transaksi_keuangan || res.transaksi || [];
+            globalKategori = res.kategori || [];
+            globalNasabah = res.nasabah || [];
+            globalTransaksi = res.transaksi || [];
+            globalTransaksiKeuangan = res.transaksi_keuangan || res.transaksi || [];
+            globalTransaksiDashboard = res.transaksi_dashboard || globalTransaksiKeuangan;
             globalHibah = res.hibah || [];
             globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
             globalPembinaan = resDok.pembinaan || []; globalDarurat = resDok.darurat || [];
             globalPenjualan = resJual || [];
+            perbaruiRingkasanDashboardDariBundle();
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
             cekDataPenjualanLokalBelumMigrasi();
