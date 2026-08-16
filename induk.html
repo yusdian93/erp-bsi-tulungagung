@@ -1335,17 +1335,6 @@
             </div>
 
             <div class="sidebar-label nav-section-label">Pendukung & Pengendalian</div>
-            <div class="nav-group" id="grp-operasional">
-                <button class="nav-group-header" onclick="toggleGroup('grp-operasional')">
-                    <span class="gh-ic">🧰</span><span class="gh-label">Operasional & Pembinaan</span><span class="gh-arrow">›</span>
-                </button>
-                <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Inventaris & Biaya Operasional" data-group="grp-operasional" onclick="pindahTab('inventaris', this); loadInventarisOperasional();" title="Inventaris, biaya operasional, pemeliharaan, dan investasi"><span class="nav-ic">🧰</span><span class="nav-text">Inventaris & Biaya</span></button>
-                    <button class="nav-btn" data-label="Pembinaan Bank Sampah Unit" data-group="grp-operasional" onclick="pindahTab('dok_pembinaan', this); loadDokPembinaan();" title="Mencatat kegiatan pembinaan Bank Sampah Unit"><span class="nav-ic">🎓</span><span class="nav-text">Pembinaan BSU</span></button>
-                    <button class="nav-btn" data-label="Kejadian Darurat / Kecelakaan" data-group="grp-operasional" onclick="pindahTab('dok_darurat', this); loadDokDarurat();" title="Mencatat kejadian darurat atau kecelakaan kerja"><span class="nav-ic">🚨</span><span class="nav-text">Kejadian Darurat</span></button>
-                </div>
-            </div>
-
             <div class="nav-group" id="grp-laporan">
                 <button class="nav-group-header" onclick="toggleGroup('grp-laporan')">
                     <span class="gh-ic">📁</span><span class="gh-label">Laporan & Dokumen</span><span class="gh-arrow">›</span>
@@ -1405,9 +1394,9 @@
             <div>
                 <div class="report-hub-kicker">🗂️ Pelaporan Terpadu</div>
                 <h2>Pusat Laporan & Dokumen BSI</h2>
-                <p>Pilih laporan yang dibutuhkan dari satu halaman. Menu rinci yang sebelumnya memenuhi sidebar tetap tersedia di sini tanpa menghapus data maupun fungsi lama.</p>
+                <p>Laporan inti untuk memantau penerimaan BSU, penjualan, stok, keuangan, serta kinerja bulanan dan tahunan Bank Sampah Induk.</p>
             </div>
-            <div class="report-hub-count"><strong>12</strong><span>Laporan & Dokumen</span></div>
+            <div class="report-hub-count"><strong>8</strong><span>Laporan Inti</span></div>
         </div>
 
         <div class="menu-hub-section">
@@ -1429,35 +1418,23 @@
                     <span class="menu-hub-icon">↘️</span><strong>Kas Masuk</strong><small>Rincian penerimaan uang dari penjualan, bantuan, dan sumber lain.</small><span class="menu-hub-arrow">›</span>
                 </button>
                 <button class="menu-hub-card" data-label="Laporan Kas Keluar" onclick="bukaHalamanInduk('lap_kaskeluar','Laporan Kas Keluar'); renderLapKasKeluar('semua');">
-                    <span class="menu-hub-icon">↗️</span><strong>Kas Keluar</strong><small>Rincian pembayaran BSU, biaya operasional, investasi, dan pemeliharaan.</small><span class="menu-hub-arrow">›</span>
+                    <span class="menu-hub-icon">↗️</span><strong>Kas Keluar</strong><small>Rincian pembayaran saldo BSU dan pengeluaran yang sudah tercatat.</small><span class="menu-hub-arrow">›</span>
                 </button>
             </div>
         </div>
 
         <div class="menu-hub-section">
-            <div class="menu-hub-section-title"><h3>📑 Dokumen Operasional Resmi</h3><span>Format rekap untuk arsip dan pelaporan</span></div>
+            <div class="menu-hub-section-title"><h3>📑 Ringkasan Berkala BSI</h3><span>Rekap bulanan dan tahunan untuk evaluasi</span></div>
             <div class="menu-hub-grid">
                 <button class="menu-hub-card is-document" data-label="Laporan Operasional Bulanan" onclick="bukaHalamanInduk('dok_operasional','Laporan Operasional Bulanan'); initDokOperasional();">
-                    <span class="menu-hub-icon">📘</span><strong>Operasional Bulanan</strong><small>Ringkasan kegiatan BSI dalam satu periode bulanan.</small><span class="menu-hub-arrow">›</span>
-                </button>
-                <button class="menu-hub-card is-document" data-label="Laporan Stok & Pengolahan" onclick="bukaHalamanInduk('dok_stok','Laporan Stok & Hasil Pengolahan'); initDokStok();">
-                    <span class="menu-hub-icon">📦</span><strong>Stok & Pengolahan</strong><small>Dokumen persediaan dan hasil pengolahan material.</small><span class="menu-hub-arrow">›</span>
-                </button>
-                <button class="menu-hub-card is-document" data-label="Laporan Sampah Masuk & Keluar" onclick="bukaHalamanInduk('dok_sampah','Laporan Sampah Masuk & Keluar'); initDokSampah();">
-                    <span class="menu-hub-icon">♻️</span><strong>Sampah Masuk & Keluar</strong><small>Rekap arus material dari BSU sampai penjualan.</small><span class="menu-hub-arrow">›</span>
-                </button>
-                <button class="menu-hub-card is-document" data-label="Laporan Hasil Penjualan" onclick="bukaHalamanInduk('dok_penjualan','Laporan Hasil Penjualan'); initDokPenjualan();">
-                    <span class="menu-hub-icon">💵</span><strong>Hasil Penjualan</strong><small>Dokumen nilai penjualan dan penerimaan hasil material.</small><span class="menu-hub-arrow">›</span>
-                </button>
-                <button class="menu-hub-card is-document" data-label="Laporan Kondisi Peralatan" onclick="bukaHalamanInduk('dok_peralatan','Laporan Kondisi Peralatan'); initDokPeralatan();">
-                    <span class="menu-hub-icon">🧰</span><strong>Kondisi Peralatan</strong><small>Rekap kondisi alat, pemeliharaan, dan kebutuhan tindak lanjut.</small><span class="menu-hub-arrow">›</span>
+                    <span class="menu-hub-icon">📘</span><strong>Ringkasan Bulanan BSI</strong><small>Setoran BSU, penjualan, kas masuk, kas keluar, dan saldo bersih per bulan.</small><span class="menu-hub-arrow">›</span>
                 </button>
                 <button class="menu-hub-card is-document" data-label="Laporan Tahunan" onclick="bukaHalamanInduk('dok_tahunan','Laporan Tahunan'); initDokTahunan();">
-                    <span class="menu-hub-icon">📅</span><strong>Laporan Tahunan</strong><small>Kompilasi kinerja dan kegiatan BSI selama satu tahun.</small><span class="menu-hub-arrow">›</span>
+                    <span class="menu-hub-icon">📅</span><strong>Ringkasan Tahunan BSI</strong><small>Kompilasi setoran dan arus kas Bank Sampah Induk selama satu tahun.</small><span class="menu-hub-arrow">›</span>
                 </button>
             </div>
-            <div class="menu-hub-note"><b>Pembinaan BSU</b> dan <b>Kejadian Darurat</b> dipindahkan ke kelompok <b>Operasional & Pembinaan</b> agar lebih mudah ditemukan sesuai proses kerjanya.</div>
         </div>
+
     </div>
 
     <!-- ================= NERACA ================= -->
@@ -2525,8 +2502,8 @@
 
     <div id="dok_operasional" class="content-section">
         <div class="panel">
-            <div class="panel-header"><h2>📘 a. LAPORAN OPERASIONAL BULANAN</h2></div>
-            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Ringkasan menyeluruh kegiatan Bank Sampah Induk dalam satu bulan: setoran BSU, penjualan, kas masuk/keluar, biaya operasional, dan aktivitas pembinaan/kejadian darurat (jika ada).</p>
+            <div class="panel-header"><h2>📘 RINGKASAN BULANAN BANK SAMPAH INDUK</h2></div>
+            <p style="margin:-6px 0 16px; font-size:12.5px; color:var(--text-muted);">Ringkasan inti Bank Sampah Induk dalam satu bulan: setoran BSU, hasil penjualan, kas masuk, kas keluar, saldo bersih, dan jumlah BSU terdaftar.</p>
             <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; margin-bottom:20px;">
                 <div class="form-group" style="margin-bottom:0;"><label>Pilih Bulan</label><input type="month" id="dokOpBulan" class="form-control" onchange="renderRingkasanDokOperasional()"></div>
                 <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="cetakDokOperasional()">👁️ Preview & Cetak PDF</button>
@@ -5515,8 +5492,6 @@
         let [tahun, bulan] = bulanStr.split('-').map(Number);
         let awal = new Date(tahun, bulan - 1, 1), akhir = new Date(tahun, bulan, 1);
         let dalamPeriode = (tglStr) => { let d = uraikanTanggalInput(tglStr); return !isNaN(d) && d >= awal && d < akhir; };
-        let dalamPeriodeISO = (tglStr) => { let d = new Date(tglStr); return !isNaN(d) && d >= awal && d < akhir; };
-
         let totalSetoranKg = globalTransaksi.filter(t => t.total > 0 && t.berat > 0 && dalamPeriode(t.tgl)).reduce((a, t) => a + (parseFloat(t.berat) || 0), 0);
         let totalPenjualanRp = globalPenjualan.filter(d => dalamPeriode(d.tanggal)).reduce((a, d) => a + (parseFloat(d.total) || 0), 0);
 
@@ -5524,11 +5499,8 @@
         let kasMasuk = kasData.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
         let kasKeluar = kasData.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
 
-        let biayaOp = (globalBiayaOp || []).filter(b => dalamPeriodeISO(b.tanggal)).reduce((a, b) => a + (parseFloat(b.jumlah) || 0), 0);
-        let jmlPembinaan = (globalPembinaan || []).filter(p => dalamPeriodeISO(p.tanggal)).length;
-        let jmlDarurat = (globalDarurat || []).filter(d => dalamPeriodeISO(d.tanggal)).length;
-
-        return { totalSetoranKg, totalPenjualanRp, kasMasuk, kasKeluar, saldoBersih: kasMasuk - kasKeluar, biayaOp, jmlBsuAktif: globalNasabah.filter(b=>b.mode_latihan!==true).length, jmlPembinaan, jmlDarurat };
+        let jmlBsuAktif = globalNasabah.filter(b => String(b.status || 'aktif').toLowerCase() !== 'nonaktif').length;
+        return { totalSetoranKg, totalPenjualanRp, kasMasuk, kasKeluar, saldoBersih: kasMasuk - kasKeluar, jmlBsuAktif };
     }
 
     function renderRingkasanDokOperasional() {
@@ -5542,8 +5514,6 @@
             <div class="card card-red"><h3>Kas Keluar</h3><p>Rp ${r.kasKeluar.toLocaleString('id-ID')}</p></div>
             <div class="card"><h3>Saldo Bersih Bulan Ini</h3><p>Rp ${r.saldoBersih.toLocaleString('id-ID')}</p></div>
             <div class="card"><h3>Jumlah BSU Terdaftar</h3><p>${r.jmlBsuAktif}</p></div>
-            <div class="card"><h3>Kegiatan Pembinaan</h3><p>${r.jmlPembinaan}</p></div>
-            <div class="card"><h3>Kejadian Darurat</h3><p>${r.jmlDarurat}</p></div>
         `;
     }
 
@@ -5555,17 +5525,14 @@
         let [tahun, bulan] = bulanStr.split('-').map(Number);
         let namaBulan = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][bulan - 1];
 
-        bukaPreviewDokumen('LAPORAN OPERASIONAL BULANAN', 'Periode: ' + namaBulan + ' ' + tahun, [
-            { heading: 'Ringkasan Kegiatan', rows: [
+        bukaPreviewDokumen('RINGKASAN BULANAN BANK SAMPAH INDUK', 'Periode: ' + namaBulan + ' ' + tahun, [
+            { heading: 'Ringkasan Utama', rows: [
                 ['Total Setoran dari BSU', r.totalSetoranKg.toFixed(1) + ' Kg'],
                 ['Total Hasil Penjualan', 'Rp ' + r.totalPenjualanRp.toLocaleString('id-ID')],
                 ['Total Kas Masuk', 'Rp ' + r.kasMasuk.toLocaleString('id-ID')],
                 ['Total Kas Keluar', 'Rp ' + r.kasKeluar.toLocaleString('id-ID')],
                 ['Saldo Bersih Bulan Ini', 'Rp ' + r.saldoBersih.toLocaleString('id-ID')],
-                ['Biaya Operasional', 'Rp ' + r.biayaOp.toLocaleString('id-ID')],
-                ['Jumlah BSU Terdaftar', r.jmlBsuAktif + ' Unit'],
-                ['Kegiatan Pembinaan BSU', r.jmlPembinaan + ' Kegiatan'],
-                ['Kejadian Kecelakaan/Darurat', r.jmlDarurat + ' Kejadian']
+                ['Jumlah BSU Terdaftar', r.jmlBsuAktif + ' Unit']
             ] }
         ]);
     }
