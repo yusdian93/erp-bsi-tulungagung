@@ -780,7 +780,7 @@
 
         /* Status surat pengantar: tipografi konsisten dan proporsi kolom lebih nyaman. */
         .table-pengiriman-rapi {
-            min-width: 1280px;
+            min-width: 1120px;
             table-layout: fixed;
         }
         .table-pengiriman-rapi thead th {
@@ -817,8 +817,7 @@
         .table-pengiriman-rapi .pengiriman-tanggal,
         .table-pengiriman-rapi .pengiriman-dokumen,
         .table-pengiriman-rapi .pengiriman-meta,
-        .table-pengiriman-rapi .pengiriman-petugas,
-        .table-pengiriman-rapi .pengiriman-tanggal-bayar {
+        .table-pengiriman-rapi .pengiriman-petugas {
             display: block;
         }
         .table-pengiriman-rapi .pengiriman-dokumen {
@@ -826,8 +825,7 @@
             font-weight: 700 !important;
         }
         .table-pengiriman-rapi .pengiriman-meta,
-        .table-pengiriman-rapi .pengiriman-petugas,
-        .table-pengiriman-rapi .pengiriman-tanggal-bayar {
+        .table-pengiriman-rapi .pengiriman-petugas {
             margin-top: 4px;
             color: #475569 !important;
         }
@@ -884,15 +882,14 @@
             white-space: nowrap;
         }
         .table-pengiriman-rapi th:nth-child(1), .table-pengiriman-rapi td:nth-child(1) { width: 15%; }
-        .table-pengiriman-rapi th:nth-child(2), .table-pengiriman-rapi td:nth-child(2) { width: 18%; }
-        .table-pengiriman-rapi th:nth-child(3), .table-pengiriman-rapi td:nth-child(3) { width: 9%; }
-        .table-pengiriman-rapi th:nth-child(4), .table-pengiriman-rapi td:nth-child(4) { width: 12%; }
-        .table-pengiriman-rapi th:nth-child(5), .table-pengiriman-rapi td:nth-child(5) { width: 21%; }
+        .table-pengiriman-rapi th:nth-child(2), .table-pengiriman-rapi td:nth-child(2) { width: 19%; }
+        .table-pengiriman-rapi th:nth-child(3), .table-pengiriman-rapi td:nth-child(3) { width: 10%; }
+        .table-pengiriman-rapi th:nth-child(4), .table-pengiriman-rapi td:nth-child(4) { width: 13%; }
+        .table-pengiriman-rapi th:nth-child(5), .table-pengiriman-rapi td:nth-child(5) { width: 23%; }
         .table-pengiriman-rapi th:nth-child(6), .table-pengiriman-rapi td:nth-child(6) { width: 13%; }
         .table-pengiriman-rapi th:nth-child(7), .table-pengiriman-rapi td:nth-child(7) { width: 7%; }
-        .table-pengiriman-rapi th:nth-child(8), .table-pengiriman-rapi td:nth-child(8) { width: 9%; }
         @media (max-width: 767.98px) {
-            .table-pengiriman-rapi { min-width: 1180px; }
+            .table-pengiriman-rapi { min-width: 1050px; }
             .table-pengiriman-rapi thead th { font-size: .72rem !important; padding: 12px 10px !important; }
             .table-pengiriman-rapi tbody td,
             .table-pengiriman-rapi tbody td div,
@@ -1446,7 +1443,7 @@
                     <h6 class="fw-bold m-0">Status Surat Pengantar dan Hasil Verifikasi BSI</h6>
                     <small class="text-muted">Satu baris mewakili satu surat pengantar, meskipun berisi banyak material.</small>
                 </div>
-                <div class="table-responsive"><table class="table table-hover table-pengiriman-rapi"><thead><tr><th>Tanggal/Surat Pengantar</th><th>Rincian Material</th><th class="text-end">Total Berat Kirim</th><th>Status Verifikasi</th><th>Hasil BSI</th><th>Status Pembayaran</th><th>Catatan</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
+                <div class="table-responsive"><table class="table table-hover table-pengiriman-rapi"><thead><tr><th>Tanggal/Surat Pengantar</th><th>Rincian Material</th><th class="text-end">Total Berat Kirim</th><th>Status Verifikasi</th><th>Hasil BSI</th><th>Catatan</th><th class="text-center">Aksi</th></tr></thead><tbody id="tabel-pengiriman-bsi"></tbody></table></div>
             </div>
         </div>
 
@@ -3575,7 +3572,7 @@
     function eksporExcel() {
         const trx=transaksiAktif(dataTransaksi);const keluar=transaksiAktif(dataTransaksiKeluar);const stok=hitungSemuaStok();
         const rowsTrx=trx.map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),ID_Nasabah:t.id_nasabah||'',Nasabah:t.nama,Jenis:t.jenis,Berat_Kg:num(t.berat),Harga_Satuan:num(t.harga_satuan),Nilai:num(t.total),Status:t.status||'aktif'}));
-        const rowsKeluar=keluar.filter(t=>t.jenis!=='Penarikan Tabungan').map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),No_Dokumen:t.no_dokumen||'',Material:t.jenis,Berat_Kirim_Kg:num(t.berat_kirim??t.berat),Status_Verifikasi:t.status_verifikasi||'diterima',Berat_Diterima_Kg:num(t.berat_diterima??t.berat),Harga_Final:num(t.harga_final??t.harga_satuan),Total_Final:num(t.total_final??t.total),Status_Pembayaran:t.status_pembayaran||''}));
+        const rowsKeluar=keluar.filter(t=>t.jenis!=='Penarikan Tabungan').map(t=>({Nomor:t.id,Tanggal:formatTanggalTampil(t.tgl),No_Dokumen:t.no_dokumen||'',Material:t.jenis,Berat_Kirim_Kg:num(t.berat_kirim??t.berat),Status_Verifikasi:t.status_verifikasi||'diterima',Berat_Diterima_Kg:num(t.berat_diterima??t.berat),Harga_Final:num(t.harga_final??t.harga_satuan),Total_Final:num(t.total_final??t.total)}));
         const rowsKas=dataKasMutasi.map(k=>({Tanggal:formatTanggalTampil(k.tanggal),Arah:k.arah,Kategori:k.kategori,Nominal:num(k.nominal),Metode:k.metode,No_Bukti:k.no_bukti,Keterangan:k.keterangan,Petugas:k.oleh}));
         if(window.XLSX){const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsTrx),'Transaksi Nasabah');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsKeluar),'Pengiriman BSI');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(stok),'Stok');XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rowsKas),'Kas');XLSX.writeFile(wb,`Laporan_BSU_${namaUnitTanpaBSU().replace(/\s+/g,'_')}_${new Date().toISOString().slice(0,10)}.xlsx`);}else unduhCsv(rowsTrx,'Laporan_BSU.csv');
     }
@@ -3700,7 +3697,7 @@
 
     function labelStatusVerifikasiPengiriman(t){
         const st=String((t.status||'aktif')==='dibatalkan'?(t.status_verifikasi==='ditolak'?'ditolak':'dibatalkan'):(t.status_verifikasi||'diterima')).toLowerCase();
-        return ({menunggu_verifikasi:'Menunggu Verifikasi BSI',diterima:'Diterima BSI',ditolak:'Ditolak BSI',dibatalkan:'Dibatalkan BSU'})[st]||st.replaceAll('_',' ');
+        return ({menunggu_verifikasi:'Menunggu Verifikasi',diterima:'Diterima BSI',ditolak:'Ditolak/Dibatalkan',dibatalkan:'Ditolak/Dibatalkan'})[st]||st.replaceAll('_',' ');
     }
     function kelasStatusVerifikasiPengiriman(t){
         const st=String(t.status_verifikasi||'diterima').toLowerCase();
@@ -3708,11 +3705,6 @@
         if(st==='menunggu_verifikasi')return 'status-pending';
         return 'status-void';
     }
-    function labelStatusPembayaranPengiriman(t){
-        const st=String(t.status_pembayaran||'belum_dibayar').toLowerCase();
-        return ({belum_dibayar:'Belum Diverifikasi/Dibayar',masuk_saldo_bsu:'Masuk Saldo BSU',lunas:'Lunas/Dibayar',tidak_berlaku:'Tidak Berlaku'})[st]||st.replaceAll('_',' ');
-    }
-    function kelasStatusPembayaranPengiriman(t){return t.status_pembayaran==='lunas'?'status-paid':(t.status_pembayaran==='tidak_berlaku'?'status-void':'status-pending');}
     function hitungPengirimanBSI(){
         const sel=document.getElementById('kirimMaterial');if(!sel)return;
         const opt=sel.options[sel.selectedIndex];
@@ -3766,7 +3758,6 @@
             g.wakil=g.items[0];g.total_kirim=g.items.reduce((a,t)=>a+num(t.berat_kirim??t.berat),0);g.total_diterima=g.items.reduce((a,t)=>a+(t.status_verifikasi==='diterima'?num(t.berat_diterima??t.berat):0),0);g.total_final=g.items.reduce((a,t)=>a+num(t.total_final??t.total),0);
             const sts=g.items.map(t=>(t.status||'aktif')==='dibatalkan'?(t.status_verifikasi==='ditolak'?'ditolak':'dibatalkan'):(t.status_verifikasi||'menunggu_verifikasi'));
             g.status_verifikasi=sts.every(s=>s==='diterima')?'diterima':(sts.some(s=>s==='menunggu_verifikasi')?'menunggu_verifikasi':(sts.some(s=>s==='ditolak')?'ditolak':'dibatalkan'));
-            const bayar=g.items.map(t=>String(t.status_pembayaran||'belum_dibayar'));g.status_pembayaran=bayar.every(s=>s==='lunas')?'lunas':(g.status_verifikasi==='diterima'?'masuk_saldo_bsu':(g.status_verifikasi==='menunggu_verifikasi'?'belum_dibayar':'tidak_berlaku'));
             return g;
         });
     }
@@ -3774,14 +3765,14 @@
         const tb=document.getElementById('tabel-pengiriman-bsi');if(!tb)return;
         const groups=buatGrupPengirimanUnit().sort((a,b)=>tanggalKeMs(b.wakil.tgl)-tanggalKeMs(a.wakil.tgl));
         tb.innerHTML=groups.length?groups.map(g=>{
-            const t=g.wakil;const pseudo={...t,status_verifikasi:g.status_verifikasi,status_pembayaran:g.status_pembayaran};
+            const t=g.wakil;const pseudo={...t,status_verifikasi:g.status_verifikasi};
             const rincian=g.items.map(x=>`<div class="pengiriman-item"><span class="pengiriman-item-nama">${escapeHtml(x.jenis)}</span><span class="pengiriman-item-berat">${num(x.berat_kirim??x.berat).toFixed(2)} Kg</span></div>`).join('');
             const hasil=g.status_verifikasi==='diterima'?g.items.map(x=>`<div class="hasil-item"><span class="hasil-item-nama">${escapeHtml(x.jenis)}</span><span class="hasil-item-rumus">${num(x.berat_diterima??x.berat).toFixed(2)} Kg × ${rupiah(x.harga_final??x.harga_satuan)}/Kg</span><span class="hasil-item-nilai">${rupiah(x.total_final??x.total)}</span></div>`).join(''):(g.status_verifikasi==='ditolak'?'<span class="text-danger fw-bold">Seluruh pengiriman ditolak</span>':'<span class="text-muted">Belum diperiksa</span>');
             const cat=[...new Set(g.items.flatMap(x=>[x.catatan_verifikasi,x.catatan]).filter(Boolean))].map(escapeHtml).join('<br>')||'-';
             const bisaBatal=g.status_verifikasi==='menunggu_verifikasi';
             const aksi=`<div class="d-flex gap-1 justify-content-center flex-wrap pengiriman-aksi"><button class="btn btn-sm btn-outline-success" onclick="cetakSuratPengantarPengiriman('${escAttrJs(g.key)}')"><i class="bi bi-printer me-1"></i>Cetak</button>${bisaBatal?`<button class="btn btn-sm btn-outline-danger" onclick="batalkanPengajuanPengiriman('${escAttrJs(g.key)}')"><i class="bi bi-x-circle me-1"></i>Batalkan</button>`:''}</div>`;
-            return `<tr><td><span class="pengiriman-tanggal">${formatTanggalTampil(t.tgl)}</span><span class="pengiriman-dokumen">${escapeHtml(t.no_dokumen||'-')}</span><span class="pengiriman-meta">${g.items.length} material</span></td><td>${rincian}</td><td class="pengiriman-total-kg">${g.total_kirim.toFixed(2)} Kg</td><td><span class="status-chip ${kelasStatusVerifikasiPengiriman(pseudo)}">${escapeHtml(labelStatusVerifikasiPengiriman(pseudo))}</span>${t.diverifikasi_oleh?`<span class="pengiriman-petugas">oleh ${escapeHtml(t.diverifikasi_oleh)}</span>`:''}</td><td>${hasil}${g.status_verifikasi==='diterima'?`<div class="hasil-total">Total: ${g.total_diterima.toFixed(2)} Kg · ${rupiah(g.total_final)}</div>`:''}</td><td><span class="status-chip ${kelasStatusPembayaranPengiriman(pseudo)}">${escapeHtml(labelStatusPembayaranPengiriman(pseudo))}</span>${t.tanggal_pembayaran?`<span class="pengiriman-tanggal-bayar">${formatTanggalTampil(t.tanggal_pembayaran)}</span>`:''}</td><td class="pengiriman-catatan">${cat}</td><td class="text-center">${aksi}</td></tr>`;
-        }).join(''):`<tr><td colspan="8" class="empty-state"><i class="bi bi-truck"></i>Belum ada pengajuan pengiriman.</td></tr>`;
+            return `<tr><td><span class="pengiriman-tanggal">${formatTanggalTampil(t.tgl)}</span><span class="pengiriman-dokumen">${escapeHtml(t.no_dokumen||'-')}</span><span class="pengiriman-meta">${g.items.length} material</span></td><td>${rincian}</td><td class="pengiriman-total-kg">${g.total_kirim.toFixed(2)} Kg</td><td><span class="status-chip ${kelasStatusVerifikasiPengiriman(pseudo)}">${escapeHtml(labelStatusVerifikasiPengiriman(pseudo))}</span>${t.diverifikasi_oleh?`<span class="pengiriman-petugas">oleh ${escapeHtml(t.diverifikasi_oleh)}</span>`:''}</td><td>${hasil}${g.status_verifikasi==='diterima'?`<div class="hasil-total">Total: ${g.total_diterima.toFixed(2)} Kg · ${rupiah(g.total_final)}</div>`:''}</td><td class="pengiriman-catatan">${cat}</td><td class="text-center">${aksi}</td></tr>`;
+        }).join(''):`<tr><td colspan="7" class="empty-state"><i class="bi bi-truck"></i>Belum ada pengajuan pengiriman.</td></tr>`;
     }
     function batalkanPengajuanPengiriman(key){
         const g=buatGrupPengirimanUnit().find(x=>x.key===key);if(!g)return;

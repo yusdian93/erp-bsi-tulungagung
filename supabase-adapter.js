@@ -352,18 +352,6 @@ const AdapterAPI = {
     return data || { ok:true };
   },
 
-  async konfirmasiPembayaranPengirimanBSI(form) {
-    const { data, error } = await sb.rpc('konfirmasi_pembayaran_pengiriman_bsu', {
-      p_id: form.id,
-      p_tanggal: form.tanggal,
-      p_metode: form.metode,
-      p_no_bukti: form.no_bukti || null,
-      p_oleh: form.oleh || getPetugasSesi()
-    });
-    if (error) return { ok:false, error:error.message };
-    return data || { ok:true };
-  },
-
   async batalkanPengajuanPengirimanBSU(form) {
     const { data, error } = await sb.rpc('batalkan_pengajuan_pengiriman_bsu', {
       p_id: form.id,
@@ -381,18 +369,6 @@ const AdapterAPI = {
       p_status: form.status_verifikasi,
       p_items: form.items || [],
       p_catatan: form.catatan || null,
-      p_oleh: form.oleh || getPetugasSesi()
-    });
-    if (error) return { ok:false, error:error.message };
-    return data || { ok:true };
-  },
-
-  async konfirmasiPembayaranPengirimanBatchBSI(form) {
-    const { data, error } = await sb.rpc('konfirmasi_pembayaran_pengiriman_bsu_batch', {
-      p_kelompok_id: form.kelompok_id,
-      p_tanggal: form.tanggal,
-      p_metode: form.metode,
-      p_no_bukti: form.no_bukti || null,
       p_oleh: form.oleh || getPetugasSesi()
     });
     if (error) return { ok:false, error:error.message };
@@ -518,7 +494,8 @@ const AdapterAPI = {
     return 'Sukses tersimpan';
   },
 
-  // Tarik Tabungan BSU (BSI membayar tunai/transfer ke BSU, mengurangi saldo BSU di BSI)
+  // Satu-satunya alur pembayaran BSI ke BSU: menu Keuangan BSU > Pencairan Saldo BSU.
+  // Transaksi ini mengurangi saldo BSU di BSI setelah dana benar-benar diserahkan.
   async tambahPenarikanBSU({ nomorTransaksi, tgl, nama, id_unit, jumlah, metode, status, disetujuiOleh }) {
     const kunci = await cekPeriodeTerkunci(tgl);
     if (kunci) return pesanPeriodeTerkunci(kunci);
