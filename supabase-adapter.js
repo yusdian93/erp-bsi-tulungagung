@@ -819,15 +819,46 @@ const AdapterAPI = {
       sb.from('bagi_hasil_penggunaan').select('*').eq('id_unit', idUnit).order('tanggal', { ascending: false }),
       sb.from('audit_log').select('*').order('waktu', { ascending: false }).limit(500)
     ]);
+    const sumberWajib = [
+      ['nasabah', nasRes],
+      ['transaksi nasabah', trxRes],
+      ['pengiriman ke BSI', keluarRes],
+      ['profil BSU', unitRes]
+    ];
+    const gagalWajib = sumberWajib.find(([, hasil]) => hasil.error);
+    if (gagalWajib) throw new Error(`Gagal memuat ${gagalWajib[0]}: ${gagalWajib[1].error.message}`);
+    if (!(unitRes.data || []).length) throw new Error(`Data BSU dengan ID ${idUnit} tidak ditemukan.`);
+
+    const nasabah = nasRes.data || [];
+    const transaksi = trxRes.data || [];
+    const transaksiKeluar = keluarRes.data || [];
+    const stockOpname = opnameRes.data || [];
+    const kasMutasi = kasRes.data || [];
+    const aktif = rows => (rows || []).filter(row => String(row.status || 'aktif').toLowerCase() !== 'dibatalkan');
+    const trxAktif = aktif(transaksi);
+    const keluarAktif = aktif(transaksiKeluar);
+    const totalMasuk = trxAktif.filter(t => t.jenis !== 'Penarikan Tunai').reduce((a, t) => a + (Number(t.berat) || 0), 0);
+    const totalKeluar = keluarAktif.filter(t => t.jenis !== 'Penarikan Tabungan').reduce((a, t) => a + (Number(t.berat_kirim ?? t.berat) || 0), 0);
+    const penyesuaianStok = aktif(stockOpname).reduce((a, o) => a + (Number(o.selisih) || 0), 0);
+    const saldoKas = aktif(kasMutasi).reduce((a, k) => a + (String(k.arah).toLowerCase() === 'keluar' ? -(Number(k.nominal) || 0) : (Number(k.nominal) || 0)), 0);
     const audit = (auditRes.data || []).filter(a => {
       const teks = JSON.stringify([a.record_id, a.data_lama, a.data_baru, a.keterangan]);
       return teks.includes(String(idUnit));
     });
     return {
-      nasabah: nasRes.data || [], transaksi: trxRes.data || [], transaksiKeluar: keluarRes.data || [],
-      kategori: katRes.data || [], unit: unitRes.data || [], stockOpname: opnameRes.data || [],
-      kasMutasi: kasRes.data || [], rekonsiliasi: rekRes.data || [],
-      penggunaanBagiHasil: bagiRes.data || [], audit
+      nasabah, transaksi, transaksiKeluar,
+      kategori: katRes.data || [], unit: unitRes.data || [], stockOpname,
+      kasMutasi, rekonsiliasi: rekRes.data || [],
+      penggunaanBagiHasil: bagiRes.data || [], audit,
+      ringkasan: {
+        jumlah_nasabah: nasabah.filter(n => String(n.status || 'aktif').toLowerCase() !== 'nonaktif').length,
+        jumlah_transaksi: trxAktif.length,
+        total_tabungan: trxAktif.reduce((a, t) => a + (Number(t.total) || 0), 0),
+        total_sampah: totalMasuk,
+        stok_gudang: totalMasuk - totalKeluar + penyesuaianStok,
+        saldo_kas: saldoKas,
+        terkirim_bsi: totalKeluar
+      }
     };
   },
 

@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-adapter.js?v=20260816-password-terlihat-1"></script>
+    <script src="supabase-adapter.js?v=20260816-dashboard-bsu-1"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
   // === QRCode.js (davidshimjs/qrcodejs, MIT License) disematkan langsung di sini ===
@@ -1665,6 +1665,7 @@
     let dataNasabah = []; let dataTransaksi = []; let dataTransaksiKeluar = []; let dataKategori = []; let dataUnit = [];
     let dataStockOpname = []; let dataKasMutasi = []; let dataRekonsiliasiUnit = []; let dataAuditUnit = [];
     let dataPenggunaanBagiHasil = [];
+    let dataRingkasanDashboardUnit = null;
     let keranjangPengirimanBSI = [];
     let masterNasabah = []; let masterTransaksi = [];
     let HAK_AKSES_UNIT = String(localStorage.getItem('HAK_AKSES_BSU') || 'ADMIN_BSU').toUpperCase();
@@ -1676,13 +1677,12 @@
             dataTransaksiKeluar = data.transaksiKeluar || [];
             dataKategori = data.kategori || [];
             dataUnit = data.unit || [];
-            terapkanModeLatihanUnit();
             dataStockOpname = data.stockOpname || [];
             dataKasMutasi = data.kasMutasi || [];
             dataRekonsiliasiUnit = data.rekonsiliasi || [];
             dataPenggunaanBagiHasil = data.penggunaanBagiHasil || [];
             dataAuditUnit = data.audit || [];
-            terapkanHakAksesUnit();
+            dataRingkasanDashboardUnit = data.ringkasan || null;
 
             dataNasabah = [...masterNasabah];
             dataTransaksi = [...masterTransaksi];
@@ -1699,23 +1699,36 @@
                 t.nilai_pengelola = t.nilai_pengelola == null ? null : (parseFloat(t.nilai_pengelola) || 0);
             });
 
-            updateTabelNasabah();
-            updateTabelHargaSampah();
-            updateDropdownKategori();
-            updateDropdownNasabah('pilihNasabah');
-            updateDropdownNasabah('pilihNasabahSaldo');
-            isiDropdownModulBaru();
-            updateDashboard();
-            updateBukuBesar();
-            updateLaporan();
-            updateTabelStock();
-            updateTabelPengiriman();
-            updateTabelStockOpname();
-            updateKasUnit();
-            updateBagiHasilUnit();
-            updateTabelKoreksi();
-            updateAuditUnit();
-            updateProfilUnit();
+            // Tampilkan angka dashboard terlebih dahulu. Kegagalan satu tabel/modul
+            // lain tidak boleh lagi membuat semua kartu dashboard tetap kosong.
+            terapkanRingkasanDashboardCepat(dataRingkasanDashboardUnit);
+            try { updateDashboard(); }
+            catch (error) { console.error('Gagal memperbarui rincian dashboard:', error); }
+
+            const pekerjaanTampilan = [
+                ['mode latihan', terapkanModeLatihanUnit],
+                ['hak akses', terapkanHakAksesUnit],
+                ['tabel nasabah', updateTabelNasabah],
+                ['daftar harga', updateTabelHargaSampah],
+                ['kategori setoran', updateDropdownKategori],
+                ['pilihan nasabah setoran', () => updateDropdownNasabah('pilihNasabah')],
+                ['pilihan nasabah saldo', () => updateDropdownNasabah('pilihNasabahSaldo')],
+                ['pilihan modul', isiDropdownModulBaru],
+                ['buku besar', updateBukuBesar],
+                ['laporan', updateLaporan],
+                ['stok', updateTabelStock],
+                ['pengiriman', updateTabelPengiriman],
+                ['stock opname', updateTabelStockOpname],
+                ['kas unit', updateKasUnit],
+                ['bagi hasil', updateBagiHasilUnit],
+                ['koreksi', updateTabelKoreksi],
+                ['audit', updateAuditUnit],
+                ['profil', updateProfilUnit]
+            ];
+            pekerjaanTampilan.forEach(([nama, jalankan]) => {
+                try { jalankan(); }
+                catch (error) { console.error(`Gagal memperbarui ${nama}:`, error); }
+            });
         }).catch(error => {
             console.error('Gagal memuat data:', error);
             alert('Gagal memuat data dari server. Periksa koneksi internet atau hubungi administrator sistem.');
@@ -1727,19 +1740,35 @@
     // ==========================================
     // LOGIKA DASBOR & ANIMASI AI KOMPOSISI HIERARKI
     // ==========================================
+    function terapkanRingkasanDashboardCepat(ringkasan) {
+        if (!ringkasan) return;
+        setText('dash-transaksi', num(ringkasan.jumlah_transaksi).toLocaleString('id-ID'));
+        setText('dash-nasabah', num(ringkasan.jumlah_nasabah).toLocaleString('id-ID'));
+        setText('dash-rupiah', rupiah(ringkasan.total_tabungan));
+        setText('dash-sampah', num(ringkasan.total_sampah).toFixed(1) + ' Kg');
+        setText('dash-stok-aktif', num(ringkasan.stok_gudang).toFixed(2) + ' Kg');
+        setText('dash-kas', rupiah(ringkasan.saldo_kas));
+        setText('dash-keluar-bsi', num(ringkasan.terkirim_bsi).toFixed(2) + ' Kg');
+    }
+
     function updateDashboard() {
         const trxAktif = transaksiAktif(dataTransaksi);
         const keluarAktif = transaksiAktif(dataTransaksiKeluar);
         const totalSaldo = trxAktif.reduce((a,t) => a + num(t.total), 0);
         const totalMasuk = trxAktif.filter(t => t.jenis !== 'Penarikan Tunai').reduce((a,t) => a + num(t.berat), 0);
         const totalKeluar = keluarAktif.filter(t => num(t.berat_kirim ?? t.berat) > 0).reduce((a,t) => a + num(t.berat_kirim ?? t.berat), 0);
-        const totalStok = hitungSemuaStok().reduce((a,b) => a + b.sisa, 0);
-        const saldoKas = hitungSaldoKas();
 
+        // Empat angka utama tidak bergantung pada modul stok/kas.
         setText('dash-transaksi', trxAktif.length);
         setText('dash-nasabah', dataNasabah.filter(n => (n.status || 'aktif') !== 'nonaktif').length);
         setText('dash-rupiah', rupiah(totalSaldo));
         setText('dash-sampah', totalMasuk.toFixed(1) + ' Kg');
+        let totalStok = num(dataRingkasanDashboardUnit?.stok_gudang);
+        let saldoKas = num(dataRingkasanDashboardUnit?.saldo_kas);
+        try { totalStok = hitungSemuaStok().reduce((a,b) => a + b.sisa, 0); }
+        catch (error) { console.error('Gagal menghitung stok dashboard:', error); }
+        try { saldoKas = hitungSaldoKas(); }
+        catch (error) { console.error('Gagal menghitung kas dashboard:', error); }
         setText('dash-stok-aktif', totalStok.toFixed(2) + ' Kg');
         setText('dash-kas', rupiah(saldoKas));
         setText('dash-keluar-bsi', totalKeluar.toFixed(2) + ' Kg');
