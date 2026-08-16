@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-adapter.js"></script>
+    <script src="supabase-adapter.js?v=20260816-surat-otomatis-3"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
   // === QRCode.js (davidshimjs/qrcodejs, MIT License) disematkan langsung di sini ===
@@ -1406,11 +1406,11 @@
         <div id="pengiriman" class="tab-content" style="display:none;">
             <div class="card p-4 p-md-5">
                 <div class="module-title"><span class="icon-shell"><i class="bi bi-truck"></i></span><div><h4 class="m-0">Pengajuan Pengiriman Sampah ke BSI</h4><div class="module-note">Satu surat pengantar dapat memuat beberapa jenis material sekaligus. BSI memeriksa berat dan harga final setiap material dalam satu pengiriman.</div></div></div>
-                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i><strong>Alur:</strong> Isi satu nomor surat pengantar → tambahkan seluruh material ke daftar → kirim satu kali → BSI memverifikasi semua material dalam surat yang sama → pembayaran dilakukan untuk total pengiriman.</div>
+                <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i><strong>Alur:</strong> Nomor surat dibuat otomatis sesuai nama BSU → tambahkan seluruh material ke daftar → kirim satu kali → BSI memverifikasi semua material dalam surat yang sama.</div>
                 <form id="formPengirimanBSI" class="mt-4" onsubmit="simpanPengirimanBSI(event)">
                     <div class="row g-3">
-                        <div class="col-md-3"><label>Tanggal Pengiriman <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" required></div>
-                        <div class="col-md-4"><label>No. Surat Pengantar/Jalan <span class="required-mark">*</span></label><input id="kirimDokumen" class="form-control" placeholder="Contoh: SJ/BSU/07/2026/001" required></div>
+                        <div class="col-md-3"><label>Tanggal Pengiriman <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" onchange="buatNomorSuratPengantarOtomatis(true)" required></div>
+                        <div class="col-md-4"><label>No. Surat Pengantar/Jalan</label><input id="kirimDokumen" class="form-control" placeholder="Dibuat otomatis oleh sistem" readonly aria-readonly="true" style="background:#f1f5f9;font-weight:700;"><small class="text-muted">Otomatis dari nama BSU, tanggal, dan kode unik.</small></div>
                         <div class="col-md-2"><label>Biaya Angkut BSU</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
                         <div class="col-md-3"><label>Catatan Pengiriman</label><input id="kirimCatatan" class="form-control" placeholder="Pengemudi/jumlah karung/kondisi"></div>
                     </div>
@@ -3693,6 +3693,21 @@
         const lapNas=document.getElementById('lapFilterNasabah');if(lapNas)lapNas.innerHTML='<option value="">Semua Nasabah</option>'+dataNasabah.map(n=>`<option value="${escapeHtmlAttr(n.id)}">${escapeHtml(n.nama)} — ${escapeHtml(n.id)}</option>`).join('');
         const today=new Date().toISOString().slice(0,10);['kirimTanggal','opnameTanggal','kasTanggal','rekTanggal','bagiTanggal'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
         const op=document.getElementById('opnamePetugas');if(op&&!op.value)op.value=getPetugasSesi();
+        buatNomorSuratPengantarOtomatis(false);
+    }
+
+    function buatNomorSuratPengantarOtomatis(paksa=false){
+        const input=document.getElementById('kirimDokumen');
+        const tgl=document.getElementById('kirimTanggal')?.value||new Date().toISOString().slice(0,10);
+        if(!input)return '';
+        if(!paksa&&input.value.trim())return input.value.trim();
+        const data={nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),id_unit:CURRENT_UNIT_ID,tgl};
+        if(typeof AdapterAPI!=='undefined'&&typeof AdapterAPI.buatNomorSuratPengantar==='function')input.value=AdapterAPI.buatNomorSuratPengantar(data);
+        else{
+            const kode=String(data.nama||data.id_unit||'UNIT').replace(/\b(bank|sampah|unit|bsu)\b/gi,' ').replace(/[^a-zA-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').toUpperCase().slice(0,24)||'UNIT';
+            input.value=`SPJ/${kode}/${String(tgl).replace(/\D/g,'')}/${Date.now().toString(36).toUpperCase()}`;
+        }
+        return input.value.trim();
     }
 
     function labelStatusVerifikasiPengiriman(t){
@@ -3736,9 +3751,9 @@
     }
     function simpanPengirimanBSI(e){
         e.preventDefault();
-        const tgl=document.getElementById('kirimTanggal').value;const noDok=document.getElementById('kirimDokumen').value.trim();
+        const tgl=document.getElementById('kirimTanggal').value;const noDok=buatNomorSuratPengantarOtomatis(false);
         if(!tgl)return alert('Tanggal pengiriman wajib diisi.');
-        if(!noDok)return alert('Nomor surat pengantar/jalan wajib diisi.');
+        if(!noDok)return alert('Nomor surat otomatis gagal dibuat. Muat ulang halaman lalu coba lagi.');
         if(!keranjangPengirimanBSI.length)return alert('Tambahkan minimal satu material ke surat pengantar.');
         for(const item of keranjangPengirimanBSI){const stok=stokMaterial(item.jenis);if(num(item.berat_kirim)>stok)return alert(`Stok ${escapeHtml(item.jenis)} hanya ${stok.toFixed(2)} Kg.`);}
         const totalKg=keranjangPengirimanBSI.reduce((a,x)=>a+num(x.berat_kirim),0);

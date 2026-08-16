@@ -84,6 +84,21 @@ function genId(prefix) {
   return (prefix ? prefix + '-' : '') + unik;
 }
 
+function buatNomorSuratPengantarOtomatis({ nama, id_unit, tgl } = {}) {
+  const namaBersih = String(nama || '')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/\b(bank|sampah|unit|bsu)\b/gi, ' ')
+    .replace(/[^a-zA-Z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .toUpperCase();
+  const kodeUnit = (namaBersih || String(id_unit || 'UNIT').replace(/[^a-zA-Z0-9]+/g, '-').toUpperCase()).slice(0, 24);
+  const tanggal = String(tgl || new Date().toISOString().slice(0, 10)).replace(/\D/g, '').slice(0, 8);
+  const sekarang = new Date();
+  const waktu = [sekarang.getHours(), sekarang.getMinutes(), sekarang.getSeconds()].map(v => String(v).padStart(2, '0')).join('');
+  const unik = genId().replace(/[^a-zA-Z0-9]/g, '').slice(-4).toUpperCase();
+  return `SPJ/${kodeUnit}/${tanggal}/${waktu}-${unik}`;
+}
+
 // ================== UTIL: IDENTITAS PETUGAS PER-SESI ==================
 // Dipakai untuk mengisi kolom "oleh" di audit_log tanpa perlu login
 // terpisah per pengguna. Ditanya sekali per sesi tab browser, lalu
@@ -275,6 +290,10 @@ function stripPasswordBsu(obj) {
 }
 
 const AdapterAPI = {
+
+  buatNomorSuratPengantar(form) {
+    return buatNomorSuratPengantarOtomatis(form);
+  },
 
   // ================== LOGIN (dipakai index.html) ==================
   // Password dicek di server (Edge Function), TIDAK PERNAH dikirim mentah ke browser.
@@ -1090,8 +1109,9 @@ const AdapterAPI = {
   async tambahPengirimanBatchBSI({ id_unit, nama, tgl, no_dokumen, biaya_angkut, catatan, items, kelompok_id, oleh }) {
     const kunci = await cekPeriodeTerkunci(tgl);
     if (kunci) return { ok:false, error:pesanPeriodeTerkunci(kunci) };
-    if (!id_unit || !tgl || !String(no_dokumen || '').trim()) return { ok:false, error:'Tanggal dan nomor surat pengantar wajib diisi.' };
+    if (!id_unit || !tgl) return { ok:false, error:'Identitas BSU dan tanggal pengiriman wajib tersedia.' };
     if (!Array.isArray(items) || !items.length) return { ok:false, error:'Daftar material pengiriman masih kosong.' };
+    const nomorDokumen = String(no_dokumen || '').trim() || buatNomorSuratPengantarOtomatis({ nama, id_unit, tgl });
     const grupId = kelompok_id || genId('KRM');
     const petugas = oleh || getPetugasSesi();
     const seen = new Set();
@@ -1106,7 +1126,7 @@ const AdapterAPI = {
         id: genId('TRX'), id_unit, level:'unit_ke_induk', nama, tgl, jenis,
         berat_kirim:beratKirim, berat:beratKirim,
         harga_usulan:hargaUsulan, total_usulan:beratKirim*hargaUsulan,
-        harga_satuan:0, total:0, no_dokumen:String(no_dokumen).trim(),
+        harga_satuan:0, total:0, no_dokumen:nomorDokumen,
         kelompok_id:grupId, status_verifikasi:'menunggu_verifikasi', status_pembayaran:'belum_dibayar',
         biaya_angkut:index===0?(Number(biaya_angkut)||0):0,
         catatan:catatan||null, status:'aktif', created_by:petugas
@@ -1114,8 +1134,8 @@ const AdapterAPI = {
     });
     const { error } = await sb.from('transaksi').insert(rows);
     if (error) return { ok:false, error:error.message };
-    rows.forEach(row => logAudit('transaksi', row.id, 'insert', null, row, 'Surat pengantar multi-material ' + no_dokumen + ' / grup ' + grupId));
-    return { ok:true, kelompok_id:grupId, jumlah_item:rows.length, total_kg:rows.reduce((a,r)=>a+Number(r.berat_kirim||0),0) };
+    rows.forEach(row => logAudit('transaksi', row.id, 'insert', null, row, 'Surat pengantar multi-material ' + nomorDokumen + ' / grup ' + grupId));
+    return { ok:true, kelompok_id:grupId, no_dokumen:nomorDokumen, jumlah_item:rows.length, total_kg:rows.reduce((a,r)=>a+Number(r.berat_kirim||0),0) };
   },
 
   async tambahPengirimanBSI(form) {
@@ -1124,13 +1144,14 @@ const AdapterAPI = {
     const id = genId('TRX');
     const beratKirim = Number(form.berat_kirim ?? form.berat) || 0;
     const hargaUsulan = Number(form.harga_usulan ?? form.harga_satuan) || 0;
+    const nomorDokumen = String(form.no_dokumen || '').trim() || buatNomorSuratPengantarOtomatis({ nama:form.nama, id_unit:form.id_unit, tgl:form.tgl });
     const row = {
       id, id_unit: form.id_unit, level: 'unit_ke_induk', nama: form.nama, tgl: form.tgl,
       jenis: form.jenis,
       berat_kirim: beratKirim, berat: beratKirim,
       harga_usulan: hargaUsulan, total_usulan: beratKirim * hargaUsulan,
       harga_satuan: 0, total: 0,
-      no_dokumen: form.no_dokumen || null,
+      no_dokumen: nomorDokumen,
       status_verifikasi: 'menunggu_verifikasi',
       status_pembayaran: 'belum_dibayar',
       biaya_angkut: Number(form.biaya_angkut) || 0,
