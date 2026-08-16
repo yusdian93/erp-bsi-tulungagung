@@ -317,16 +317,9 @@ const AdapterAPI = {
     // Data BSU latihan tetap ditampilkan pada daftar administrasi, tetapi transaksi
     // latihan tidak dimasukkan ke dashboard dan laporan resmi Bank Sampah Induk.
     const idLatihan = new Set((bsuList || []).filter(b => b.mode_latihan === true).map(b => String(b.id)));
-    const transaksiResmi = (transaksi || []).filter(t => {
-      if (idLatihan.has(String(t.id_unit || ''))) return false;
-      if ((t.status || 'aktif') === 'dibatalkan') return false;
-      // Transaksi material baru hanya masuk dashboard/laporan BSI setelah diterima.
-      // Riwayat lama (status_verifikasi null) dan transaksi Penarikan Tabungan tetap dibaca.
-      return t.jenis === 'Penarikan Tabungan' || !t.status_verifikasi || t.status_verifikasi === 'diterima';
-    }).map(t => {
+    const normalisasiTransaksiBsi = t => {
       // Pengajuan baru dibuat dengan total/harga_satuan = 0. Setelah BSI menerima,
-      // nilai yang sah tersimpan di kolom *_final. Normalisasi di satu tempat agar
-      // Saldo BSU di BSI, Pencairan Saldo, dashboard, dan laporan membaca nilai final.
+      // nilai yang sah tersimpan di kolom *_final.
       if (t.jenis === 'Penarikan Tabungan' || t.status_verifikasi !== 'diterima') return t;
       const totalFinal = Number(t.total_final);
       const beratFinal = Number(t.berat_diterima);
@@ -337,8 +330,16 @@ const AdapterAPI = {
         berat: Number.isFinite(beratFinal) && beratFinal > 0 ? beratFinal : (Number(t.berat) || 0),
         harga_satuan: Number.isFinite(hargaFinal) && hargaFinal > 0 ? hargaFinal : (Number(t.harga_satuan) || 0)
       };
-    });
-    return { kategori: kategori || [], nasabah: bsuList || [], transaksi: transaksiResmi, hibah: hibah || [] };
+    };
+    const transaksiKeuangan = (transaksi || []).filter(t => {
+      if ((t.status || 'aktif') === 'dibatalkan') return false;
+      // Saldo hanya berasal dari material yang diterima, riwayat lama, dan pencairan.
+      return t.jenis === 'Penarikan Tabungan' || !t.status_verifikasi || t.status_verifikasi === 'diterima';
+    }).map(normalisasiTransaksiBsi);
+    // Dashboard dan laporan resmi tetap mengecualikan BSU latihan. Dua menu keuangan
+    // memakai transaksi_keuangan agar saldo BSU latihan tetap dapat diuji dan dicairkan.
+    const transaksiResmi = transaksiKeuangan.filter(t => !idLatihan.has(String(t.id_unit || '')));
+    return { kategori: kategori || [], nasabah: bsuList || [], transaksi: transaksiResmi, transaksi_keuangan: transaksiKeuangan, hibah: hibah || [] };
   },
 
   // Seluruh pengajuan BSU, termasuk yang masih menunggu, khusus menu verifikasi BSI.

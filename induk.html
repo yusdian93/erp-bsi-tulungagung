@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="supabase-adapter.js" defer></script>
+  <script src="supabase-adapter.js?v=20260816-saldo-bsu-2" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -2991,6 +2991,7 @@
 
     let globalDataDashboard = null;
     let globalTransaksi = [];
+    let globalTransaksiKeuangan = [];
     let globalNasabah = []; 
     let globalKategori = [];
     let globalPenjualan = []; // sumber: tabel `penjualan` di Supabase (dulu localStorage, sudah dimigrasikan)
@@ -4574,7 +4575,7 @@
     function transaksiKeuanganBsi(idAtauNama) {
         const bsu = cariBsuKeuanganBsi(idAtauNama);
         if (!bsu) return [];
-        return globalTransaksi.filter(t => {
+        return globalTransaksiKeuangan.filter(t => {
             const punyaId = t.id_unit != null && String(t.id_unit).trim() !== '';
             return punyaId ? String(t.id_unit) === String(bsu.id) : String(t.nama || '') === String(bsu.nama || '');
         });
@@ -5109,7 +5110,7 @@
 
     function renderRiwayatTarikBSU() {
         let tbody = document.getElementById('tbodyRiwayatTarikBSU');
-        let penarikan = globalTransaksi.filter(t => t.jenis === 'Penarikan Tabungan').slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+        let penarikan = globalTransaksiKeuangan.filter(t => t.jenis === 'Penarikan Tabungan').slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
 
         if (penarikan.length === 0) {
             tbody.innerHTML = '<tr><td colspan="11" class="text-center text-muted">Belum ada pembayaran saldo BSU</td></tr>';
@@ -6470,7 +6471,7 @@
     function loadDataTambahan() {
         return Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle()])
         .then(([res, resInv, resDok, resJual]) => {
-            globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
+            globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || []; globalTransaksiKeuangan = res.transaksi_keuangan || res.transaksi || [];
             globalHibah = res.hibah || [];
             globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
             globalPembinaan = resDok.pembinaan || []; globalDarurat = resDok.darurat || [];
@@ -6518,7 +6519,7 @@
     // Total tabungan BSU yang masih tersimpan di BSI (belum ditarik) = kewajiban BSI ke BSU.
     function hitungTotalTabunganBsuBelumDitarik() {
         let total = 0;
-        (globalNasabah || []).forEach(bsu => { total += Math.max(0, hitungSaldoBsuSaatIni(bsu.nama)); });
+        (globalNasabah || []).filter(bsu => bsu.mode_latihan !== true).forEach(bsu => { total += Math.max(0, hitungSaldoBsuSaatIni(bsu.id || bsu.nama)); });
         return total;
     }
 
