@@ -4566,15 +4566,29 @@
         });
     }
 
+    function cariBsuKeuanganBsi(idAtauNama) {
+        const kunci = String(idAtauNama == null ? '' : idAtauNama);
+        return globalNasabah.find(n => String(n.id) === kunci) || globalNasabah.find(n => String(n.nama) === kunci) || null;
+    }
+
+    function transaksiKeuanganBsi(idAtauNama) {
+        const bsu = cariBsuKeuanganBsi(idAtauNama);
+        if (!bsu) return [];
+        return globalTransaksi.filter(t => {
+            const punyaId = t.id_unit != null && String(t.id_unit).trim() !== '';
+            return punyaId ? String(t.id_unit) === String(bsu.id) : String(t.nama || '') === String(bsu.nama || '');
+        });
+    }
+
     function loadSaldoTabunganBSI() {
         if (!document.getElementById('rekapSaldoBSIBulan').value) {
             let now = new Date();
             document.getElementById('rekapSaldoBSIBulan').value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
         }
         let selBsu = document.getElementById('saldoBSIPilihBsu');
-        let prevVal = selBsu.value;
-        selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${escHtml(n.nama)}</option>`).join('');
-        if (prevVal) selBsu.value = prevVal;
+        let prevBsu = cariBsuKeuanganBsi(selBsu.value);
+        selBsu.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.id || n.nama)}">${escHtml(n.nama)}</option>`).join('');
+        if (prevBsu) selBsu.value = prevBsu.id || prevBsu.nama;
 
         renderRekapSaldoBSI();
         renderMultiBulanSaldoBSI();
@@ -4584,18 +4598,23 @@
     let lastRekeningBSI = null;
 
     function ubahPilihanSaldoBSI() {
-        let namaBsu = document.getElementById('saldoBSIPilihBsu').value;
+        let idAtauNamaBsu = document.getElementById('saldoBSIPilihBsu').value;
         let elKosong = document.getElementById('saldoBSIKosong');
         let elIsi = document.getElementById('saldoBSIIsi');
 
-        if (!namaBsu) {
+        if (!idAtauNamaBsu) {
             elKosong.style.display = 'block'; elIsi.style.display = 'none';
             lastRekeningBSI = null;
             return;
         }
 
-        let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
-        let trx = globalTransaksi.filter(t => t.nama === namaBsu).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+        let bsuInfo = cariBsuKeuanganBsi(idAtauNamaBsu);
+        if (!bsuInfo) {
+            elKosong.style.display = 'block'; elIsi.style.display = 'none';
+            lastRekeningBSI = null;
+            return;
+        }
+        let trx = transaksiKeuanganBsi(bsuInfo.id || bsuInfo.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
 
         let saldoBerjalan = 0, totalSetor = 0, totalTarik = 0;
         let rincianJenis = {};
@@ -4632,7 +4651,7 @@
         document.getElementById('saldoBSIKosong').style.display = 'none';
         document.getElementById('saldoBSIIsi').style.display = 'block';
 
-        lastRekeningBSI = { namaBsu, idBsu: bsuInfo.id || '-', hp: bsuInfo.hp || '', baris, totalSetor, totalTarik, saldoAkhir: saldoBerjalan, rincianJenis };
+        lastRekeningBSI = { namaBsu: bsuInfo.nama || '-', idBsu: bsuInfo.id || '-', hp: bsuInfo.hp || '', baris, totalSetor, totalTarik, saldoAkhir: saldoBerjalan, rincianJenis };
     }
 
     function cetakRekeningBSI() {
@@ -4910,7 +4929,7 @@
         let totSetoran = 0, totTarik = 0, totAwal = 0, totAkhir = 0;
 
         let baris = globalNasabah.map((bsu, i) => {
-            let trxBsu = globalTransaksi.filter(t => t.nama === bsu.nama);
+            let trxBsu = transaksiKeuanganBsi(bsu.id || bsu.nama);
 
             let setoranBulan = 0, tarikBulan = 0, saldoAwal = 0;
             trxBsu.forEach(t => {
@@ -5016,9 +5035,9 @@
     // =========================================
     function loadTarikTabunganBSU() {
         let sel = document.getElementById('tarikBsuPilih');
-        let prevVal = sel.value;
-        sel.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.nama)}">${escHtml(n.nama)}</option>`).join('');
-        if (prevVal) sel.value = prevVal;
+        let prevBsu = cariBsuKeuanganBsi(sel.value);
+        sel.innerHTML = '<option value="">-- Pilih BSU --</option>' + globalNasabah.map(n => `<option value="${escAttr(n.id || n.nama)}">${escHtml(n.nama)}</option>`).join('');
+        if (prevBsu) sel.value = prevBsu.id || prevBsu.nama;
 
         if (!document.getElementById('tarikBsuTanggal').value) {
             document.getElementById('tarikBsuTanggal').value = new Date().toISOString().slice(0, 10);
@@ -5028,37 +5047,40 @@
         renderRiwayatTarikBSU();
     }
 
-    function hitungSaldoBsuSaatIni(namaBsu) {
-        return globalTransaksi.filter(t => t.nama === namaBsu).reduce((a, t) => a + (parseFloat(t.total) || 0), 0);
+    function hitungSaldoBsuSaatIni(idAtauNamaBsu) {
+        return transaksiKeuanganBsi(idAtauNamaBsu).reduce((a, t) => a + (parseFloat(t.total) || 0), 0);
     }
 
     function ubahBsuTarikBSU() {
-        let namaBsu = document.getElementById('tarikBsuPilih').value;
+        let idAtauNamaBsu = document.getElementById('tarikBsuPilih').value;
         let elIdentitas = document.getElementById('tarikBsuIdentitas');
-        if (!namaBsu) { elIdentitas.style.display = 'none'; return; }
-        let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
-        let saldo = hitungSaldoBsuSaatIni(namaBsu);
+        if (!idAtauNamaBsu) { elIdentitas.style.display = 'none'; return; }
+        let bsuInfo = cariBsuKeuanganBsi(idAtauNamaBsu);
+        if (!bsuInfo) { elIdentitas.style.display = 'none'; return; }
+        let saldo = hitungSaldoBsuSaatIni(bsuInfo.id || bsuInfo.nama);
         document.getElementById('tarikBsuId').innerText = bsuInfo.id || '-';
         document.getElementById('tarikBsuSaldo').innerText = 'Rp ' + saldo.toLocaleString('id-ID');
         elIdentitas.style.display = 'block';
     }
 
     function simpanTarikBSU() {
-        let namaBsu = document.getElementById('tarikBsuPilih').value;
+        let idAtauNamaBsu = document.getElementById('tarikBsuPilih').value;
         let jumlah = parseFloat(document.getElementById('tarikBsuJumlah').value);
         let tglInput = document.getElementById('tarikBsuTanggal').value;
         let metode = document.getElementById('tarikBsuMetode').value;
         let disetujui = document.getElementById('tarikBsuDisetujui').value.trim();
         let status = document.getElementById('tarikBsuStatus').value;
 
-        if (!namaBsu) return alert('Pilih BSU terlebih dahulu.');
+        if (!idAtauNamaBsu) return alert('Pilih BSU terlebih dahulu.');
         if (!jumlah || jumlah <= 0) return alert('Jumlah pencairan harus lebih dari 0.');
         if (!tglInput) return alert('Tanggal pembayaran wajib diisi.');
         if (!disetujui) return alert('Nama pengelola BSI yang menyetujui wajib diisi.');
         if (cekPeringatanPeriodeTerkunci(tglInput)) return;
 
-        let bsuInfo = globalNasabah.find(n => n.nama === namaBsu) || {};
-        let saldoSaatIni = hitungSaldoBsuSaatIni(namaBsu);
+        let bsuInfo = cariBsuKeuanganBsi(idAtauNamaBsu);
+        if (!bsuInfo) return alert('Data BSU tidak ditemukan. Muat ulang halaman lalu coba lagi.');
+        let bsuTerpilih = bsuInfo.id || bsuInfo.nama;
+        let saldoSaatIni = hitungSaldoBsuSaatIni(bsuTerpilih);
         if (jumlah > saldoSaatIni) return alert(`Jumlah pencairan (Rp ${jumlah.toLocaleString('id-ID')}) melebihi saldo tersedia (Rp ${saldoSaatIni.toLocaleString('id-ID')}).`);
 
         let tglObj = new Date(tglInput + 'T' + new Date().toTimeString().slice(0, 5));
@@ -5069,13 +5091,18 @@
         btn.disabled = true; btn.innerText = 'Memproses...';
 
         AdapterAPI.tambahPenarikanBSU({
-            nomorTransaksi, tgl: tglFormatted, nama: namaBsu, id_unit: bsuInfo.id,
+            nomorTransaksi, tgl: tglFormatted, nama: bsuInfo.nama, id_unit: bsuInfo.id,
             jumlah, metode, status, disetujuiOleh: disetujui
         }).then(res => {
-            alert(res);
+            if (!String(res || '').startsWith('Sukses')) throw new Error(res || 'Pembayaran gagal disimpan.');
+            alert('Pembayaran saldo BSU berhasil dicatat.');
             document.getElementById('formTarikBSU').reset();
             document.getElementById('tarikBsuTanggal').value = new Date().toISOString().slice(0, 10);
-            loadDataTambahan(); // refresh globalTransaksi supaya saldo & riwayat ikut update
+            return loadDataTambahan();
+        }).then(() => {
+            loadTarikTabunganBSU();
+            document.getElementById('tarikBsuPilih').value = bsuTerpilih;
+            ubahBsuTarikBSU();
         }).catch(e => alert('Gagal: ' + e))
           .finally(() => { btn.disabled = false; btn.innerText = '💸 CATAT PEMBAYARAN'; });
     }
@@ -5091,7 +5118,7 @@
 
         // Hitung saldo akhir tiap BSU secara berjalan (kronologis, gabungan semua jenis transaksi BSU tsb)
         let baris = penarikan.map(p => {
-            let semuaTrxBsu = globalTransaksi.filter(t => t.nama === p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+            let semuaTrxBsu = transaksiKeuanganBsi(p.id_unit || p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
             let saldoBerjalan = 0;
             for (let t of semuaTrxBsu) {
                 saldoBerjalan += parseFloat(t.total) || 0;
@@ -5101,7 +5128,7 @@
         });
 
         tbody.innerHTML = baris.slice().reverse().map((p, i) => {
-            let bsuInfo = globalNasabah.find(n => n.nama === p.nama) || {};
+            let bsuInfo = cariBsuKeuanganBsi(p.id_unit || p.nama) || {};
             let warnaStatus = p.status === 'Disetujui' ? 'var(--secondary)' : (p.status === 'Ditolak' ? 'var(--danger)' : '#b45309');
             return `<tr>
                 <td>${baris.length - i}</td><td>${formatTglTabel(p.tgl)}</td><td style="font-weight:700;">${escHtml(p.nama)}</td><td>${escHtml(bsuInfo.id || p.id_unit || '-')}</td>
@@ -5123,8 +5150,8 @@
         if (typeof window.jspdf === 'undefined') return alert('Pustaka PDF belum siap, coba lagi sesaat.');
         const { jsPDF } = window.jspdf;
 
-        let bsuInfo = globalNasabah.find(n => n.nama === p.nama) || {};
-        let semuaTrxBsu = globalTransaksi.filter(t => t.nama === p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+        let bsuInfo = cariBsuKeuanganBsi(p.id_unit || p.nama) || {};
+        let semuaTrxBsu = transaksiKeuanganBsi(p.id_unit || p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
         let saldoBerjalan = 0;
         for (let t of semuaTrxBsu) { saldoBerjalan += parseFloat(t.total) || 0; if (t.id === p.id) break; }
 
@@ -5169,8 +5196,8 @@
         let p = globalTransaksi.find(t => t.id === idTransaksi);
         if (!p) return alert('Data transaksi tidak ditemukan.');
 
-        let bsuInfo = globalNasabah.find(n => n.nama === p.nama) || {};
-        let semuaTrxBsu = globalTransaksi.filter(t => t.nama === p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
+        let bsuInfo = cariBsuKeuanganBsi(p.id_unit || p.nama) || {};
+        let semuaTrxBsu = transaksiKeuanganBsi(p.id_unit || p.nama).slice().sort((a, b) => uraikanTanggalInput(a.tgl) - uraikanTanggalInput(b.tgl));
         let saldoBerjalan = 0;
         for (let t of semuaTrxBsu) { saldoBerjalan += parseFloat(t.total) || 0; if (t.id === p.id) break; }
 
@@ -6441,7 +6468,7 @@
     }
 
     function loadDataTambahan() {
-        Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle()])
+        return Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle()])
         .then(([res, resInv, resDok, resJual]) => {
             globalKategori = res.kategori || []; globalNasabah = res.nasabah || []; globalTransaksi = res.transaksi || [];
             globalHibah = res.hibah || [];
