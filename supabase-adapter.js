@@ -299,9 +299,9 @@ const AdapterAPI = {
       sb.from('transaksi').select('*').eq('level', 'unit_ke_induk').order('tgl', { ascending: false }),
       sb.from('bantuan_hibah').select('*')
     ]);
-    // Data BSU latihan tetap ditampilkan pada daftar administrasi. Dashboard dan
-    // menu saldo memakai data operasional lengkap, sedangkan laporan resmi tetap
-    // memakai transaksi yang mengecualikan BSU latihan.
+    // Data BSU latihan tetap ditampilkan pada daftar administrasi. Seluruh ringkasan,
+    // keuangan, laporan, dan dokumen memakai transaksi operasional yang sudah sah
+    // agar angka yang terlihat pada dashboard juga tercatat konsisten di laporan.
     const idLatihan = new Set((bsuList || []).filter(b => b.mode_latihan === true).map(b => String(b.id)));
     const normalisasiTransaksiBsi = t => {
       // Pengajuan baru dibuat dengan total/harga_satuan = 0. Setelah BSI menerima,
@@ -322,13 +322,15 @@ const AdapterAPI = {
       // Saldo hanya berasal dari material yang diterima, riwayat lama, dan pencairan.
       return t.jenis === 'Penarikan Tabungan' || !t.status_verifikasi || t.status_verifikasi === 'diterima';
     }).map(normalisasiTransaksiBsi);
-    // Laporan resmi tetap mengecualikan BSU latihan. Dashboard dan dua menu keuangan
-    // memakai sumber operasional agar saldo BSU latihan dapat dilihat dan diuji.
+    // Salinan tanpa BSU latihan tetap disediakan bila kelak diperlukan untuk ekspor
+    // eksternal, tetapi tampilan laporan aplikasi menggunakan transaksi operasional.
     const transaksiResmi = transaksiKeuangan.filter(t => !idLatihan.has(String(t.id_unit || '')));
     return {
       kategori: kategori || [],
       nasabah: bsuList || [],
-      transaksi: transaksiResmi,
+      transaksi: transaksiKeuangan,
+      transaksi_laporan: transaksiKeuangan,
+      transaksi_resmi: transaksiResmi,
       transaksi_dashboard: transaksiKeuangan,
       transaksi_keuangan: transaksiKeuangan,
       hibah: hibah || []

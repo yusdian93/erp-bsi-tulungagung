@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-  <script src="supabase-adapter.js?v=20260816-pengajuan-bsi-1" defer></script>
+  <script src="supabase-adapter.js?v=20260816-laporan-dokumen-1" defer></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -6502,7 +6502,9 @@
         .then(([res, resInv, resDok, resJual]) => {
             globalKategori = res.kategori || [];
             globalNasabah = res.nasabah || [];
-            globalTransaksi = res.transaksi || [];
+            // Laporan dan dokumen harus memakai sumber operasional yang sama dengan
+            // dashboard/keuangan, termasuk transaksi sah dari BSU mode latihan.
+            globalTransaksi = res.transaksi_laporan || res.transaksi_keuangan || res.transaksi_dashboard || res.transaksi || [];
             globalTransaksiKeuangan = res.transaksi_keuangan || res.transaksi || [];
             globalTransaksiDashboard = res.transaksi_dashboard || globalTransaksiKeuangan;
             globalHibah = res.hibah || [];
