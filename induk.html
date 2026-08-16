@@ -1362,7 +1362,6 @@
                 <div class="nav-group-items">
                     <button class="nav-btn" data-label="Neraca Aset, Kewajiban & Modal" data-group="grp-kontrol" onclick="pindahTab('neraca', this); loadNeracaPosManual();" title="Posisi aset, kewajiban, dan modal"><span class="nav-ic">⚖️</span><span class="nav-text">Neraca</span></button>
                     <button class="nav-btn" data-label="Tutup Buku Periode" data-group="grp-kontrol" onclick="pindahTab('tutupbuku', this); loadTutupBuku();" title="Mengunci transaksi pada periode yang sudah selesai"><span class="nav-ic">🔒</span><span class="nav-text">Tutup Buku</span></button>
-                    <button class="nav-btn" data-label="Rekonsiliasi Kas / Bank" data-group="grp-kontrol" onclick="pindahTab('rekonsiliasi', this); loadRekonsiliasi();" title="Mencocokkan saldo sistem dengan kas atau rekening"><span class="nav-ic">🧾</span><span class="nav-text">Rekonsiliasi Kas/Bank</span></button>
                     <button class="nav-btn" data-label="Audit Trail / Log Aktivitas" data-group="grp-kontrol" onclick="pindahTab('audittrail', this); loadAuditTrail();" title="Melihat jejak penambahan, perubahan, dan pembatalan data"><span class="nav-ic">🕵️</span><span class="nav-text">Audit Trail</span></button>
                     <button class="nav-btn" data-label="Backup & Restore Data" data-group="grp-kontrol" onclick="pindahTab('backupdata', this);" title="Mencadangkan dan memulihkan data sistem"><span class="nav-ic">💾</span><span class="nav-text">Backup & Restore</span></button>
                 </div>
@@ -1538,38 +1537,6 @@
                 <table id="tbl_tutupbuku">
                     <thead><tr><th>PERIODE</th><th>STATUS</th><th>DITUTUP OLEH</th><th>WAKTU DITUTUP</th><th>CATATAN</th><th class="text-center">AKSI</th></tr></thead>
                     <tbody id="tbody_tutupbuku"><tr><td colspan="6" class="text-center">Memuat data...</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- ================= REKONSILIASI KAS/BANK ================= -->
-    <div id="rekonsiliasi" class="content-section">
-        <div class="panel">
-            <div class="panel-header"><h2>🧾 REKONSILIASI KAS / BANK</h2></div>
-            <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
-                Cocokkan saldo hasil hitung sistem (otomatis dari catatan transaksi) dengan saldo fisik riil (hitung tunai / mutasi rekening
-                koran) secara berkala. Selisih akan ditandai merah dan perlu ditelusuri.
-            </p>
-
-            <div class="form-row-grid" style="background:#f8fafc; padding:14px; border-radius:10px; border:1px solid var(--border); margin-bottom:20px;">
-                <div class="form-group"><label>Tanggal Pemeriksaan</label><input type="date" id="rekTanggal" class="form-control" onchange="hitungSaldoSistemRekon()"></div>
-                <div class="form-group"><label>Sumber</label>
-                    <select id="rekSumber" class="form-control">
-                        <option>Kas Tunai</option><option>Rekening Bank</option><option>E-Wallet</option><option>Lainnya</option>
-                    </select>
-                </div>
-                <div class="form-group"><label>Saldo Menurut Sistem (Rp)</label><input type="number" id="rekSaldoSistem" class="form-control" placeholder="Otomatis terisi dari tanggal di atas"></div>
-                <div class="form-group"><label>Saldo Fisik / Riil (Rp)</label><input type="number" id="rekSaldoFisik" class="form-control" placeholder="Hasil hitung tunai / rekening koran"></div>
-                <div class="form-group"><label>Diperiksa Oleh</label><input type="text" id="rekDiperiksaOleh" class="form-control" placeholder="Nama petugas"></div>
-                <div class="form-group" style="grid-column: 1 / -1;"><label>Keterangan</label><input type="text" id="rekKeterangan" class="form-control" placeholder="Catatan penyebab selisih (jika ada)"></div>
-            </div>
-            <button type="button" class="btn-submit" style="width:auto; padding:12px 24px; margin-bottom:20px;" onclick="simpanRekonsiliasi()">SIMPAN HASIL REKONSILIASI</button>
-
-            <div class="table-container">
-                <table id="tbl_rekonsiliasi">
-                    <thead><tr><th>TANGGAL</th><th>SUMBER</th><th class="text-right">SALDO SISTEM</th><th class="text-right">SALDO FISIK</th><th class="text-right">SELISIH</th><th>DIPERIKSA OLEH</th><th>KETERANGAN</th><th class="text-center">AKSI</th></tr></thead>
-                    <tbody id="tbody_rekonsiliasi"><tr><td colspan="8" class="text-center">Memuat data...</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -6745,66 +6712,6 @@
             return true;
         }
         return false;
-    }
-
-    // =========================================
-    // REKONSILIASI KAS / BANK
-    // =========================================
-    function hitungSaldoSistemRekon() {
-        let tgl = document.getElementById('rekTanggal').value;
-        if (!tgl) return;
-        document.getElementById('rekSaldoSistem').value = Math.round(hitungSaldoKasKumulatif(tgl));
-    }
-
-    function loadRekonsiliasi() {
-        if (!document.getElementById('rekTanggal').value) {
-            document.getElementById('rekTanggal').value = new Date().toISOString().slice(0, 10);
-            hitungSaldoSistemRekon();
-        }
-        AdapterAPI.getRekonsiliasiList().then(list => renderRekonsiliasiList(list))
-        .catch(() => { document.getElementById('tbody_rekonsiliasi').innerHTML = '<tr><td colspan="8" class="text-center text-muted">Gagal memuat data. Pastikan migrasi schema_upgrade.sql sudah dijalankan.</td></tr>'; });
-    }
-
-    function renderRekonsiliasiList(list) {
-        let tbody = document.getElementById('tbody_rekonsiliasi');
-        if (!list || !list.length) { tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">Belum ada riwayat rekonsiliasi.</td></tr>'; return; }
-        tbody.innerHTML = list.map(r => {
-            let selisih = (parseFloat(r.saldo_fisik) || 0) - (parseFloat(r.saldo_sistem) || 0);
-            let cocok = Math.abs(selisih) < 1;
-            let badge = cocok
-                ? `<span style="background:#dcfce7; color:#166534; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:800;">✓ COCOK</span>`
-                : `<span style="background:#fee2e2; color:#991b1b; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:800;">⚠ SELISIH</span>`;
-            return `<tr>
-                <td>${formatTglTabel(r.tanggal)}</td><td>${escHtml(r.sumber || '-')}</td>
-                <td class="text-right">Rp ${Math.round(r.saldo_sistem || 0).toLocaleString('id-ID')}</td>
-                <td class="text-right">Rp ${Math.round(r.saldo_fisik || 0).toLocaleString('id-ID')}</td>
-                <td class="text-right" style="font-weight:800; color:${cocok ? '#166534' : '#991b1b'};">${selisih >= 0 ? '+' : ''}Rp ${Math.round(selisih).toLocaleString('id-ID')} ${badge}</td>
-                <td>${r.diperiksa_oleh || '-'}</td><td>${escHtml(r.keterangan || '-')}</td>
-                <td class="text-center"><button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusRekonsiliasi('${escAttr(r.id)}')">🗑️</button></td>
-            </tr>`;
-        }).join('');
-    }
-
-    function simpanRekonsiliasi() {
-        let form = {
-            tanggal: document.getElementById('rekTanggal').value,
-            sumber: document.getElementById('rekSumber').value,
-            saldo_sistem: parseFloat(document.getElementById('rekSaldoSistem').value) || 0,
-            saldo_fisik: parseFloat(document.getElementById('rekSaldoFisik').value) || 0,
-            diperiksa_oleh: document.getElementById('rekDiperiksaOleh').value.trim(),
-            keterangan: document.getElementById('rekKeterangan').value.trim()
-        };
-        if (!form.tanggal) return alert('Tanggal pemeriksaan wajib diisi.');
-        AdapterAPI.tambahRekonsiliasi(form).then(res => {
-            alert(res);
-            document.getElementById('rekSaldoFisik').value = ''; document.getElementById('rekKeterangan').value = '';
-            loadRekonsiliasi();
-        }).catch(e => alert('Gagal: ' + e));
-    }
-
-    function hapusRekonsiliasi(id) {
-        if (!confirm('Yakin ingin menghapus catatan rekonsiliasi ini?')) return;
-        AdapterAPI.deleteRekonsiliasi(id).then(res => { alert(res); loadRekonsiliasi(); }).catch(e => alert('Gagal: ' + e));
     }
 
     // =========================================
