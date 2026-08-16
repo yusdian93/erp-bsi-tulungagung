@@ -50,7 +50,7 @@ function genId(prefix) {
   return (prefix ? prefix + '-' : '') + unik;
 }
 
-function buatNomorSuratPengantarOtomatis({ nama, id_unit, tgl } = {}) {
+function buatNomorSuratPengantarInternalBSI({ nama, id_unit, tgl } = {}) {
   const namaBersih = String(nama || '')
     .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .replace(/\b(bank|sampah|unit|bsu)\b/gi, ' ')
@@ -258,7 +258,7 @@ function stripPasswordBsu(obj) {
 const AdapterAPI = {
 
   buatNomorSuratPengantar(form) {
-    return buatNomorSuratPengantarOtomatis(form);
+    return buatNomorSuratPengantarInternalBSI(form);
   },
 
   // ================== LOGIN (dipakai index.html) ==================
@@ -1134,7 +1134,7 @@ const AdapterAPI = {
     if (kunci) return { ok:false, error:pesanPeriodeTerkunci(kunci) };
     if (!id_unit || !tgl) return { ok:false, error:'Identitas BSU dan tanggal pengiriman wajib tersedia.' };
     if (!Array.isArray(items) || !items.length) return { ok:false, error:'Daftar material pengiriman masih kosong.' };
-    const nomorDokumen = String(no_dokumen || '').trim() || buatNomorSuratPengantarOtomatis({ nama, id_unit, tgl });
+    const nomorDokumen = String(no_dokumen || '').trim() || buatNomorSuratPengantarInternalBSI({ nama, id_unit, tgl });
     const grupId = kelompok_id || genId('KRM');
     const petugas = oleh || getPetugasSesi();
     const seen = new Set();
@@ -1167,7 +1167,7 @@ const AdapterAPI = {
     const id = genId('TRX');
     const beratKirim = Number(form.berat_kirim ?? form.berat) || 0;
     const hargaUsulan = Number(form.harga_usulan ?? form.harga_satuan) || 0;
-    const nomorDokumen = String(form.no_dokumen || '').trim() || buatNomorSuratPengantarOtomatis({ nama:form.nama, id_unit:form.id_unit, tgl:form.tgl });
+    const nomorDokumen = String(form.no_dokumen || '').trim() || buatNomorSuratPengantarInternalBSI({ nama:form.nama, id_unit:form.id_unit, tgl:form.tgl });
     const row = {
       id, id_unit: form.id_unit, level: 'unit_ke_induk', nama: form.nama, tgl: form.tgl,
       jenis: form.jenis,

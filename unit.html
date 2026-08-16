@@ -11,7 +11,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase-adapter.js?v=20260816-dashboard-bsu-1"></script>
+    <script src="supabase-adapter.js?v=20260816-pengajuan-bsi-1"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script>
   // === QRCode.js (davidshimjs/qrcodejs, MIT License) disematkan langsung di sini ===
@@ -1409,7 +1409,7 @@
                 <div class="data-warning mt-4"><i class="bi bi-info-circle me-2"></i><strong>Alur:</strong> Nomor surat dibuat otomatis sesuai nama BSU → tambahkan seluruh material ke daftar → kirim satu kali → BSI memverifikasi semua material dalam surat yang sama.</div>
                 <form id="formPengirimanBSI" class="mt-4" onsubmit="simpanPengirimanBSI(event)">
                     <div class="row g-3">
-                        <div class="col-md-3"><label>Tanggal Pengiriman <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" onchange="buatNomorSuratPengantarOtomatis(true)" required></div>
+                        <div class="col-md-3"><label>Tanggal Pengiriman <span class="required-mark">*</span></label><input type="date" id="kirimTanggal" class="form-control" onchange="isiNomorSuratPengantarBSU(true)" required></div>
                         <div class="col-md-4"><label>No. Surat Pengantar/Jalan</label><input id="kirimDokumen" class="form-control" placeholder="Dibuat otomatis oleh sistem" readonly aria-readonly="true" style="background:#f1f5f9;font-weight:700;"><small class="text-muted">Otomatis dari nama BSU, tanggal, dan kode unik.</small></div>
                         <div class="col-md-2"><label>Biaya Angkut BSU</label><input type="number" min="0" id="kirimBiayaAngkut" class="form-control" value="0"></div>
                         <div class="col-md-3"><label>Catatan Pengiriman</label><input id="kirimCatatan" class="form-control" placeholder="Pengemudi/jumlah karung/kondisi"></div>
@@ -3722,10 +3722,10 @@
         const lapNas=document.getElementById('lapFilterNasabah');if(lapNas)lapNas.innerHTML='<option value="">Semua Nasabah</option>'+dataNasabah.map(n=>`<option value="${escapeHtmlAttr(n.id)}">${escapeHtml(n.nama)} — ${escapeHtml(n.id)}</option>`).join('');
         const today=new Date().toISOString().slice(0,10);['kirimTanggal','opnameTanggal','kasTanggal','rekTanggal','bagiTanggal'].forEach(id=>{const el=document.getElementById(id);if(el&&!el.value)el.value=today;});
         const op=document.getElementById('opnamePetugas');if(op&&!op.value)op.value=getPetugasSesi();
-        buatNomorSuratPengantarOtomatis(false);
+        isiNomorSuratPengantarBSU(false);
     }
 
-    function buatNomorSuratPengantarOtomatis(paksa=false){
+    function isiNomorSuratPengantarBSU(paksa=false){
         const input=document.getElementById('kirimDokumen');
         const tgl=document.getElementById('kirimTanggal')?.value||new Date().toISOString().slice(0,10);
         if(!input)return '';
@@ -3778,18 +3778,40 @@
         tb.innerHTML=keranjangPengirimanBSI.length?keranjangPengirimanBSI.map((x,i)=>`<tr><td>${i+1}</td><td class="fw-bold">${escapeHtml(x.jenis)}</td><td class="text-end">${stokMaterial(x.jenis).toFixed(2)} Kg</td><td class="text-end fw-bold">${num(x.berat_kirim).toFixed(2)} Kg</td><td class="text-end">${rupiah(x.harga_usulan)}/Kg</td><td class="text-end fw-bold">${rupiah(num(x.berat_kirim)*num(x.harga_usulan))}</td><td class="text-center"><button type="button" class="btn btn-sm btn-outline-danger" onclick="hapusItemPengirimanBSI(${i})"><i class="bi bi-trash"></i></button></td></tr>`).join(''):`<tr><td colspan="7" class="empty-state">Belum ada material dalam surat pengantar.</td></tr>`;
         setText('kirimJumlahMaterial',keranjangPengirimanBSI.length);setText('kirimTotalKg',totalKg.toFixed(2)+' Kg');setText('kirimTotalEstimasi',rupiah(totalRp));
     }
-    function simpanPengirimanBSI(e){
-        e.preventDefault();
-        const tgl=document.getElementById('kirimTanggal').value;const noDok=buatNomorSuratPengantarOtomatis(false);
-        if(!tgl)return alert('Tanggal pengiriman wajib diisi.');
-        if(!noDok)return alert('Nomor surat otomatis gagal dibuat. Muat ulang halaman lalu coba lagi.');
-        if(!keranjangPengirimanBSI.length)return alert('Tambahkan minimal satu material ke surat pengantar.');
-        for(const item of keranjangPengirimanBSI){const stok=stokMaterial(item.jenis);if(num(item.berat_kirim)>stok)return alert(`Stok ${escapeHtml(item.jenis)} hanya ${stok.toFixed(2)} Kg.`);}
-        const totalKg=keranjangPengirimanBSI.reduce((a,x)=>a+num(x.berat_kirim),0);
-        const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl,no_dokumen:noDok,biaya_angkut:num(document.getElementById('kirimBiayaAngkut').value),catatan:document.getElementById('kirimCatatan').value.trim(),oleh:getPetugasSesi(),items:keranjangPengirimanBSI.map(x=>({...x}))};
-        if(!confirm(`Kirim satu surat pengantar ${noDok} berisi ${form.items.length} material dengan total ${totalKg.toFixed(2)} Kg ke BSI?\n\nBerat dan harga final setiap material akan ditentukan BSI.`))return;
-        const btn=e.target.querySelector('button[type="submit"]');btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Mengirim...';
-        AdapterAPI.tambahPengirimanBatchBSI(form).then(res=>{if(!res?.ok)throw new Error(res?.error||'Pengiriman gagal');alert(`Pengajuan ${noDok} berhasil dikirim dengan ${res.jumlah_item||form.items.length} material.`);keranjangPengirimanBSI=[];e.target.reset();isiDropdownModulBaru();renderKeranjangPengirimanBSI();hitungPengirimanBSI();loadDataDatabase();}).catch(err=>alert('Gagal: '+err.message)).finally(()=>{btn.disabled=false;btn.innerHTML='<i class="bi bi-send-check me-2"></i>Kirim Satu Pengajuan ke BSI';});
+    async function simpanPengirimanBSI(e){
+        e?.preventDefault();
+        const formEl=e?.currentTarget||e?.target||document.getElementById('formPengirimanBSI');
+        const btn=formEl?.querySelector('button[type="submit"]');
+        const teksTombol=btn?.innerHTML||'<i class="bi bi-send-check me-2"></i>Kirim Satu Pengajuan ke BSI';
+        let sedangMengirim=false;
+        try{
+            const tgl=document.getElementById('kirimTanggal')?.value||'';
+            if(!tgl)return alert('Tanggal pengiriman wajib diisi.');
+            const noDok=isiNomorSuratPengantarBSU(false);
+            if(!noDok)return alert('Nomor surat otomatis gagal dibuat. Muat ulang halaman lalu coba lagi.');
+            if(!keranjangPengirimanBSI.length)return alert('Tambahkan minimal satu material ke surat pengantar.');
+            for(const item of keranjangPengirimanBSI){const stok=stokMaterial(item.jenis);if(num(item.berat_kirim)>stok)return alert(`Stok ${item.jenis} hanya ${stok.toFixed(2)} Kg.`);}
+            if(typeof AdapterAPI==='undefined'||typeof AdapterAPI.tambahPengirimanBatchBSI!=='function')throw new Error('Penghubung database belum siap. Muat ulang halaman lalu coba lagi.');
+            const totalKg=keranjangPengirimanBSI.reduce((a,x)=>a+num(x.berat_kirim),0);
+            const form={id_unit:CURRENT_UNIT_ID,nama:CURRENT_UNIT_NAMA||namaUnitTanpaBSU(),tgl,no_dokumen:noDok,biaya_angkut:num(document.getElementById('kirimBiayaAngkut')?.value),catatan:document.getElementById('kirimCatatan')?.value.trim()||'',oleh:getPetugasSesi(),items:keranjangPengirimanBSI.map(x=>({...x}))};
+            if(!confirm(`Kirim satu surat pengantar ${noDok} berisi ${form.items.length} material dengan total ${totalKg.toFixed(2)} Kg ke BSI?\n\nBerat dan harga final setiap material akan ditentukan BSI.`))return;
+            sedangMengirim=true;
+            if(btn){btn.disabled=true;btn.innerHTML='<i class="bi bi-hourglass-split me-2"></i>Mengirim...';}
+            const res=await AdapterAPI.tambahPengirimanBatchBSI(form);
+            if(!res?.ok)throw new Error(res?.error||'Pengiriman gagal.');
+            alert(`Pengajuan ${noDok} berhasil dikirim dengan ${res.jumlah_item||form.items.length} material.`);
+            keranjangPengirimanBSI=[];
+            formEl?.reset();
+            isiDropdownModulBaru();
+            renderKeranjangPengirimanBSI();
+            hitungPengirimanBSI();
+            Promise.resolve(loadDataDatabase()).catch(err=>console.error('Gagal memuat ulang data setelah pengiriman:',err));
+        }catch(err){
+            console.error('Gagal mengirim pengajuan BSI:',err);
+            alert('Gagal mengirim pengajuan BSI: '+(err?.message||String(err)));
+        }finally{
+            if(sedangMengirim&&btn){btn.disabled=false;btn.innerHTML=teksTombol;}
+        }
     }
     function kunciGrupPengirimanUnit(t){return t.kelompok_id?'GRP|'+String(t.kelompok_id):'ID|'+String(t.id);}
     function buatGrupPengirimanUnit(){
