@@ -1349,9 +1349,7 @@
                     <span class="gh-ic">🧮</span><span class="gh-label">Kontrol & Keamanan</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
-                    <button class="nav-btn" data-label="Neraca Aset, Kewajiban & Modal" data-group="grp-kontrol" onclick="pindahTab('neraca', this); loadNeracaPosManual();" title="Posisi aset, kewajiban, dan modal"><span class="nav-ic">⚖️</span><span class="nav-text">Neraca</span></button>
                     <button class="nav-btn" data-label="Tutup Buku Periode" data-group="grp-kontrol" onclick="pindahTab('tutupbuku', this); loadTutupBuku();" title="Mengunci transaksi pada periode yang sudah selesai"><span class="nav-ic">🔒</span><span class="nav-text">Tutup Buku</span></button>
-                    <button class="nav-btn" data-label="Audit Trail / Log Aktivitas" data-group="grp-kontrol" onclick="pindahTab('audittrail', this); loadAuditTrail();" title="Melihat jejak penambahan, perubahan, dan pembatalan data"><span class="nav-ic">🕵️</span><span class="nav-text">Audit Trail</span></button>
                     <button class="nav-btn" data-label="Backup & Restore Data" data-group="grp-kontrol" onclick="pindahTab('backupdata', this);" title="Mencadangkan dan memulihkan data sistem"><span class="nav-ic">💾</span><span class="nav-text">Backup & Restore</span></button>
                 </div>
             </div>
@@ -1396,7 +1394,7 @@
                 <h2>Pusat Laporan & Dokumen BSI</h2>
                 <p>Laporan inti untuk memantau penerimaan BSU, penjualan, stok, keuangan, serta kinerja bulanan dan tahunan Bank Sampah Induk.</p>
             </div>
-            <div class="report-hub-count"><strong>8</strong><span>Laporan Inti</span></div>
+            <div class="report-hub-count"><strong>10</strong><span>Laporan Inti</span></div>
         </div>
 
         <div class="menu-hub-section">
@@ -1420,6 +1418,12 @@
                 <button class="menu-hub-card" data-label="Laporan Kas Keluar" onclick="bukaHalamanInduk('lap_kaskeluar','Laporan Kas Keluar'); renderLapKasKeluar('semua');">
                     <span class="menu-hub-icon">↗️</span><strong>Kas Keluar</strong><small>Rincian pembayaran saldo BSU dan pengeluaran yang sudah tercatat.</small><span class="menu-hub-arrow">›</span>
                 </button>
+                <button class="menu-hub-card" data-label="Buku Besar Bank Sampah Induk" onclick="bukaHalamanInduk('bukubesar_bsi','Buku Besar Bank Sampah Induk'); renderBukuBesarBSI();">
+                    <span class="menu-hub-icon">📚</span><strong>Buku Besar BSI</strong><small>Jurnal debit dan kredit dari transaksi keuangan Bank Sampah Induk.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Neraca dan Rekapitulasi" onclick="bukaHalamanInduk('neraca','Laporan Neraca & Rekapitulasi'); loadNeracaPosManual();">
+                    <span class="menu-hub-icon">⚖️</span><strong>Neraca & Rekapitulasi</strong><small>Posisi aset, kewajiban, modal, dan keseimbangan keuangan BSI.</small><span class="menu-hub-arrow">›</span>
+                </button>
             </div>
         </div>
 
@@ -1437,10 +1441,36 @@
 
     </div>
 
+    <!-- ================= BUKU BESAR BANK SAMPAH INDUK ================= -->
+    <div id="bukubesar_bsi" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>📚 BUKU BESAR BANK SAMPAH INDUK</h2></div>
+            <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">Rekap jurnal debit dan kredit yang disusun otomatis dari penerimaan material BSU, pencairan saldo BSU, penjualan off-taker, bantuan/hibah, serta pengeluaran yang sudah tercatat.</p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; margin-bottom:16px; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                <div class="form-group" style="margin-bottom:0;"><label>Dari Tanggal</label><input type="date" id="bbBsiMulai" class="form-control" onchange="renderBukuBesarBSI()"></div>
+                <div class="form-group" style="margin-bottom:0;"><label>Sampai Tanggal</label><input type="date" id="bbBsiAkhir" class="form-control" onchange="renderBukuBesarBSI()"></div>
+                <div class="form-group" style="margin-bottom:0; min-width:220px;"><label>Akun</label><select id="bbBsiAkun" class="form-control" onchange="renderBukuBesarBSI()"><option value="">Semua Akun</option></select></div>
+                <button class="btn-sync" style="padding:9px 15px;" onclick="resetFilterBukuBesarBSI()">↺ Semua Data</button>
+                <button class="btn-sync" style="padding:9px 15px; border-color:#ef4444; color:#b91c1c; margin-left:auto;" onclick="cetakBukuBesarBSI()">📄 Preview & Cetak</button>
+            </div>
+            <div class="cards" style="margin-bottom:18px;">
+                <div class="card card-green"><h3>Total Debit</h3><p id="bbBsiTotalDebit">Rp 0</p></div>
+                <div class="card card-blue"><h3>Total Kredit</h3><p id="bbBsiTotalKredit">Rp 0</p></div>
+                <div class="card"><h3 id="bbBsiLabelSelisih">Selisih Jurnal</h3><p id="bbBsiSelisih">Rp 0</p></div>
+            </div>
+            <div class="table-container">
+                <table id="tbl_bukubesar_bsi">
+                    <thead><tr><th>TANGGAL</th><th>REFERENSI</th><th>URAIAN</th><th>AKUN</th><th class="text-right">DEBIT</th><th class="text-right">KREDIT</th><th class="text-right">SALDO AKUN</th></tr></thead>
+                    <tbody id="tbody_bukubesar_bsi"><tr><td colspan="7" class="text-center">Memuat data...</td></tr></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- ================= NERACA ================= -->
     <div id="neraca" class="content-section">
         <div class="panel">
-            <div class="panel-header"><h2>⚖️ NERACA — POSISI ASET, KEWAJIBAN & MODAL</h2></div>
+            <div class="panel-header"><h2>⚖️ LAPORAN NERACA & REKAPITULASI</h2></div>
             <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
                 Kas &amp; setara kas, tabungan BSU yang belum ditarik, dan akumulasi investasi alat dihitung <b>otomatis</b> dari data transaksi.
                 Pos lain (misal modal awal, aset tanah/bangunan, utang bank) bisa ditambahkan manual di bawah.
@@ -3732,6 +3762,140 @@
 
         let url = hp ? `https://wa.me/${hp}?text=${encodeURIComponent(pesan)}` : `https://wa.me/?text=${encodeURIComponent(pesan)}`;
         window.open(url, '_blank');
+    }
+
+    // =========================================
+    // BUKU BESAR BANK SAMPAH INDUK
+    // =========================================
+    function formatRupiahBukuBesarBSI(nilai) {
+        return 'Rp ' + Math.round(Number(nilai) || 0).toLocaleString('id-ID');
+    }
+
+    function tambahPasanganJurnalBSI(daftar, data, akunDebit, akunKredit, nominal) {
+        let nilai = Math.abs(Number(nominal) || 0);
+        if (nilai <= 0) return;
+        daftar.push({ ...data, akun:akunDebit, debit:nilai, kredit:0, urutan:0 });
+        daftar.push({ ...data, akun:akunKredit, debit:0, kredit:nilai, urutan:1 });
+    }
+
+    function buatDataBukuBesarBSI() {
+        let jurnal = [];
+        (globalTransaksi || []).filter(t => String(t.status || 'aktif').toLowerCase() !== 'dibatalkan').forEach(t => {
+            let nilai = Number(t.total) || Number(t.total_final) || 0;
+            let data = {
+                tanggal:t.tgl,
+                referensi:t.no_dokumen || t.id || '-',
+                uraian:(nilai < 0 || t.jenis === 'Penarikan Tabungan') ? `Pencairan saldo kepada ${t.nama || 'BSU'}` : `Penerimaan ${t.jenis || 'material'} dari ${t.nama || 'BSU'}`
+            };
+            if (nilai < 0 || t.jenis === 'Penarikan Tabungan') tambahPasanganJurnalBSI(jurnal, data, 'Utang Saldo BSU', 'Kas / Bank', nilai);
+            else if (nilai > 0) tambahPasanganJurnalBSI(jurnal, data, 'Persediaan Sampah', 'Utang Saldo BSU', nilai);
+        });
+
+        (globalPenjualan || []).forEach((p, index) => {
+            tambahPasanganJurnalBSI(jurnal, {
+                tanggal:p.tanggal,
+                referensi:p.id || `PJL-${index + 1}`,
+                uraian:`Penjualan ${p.material || 'material'} kepada ${p.pembeli || 'off-taker'}`
+            }, 'Kas / Bank', 'Pendapatan Penjualan', p.total);
+        });
+
+        (globalHibah || []).forEach((h, index) => {
+            tambahPasanganJurnalBSI(jurnal, {
+                tanggal:h.tanggal,
+                referensi:h.id || `HIB-${index + 1}`,
+                uraian:`Bantuan/hibah dari ${h.sumber || 'sumber lain'}`
+            }, 'Kas / Bank', 'Pendapatan Bantuan / Hibah', h.jumlah);
+        });
+
+        (globalBiayaOp || []).forEach((b, index) => {
+            tambahPasanganJurnalBSI(jurnal, {
+                tanggal:b.tanggal,
+                referensi:b.id || `BOP-${index + 1}`,
+                uraian:b.jenis_biaya || b.keterangan || 'Biaya operasional'
+            }, 'Beban Operasional', 'Kas / Bank', b.jumlah);
+        });
+
+        (globalPemeliharaan || []).forEach((p, index) => {
+            let investasi = String(p.jenis || '').toLowerCase().includes('investasi');
+            tambahPasanganJurnalBSI(jurnal, {
+                tanggal:p.tanggal,
+                referensi:p.id || `PML-${index + 1}`,
+                uraian:`${p.jenis || 'Pemeliharaan'} ${p.nama_alat || 'peralatan'}`
+            }, investasi ? 'Aset Tetap / Peralatan' : 'Beban Pemeliharaan', 'Kas / Bank', p.biaya);
+        });
+
+        jurnal.forEach(j => { j.tanggalObj = uraikanTanggalInput(j.tanggal); });
+        return jurnal.sort((a, b) => {
+            let ta = isNaN(a.tanggalObj) ? 0 : a.tanggalObj.getTime();
+            let tb = isNaN(b.tanggalObj) ? 0 : b.tanggalObj.getTime();
+            return ta - tb || String(a.referensi).localeCompare(String(b.referensi), 'id') || a.urutan - b.urutan;
+        });
+    }
+
+    function ambilBukuBesarBSITerfilter() {
+        let mulai = document.getElementById('bbBsiMulai')?.value || '';
+        let akhir = document.getElementById('bbBsiAkhir')?.value || '';
+        let akun = document.getElementById('bbBsiAkun')?.value || '';
+        let awalObj = mulai ? uraikanTanggalInput(mulai) : null;
+        let akhirObj = akhir ? uraikanTanggalInput(akhir) : null;
+        return buatDataBukuBesarBSI().filter(j => {
+            if (akun && j.akun !== akun) return false;
+            if (awalObj && (isNaN(j.tanggalObj) || j.tanggalObj < awalObj)) return false;
+            if (akhirObj && (isNaN(j.tanggalObj) || j.tanggalObj > akhirObj)) return false;
+            return true;
+        });
+    }
+
+    function renderBukuBesarBSI() {
+        let semua = buatDataBukuBesarBSI();
+        let select = document.getElementById('bbBsiAkun');
+        let akunTerpilih = select?.value || '';
+        if (select) {
+            let daftarAkun = [...new Set(semua.map(j => j.akun))].sort((a, b) => a.localeCompare(b, 'id'));
+            select.innerHTML = '<option value="">Semua Akun</option>' + daftarAkun.map(a => `<option value="${escAttr(a)}">${escHtml(a)}</option>`).join('');
+            if (daftarAkun.includes(akunTerpilih)) select.value = akunTerpilih;
+            else akunTerpilih = '';
+        }
+
+        let list = ambilBukuBesarBSITerfilter();
+        let totalDebit = list.reduce((a, j) => a + j.debit, 0);
+        let totalKredit = list.reduce((a, j) => a + j.kredit, 0);
+        let saldoBerjalan = 0;
+        let tbody = document.getElementById('tbody_bukubesar_bsi');
+        if (tbody) {
+            tbody.innerHTML = list.length ? list.map(j => {
+                saldoBerjalan += j.debit - j.kredit;
+                return `<tr><td>${formatTglTabel(j.tanggal)}</td><td>${escHtml(j.referensi)}</td><td>${escHtml(j.uraian)}</td><td style="font-weight:700;">${escHtml(j.akun)}</td><td class="text-right" style="color:#166534;">${j.debit ? formatRupiahBukuBesarBSI(j.debit) : '-'}</td><td class="text-right" style="color:#991b1b;">${j.kredit ? formatRupiahBukuBesarBSI(j.kredit) : '-'}</td><td class="text-right" style="font-weight:800;">${akunTerpilih ? formatRupiahBukuBesarBSI(saldoBerjalan) : '-'}</td></tr>`;
+            }).join('') : '<tr><td colspan="7" class="text-center text-muted">Belum ada jurnal pada filter yang dipilih.</td></tr>';
+        }
+        let setText = (id, value) => { let el = document.getElementById(id); if (el) el.innerText = value; };
+        setText('bbBsiTotalDebit', formatRupiahBukuBesarBSI(totalDebit));
+        setText('bbBsiTotalKredit', formatRupiahBukuBesarBSI(totalKredit));
+        setText('bbBsiSelisih', formatRupiahBukuBesarBSI(totalDebit - totalKredit));
+        setText('bbBsiLabelSelisih', akunTerpilih ? 'Saldo Akun (Debit - Kredit)' : 'Selisih Jurnal');
+    }
+
+    function resetFilterBukuBesarBSI() {
+        ['bbBsiMulai', 'bbBsiAkhir'].forEach(id => { let el = document.getElementById(id); if (el) el.value = ''; });
+        let akun = document.getElementById('bbBsiAkun'); if (akun) akun.value = '';
+        renderBukuBesarBSI();
+    }
+
+    function cetakBukuBesarBSI() {
+        renderBukuBesarBSI();
+        let list = ambilBukuBesarBSITerfilter();
+        if (!list.length) return alert('Tidak ada data Buku Besar untuk dicetak.');
+        let akun = document.getElementById('bbBsiAkun')?.value || 'Semua Akun';
+        let mulai = document.getElementById('bbBsiMulai')?.value || 'awal data';
+        let akhir = document.getElementById('bbBsiAkhir')?.value || 'data terakhir';
+        let saldo = 0;
+        let rows = list.map(j => {
+            saldo += j.debit - j.kredit;
+            return [formatTglTabel(j.tanggal), j.referensi, j.uraian, j.akun, j.debit ? formatRupiahBukuBesarBSI(j.debit) : '-', j.kredit ? formatRupiahBukuBesarBSI(j.kredit) : '-', akun !== 'Semua Akun' ? formatRupiahBukuBesarBSI(saldo) : '-'];
+        });
+        bukaPreviewDokumen('BUKU BESAR BANK SAMPAH INDUK', `Periode: ${mulai} s.d. ${akhir} · Akun: ${akun}`, [
+            { headers:['Tanggal','Referensi','Uraian','Akun','Debit','Kredit','Saldo Akun'], rows }
+        ]);
     }
 
     // =========================================
