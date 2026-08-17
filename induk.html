@@ -379,6 +379,7 @@
     .menu-hub-section-title h3 { margin:0; color:#0f172a; font-size:17px; }
     .menu-hub-section-title span { color:var(--text-muted); font-size:11px; font-weight:600; }
     .menu-hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+    .finance-data-grid { display:grid; grid-template-columns:minmax(300px,.9fr) minmax(420px,1.4fr); gap:20px; align-items:start; }
     .menu-hub-card {
         position:relative; overflow:hidden; min-height:142px; padding:18px; border:1px solid var(--border); border-radius:17px;
         background:#fff; box-shadow:var(--shadow-sm); cursor:pointer; text-align:left; font-family:inherit; transition:.22s ease;
@@ -394,7 +395,7 @@
     .menu-hub-card.is-document .menu-hub-arrow { color:#2563eb; }
     .menu-hub-note { margin-top:8px; padding:13px 15px; border-radius:13px; color:#475569; background:#f8fafc; border:1px dashed #cbd5e1; font-size:11px; line-height:1.55; }
 
-    @media(max-width:1100px){ .menu-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr));} }
+    @media(max-width:1100px){ .menu-hub-grid{grid-template-columns:repeat(2,minmax(0,1fr));} .finance-data-grid{grid-template-columns:1fr;} }
     @media(max-width:680px){
         .report-hub-hero{align-items:flex-start; flex-direction:column; padding:22px;}
         .report-hub-count{min-width:0; width:100%; text-align:left;}
@@ -1325,12 +1326,13 @@
 
             <div class="nav-group" id="grp-keuangan">
                 <button class="nav-group-header" onclick="toggleGroup('grp-keuangan')">
-                    <span class="gh-ic">💳</span><span class="gh-label">Keuangan BSU</span><span class="gh-arrow">›</span>
+                    <span class="gh-ic">💳</span><span class="gh-label">Keuangan BSU &amp; BSI</span><span class="gh-arrow">›</span>
                 </button>
                 <div class="nav-group-items">
                     <button class="nav-btn" data-label="Skema Bagi Hasil BSU" data-group="grp-keuangan" onclick="pindahTab('bagihasil', this); loadBagiHasilInduk();" title="Mengatur persentase hak nasabah dan operasional pengelola"><span class="nav-ic">%</span><span class="nav-text">Skema Bagi Hasil</span></button>
                     <button class="nav-btn" data-label="Saldo BSU di BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();" title="Melihat saldo dan riwayat keuangan setiap BSU"><span class="nav-ic">💾</span><span class="nav-text">Saldo BSU di BSI</span></button>
                     <button class="nav-btn" data-label="Pencairan Saldo BSU" data-group="grp-keuangan" onclick="pindahTab('tarikbsu', this); loadTarikTabunganBSU();" title="Mencatat pencairan saldo dan status pembayaran kepada BSU"><span class="nav-ic">💸</span><span class="nav-text">Pencairan Saldo BSU</span></button>
+                    <button class="nav-btn" data-label="Data Pelengkap Laporan Keuangan" data-group="grp-keuangan" onclick="pindahTab('datapelengkap', this); loadDataPelengkapNeraca();" title="Mencatat saldo awal, piutang, utang, modal, aset, stok, dan penyesuaian akhir bulan"><span class="nav-ic">🧾</span><span class="nav-text">Data Pelengkap Neraca</span><span class="nav-tag nav-tag-main">Baru</span></button>
                 </div>
             </div>
 
@@ -1394,7 +1396,7 @@
                 <h2>Pusat Laporan & Dokumen BSI</h2>
                 <p>Laporan inti untuk memantau penerimaan BSU, penjualan, stok, keuangan, serta kinerja bulanan dan tahunan Bank Sampah Induk.</p>
             </div>
-            <div class="report-hub-count"><strong>10</strong><span>Laporan Inti</span></div>
+            <div class="report-hub-count"><strong>13</strong><span>Laporan Inti</span></div>
         </div>
 
         <div class="menu-hub-section">
@@ -1421,8 +1423,17 @@
                 <button class="menu-hub-card" data-label="Buku Besar Bank Sampah Induk" onclick="bukaHalamanInduk('bukubesar_bsi','Buku Besar Bank Sampah Induk'); renderBukuBesarBSI();">
                     <span class="menu-hub-icon">📚</span><strong>Buku Besar BSI</strong><small>Jurnal debit dan kredit dari transaksi keuangan Bank Sampah Induk.</small><span class="menu-hub-arrow">›</span>
                 </button>
-                <button class="menu-hub-card" data-label="Laporan Neraca dan Rekapitulasi" onclick="bukaHalamanInduk('neraca','Laporan Neraca & Rekapitulasi'); loadNeracaPosManual();">
-                    <span class="menu-hub-icon">⚖️</span><strong>Neraca & Rekapitulasi</strong><small>Posisi aset, kewajiban, modal, dan keseimbangan keuangan BSI.</small><span class="menu-hub-arrow">›</span>
+                <button class="menu-hub-card" data-label="Laporan Neraca dan Rekapitulasi" onclick="bukaHalamanInduk('neraca','Laporan Neraca & Rekapitulasi'); renderNeraca();">
+                    <span class="menu-hub-icon">⚖️</span><strong>Neraca & Rekapitulasi</strong><small>Otomatis dari transaksi, stok, penjualan, pencairan saldo, dan aset BSI.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Arus Kas" onclick="bukaHalamanInduk('lap_aruskas','Laporan Arus Kas'); renderLaporanArusKas();">
+                    <span class="menu-hub-icon">🌊</span><strong>Arus Kas</strong><small>Pergerakan kas masuk dan keluar berdasarkan kegiatan BSI.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Laporan Perubahan Modal" onclick="bukaHalamanInduk('lap_perubahanmodal','Laporan Perubahan Modal'); renderLaporanPerubahanModal();">
+                    <span class="menu-hub-icon">📈</span><strong>Perubahan Modal</strong><small>Modal tercatat dan perubahan nilai bersih BSI selama periode laporan.</small><span class="menu-hub-arrow">›</span>
+                </button>
+                <button class="menu-hub-card" data-label="Catatan Atas Laporan Keuangan" onclick="bukaHalamanInduk('lap_catatan','Catatan Atas Laporan Keuangan'); renderCatatanLaporanKeuangan();">
+                    <span class="menu-hub-icon">📝</span><strong>Catatan Laporan Keuangan</strong><small>Penjelasan sumber angka, kebijakan otomatis, dan data yang perlu dilengkapi.</small><span class="menu-hub-arrow">›</span>
                 </button>
             </div>
         </div>
@@ -1439,6 +1450,106 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- ================= DATA PELENGKAP LAPORAN KEUANGAN ================= -->
+    <div id="datapelengkap" class="content-section">
+        <div class="panel">
+            <div class="panel-header" style="flex-wrap:wrap;gap:10px;">
+                <div><h2>🧾 DATA PELENGKAP LAPORAN KEUANGAN</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12.5px;">Isi hanya data yang belum tercatat melalui transaksi utama. Sistem akan memasukkannya ke laporan secara otomatis tanpa debit dan kredit manual.</p></div>
+                <button class="btn-sync" onclick="loadDataPelengkapNeraca()">🔄 Muat Ulang</button>
+            </div>
+
+            <div class="cards" id="pelengkapCards" style="margin:18px 0;"></div>
+
+            <div class="finance-data-grid">
+                <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;">
+                    <h3 style="margin:0 0 5px;">Tambah Data</h3>
+                    <p id="pelengkapBantuan" style="margin:0 0 14px;color:var(--text-muted);font-size:12px;line-height:1.5;"></p>
+                    <form id="formDataPelengkap" onsubmit="simpanDataPelengkap(event)">
+                        <div class="form-group"><label>Jenis Data</label>
+                            <select id="pelengkapJenis" class="form-control" onchange="ubahJenisDataPelengkap()" required>
+                                <option value="saldo_awal_kas">Saldo Awal Kas Tunai</option>
+                                <option value="saldo_awal_bank">Saldo Awal Rekening Bank</option>
+                                <option value="piutang">Piutang Pembeli</option>
+                                <option value="utang_lain">Utang BSI Lainnya</option>
+                                <option value="modal">Modal Uang / Dana BSI</option>
+                                <option value="aset_tetap_pelengkap">Aset Tetap / Peralatan</option>
+                                <option value="stok_penyesuaian">Penyesuaian Stok Gudang</option>
+                                <option value="pendapatan_akrual">Pendapatan Belum Diterima</option>
+                                <option value="beban_akrual">Biaya Belum Dibayar</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Tanggal</label><input type="date" id="pelengkapTanggal" class="form-control" required></div>
+                        <div class="form-group"><label id="pelengkapNamaLabel">Nama / Uraian</label><input type="text" id="pelengkapNama" class="form-control" placeholder="Tuliskan nama data" required></div>
+                        <div class="form-group"><label id="pelengkapNilaiLabel">Nilai (Rp)</label><input type="number" id="pelengkapNilai" class="form-control" min="1" step="1" placeholder="0" required></div>
+                        <div class="form-group" id="pelengkapArahWrap"><label>Perubahan</label><select id="pelengkapArah" class="form-control"><option value="tambah">Menambah saldo</option><option value="kurang">Mengurangi saldo</option></select></div>
+                        <div class="form-group" id="pelengkapMasaWrap" style="display:none;"><label>Masa Manfaat Aset (tahun)</label><input type="number" id="pelengkapMasa" class="form-control" min="1" max="50" value="5"></div>
+                        <div class="form-group" id="pelengkapSumberAsetWrap" style="display:none;"><label>Sumber / Kepemilikan Aset</label>
+                            <select id="pelengkapSumberAset" class="form-control" onchange="ubahSumberAsetPelengkap()">
+                                <option value="modal_aset">Modal Aset Milik BSI</option>
+                                <option value="hibah_aset">Hibah Aset Permanen</option>
+                                <option value="utang_aset">Dibeli dengan Utang</option>
+                                <option value="pinjaman_titipan">Pinjaman / Titipan Pihak Lain</option>
+                            </select>
+                            <small id="pelengkapSumberAsetInfo" style="display:block;margin-top:6px;color:var(--text-muted);line-height:1.45;"></small>
+                        </div>
+                        <div class="form-group" id="pelengkapKgWrap" style="display:none;"><label>Selisih Berat Stok (Kg)</label><input type="number" id="pelengkapKg" class="form-control" min="0.01" step="0.01" placeholder="0"></div>
+                        <div class="form-group"><label>Keterangan (opsional)</label><textarea id="pelengkapKeterangan" class="form-control" rows="2" placeholder="Nomor bukti atau penjelasan singkat"></textarea></div>
+                        <button type="submit" class="btn-submit" id="btnSimpanPelengkap">SIMPAN DATA</button>
+                    </form>
+                </div>
+
+                <div>
+                    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;"><h3 style="margin:0;">Data yang Sudah Tercatat</h3><input type="search" id="cariDataPelengkap" class="form-control" style="max-width:230px;" placeholder="Cari data..." oninput="renderDataPelengkapNeraca()"></div>
+                    <div class="table-container" style="max-height:580px;overflow:auto;"><table>
+                        <thead><tr><th>TANGGAL</th><th>JENIS &amp; URAIAN</th><th>RINCIAN</th><th class="text-right">NILAI</th><th></th></tr></thead>
+                        <tbody id="tbodyDataPelengkap"><tr><td colspan="5" class="text-center">Memuat data...</td></tr></tbody>
+                    </table></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= LAPORAN ARUS KAS ================= -->
+    <div id="lap_aruskas" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>🌊 LAPORAN ARUS KAS OTOMATIS</h2></div>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:-8px;">Menjelaskan sumber penerimaan dan penggunaan uang BSI. Saldo awal diambil dari Data Pelengkap Neraca.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;background:#f8fafc;padding:12px;border-radius:10px;border:1px solid var(--border);">
+                <div class="form-group" style="margin:0;"><label>Dari Tanggal</label><input type="date" id="arusKasMulai" class="form-control" onchange="renderLaporanArusKas()"></div>
+                <div class="form-group" style="margin:0;"><label>Sampai Tanggal</label><input type="date" id="arusKasAkhir" class="form-control" onchange="renderLaporanArusKas()"></div>
+                <button class="btn-sync" onclick="resetLaporanArusKas()">↺ Tahun Berjalan</button>
+                <button class="btn-sync" style="margin-left:auto;border-color:#ef4444;color:#b91c1c;" onclick="cetakLaporanArusKas()">📄 Preview &amp; Cetak</button>
+            </div>
+            <div class="cards" id="arusKasCards" style="margin-bottom:18px;"></div>
+            <div class="table-container"><table><thead><tr><th>KELOMPOK</th><th>URAIAN</th><th class="text-right">MASUK</th><th class="text-right">KELUAR</th></tr></thead><tbody id="tbodyArusKas"></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- ================= LAPORAN PERUBAHAN MODAL ================= -->
+    <div id="lap_perubahanmodal" class="content-section">
+        <div class="panel">
+            <div class="panel-header"><h2>📈 LAPORAN PERUBAHAN MODAL OTOMATIS</h2></div>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:-8px;">Menunjukkan modal yang dicatat dan perubahan nilai bersih BSI berdasarkan posisi awal dan akhir periode.</p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:16px;background:#f8fafc;padding:12px;border-radius:10px;border:1px solid var(--border);">
+                <div class="form-group" style="margin:0;"><label>Dari Tanggal</label><input type="date" id="modalMulai" class="form-control" onchange="renderLaporanPerubahanModal()"></div>
+                <div class="form-group" style="margin:0;"><label>Sampai Tanggal</label><input type="date" id="modalAkhir" class="form-control" onchange="renderLaporanPerubahanModal()"></div>
+                <button class="btn-sync" onclick="resetLaporanPerubahanModal()">↺ Tahun Berjalan</button>
+                <button class="btn-sync" style="margin-left:auto;border-color:#ef4444;color:#b91c1c;" onclick="cetakLaporanPerubahanModal()">📄 Preview &amp; Cetak</button>
+            </div>
+            <div class="cards" id="modalCards" style="margin-bottom:18px;"></div>
+            <div class="table-container"><table><thead><tr><th>URAIAN</th><th class="text-right">NILAI</th></tr></thead><tbody id="tbodyPerubahanModal"></tbody></table></div>
+        </div>
+    </div>
+
+    <!-- ================= CATATAN LAPORAN KEUANGAN ================= -->
+    <div id="lap_catatan" class="content-section">
+        <div class="panel">
+            <div class="panel-header" style="flex-wrap:wrap;gap:10px;"><div><h2>📝 CATATAN ATAS LAPORAN KEUANGAN</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12.5px;">Penjelasan otomatis agar angka laporan mudah dipahami dan diperiksa.</p></div><button class="btn-sync" onclick="cetakCatatanLaporanKeuangan()">📄 Preview &amp; Cetak</button></div>
+            <div id="catatanStatus" style="margin:18px 0;"></div>
+            <div id="catatanIsi" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px;"></div>
+        </div>
     </div>
 
     <!-- ================= BUKU BESAR BANK SAMPAH INDUK ================= -->
@@ -1470,13 +1581,11 @@
     <!-- ================= NERACA ================= -->
     <div id="neraca" class="content-section">
         <div class="panel">
-            <div class="panel-header"><h2>⚖️ LAPORAN NERACA & REKAPITULASI</h2></div>
+            <div class="panel-header"><h2>⚖️ LAPORAN NERACA &amp; REKAPITULASI OTOMATIS</h2></div>
             <p style="color:var(--text-muted); font-size:13px; margin-top:-8px;">
-                Kas &amp; setara kas, tabungan BSU yang belum ditarik, dan akumulasi investasi alat dihitung <b>otomatis</b> dari data transaksi.
-                Pos lain (misal modal awal, aset tanah/bangunan, utang bank) bisa ditambahkan manual di bawah.
-                Baris <b>"Laba Ditahan / Selisih Penyeimbang"</b> dihitung otomatis agar Neraca selalu seimbang (Aset = Kewajiban + Modal) —
-                sistem ini mencatat transaksi berbasis kas, bukan akuntansi berpasangan (double-entry) penuh, sehingga untuk pelaporan resmi/audit
-                sebaiknya tetap diverifikasi oleh akuntan.
+                Tidak perlu mengisi data akuntansi secara manual. Sistem menghitung otomatis dari transaksi BSU yang diterima BSI,
+                stok sampah, penjualan, pencairan saldo BSU, kas, biaya, hibah, serta investasi alat yang sudah tercatat.
+                Nilai persediaan memakai harga perolehan rata-rata dari transaksi yang diterima BSI.
             </p>
 
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
@@ -1488,40 +1597,29 @@
 
             <div class="cards" id="neracaCards" style="margin-bottom:20px;"></div>
 
+            <h3 style="margin:0 0 8px;">REKAPITULASI OPERASIONAL</h3>
+            <div class="cards" id="neracaRekapCards" style="margin-bottom:20px;"></div>
+
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
                 <div>
                     <h3 style="margin:0 0 8px;">ASET</h3>
                     <div class="table-container"><table id="tbl_neraca_aset">
-                        <thead><tr><th>POS</th><th class="text-right">NILAI (Rp)</th><th></th></tr></thead>
+                        <thead><tr><th>POS OTOMATIS</th><th class="text-right">NILAI (Rp)</th></tr></thead>
                         <tbody id="tbody_neraca_aset"></tbody>
                     </table></div>
                 </div>
                 <div>
                     <h3 style="margin:0 0 8px;">KEWAJIBAN &amp; MODAL</h3>
                     <div class="table-container"><table id="tbl_neraca_kewajiban">
-                        <thead><tr><th>POS</th><th class="text-right">NILAI (Rp)</th><th></th></tr></thead>
+                        <thead><tr><th>POS OTOMATIS</th><th class="text-right">NILAI (Rp)</th></tr></thead>
                         <tbody id="tbody_neraca_kewajiban"></tbody>
                     </table></div>
                 </div>
             </div>
 
-            <div class="panel" style="margin-top:20px; background:#f8fafc;">
-                <div class="panel-header"><h2 style="font-size:15px;">➕ Tambah Pos Neraca Manual</h2></div>
-                <div class="form-row-grid">
-                    <div class="form-group"><label>Kategori</label>
-                        <select id="nrcKategori" class="form-control">
-                            <option value="aset_lancar">Aset Lancar</option>
-                            <option value="aset_tetap">Aset Tetap</option>
-                            <option value="kewajiban">Kewajiban</option>
-                            <option value="modal">Modal</option>
-                        </select>
-                    </div>
-                    <div class="form-group"><label>Nama Pos</label><input type="text" id="nrcNamaPos" class="form-control" placeholder="Contoh: Modal Awal Pendirian"></div>
-                    <div class="form-group"><label>Nilai (Rp)</label><input type="number" id="nrcNilai" class="form-control" placeholder="0"></div>
-                    <div class="form-group"><label>Tanggal</label><input type="date" id="nrcTanggal" class="form-control"></div>
-                    <div class="form-group" style="grid-column: 1 / -1;"><label>Keterangan</label><input type="text" id="nrcKeterangan" class="form-control"></div>
-                </div>
-                <button type="button" class="btn-submit" style="width:auto; padding:12px 24px;" onclick="simpanPosNeraca()">SIMPAN POS</button>
+            <div style="margin-top:16px; padding:12px 14px; border-radius:10px; background:#eff6ff; border:1px solid #bfdbfe; color:#1e3a8a; font-size:12.5px; line-height:1.6;">
+                <b>Cara membaca:</b> Aset adalah kas, persediaan, dan peralatan yang dimiliki BSI. Kewajiban adalah saldo BSU yang belum dicairkan.
+                Modal Bersih adalah selisih otomatis antara total aset dan kewajiban. Nilai negatif berarti kewajiban lebih besar daripada aset yang tercatat.
             </div>
         </div>
     </div>
@@ -1752,7 +1850,8 @@
 
     <div id="lap_labarugi" class="content-section">
         <div class="panel">
-            <div class="panel-header"><h2>💰 LAPORAN KEUANGAN (LABA & RUGI)</h2></div>
+            <div class="panel-header"><h2>💰 LAPORAN LABA &amp; RUGI OTOMATIS</h2></div>
+            <p style="color:var(--text-muted);font-size:13px;margin-top:-8px;">Penjualan dikurangi harga pokok sampah terjual, biaya operasional, pemeliharaan, penyusutan aset, dan penyesuaian akhir periode. Pencairan saldo BSU tidak dianggap sebagai beban.</p>
             
             <div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px; align-items:center; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid var(--border);">
                 <div style="flex-grow:1; display:flex; gap:8px; align-items:center; flex-wrap: wrap;">
@@ -1770,7 +1869,7 @@
             <div class="table-container" style="max-height: 500px; overflow-y:auto;">
                 <table id="tbl_lap_labarugi">
                     <thead style="position: sticky; top: 0; z-index: 1;">
-                        <tr><th>TANGGAL</th><th>KATEGORI</th><th>KETERANGAN</th><th class="text-right">PEMASUKAN</th><th class="text-right">PENGELUARAN</th></tr>
+                        <tr><th>KELOMPOK</th><th>URAIAN</th><th>KETERANGAN</th><th class="text-right">PENDAPATAN</th><th class="text-right">BEBAN</th></tr>
                     </thead>
                     <tbody id="tbody_lap_labarugi">
                         <tr><td colspan="5" class="text-center">Memuat data...</td></tr>
@@ -2970,6 +3069,7 @@
     let globalNasabah = []; 
     let globalKategori = [];
     let globalPenjualan = []; // sumber: tabel `penjualan` di Supabase (dulu localStorage, sudah dimigrasikan)
+    let globalDataPelengkapNeraca = [];
     let globalBagiHasilInduk = { bsu: [], transaksi: [], penggunaan: [] };
     let globalPengirimanVerifikasi = [];
     let globalBsuVerifikasi = [];
@@ -3792,11 +3892,16 @@
         });
 
         (globalPenjualan || []).forEach((p, index) => {
-            tambahPasanganJurnalBSI(jurnal, {
+            let dataJual = {
                 tanggal:p.tanggal,
                 referensi:p.id || `PJL-${index + 1}`,
                 uraian:`Penjualan ${p.material || 'material'} kepada ${p.pembeli || 'off-taker'}`
-            }, 'Kas / Bank', 'Pendapatan Penjualan', p.total);
+            };
+            tambahPasanganJurnalBSI(jurnal, dataJual, 'Kas / Bank', 'Pendapatan Penjualan', p.total);
+            let stokSaatJual = hitungPersediaanOtomatisNeraca(p.tanggal);
+            let material = stokSaatJual.rincian.find(m => String(m.nama || '').trim().toLowerCase() === String(p.material || '').trim().toLowerCase());
+            let hpp = (Number(p.berat) || 0) * (Number(material?.hargaRataRata) || 0);
+            tambahPasanganJurnalBSI(jurnal, { ...dataJual, referensi: dataJual.referensi + '-HPP', uraian: 'Harga pokok ' + dataJual.uraian.toLowerCase() }, 'Harga Pokok Sampah Terjual', 'Persediaan Sampah', hpp);
         });
 
         (globalHibah || []).forEach((h, index) => {
@@ -3823,6 +3928,36 @@
                 uraian:`${p.jenis || 'Pemeliharaan'} ${p.nama_alat || 'peralatan'}`
             }, investasi ? 'Aset Tetap / Peralatan' : 'Beban Pemeliharaan', 'Kas / Bank', p.biaya);
         });
+
+        let pasanganPelengkap = {
+            saldo_awal_kas: ['Kas / Bank', 'Modal / Saldo Awal'],
+            saldo_awal_bank: ['Kas / Bank', 'Modal / Saldo Awal'],
+            piutang: ['Piutang Pembeli', 'Modal / Saldo Awal'],
+            utang_lain: ['Saldo Awal / Penyesuaian', 'Utang BSI Lainnya'],
+            modal: ['Saldo Awal / Penyesuaian', 'Modal & Dana BSI'],
+            aset_tetap_pelengkap: ['Aset Tetap / Peralatan', 'Modal / Saldo Awal'],
+            stok_penyesuaian: ['Persediaan Sampah', 'Selisih Penyesuaian Stok'],
+            pendapatan_akrual: ['Piutang Pembeli', 'Pendapatan Belum Diterima'],
+            beban_akrual: ['Biaya Belum Dibayar', 'Utang BSI Lainnya'],
+            aset_lancar: ['Aset Lancar Lainnya', 'Modal / Saldo Awal'],
+            aset_tetap: ['Aset Tetap / Peralatan', 'Modal / Saldo Awal'],
+            kewajiban: ['Saldo Awal / Penyesuaian', 'Utang BSI Lainnya']
+        };
+        (globalDataPelengkapNeraca || []).forEach((p, index) => {
+            let akun = pasanganPelengkap[p.kategori];
+            if (!akun) return;
+            if (p.kategori === 'aset_tetap_pelengkap') {
+                let sumberAset = bacaMetaDataPelengkap(p.keterangan).sumber_aset || 'modal_aset';
+                if (sumberAset === 'pinjaman_titipan') return;
+                akun = ['Aset Tetap / Peralatan', sumberAset === 'utang_aset' ? 'Utang BSI Lainnya' : (sumberAset === 'hibah_aset' ? 'Modal Hibah Aset' : 'Modal Aset BSI')];
+            }
+            let nilai = Number(p.nilai) || 0;
+            let data = { tanggal:p.tanggal, referensi:p.id || `PLK-${index + 1}`, uraian:`${LABEL_DATA_PELENGKAP[p.kategori] || p.kategori}: ${p.nama_pos || '-'}` };
+            tambahPasanganJurnalBSI(jurnal, data, nilai >= 0 ? akun[0] : akun[1], nilai >= 0 ? akun[1] : akun[0], nilai);
+        });
+
+        let penyusutanKini = hitungAsetTetapBersih(tanggalIsoLokal(new Date())).penyusutan;
+        tambahPasanganJurnalBSI(jurnal, { tanggal:tanggalIsoLokal(new Date()), referensi:'SYS-PENYUSUTAN', uraian:'Akumulasi penyusutan aset tetap sampai hari ini' }, 'Beban Penyusutan Aset', 'Akumulasi Penyusutan Aset', penyusutanKini);
 
         jurnal.forEach(j => { j.tanggalObj = uraikanTanggalInput(j.tanggal); });
         return jurnal.sort((a, b) => {
@@ -4176,18 +4311,46 @@
         if(filterType === 'semua') { tgl=''; bln=''; thn=''; document.getElementById('filterTgl_labarugi').value=''; document.getElementById('filterBln_labarugi').value=''; document.getElementById('filterThn_labarugi').value=''; }
         else if(filterType === 'tgl') { bln=''; thn=''; } else if(filterType === 'bln') { tgl=''; thn=''; } else if(filterType === 'thn') { tgl=''; bln=''; }
 
-        let html = ''; let totMasuk = 0, totKeluar = 0;
-        filterDataByDateRange(getDataKasIndukOtomatis(), 'tanggal', filterType, tgl, bln, thn).slice().reverse().forEach(d => {
-            if(d.jenis === 'masuk') totMasuk += d.nominal; else totKeluar += d.nominal;
-            html += `<tr><td>${formatTglTabel(d.tanggal)}</td><td style="font-weight:700;">${escHtml(d.kategori)}</td><td>${escHtml(d.keterangan)}</td><td class="text-right text-success">${d.jenis === 'masuk' ? `Rp ${d.nominal.toLocaleString('id-ID')}` : '-'}</td><td class="text-right text-danger">${d.jenis === 'keluar' ? `Rp ${d.nominal.toLocaleString('id-ID')}` : '-'}</td></tr>`;
-        });
-        
-        let labaRugi = totMasuk - totKeluar;
-        if(!html) html = '<tr><td colspan="5" class="text-center text-muted">Tidak ada arus kas di periode ini.</td></tr>';
-        else {
-            html += `<tr style="background:#f8fafc; font-weight:800;"><td colspan="3" class="text-right">SUB TOTAL</td><td class="text-right text-success">Rp ${totMasuk.toLocaleString('id-ID')}</td><td class="text-right text-danger">Rp ${totKeluar.toLocaleString('id-ID')}</td></tr>`;
-            html += `<tr style="background:#f1f5f9; font-weight:900;"><td colspan="3" class="text-right">LABA/RUGI BERSIH</td><td colspan="2" class="text-center ${labaRugi >= 0 ? 'text-primary' : 'text-danger'}">Rp ${labaRugi.toLocaleString('id-ID')}</td></tr>`;
-        }
+        let awal = null, akhir = null;
+        if (filterType === 'tgl' && tgl) { awal = uraikanTanggalInput(tgl); akhir = new Date(awal); akhir.setDate(akhir.getDate() + 1); }
+        if (filterType === 'bln' && bln) { let [y, m] = bln.split('-').map(Number); awal = new Date(y, m - 1, 1); akhir = new Date(y, m, 1); }
+        if (filterType === 'thn' && thn) { awal = new Date(Number(thn), 0, 1); akhir = new Date(Number(thn) + 1, 0, 1); }
+        let dalamPeriode = value => { let d = uraikanTanggalInput(value); return !isNaN(d) && (!awal || d >= awal) && (!akhir || d < akhir); };
+        let sampai = akhir ? new Date(akhir.getTime() - 86400000) : new Date();
+
+        let penjualanPeriode = (globalPenjualan || []).filter(p => dalamPeriode(p.tanggal));
+        let pendapatanPenjualan = penjualanPeriode.reduce((a, p) => a + (Number(p.total) || 0), 0);
+        let pendapatanHibah = (globalHibah || []).filter(h => dalamPeriode(h.tanggal)).reduce((a, h) => a + (Number(h.jumlah) || 0), 0);
+        let pendapatanAkrual = (globalDataPelengkapNeraca || []).filter(p => p.kategori === 'pendapatan_akrual' && dalamPeriode(p.tanggal)).reduce((a, p) => a + (Number(p.nilai) || 0), 0);
+
+        let stokSampai = hitungPersediaanOtomatisNeraca(tanggalIsoLokal(sampai));
+        let hargaRata = {};
+        stokSampai.rincian.forEach(m => { hargaRata[String(m.nama || '').trim().toLowerCase()] = Number(m.hargaRataRata) || 0; });
+        let hpp = penjualanPeriode.reduce((a, p) => a + (Number(p.berat) || 0) * (hargaRata[String(p.material || '').trim().toLowerCase()] || 0), 0);
+        let biayaOperasional = (globalBiayaOp || []).filter(b => dalamPeriode(b.tanggal)).reduce((a, b) => a + (Number(b.jumlah) || 0), 0);
+        let biayaPemeliharaan = (globalPemeliharaan || []).filter(p => p.jenis === 'Pemeliharaan' && dalamPeriode(p.tanggal)).reduce((a, p) => a + (Number(p.biaya) || 0), 0);
+        let bebanAkrual = (globalDataPelengkapNeraca || []).filter(p => p.kategori === 'beban_akrual' && dalamPeriode(p.tanggal)).reduce((a, p) => a + (Number(p.nilai) || 0), 0);
+        let penyusutanAkhir = hitungAsetTetapBersih(tanggalIsoLokal(sampai)).penyusutan;
+        let penyusutanAwal = 0;
+        if (awal) { let sebelum = new Date(awal); sebelum.setDate(sebelum.getDate() - 1); penyusutanAwal = hitungAsetTetapBersih(tanggalIsoLokal(sebelum)).penyusutan; }
+        let penyusutanPeriode = Math.max(0, penyusutanAkhir - penyusutanAwal);
+
+        let baris = [
+            ['Pendapatan', 'Penjualan Sampah', `${penjualanPeriode.length} transaksi penjualan`, pendapatanPenjualan, 0],
+            ['Pendapatan', 'Bantuan / Hibah', 'Penerimaan yang tercatat', pendapatanHibah, 0],
+            ['Pendapatan', 'Pendapatan Belum Diterima', 'Penyesuaian akhir periode', pendapatanAkrual, 0],
+            ['Beban', 'Harga Pokok Sampah Terjual', 'Berat terjual × harga perolehan rata-rata', 0, hpp],
+            ['Beban', 'Biaya Operasional', 'Biaya kegiatan BSI', 0, biayaOperasional],
+            ['Beban', 'Pemeliharaan Peralatan', 'Biaya perawatan yang tercatat', 0, biayaPemeliharaan],
+            ['Beban', 'Penyusutan Aset Tetap', 'Metode garis lurus', 0, penyusutanPeriode],
+            ['Beban', 'Biaya Belum Dibayar', 'Penyesuaian akhir periode', 0, bebanAkrual]
+        ].filter(r => r[3] !== 0 || r[4] !== 0);
+        let totalPendapatan = baris.reduce((a, r) => a + r[3], 0), totalBeban = baris.reduce((a, r) => a + r[4], 0), labaRugi = totalPendapatan - totalBeban;
+        let rp = v => 'Rp ' + Math.round(Number(v) || 0).toLocaleString('id-ID');
+        let html = baris.map(r => `<tr><td><strong>${escHtml(r[0])}</strong></td><td>${escHtml(r[1])}</td><td>${escHtml(r[2])}</td><td class="text-right text-success">${r[3] ? rp(r[3]) : '-'}</td><td class="text-right text-danger">${r[4] ? rp(r[4]) : '-'}</td></tr>`).join('');
+        if (!html) html = '<tr><td colspan="5" class="text-center text-muted">Belum ada pendapatan atau beban pada periode ini.</td></tr>';
+        html += `<tr style="background:#f8fafc;font-weight:800;"><td colspan="3" class="text-right">TOTAL</td><td class="text-right text-success">${rp(totalPendapatan)}</td><td class="text-right text-danger">${rp(totalBeban)}</td></tr>`;
+        html += `<tr style="background:#f1f5f9;font-weight:900;"><td colspan="3" class="text-right">LABA / (RUGI) BERSIH</td><td colspan="2" class="text-center ${labaRugi >= 0 ? 'text-primary' : 'text-danger'}">${rp(labaRugi)}</td></tr>`;
         document.getElementById('tbody_lap_labarugi').innerHTML = html;
     }
 
@@ -6596,8 +6759,8 @@
     }
 
     function loadDataTambahan() {
-        return Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle()])
-        .then(([res, resInv, resDok, resJual]) => {
+        return Promise.all([AdapterAPI.getBundleBSI(), AdapterAPI.getInventarisBundle(), AdapterAPI.getDokumenLaporanBundle(), AdapterAPI.getPenjualanBundle(), AdapterAPI.getNeracaPosList()])
+        .then(([res, resInv, resDok, resJual, resPelengkap]) => {
             globalKategori = res.kategori || [];
             globalNasabah = res.nasabah || [];
             // Laporan dan dokumen harus memakai sumber operasional yang sama dengan
@@ -6609,6 +6772,7 @@
             globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
             globalPembinaan = resDok.pembinaan || []; globalDarurat = resDok.darurat || [];
             globalPenjualan = resJual || [];
+            globalDataPelengkapNeraca = resPelengkap || [];
             perbaruiRingkasanDashboardDariBundle();
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
@@ -6636,58 +6800,341 @@
     }
 
     // =========================================
+    // DATA PELENGKAP LAPORAN KEUANGAN
+    // =========================================
+    const LABEL_DATA_PELENGKAP = {
+        saldo_awal_kas: 'Saldo Awal Kas Tunai',
+        saldo_awal_bank: 'Saldo Awal Rekening Bank',
+        piutang: 'Piutang Pembeli',
+        utang_lain: 'Utang BSI Lainnya',
+        modal: 'Modal Uang / Dana BSI',
+        aset_tetap_pelengkap: 'Aset Tetap / Peralatan',
+        stok_penyesuaian: 'Penyesuaian Stok Gudang',
+        pendapatan_akrual: 'Pendapatan Belum Diterima',
+        beban_akrual: 'Biaya Belum Dibayar',
+        aset_lancar: 'Aset Lancar (data lama)',
+        aset_tetap: 'Aset Tetap (data lama)',
+        kewajiban: 'Kewajiban (data lama)'
+    };
+    const BANTUAN_DATA_PELENGKAP = {
+        saldo_awal_kas: 'Masukkan uang tunai yang sudah dimiliki BSI sebelum aplikasi mulai digunakan. Cukup dicatat satu kali.',
+        saldo_awal_bank: 'Masukkan saldo awal setiap rekening bank BSI. Tuliskan nama bank atau nomor rekening pada uraian.',
+        piutang: 'Catat tagihan kepada pembeli. Pilih “mengurangi saldo” ketika piutang sudah dibayar atau dikoreksi.',
+        utang_lain: 'Catat pinjaman atau tagihan BSI selain saldo BSU. Pilih “mengurangi saldo” ketika utang sudah dibayar.',
+        modal: 'Khusus modal yang berupa uang atau dana. Untuk modal berupa peralatan, pilih Aset Tetap lalu pilih sumber “Modal Aset Milik BSI”.',
+        aset_tetap_pelengkap: 'Catat alat atau peralatan, lalu pilih sumber kepemilikannya. Modal, hibah, utang, atau status pinjaman akan ditentukan otomatis tanpa membuat kas fiktif.',
+        stok_penyesuaian: 'Digunakan setelah timbang fisik gudang. Isi selisih berat dan nilai stok yang bertambah atau berkurang.',
+        pendapatan_akrual: 'Pendapatan yang sudah menjadi hak BSI tetapi uangnya belum diterima. Sistem menambah piutang dan hasil usaha.',
+        beban_akrual: 'Biaya yang sudah menjadi kewajiban BSI tetapi belum dibayar. Sistem menambah utang dan beban.'
+    };
+    const LABEL_SUMBER_ASET = {
+        modal_aset: 'Modal Aset Milik BSI',
+        hibah_aset: 'Hibah Aset Permanen',
+        utang_aset: 'Dibeli dengan Utang',
+        pinjaman_titipan: 'Pinjaman / Titipan Pihak Lain',
+        data_lama: 'Data Aset Lama'
+    };
+    const INFO_SUMBER_ASET = {
+        modal_aset: 'Aset masuk sebagai milik BSI dan nilainya otomatis menjadi modal aset. Kas tetap Rp0.',
+        hibah_aset: 'Aset masuk sebagai milik BSI dan otomatis dicatat sebagai dana/modal hibah aset.',
+        utang_aset: 'Aset masuk sebagai milik BSI dan nilainya otomatis menjadi utang BSI.',
+        pinjaman_titipan: 'Aset hanya dicatat sebagai informasi pemakaian. Tidak masuk total aset, modal, utang, atau penyusutan BSI.'
+    };
+
+    function bacaMetaDataPelengkap(keterangan) {
+        if (!keterangan) return {};
+        try {
+            let hasil = JSON.parse(keterangan);
+            return hasil && typeof hasil === 'object' ? hasil : { catatan: String(keterangan) };
+        } catch (_) { return { catatan: String(keterangan) }; }
+    }
+
+    function ambilDataPelengkapSampai(sampaiTgl) {
+        let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
+        return (globalDataPelengkapNeraca || []).filter(p => {
+            let d = uraikanTanggalInput(p.tanggal);
+            return !isNaN(d) && d <= batas;
+        });
+    }
+
+    function jumlahDataPelengkap(jenis, sampaiTgl) {
+        let daftarJenis = Array.isArray(jenis) ? jenis : [jenis];
+        return ambilDataPelengkapSampai(sampaiTgl).filter(p => daftarJenis.includes(p.kategori)).reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
+    }
+
+    function ubahJenisDataPelengkap() {
+        let jenis = document.getElementById('pelengkapJenis')?.value || 'saldo_awal_kas';
+        let bantuan = document.getElementById('pelengkapBantuan');
+        if (bantuan) bantuan.innerText = BANTUAN_DATA_PELENGKAP[jenis] || 'Data ini akan dimasukkan otomatis ke laporan.';
+        let masaWrap = document.getElementById('pelengkapMasaWrap');
+        let sumberWrap = document.getElementById('pelengkapSumberAsetWrap');
+        let kgWrap = document.getElementById('pelengkapKgWrap');
+        let arahWrap = document.getElementById('pelengkapArahWrap');
+        if (masaWrap) masaWrap.style.display = jenis === 'aset_tetap_pelengkap' ? 'block' : 'none';
+        if (sumberWrap) sumberWrap.style.display = jenis === 'aset_tetap_pelengkap' ? 'block' : 'none';
+        if (kgWrap) kgWrap.style.display = jenis === 'stok_penyesuaian' ? 'block' : 'none';
+        if (arahWrap) arahWrap.style.display = ['saldo_awal_kas', 'saldo_awal_bank', 'aset_tetap_pelengkap'].includes(jenis) ? 'none' : 'block';
+        let labelNama = document.getElementById('pelengkapNamaLabel');
+        let labelNilai = document.getElementById('pelengkapNilaiLabel');
+        if (labelNama) labelNama.innerText = jenis === 'saldo_awal_bank' ? 'Nama Bank / Rekening' : (jenis === 'aset_tetap_pelengkap' ? 'Nama Aset / Peralatan' : 'Nama / Uraian');
+        if (labelNilai) labelNilai.innerText = jenis === 'stok_penyesuaian' ? 'Nilai Selisih Stok (Rp)' : 'Nilai (Rp)';
+        if (jenis === 'aset_tetap_pelengkap') ubahSumberAsetPelengkap();
+    }
+
+    function ubahSumberAsetPelengkap() {
+        let sumber = document.getElementById('pelengkapSumberAset')?.value || 'modal_aset';
+        let info = document.getElementById('pelengkapSumberAsetInfo');
+        let masaWrap = document.getElementById('pelengkapMasaWrap');
+        if (info) info.innerText = INFO_SUMBER_ASET[sumber] || '';
+        if (masaWrap) masaWrap.style.display = sumber === 'pinjaman_titipan' ? 'none' : 'block';
+    }
+
+    function loadDataPelengkapNeraca(callback) {
+        let tbody = document.getElementById('tbodyDataPelengkap');
+        if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center">Memuat data...</td></tr>';
+        return AdapterAPI.getNeracaPosList().then(list => {
+            globalDataPelengkapNeraca = list || [];
+            if (callback) callback();
+            renderDataPelengkapNeraca();
+            ubahJenisDataPelengkap();
+            return globalDataPelengkapNeraca;
+        }).catch(e => {
+            if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center text-danger">Gagal memuat data pelengkap.</td></tr>';
+            throw e;
+        });
+    }
+
+    function renderDataPelengkapNeraca() {
+        let tbody = document.getElementById('tbodyDataPelengkap');
+        if (!tbody) return;
+        if (!document.getElementById('pelengkapTanggal').value) document.getElementById('pelengkapTanggal').value = new Date().toISOString().slice(0, 10);
+        let cari = (document.getElementById('cariDataPelengkap')?.value || '').trim().toLowerCase();
+        let list = (globalDataPelengkapNeraca || []).filter(p => [LABEL_DATA_PELENGKAP[p.kategori], p.nama_pos, p.keterangan].join(' ').toLowerCase().includes(cari)).slice().sort((a, b) => uraikanTanggalInput(b.tanggal) - uraikanTanggalInput(a.tanggal));
+        let rp = v => 'Rp ' + Math.round(Math.abs(Number(v) || 0)).toLocaleString('id-ID');
+        let ringkas = ringkasDataPelengkapNeraca(tanggalIsoLokal(new Date()));
+        let piutang = ringkas.piutang;
+        let utang = ringkas.utangLain;
+        let modal = ringkas.modalTercatat;
+        let cards = document.getElementById('pelengkapCards');
+        if (cards) cards.innerHTML = `
+            <div class="card card-blue"><h3>Jumlah Data</h3><p>${globalDataPelengkapNeraca.length}</p></div>
+            <div class="card card-green"><h3>Piutang Bersih</h3><p>${rp(piutang)}</p></div>
+            <div class="card card-red"><h3>Utang Lain</h3><p>${rp(utang)}</p></div>
+            <div class="card card-blue"><h3>Modal Tercatat</h3><p>${rp(modal)}</p></div>`;
+        if (!list.length) {
+            tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada data pelengkap. Laporan tetap memakai transaksi utama yang sudah tercatat.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = list.map(p => {
+            let meta = bacaMetaDataPelengkap(p.keterangan);
+            let nilai = Number(p.nilai) || 0;
+            let rincian = [];
+            if (meta.jumlah_kg) rincian.push(`${Number(meta.jumlah_kg).toLocaleString('id-ID')} Kg`);
+            if (meta.masa_manfaat) rincian.push(`Masa manfaat ${meta.masa_manfaat} tahun`);
+            if (p.kategori === 'aset_tetap_pelengkap') rincian.push(LABEL_SUMBER_ASET[meta.sumber_aset || 'modal_aset']);
+            if (meta.catatan) rincian.push(meta.catatan);
+            return `<tr><td>${formatTglTabel(p.tanggal)}</td><td><strong>${escHtml(LABEL_DATA_PELENGKAP[p.kategori] || p.kategori)}</strong><br><small>${escHtml(p.nama_pos || '-')}</small></td><td>${escHtml(rincian.join(' • ') || '-')}</td><td class="text-right" style="font-weight:800;color:${nilai < 0 ? '#b91c1c' : '#047857'};">${nilai < 0 ? '− ' : '+ '}${rp(nilai)}</td><td class="text-center"><button class="btn-sync" style="padding:4px 8px;background:#fee2e2;color:#991b1b;border-color:#fecaca;" onclick="hapusDataPelengkap('${escAttr(p.id)}')">🗑️</button></td></tr>`;
+        }).join('');
+    }
+
+    function simpanDataPelengkap(event) {
+        event.preventDefault();
+        let jenis = document.getElementById('pelengkapJenis').value;
+        let tanggal = document.getElementById('pelengkapTanggal').value;
+        let nama = document.getElementById('pelengkapNama').value.trim();
+        let nilaiAwal = parseFloat(document.getElementById('pelengkapNilai').value) || 0;
+        let arah = document.getElementById('pelengkapArah').value;
+        let tetapTambah = ['saldo_awal_kas', 'saldo_awal_bank', 'aset_tetap_pelengkap'].includes(jenis);
+        let nilai = nilaiAwal * ((!tetapTambah && arah === 'kurang') ? -1 : 1);
+        let masa = parseFloat(document.getElementById('pelengkapMasa').value) || 5;
+        let sumberAset = document.getElementById('pelengkapSumberAset').value || 'modal_aset';
+        let jumlahKg = parseFloat(document.getElementById('pelengkapKg').value) || 0;
+        if (!tanggal || !nama || nilaiAwal <= 0) return alert('Lengkapi tanggal, nama/uraian, dan nilai lebih dari Rp0.');
+        if (jenis === 'stok_penyesuaian' && jumlahKg <= 0) return alert('Selisih berat stok wajib lebih dari 0 Kg.');
+        if (cekPeringatanPeriodeTerkunci(tanggal)) return;
+        let meta = { versi: 1, catatan: document.getElementById('pelengkapKeterangan').value.trim() || '', arah: tetapTambah ? 'tambah' : arah };
+        if (jenis === 'aset_tetap_pelengkap') { meta.masa_manfaat = Math.max(1, masa); meta.sumber_aset = sumberAset; }
+        if (jenis === 'stok_penyesuaian') meta.jumlah_kg = jumlahKg * (arah === 'kurang' ? -1 : 1);
+        let btn = document.getElementById('btnSimpanPelengkap');
+        btn.disabled = true; btn.innerText = 'MENYIMPAN...';
+        AdapterAPI.tambahPosNeraca({ kategori: jenis, nama_pos: nama, nilai, tanggal, keterangan: JSON.stringify(meta) }).then(res => {
+            if (String(res).startsWith('Gagal')) throw new Error(res);
+            alert(jenis === 'aset_tetap_pelengkap' ? 'Aset berhasil disimpan. Sumber aset dan pasangan neracanya dibuat otomatis tanpa mengubah saldo kas.' : 'Data berhasil disimpan dan akan masuk otomatis ke laporan.');
+            document.getElementById('pelengkapNama').value = '';
+            document.getElementById('pelengkapNilai').value = '';
+            document.getElementById('pelengkapKg').value = '';
+            document.getElementById('pelengkapKeterangan').value = '';
+            return loadDataPelengkapNeraca();
+        }).catch(e => alert('Gagal menyimpan: ' + e.message)).finally(() => { btn.disabled = false; btn.innerText = 'SIMPAN DATA'; });
+    }
+
+    function hapusDataPelengkap(id) {
+        if (!confirm('Hapus data pelengkap ini? Angka laporan akan dihitung ulang otomatis.')) return;
+        AdapterAPI.deletePosNeraca(id).then(res => {
+            if (String(res).startsWith('Gagal')) throw new Error(res);
+            return loadDataPelengkapNeraca();
+        }).catch(e => alert('Gagal menghapus: ' + e.message));
+    }
+
+    // =========================================
     // NERACA (POSISI ASET, KEWAJIBAN & MODAL)
     // =========================================
     let globalPeriodeTutup = [];
-    let globalNeracaPosManual = [];
 
     // Kas & setara kas kumulatif dari awal data s.d. tanggal tertentu (inklusif).
     function hitungSaldoKasKumulatif(sampaiTgl) {
         let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
-        let data = getDataKasIndukOtomatis().filter(d => !isNaN(d.tanggalObj) && d.tanggalObj <= batas);
+        let data = getDataKasIndukOtomatis().filter(d => {
+            let tanggalKas = uraikanTanggalInput(d.tanggal);
+            if (isNaN(tanggalKas)) tanggalKas = d.tanggalObj;
+            return !isNaN(tanggalKas) && tanggalKas <= batas;
+        });
         let masuk = data.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
         let keluar = data.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
         return masuk - keluar;
     }
 
     // Total tabungan BSU yang masih tersimpan di BSI (belum ditarik) = kewajiban BSI ke BSU.
-    function hitungTotalTabunganBsuBelumDitarik() {
-        let total = 0;
-        (globalNasabah || []).filter(bsu => bsu.mode_latihan !== true).forEach(bsu => { total += Math.max(0, hitungSaldoBsuSaatIni(bsu.id || bsu.nama)); });
-        return total;
+    function hitungTotalTabunganBsuBelumDitarik(sampaiTgl) {
+        let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
+        let saldoPerBsu = {};
+        let transaksiSaldo = (globalTransaksiKeuangan && globalTransaksiKeuangan.length) ? globalTransaksiKeuangan : (globalTransaksi || []);
+
+        transaksiSaldo.filter(t => {
+            let d = uraikanTanggalInput(t.tgl);
+            if (isNaN(d) || d > batas || (t.status || 'aktif') === 'dibatalkan') return false;
+            return (parseFloat(t.total) || 0) < 0 || !t.status_verifikasi || t.status_verifikasi === 'diterima';
+        }).forEach(t => {
+            let kunci = t.id_unit ? 'ID|' + String(t.id_unit) : 'NAMA|' + String(t.nama || 'Tanpa Nama');
+            saldoPerBsu[kunci] = (saldoPerBsu[kunci] || 0) + (parseFloat(t.total) || 0);
+        });
+
+        return Object.values(saldoPerBsu).reduce((total, saldo) => total + Math.max(0, saldo), 0);
     }
 
-    // Akumulasi nilai investasi alat/peralatan (nilai buku kotor, tanpa penyusutan) s.d. tanggal tertentu.
+    // Nilai stok otomatis memakai harga perolehan rata-rata material yang diterima BSI.
+    function hitungPersediaanOtomatisNeraca(sampaiTgl) {
+        let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
+        let perMaterial = {};
+        let kunciMaterial = (nama) => String(nama || 'Lainnya').trim().toLowerCase();
+
+        (globalTransaksi || []).filter(t => {
+            let d = uraikanTanggalInput(t.tgl);
+            return !isNaN(d) && d <= batas && (parseFloat(t.total) || 0) > 0 && (parseFloat(t.berat) || 0) > 0;
+        }).forEach(t => {
+            let kunci = kunciMaterial(t.jenis);
+            if (!perMaterial[kunci]) perMaterial[kunci] = { nama: t.jenis || 'Lainnya', masukKg: 0, biayaMasuk: 0, terjualKg: 0 };
+            perMaterial[kunci].masukKg += parseFloat(t.berat) || 0;
+            perMaterial[kunci].biayaMasuk += parseFloat(t.total) || 0;
+        });
+
+        (globalPenjualan || []).filter(p => {
+            let d = uraikanTanggalInput(p.tanggal);
+            return !isNaN(d) && d <= batas;
+        }).forEach(p => {
+            let kunci = kunciMaterial(p.material);
+            if (!perMaterial[kunci]) perMaterial[kunci] = { nama: p.material || 'Lainnya', masukKg: 0, biayaMasuk: 0, terjualKg: 0 };
+            perMaterial[kunci].terjualKg += parseFloat(p.berat) || 0;
+        });
+
+        let rincian = Object.values(perMaterial).map(m => {
+            let hargaRataRata = m.masukKg > 0 ? m.biayaMasuk / m.masukKg : 0;
+            let stokKg = Math.max(0, m.masukKg - m.terjualKg);
+            return { ...m, hargaRataRata, stokKg, nilai: stokKg * hargaRataRata };
+        });
+
+        let nilaiSistem = rincian.reduce((a, m) => a + m.nilai, 0);
+        let stokSistemKg = rincian.reduce((a, m) => a + m.stokKg, 0);
+        let penyesuaianNilai = jumlahDataPelengkap('stok_penyesuaian', sampaiTgl);
+        let penyesuaianKg = ambilDataPelengkapSampai(sampaiTgl).filter(p => p.kategori === 'stok_penyesuaian').reduce((a, p) => a + (Number(bacaMetaDataPelengkap(p.keterangan).jumlah_kg) || 0), 0);
+        return {
+            nilai: Math.max(0, nilaiSistem + penyesuaianNilai),
+            nilaiSistem, penyesuaianNilai, penyesuaianKg,
+            masukKg: rincian.reduce((a, m) => a + m.masukKg, 0),
+            terjualKg: rincian.reduce((a, m) => a + m.terjualKg, 0),
+            stokKg: Math.max(0, stokSistemKg + penyesuaianKg),
+            rincian
+        };
+    }
+
+    // Akumulasi nilai investasi alat/peralatan s.d. tanggal tertentu.
     function hitungAkumulasiInvestasiAlat(sampaiTgl) {
         let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date(8640000000000000);
         return (globalPemeliharaan || []).filter(p => p.jenis === 'Investasi Alat').filter(p => {
-            let d = new Date(p.tanggal); return !isNaN(d) && d <= batas;
+            let d = uraikanTanggalInput(p.tanggal); return !isNaN(d) && d <= batas;
         }).reduce((a, p) => a + (parseFloat(p.biaya) || 0), 0);
     }
 
+    function hitungAsetTetapBersih(sampaiTgl) {
+        let batas = sampaiTgl ? uraikanTanggalInput(sampaiTgl) : new Date();
+        let daftar = (globalPemeliharaan || []).filter(p => p.jenis === 'Investasi Alat').map(p => ({
+            tanggal: p.tanggal, nama: p.nama_alat || 'Peralatan', nilai: parseFloat(p.biaya) || 0, masa: 5, sumber: 'investasi'
+        }));
+        let titipan = [];
+        ambilDataPelengkapSampai(sampaiTgl).filter(p => ['aset_tetap_pelengkap', 'aset_tetap'].includes(p.kategori)).forEach(p => {
+            let meta = bacaMetaDataPelengkap(p.keterangan);
+            let sumberAset = p.kategori === 'aset_tetap_pelengkap' ? (meta.sumber_aset || 'modal_aset') : 'data_lama';
+            let item = { tanggal: p.tanggal, nama: p.nama_pos || 'Aset Tetap', nilai: parseFloat(p.nilai) || 0, masa: Math.max(1, Number(meta.masa_manfaat) || 5), sumber: 'pelengkap', sumberAset };
+            if (sumberAset === 'pinjaman_titipan') titipan.push(item); else daftar.push(item);
+        });
+        let rincian = daftar.filter(a => {
+            let d = uraikanTanggalInput(a.tanggal);
+            return !isNaN(d) && d <= batas;
+        }).map(a => {
+            if (a.nilai <= 0) return { ...a, penyusutan: 0, nilaiBuku: a.nilai };
+            let tanggalAset = uraikanTanggalInput(a.tanggal);
+            let tahunTerpakai = Math.max(0, (batas - tanggalAset) / (365.25 * 24 * 60 * 60 * 1000));
+            let penyusutan = Math.min(a.nilai, (a.nilai / a.masa) * tahunTerpakai);
+            return { ...a, penyusutan, nilaiBuku: a.nilai - penyusutan };
+        });
+        return {
+            nilaiPerolehan: rincian.reduce((a, x) => a + x.nilai, 0),
+            penyusutan: rincian.reduce((a, x) => a + x.penyusutan, 0),
+            nilaiBuku: rincian.reduce((a, x) => a + x.nilaiBuku, 0),
+            rincian, titipan, nilaiTitipan: titipan.reduce((a, x) => a + x.nilai, 0)
+        };
+    }
+
+    function ringkasDataPelengkapNeraca(sampaiTgl) {
+        let asetPelengkap = ambilDataPelengkapSampai(sampaiTgl).filter(p => p.kategori === 'aset_tetap_pelengkap');
+        let modalAsetOtomatis = asetPelengkap.filter(p => ['modal_aset', 'hibah_aset'].includes(bacaMetaDataPelengkap(p.keterangan).sumber_aset || 'modal_aset')).reduce((a, p) => a + (Number(p.nilai) || 0), 0);
+        let utangAsetOtomatis = asetPelengkap.filter(p => bacaMetaDataPelengkap(p.keterangan).sumber_aset === 'utang_aset').reduce((a, p) => a + (Number(p.nilai) || 0), 0);
+        let modalManual = jumlahDataPelengkap('modal', sampaiTgl);
+        let utangManual = jumlahDataPelengkap(['utang_lain', 'beban_akrual', 'kewajiban'], sampaiTgl);
+        return {
+            saldoAwalKasBank: jumlahDataPelengkap(['saldo_awal_kas', 'saldo_awal_bank'], sampaiTgl),
+            piutang: jumlahDataPelengkap(['piutang', 'pendapatan_akrual'], sampaiTgl),
+            asetLancarLain: jumlahDataPelengkap('aset_lancar', sampaiTgl),
+            utangManual, utangAsetOtomatis, utangLain: utangManual + utangAsetOtomatis,
+            modalManual, modalAsetOtomatis, modalTercatat: modalManual + modalAsetOtomatis,
+            pendapatanAkrual: jumlahDataPelengkap('pendapatan_akrual', sampaiTgl),
+            bebanAkrual: jumlahDataPelengkap('beban_akrual', sampaiTgl)
+        };
+    }
+
     function hitungDataNeraca(tglStr) {
-        let kas = hitungSaldoKasKumulatif(tglStr);
-        let aset_tetap_otomatis = hitungAkumulasiInvestasiAlat(tglStr);
-        let kewajiban_tabungan = hitungTotalTabunganBsuBelumDitarik();
+        let pelengkap = ringkasDataPelengkapNeraca(tglStr);
+        let kasTransaksi = hitungSaldoKasKumulatif(tglStr);
+        let kas = kasTransaksi + pelengkap.saldoAwalKasBank;
+        let persediaan = hitungPersediaanOtomatisNeraca(tglStr);
+        let asetTetap = hitungAsetTetapBersih(tglStr);
+        let aset_tetap_otomatis = asetTetap.nilaiBuku;
+        let kewajiban_tabungan = hitungTotalTabunganBsuBelumDitarik(tglStr);
+        let batas = tglStr ? uraikanTanggalInput(tglStr) : new Date(8640000000000000);
+        let totalPenjualan = (globalPenjualan || []).filter(p => {
+            let d = uraikanTanggalInput(p.tanggal);
+            return !isNaN(d) && d <= batas;
+        }).reduce((a, p) => a + (parseFloat(p.total) || 0), 0);
 
-        let posManual = globalNeracaPosManual || [];
-        let by = (kat) => posManual.filter(p => p.kategori === kat);
-
-        let asetLancarManual = by('aset_lancar').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
-        let asetTetapManual = by('aset_tetap').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
-        let kewajibanManual = by('kewajiban').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
-        let modalManual = by('modal').reduce((a, p) => a + (parseFloat(p.nilai) || 0), 0);
-
-        let totalAset = kas + asetLancarManual + aset_tetap_otomatis + asetTetapManual;
-        let totalKewajiban = kewajiban_tabungan + kewajibanManual;
-        // Modal/laba ditahan = angka penyeimbang otomatis, supaya Aset = Kewajiban + Modal selalu terpenuhi.
-        let selisihPenyeimbang = totalAset - totalKewajiban - modalManual;
+        let totalAset = kas + pelengkap.piutang + pelengkap.asetLancarLain + persediaan.nilai + aset_tetap_otomatis;
+        let totalKewajiban = kewajiban_tabungan + pelengkap.utangLain;
+        let modalBersih = totalAset - totalKewajiban;
+        let surplusAkumulasi = modalBersih - pelengkap.modalTercatat;
 
         return {
-            kas, aset_tetap_otomatis, kewajiban_tabungan,
-            asetLancarManual, asetTetapManual, kewajibanManual, modalManual,
-            totalAset, totalKewajiban, totalModal: modalManual + selisihPenyeimbang,
-            selisihPenyeimbang, posManual
+            kas, kasTransaksi, persediaan, asetTetap, aset_tetap_otomatis, kewajiban_tabungan, pelengkap,
+            totalAset, totalKewajiban, totalModal: modalBersih, modalBersih,
+            surplusAkumulasi, totalPenjualan, totalKewajibanModal: totalKewajiban + modalBersih
         };
     }
 
@@ -6698,81 +7145,238 @@
         let tgl = document.getElementById('neracaTanggal').value;
         let n = hitungDataNeraca(tgl);
         let rp = (v) => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+        let kg = (v) => Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' Kg';
 
         document.getElementById('neracaCards').innerHTML = `
             <div class="card card-green"><h3>Total Aset</h3><p>${rp(n.totalAset)}</p></div>
             <div class="card card-red"><h3>Total Kewajiban</h3><p>${rp(n.totalKewajiban)}</p></div>
-            <div class="card card-blue"><h3>Total Modal</h3><p>${rp(n.totalModal)}</p></div>
+            <div class="card card-blue"><h3>Modal Bersih Otomatis</h3><p>${rp(n.modalBersih)}</p></div>
         `;
 
-        let baris = (nama, nilai, idPos) => `<tr>
-            <td>${nama}</td><td class="text-right" style="font-weight:700;">${rp(nilai)}</td>
-            <td class="text-center">${idPos ? `<button class="btn-sync" style="padding:3px 7px; font-size:10px; background:#fee2e2; color:#991b1b; border-color:#fca5a5;" onclick="hapusPosNeraca('${escAttr(idPos)}')">🗑️</button>` : ''}</td>
-        </tr>`;
+        document.getElementById('neracaRekapCards').innerHTML = `
+            <div class="card card-blue"><h3>Material Masuk</h3><p>${kg(n.persediaan.masukKg)}</p></div>
+            <div class="card card-red"><h3>Material Terjual</h3><p>${kg(n.persediaan.terjualKg)}</p></div>
+            <div class="card card-green"><h3>Stok Akhir</h3><p>${kg(n.persediaan.stokKg)}</p></div>
+            <div class="card card-blue"><h3>Hasil Penjualan</h3><p>${rp(n.totalPenjualan)}</p></div>
+        `;
 
-        let htmlAset = baris('Kas &amp; Setara Kas (otomatis)', n.kas, null)
-            + n.posManual.filter(p => p.kategori === 'aset_lancar').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
-            + baris('Akumulasi Investasi Alat/Peralatan (otomatis, nilai buku kotor)', n.aset_tetap_otomatis, null)
-            + n.posManual.filter(p => p.kategori === 'aset_tetap').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
-            + `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL ASET</td><td class="text-right">${rp(n.totalAset)}</td><td></td></tr>`;
+        let baris = (nama, nilai) => `<tr><td>${nama}</td><td class="text-right" style="font-weight:700;">${rp(nilai)}</td></tr>`;
+
+        let htmlAset = baris('Kas &amp; Bank', n.kas)
+            + baris('Piutang Pembeli &amp; Pendapatan Belum Diterima', n.pelengkap.piutang)
+            + (n.pelengkap.asetLancarLain ? baris('Aset Lancar Lainnya', n.pelengkap.asetLancarLain) : '')
+            + baris('Persediaan Sampah (harga perolehan rata-rata)', n.persediaan.nilai)
+            + baris('Aset Tetap / Peralatan (setelah penyusutan)', n.aset_tetap_otomatis)
+            + (n.asetTetap.titipan.length ? `<tr style="color:var(--text-muted);"><td>Aset Pinjaman / Titipan — tidak termasuk total aset</td><td class="text-right">${rp(n.asetTetap.nilaiTitipan)}</td></tr>` : '')
+            + `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL ASET</td><td class="text-right">${rp(n.totalAset)}</td></tr>`;
         document.getElementById('tbody_neraca_aset').innerHTML = htmlAset;
 
-        let htmlKewajiban = baris('Tabungan BSU Belum Ditarik (otomatis)', n.kewajiban_tabungan, null)
-            + n.posManual.filter(p => p.kategori === 'kewajiban').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
-            + `<tr style="background:#fef2f2; font-weight:800;"><td>Subtotal Kewajiban</td><td class="text-right">${rp(n.totalKewajiban)}</td><td></td></tr>`
-            + n.posManual.filter(p => p.kategori === 'modal').map(p => baris(escAttr(p.nama_pos) + ' (manual)', parseFloat(p.nilai) || 0, p.id)).join('')
-            + baris('Laba Ditahan / Selisih Penyeimbang (otomatis)', n.selisihPenyeimbang, null)
-            + `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL KEWAJIBAN + MODAL</td><td class="text-right">${rp(n.totalKewajiban + n.totalModal)}</td><td></td></tr>`;
+        let htmlKewajiban = baris('Saldo BSU Belum Dicairkan', n.kewajiban_tabungan)
+            + baris('Utang BSI Lainnya, termasuk sumber aset', n.pelengkap.utangLain)
+            + `<tr style="background:#fef2f2;font-weight:800;"><td>SUBTOTAL KEWAJIBAN</td><td class="text-right">${rp(n.totalKewajiban)}</td></tr>`
+            + baris('Modal &amp; Dana BSI, termasuk modal/hibah aset', n.pelengkap.modalTercatat)
+            + baris('Surplus / (Defisit) Akumulasi', n.surplusAkumulasi)
+            + `<tr style="background:#f1f5f9; font-weight:900;"><td>TOTAL KEWAJIBAN + MODAL</td><td class="text-right">${rp(n.totalKewajibanModal)}</td></tr>`;
         document.getElementById('tbody_neraca_kewajiban').innerHTML = htmlKewajiban;
     }
 
+    // Nama lama dipertahankan agar proses restore versi lama tetap dapat menyegarkan halaman.
     function loadNeracaPosManual(callback) {
-        AdapterAPI.getNeracaPosList().then(list => { globalNeracaPosManual = list || []; if (callback) callback(); renderNeraca(); })
-        .catch(() => { globalNeracaPosManual = []; if (callback) callback(); });
-    }
-
-    function simpanPosNeraca() {
-        let form = {
-            kategori: document.getElementById('nrcKategori').value,
-            nama_pos: document.getElementById('nrcNamaPos').value.trim(),
-            nilai: parseFloat(document.getElementById('nrcNilai').value) || 0,
-            tanggal: document.getElementById('nrcTanggal').value || null,
-            keterangan: document.getElementById('nrcKeterangan').value.trim() || null
-        };
-        if (!form.nama_pos) return alert('Nama pos wajib diisi.');
-        AdapterAPI.tambahPosNeraca(form).then(res => {
-            alert(res);
-            document.getElementById('nrcNamaPos').value = ''; document.getElementById('nrcNilai').value = '';
-            document.getElementById('nrcKeterangan').value = '';
-            loadNeracaPosManual();
-        }).catch(e => alert('Gagal: ' + e));
-    }
-
-    function hapusPosNeraca(id) {
-        if (!confirm('Yakin ingin menghapus pos neraca manual ini?')) return;
-        AdapterAPI.deletePosNeraca(id).then(res => { alert(res); loadNeracaPosManual(); }).catch(e => alert('Gagal: ' + e));
+        return loadDataPelengkapNeraca(() => { if (callback) callback(); renderNeraca(); });
     }
 
     function cetakNeraca() {
         let tgl = document.getElementById('neracaTanggal').value || new Date().toISOString().slice(0, 10);
         let n = hitungDataNeraca(tgl);
         let rp = (v) => 'Rp ' + Math.round(v).toLocaleString('id-ID');
-        let rowsAset = [['Kas & Setara Kas (otomatis)', rp(n.kas)]]
-            .concat(n.posManual.filter(p => p.kategori === 'aset_lancar').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
-            .concat([['Akumulasi Investasi Alat/Peralatan (otomatis)', rp(n.aset_tetap_otomatis)]])
-            .concat(n.posManual.filter(p => p.kategori === 'aset_tetap').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
-            .concat([['TOTAL ASET', rp(n.totalAset)]]);
-        let rowsKewajibanModal = [['Tabungan BSU Belum Ditarik (otomatis)', rp(n.kewajiban_tabungan)]]
-            .concat(n.posManual.filter(p => p.kategori === 'kewajiban').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
-            .concat([['Subtotal Kewajiban', rp(n.totalKewajiban)]])
-            .concat(n.posManual.filter(p => p.kategori === 'modal').map(p => [p.nama_pos + ' (manual)', rp(parseFloat(p.nilai) || 0)]))
-            .concat([['Laba Ditahan / Selisih Penyeimbang (otomatis)', rp(n.selisihPenyeimbang)]])
-            .concat([['TOTAL KEWAJIBAN + MODAL', rp(n.totalKewajiban + n.totalModal)]]);
+        let kg = (v) => Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' Kg';
+        let rowsAset = [
+            ['Kas & Bank', rp(n.kas)],
+            ['Piutang Pembeli & Pendapatan Belum Diterima', rp(n.pelengkap.piutang)],
+            ['Aset Lancar Lainnya', rp(n.pelengkap.asetLancarLain)],
+            ['Persediaan Sampah (harga perolehan rata-rata)', rp(n.persediaan.nilai)],
+            ['Aset Tetap / Peralatan - nilai perolehan', rp(n.asetTetap.nilaiPerolehan)],
+            ['Akumulasi Penyusutan Aset', '(' + rp(n.asetTetap.penyusutan) + ')'],
+            ['Aset Tetap / Peralatan - nilai bersih', rp(n.aset_tetap_otomatis)],
+            ['MEMO: Aset Pinjaman/Titipan (tidak termasuk total)', rp(n.asetTetap.nilaiTitipan)],
+            ['TOTAL ASET', rp(n.totalAset)]
+        ];
+        let rowsKewajibanModal = [
+            ['Saldo BSU Belum Dicairkan', rp(n.kewajiban_tabungan)],
+            ['Utang BSI Lainnya, termasuk sumber aset', rp(n.pelengkap.utangLain)],
+            ['SUBTOTAL KEWAJIBAN', rp(n.totalKewajiban)],
+            ['Modal & Dana BSI, termasuk modal/hibah aset', rp(n.pelengkap.modalTercatat)],
+            ['Surplus / (Defisit) Akumulasi', rp(n.surplusAkumulasi)],
+            ['TOTAL KEWAJIBAN + MODAL', rp(n.totalKewajibanModal)]
+        ];
+        let rowsRekap = [
+            ['Material Masuk', kg(n.persediaan.masukKg)],
+            ['Material Terjual', kg(n.persediaan.terjualKg)],
+            ['Stok Akhir', kg(n.persediaan.stokKg)],
+            ['Nilai Persediaan', rp(n.persediaan.nilai)],
+            ['Total Hasil Penjualan', rp(n.totalPenjualan)]
+        ];
 
         bukaPreviewDokumen('NERACA (POSISI ASET, KEWAJIBAN & MODAL)', 'Per tanggal: ' + formatTglTabel(tgl), [
             { heading: 'ASET', headers: ['Pos', 'Nilai'], rows: rowsAset },
             { heading: 'KEWAJIBAN & MODAL', headers: ['Pos', 'Nilai'], rows: rowsKewajibanModal },
-            { text: 'Catatan: Baris "Laba Ditahan / Selisih Penyeimbang" dihitung otomatis agar Neraca selalu seimbang. Aset tetap dicatat sebesar akumulasi biaya investasi (nilai buku kotor, tanpa penyusutan).' }
+            { heading: 'REKAPITULASI OPERASIONAL', headers: ['Uraian', 'Jumlah'], rows: rowsRekap },
+            { text: 'Catatan: Seluruh angka dihitung otomatis dari transaksi dan Data Pelengkap Neraca. Sumber aset menentukan modal, hibah, utang, atau status titipan secara otomatis tanpa mengubah kas. Aset titipan tidak masuk total aset. Persediaan memakai harga perolehan rata-rata dan aset milik BSI disusutkan dengan metode garis lurus.' }
+        ]);
+    }
+
+    // =========================================
+    // ARUS KAS, PERUBAHAN MODAL, DAN CATATAN
+    // =========================================
+    function tanggalIsoLokal(date) {
+        let d = date instanceof Date ? date : uraikanTanggalInput(date);
+        if (isNaN(d)) return '';
+        return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function dataArusKasLengkap() {
+        let data = getDataKasIndukOtomatis().map(d => ({ ...d, kelompok: String(d.kategori || '').toLowerCase().includes('investasi') ? 'Investasi' : 'Operasional' }));
+        (globalDataPelengkapNeraca || []).filter(p => ['saldo_awal_kas', 'saldo_awal_bank'].includes(p.kategori)).forEach(p => data.push({
+            tanggalObj: uraikanTanggalInput(p.tanggal), tanggal: p.tanggal, jenis: (Number(p.nilai) || 0) < 0 ? 'keluar' : 'masuk',
+            kategori: LABEL_DATA_PELENGKAP[p.kategori], keterangan: p.nama_pos || '-', nominal: Math.abs(Number(p.nilai) || 0), kelompok: 'Pendanaan / Saldo Awal'
+        }));
+        return data.filter(d => !isNaN(uraikanTanggalInput(d.tanggal))).sort((a, b) => uraikanTanggalInput(a.tanggal) - uraikanTanggalInput(b.tanggal));
+    }
+
+    function ambilLaporanArusKas() {
+        let mulai = document.getElementById('arusKasMulai')?.value || '';
+        let akhir = document.getElementById('arusKasAkhir')?.value || '';
+        let awalObj = mulai ? uraikanTanggalInput(mulai) : null;
+        let akhirObj = akhir ? uraikanTanggalInput(akhir) : null;
+        let semua = dataArusKasLengkap();
+        let sebelum = semua.filter(d => awalObj && uraikanTanggalInput(d.tanggal) < awalObj);
+        let daftar = semua.filter(d => {
+            let t = uraikanTanggalInput(d.tanggal);
+            return (!awalObj || t >= awalObj) && (!akhirObj || t <= akhirObj);
+        });
+        let hitungNet = list => list.reduce((a, d) => a + (d.jenis === 'masuk' ? d.nominal : -d.nominal), 0);
+        let saldoAwal = awalObj ? hitungNet(sebelum) : 0;
+        let masuk = daftar.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0);
+        let keluar = daftar.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
+        return { mulai, akhir, daftar, saldoAwal, masuk, keluar, perubahan: masuk - keluar, saldoAkhir: saldoAwal + masuk - keluar };
+    }
+
+    function renderLaporanArusKas() {
+        let mulai = document.getElementById('arusKasMulai'), akhir = document.getElementById('arusKasAkhir');
+        if (mulai && akhir && !mulai.value && !akhir.value) {
+            let now = new Date(); mulai.value = now.getFullYear() + '-01-01'; akhir.value = tanggalIsoLokal(now);
+        }
+        let r = ambilLaporanArusKas();
+        let rp = v => 'Rp ' + Math.round(Number(v) || 0).toLocaleString('id-ID');
+        document.getElementById('arusKasCards').innerHTML = `
+            <div class="card card-blue"><h3>Saldo Awal</h3><p>${rp(r.saldoAwal)}</p></div>
+            <div class="card card-green"><h3>Kas Masuk</h3><p>${rp(r.masuk)}</p></div>
+            <div class="card card-red"><h3>Kas Keluar</h3><p>${rp(r.keluar)}</p></div>
+            <div class="card card-blue"><h3>Saldo Akhir</h3><p>${rp(r.saldoAkhir)}</p></div>`;
+        let kelompok = ['Operasional', 'Investasi', 'Pendanaan / Saldo Awal'];
+        let rows = [];
+        kelompok.forEach(k => {
+            let list = r.daftar.filter(d => d.kelompok === k);
+            if (!list.length) return;
+            list.forEach(d => rows.push(`<tr><td>${escHtml(k)}</td><td>${formatTglTabel(d.tanggal)} — <strong>${escHtml(d.kategori)}</strong><br><small>${escHtml(d.keterangan || '-')}</small></td><td class="text-right text-success">${d.jenis === 'masuk' ? rp(d.nominal) : '-'}</td><td class="text-right text-danger">${d.jenis === 'keluar' ? rp(d.nominal) : '-'}</td></tr>`));
+            let m = list.filter(d => d.jenis === 'masuk').reduce((a, d) => a + d.nominal, 0), x = list.filter(d => d.jenis === 'keluar').reduce((a, d) => a + d.nominal, 0);
+            rows.push(`<tr style="background:#f8fafc;font-weight:800;"><td colspan="2" class="text-right">Subtotal ${escHtml(k)}</td><td class="text-right">${rp(m)}</td><td class="text-right">${rp(x)}</td></tr>`);
+        });
+        rows.push(`<tr style="background:#e0f2fe;font-weight:900;"><td colspan="2" class="text-right">KENAIKAN / (PENURUNAN) KAS</td><td colspan="2" class="text-center">${rp(r.perubahan)}</td></tr>`);
+        document.getElementById('tbodyArusKas').innerHTML = rows.join('');
+    }
+
+    function resetLaporanArusKas() {
+        document.getElementById('arusKasMulai').value = '';
+        document.getElementById('arusKasAkhir').value = '';
+        renderLaporanArusKas();
+    }
+
+    function cetakLaporanArusKas() {
+        let r = ambilLaporanArusKas(), rp = v => 'Rp ' + Math.round(Number(v) || 0).toLocaleString('id-ID');
+        let rows = r.daftar.map(d => [d.kelompok, formatTglTabel(d.tanggal) + ' — ' + d.kategori + ' — ' + (d.keterangan || '-'), d.jenis === 'masuk' ? rp(d.nominal) : '-', d.jenis === 'keluar' ? rp(d.nominal) : '-']);
+        rows.push(['', 'KENAIKAN / (PENURUNAN) KAS', '', rp(r.perubahan)]);
+        bukaPreviewDokumen('LAPORAN ARUS KAS', `Periode: ${r.mulai ? formatTglTabel(r.mulai) : 'awal data'} s.d. ${r.akhir ? formatTglTabel(r.akhir) : 'sekarang'}`, [
+            { heading: 'RINGKASAN', headers: ['Uraian', 'Nilai'], rows: [['Saldo Awal', rp(r.saldoAwal)], ['Kas Masuk', rp(r.masuk)], ['Kas Keluar', rp(r.keluar)], ['Saldo Akhir', rp(r.saldoAkhir)]] },
+            { heading: 'RINCIAN ARUS KAS', headers: ['Kelompok', 'Uraian', 'Masuk', 'Keluar'], rows }
+        ]);
+    }
+
+    function dataPerubahanModal() {
+        let mulai = document.getElementById('modalMulai')?.value || '', akhir = document.getElementById('modalAkhir')?.value || tanggalIsoLokal(new Date());
+        let awalObj = mulai ? uraikanTanggalInput(mulai) : new Date(0);
+        let sebelum = new Date(awalObj); sebelum.setDate(sebelum.getDate() - 1);
+        let modalAwal = mulai ? hitungDataNeraca(tanggalIsoLokal(sebelum)).modalBersih : 0;
+        let modalAkhir = hitungDataNeraca(akhir).modalBersih;
+        let tambahanModal = (globalDataPelengkapNeraca || []).filter(p => p.kategori === 'modal' || (p.kategori === 'aset_tetap_pelengkap' && ['modal_aset', 'hibah_aset'].includes(bacaMetaDataPelengkap(p.keterangan).sumber_aset || 'modal_aset'))).filter(p => {
+            let d = uraikanTanggalInput(p.tanggal); return !isNaN(d) && (!mulai || d >= awalObj) && d <= uraikanTanggalInput(akhir);
+        }).reduce((a, p) => a + (Number(p.nilai) || 0), 0);
+        let surplusPeriode = modalAkhir - modalAwal - tambahanModal;
+        return { mulai, akhir, modalAwal, tambahanModal, surplusPeriode, modalAkhir };
+    }
+
+    function renderLaporanPerubahanModal() {
+        let mulai = document.getElementById('modalMulai'), akhir = document.getElementById('modalAkhir');
+        if (mulai && akhir && !mulai.value && !akhir.value) { let now = new Date(); mulai.value = now.getFullYear() + '-01-01'; akhir.value = tanggalIsoLokal(now); }
+        let r = dataPerubahanModal(), rp = v => 'Rp ' + Math.round(Number(v) || 0).toLocaleString('id-ID');
+        document.getElementById('modalCards').innerHTML = `
+            <div class="card card-blue"><h3>Modal Bersih Awal</h3><p>${rp(r.modalAwal)}</p></div>
+            <div class="card card-green"><h3>Tambahan / Pengurangan Modal</h3><p>${rp(r.tambahanModal)}</p></div>
+            <div class="card ${r.surplusPeriode >= 0 ? 'card-green' : 'card-red'}"><h3>Surplus / (Defisit) Periode</h3><p>${rp(r.surplusPeriode)}</p></div>
+            <div class="card card-blue"><h3>Modal Bersih Akhir</h3><p>${rp(r.modalAkhir)}</p></div>`;
+        document.getElementById('tbodyPerubahanModal').innerHTML = `
+            <tr><td>Modal Bersih Awal Periode</td><td class="text-right">${rp(r.modalAwal)}</td></tr>
+            <tr><td>Tambahan / (Pengurangan) Modal Tercatat</td><td class="text-right">${rp(r.tambahanModal)}</td></tr>
+            <tr><td>Surplus / (Defisit) Periode — dihitung otomatis</td><td class="text-right">${rp(r.surplusPeriode)}</td></tr>
+            <tr style="background:#f1f5f9;font-weight:900;"><td>MODAL BERSIH AKHIR PERIODE</td><td class="text-right">${rp(r.modalAkhir)}</td></tr>`;
+    }
+
+    function resetLaporanPerubahanModal() {
+        let now = new Date(); document.getElementById('modalMulai').value = now.getFullYear() + '-01-01'; document.getElementById('modalAkhir').value = tanggalIsoLokal(now); renderLaporanPerubahanModal();
+    }
+
+    function cetakLaporanPerubahanModal() {
+        let r = dataPerubahanModal(), rp = v => 'Rp ' + Math.round(Number(v) || 0).toLocaleString('id-ID');
+        bukaPreviewDokumen('LAPORAN PERUBAHAN MODAL', `Periode: ${formatTglTabel(r.mulai)} s.d. ${formatTglTabel(r.akhir)}`, [{ headers: ['Uraian', 'Nilai'], rows: [['Modal Bersih Awal', rp(r.modalAwal)], ['Tambahan / (Pengurangan) Modal', rp(r.tambahanModal)], ['Surplus / (Defisit) Periode', rp(r.surplusPeriode)], ['MODAL BERSIH AKHIR', rp(r.modalAkhir)]] }]);
+    }
+
+    function susunCatatanLaporanKeuangan() {
+        let tgl = tanggalIsoLokal(new Date()), n = hitungDataNeraca(tgl);
+        let punyaSaldoAwal = (globalDataPelengkapNeraca || []).some(p => ['saldo_awal_kas', 'saldo_awal_bank'].includes(p.kategori));
+        let punyaModal = n.pelengkap.modalTercatat > 0;
+        let pernahStokOpname = (globalDataPelengkapNeraca || []).some(p => p.kategori === 'stok_penyesuaian');
+        let seimbang = Math.abs(n.totalAset - n.totalKewajibanModal) < 1;
+        let status = [
+            { ok: punyaSaldoAwal, info: !punyaSaldoAwal, teks: punyaSaldoAwal ? 'Saldo awal kas/bank sudah dicatat.' : 'Saldo awal kas/bank dianggap Rp0. Ini benar jika BSI memang belum memiliki modal uang.' },
+            { ok: punyaModal, teks: punyaModal ? 'Modal/dana BSI sudah terbentuk, termasuk modal atau hibah berupa aset.' : 'Belum ada modal uang maupun modal aset milik BSI yang dicatat.' },
+            { ok: true, info: true, teks: n.asetTetap.titipan.length ? `${n.asetTetap.titipan.length} aset pinjaman/titipan dicatat sebagai informasi dan tidak dimasukkan ke neraca BSI.` : 'Belum ada aset pinjaman/titipan yang tercatat.' },
+            { ok: pernahStokOpname, info: true, teks: pernahStokOpname ? 'Penyesuaian stok fisik pernah dicatat.' : 'Belum ada penyesuaian stok fisik. Lakukan setelah timbang gudang bila ada selisih.' },
+            { ok: seimbang, teks: seimbang ? 'Neraca seimbang: Aset sama dengan Kewajiban + Modal.' : 'Neraca tidak seimbang dan perlu diperiksa.' }
+        ];
+        let catatan = [
+            { judul: 'Dasar Penyusunan', isi: 'Laporan disusun otomatis dari transaksi BSU yang diterima, penjualan, pencairan saldo, kas, biaya, hibah, investasi, serta Data Pelengkap Neraca.' },
+            { judul: 'Kas dan Bank', isi: 'Saldo kas dan bank berasal dari saldo awal ditambah kas masuk dan dikurangi kas keluar yang tercatat sampai tanggal laporan.' },
+            { judul: 'Persediaan Sampah', isi: 'Persediaan dinilai menggunakan harga perolehan rata-rata. Berat dan nilai koreksi stok fisik ikut diperhitungkan.' },
+            { judul: 'Piutang dan Utang', isi: 'Piutang pembeli, pendapatan belum diterima, utang lain, dan biaya belum dibayar berasal dari Data Pelengkap Neraca.' },
+            { judul: 'Aset Tetap', isi: 'Sumber aset dipilih saat pencatatan. Modal aset dan hibah aset otomatis membentuk modal/dana BSI; aset yang dibeli dengan utang otomatis membentuk kewajiban; aset pinjaman/titipan hanya menjadi informasi dan tidak masuk total aset. Aset milik BSI menggunakan penyusutan garis lurus.' },
+            { judul: 'Saldo BSU', isi: 'Saldo BSU yang belum dicairkan diakui sebagai kewajiban BSI kepada seluruh Bank Sampah Unit.' },
+            { judul: 'Modal', isi: 'Modal tidak harus berupa uang. Aset milik BSI yang berasal dari modal atau hibah dapat menjadi modal aset. Modal bersih tetap merupakan selisih total aset dan total kewajiban.' },
+            { judul: 'Batas Penggunaan', isi: 'Laporan ini ditujukan untuk pengelolaan internal BSI. Dokumen resmi, perpajakan, pinjaman, atau audit tetap perlu diperiksa tenaga akuntansi yang berwenang.' }
+        ];
+        return { tgl, n, status, catatan };
+    }
+
+    function renderCatatanLaporanKeuangan() {
+        let r = susunCatatanLaporanKeuangan();
+        document.getElementById('catatanStatus').innerHTML = r.status.map(s => `<div style="padding:10px 12px;margin-bottom:8px;border-radius:9px;background:${s.ok ? '#ecfdf5' : (s.info ? '#eff6ff' : '#fff7ed')};border:1px solid ${s.ok ? '#a7f3d0' : (s.info ? '#bfdbfe' : '#fed7aa')};color:${s.ok ? '#065f46' : (s.info ? '#1e40af' : '#9a3412')};font-size:12.5px;font-weight:700;">${s.ok ? '✓' : (s.info ? 'ℹ' : '!')} ${escHtml(s.teks)}</div>`).join('');
+        document.getElementById('catatanIsi').innerHTML = r.catatan.map((c, i) => `<div style="padding:16px;border-radius:12px;border:1px solid var(--border);background:${i % 2 ? '#f8fafc' : '#fff'};"><h3 style="font-size:14px;margin:0 0 8px;">${i + 1}. ${escHtml(c.judul)}</h3><p style="margin:0;color:var(--text-muted);font-size:12.5px;line-height:1.65;">${escHtml(c.isi)}</p></div>`).join('');
+    }
+
+    function cetakCatatanLaporanKeuangan() {
+        let r = susunCatatanLaporanKeuangan();
+        bukaPreviewDokumen('CATATAN ATAS LAPORAN KEUANGAN', 'Per tanggal: ' + formatTglTabel(r.tgl), [
+            { heading: 'STATUS KELENGKAPAN', headers: ['Status', 'Keterangan'], rows: r.status.map(s => [s.ok ? 'Lengkap' : (s.info ? 'Informasi' : 'Perlu dilengkapi'), s.teks]) },
+            ...r.catatan.map((c, i) => ({ heading: `${i + 1}. ${c.judul}`, text: c.isi }))
         ]);
     }
 
@@ -7053,10 +7657,7 @@
     window.onload = function() {
         loadDataPusat();
         tampilkanPetugasSesi();
-        // Pre-load daftar pos neraca manual & status tutup buku di latar belakang (tanpa
-        // langsung merender), supaya siap dipakai ketika tab terkait dibuka oleh pengguna,
-        // dan supaya pengecekan periode-terkunci di form transaksi aktif sejak awal.
-        AdapterAPI.getNeracaPosList().then(list => { globalNeracaPosManual = list || []; }).catch(() => {});
+        // Status tutup buku dimuat sejak awal agar pengecekan periode transaksi aktif.
         loadTutupBuku();
         let lastBackup = localStorage.getItem('LAST_BACKUP_AT');
         if (lastBackup && document.getElementById('lblLastBackup')) document.getElementById('lblLastBackup').innerText = 'Backup terakhir diunduh: ' + lastBackup;
