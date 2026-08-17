@@ -6772,7 +6772,7 @@
             globalAlat = resInv.alat || []; globalBiayaOp = resInv.biaya || []; globalPemeliharaan = resInv.pemeliharaan || [];
             globalPembinaan = resDok.pembinaan || []; globalDarurat = resDok.darurat || [];
             globalPenjualan = resJual || [];
-            globalDataPelengkapNeraca = resPelengkap || [];
+            globalDataPelengkapNeraca = normalisasiDaftarDataPelengkap(resPelengkap || []);
             perbaruiRingkasanDashboardDariBundle();
             populateYearDropdowns(); populateUI();
             try { renderLapPembelian('semua'); renderLapPenjualan('semua'); renderLapStok('semua'); renderLapLabaRugi('semua'); renderLapKasMasuk('semua'); renderLapKasKeluar('semua'); } catch(e){}
@@ -6840,6 +6840,14 @@
         utang_aset: 'Aset masuk sebagai milik BSI dan nilainya otomatis menjadi utang BSI.',
         pinjaman_titipan: 'Aset hanya dicatat sebagai informasi pemakaian. Tidak masuk total aset, modal, utang, atau penyusutan BSI.'
     };
+    // Database lama membatasi kategori neraca menjadi empat nilai ini.
+    // Jenis yang lebih rinci disimpan aman di metadata agar tidak memerlukan perubahan database.
+    const KATEGORI_DB_DATA_PELENGKAP = {
+        saldo_awal_kas: 'aset_lancar', saldo_awal_bank: 'aset_lancar', piutang: 'aset_lancar',
+        stok_penyesuaian: 'aset_lancar', pendapatan_akrual: 'aset_lancar',
+        utang_lain: 'kewajiban', beban_akrual: 'kewajiban',
+        modal: 'modal', aset_tetap_pelengkap: 'aset_tetap'
+    };
 
     function bacaMetaDataPelengkap(keterangan) {
         if (!keterangan) return {};
@@ -6847,6 +6855,17 @@
             let hasil = JSON.parse(keterangan);
             return hasil && typeof hasil === 'object' ? hasil : { catatan: String(keterangan) };
         } catch (_) { return { catatan: String(keterangan) }; }
+    }
+
+    function kategoriDatabaseDataPelengkap(jenis) {
+        return KATEGORI_DB_DATA_PELENGKAP[jenis] || (['aset_lancar', 'aset_tetap', 'kewajiban', 'modal'].includes(jenis) ? jenis : 'aset_lancar');
+    }
+
+    function normalisasiDaftarDataPelengkap(list) {
+        return (list || []).map(p => {
+            let meta = bacaMetaDataPelengkap(p.keterangan);
+            return { ...p, kategori_database: p.kategori, kategori: meta.jenis_pelengkap || p.kategori };
+        });
     }
 
     function ambilDataPelengkapSampai(sampaiTgl) {
@@ -6893,7 +6912,7 @@
         let tbody = document.getElementById('tbodyDataPelengkap');
         if (tbody) tbody.innerHTML = '<tr><td colspan="5" class="text-center">Memuat data...</td></tr>';
         return AdapterAPI.getNeracaPosList().then(list => {
-            globalDataPelengkapNeraca = list || [];
+            globalDataPelengkapNeraca = normalisasiDaftarDataPelengkap(list || []);
             if (callback) callback();
             renderDataPelengkapNeraca();
             ubahJenisDataPelengkap();
@@ -6952,12 +6971,12 @@
         if (!tanggal || !nama || nilaiAwal <= 0) return alert('Lengkapi tanggal, nama/uraian, dan nilai lebih dari Rp0.');
         if (jenis === 'stok_penyesuaian' && jumlahKg <= 0) return alert('Selisih berat stok wajib lebih dari 0 Kg.');
         if (cekPeringatanPeriodeTerkunci(tanggal)) return;
-        let meta = { versi: 1, catatan: document.getElementById('pelengkapKeterangan').value.trim() || '', arah: tetapTambah ? 'tambah' : arah };
+        let meta = { versi: 1, jenis_pelengkap: jenis, catatan: document.getElementById('pelengkapKeterangan').value.trim() || '', arah: tetapTambah ? 'tambah' : arah };
         if (jenis === 'aset_tetap_pelengkap') { meta.masa_manfaat = Math.max(1, masa); meta.sumber_aset = sumberAset; }
         if (jenis === 'stok_penyesuaian') meta.jumlah_kg = jumlahKg * (arah === 'kurang' ? -1 : 1);
         let btn = document.getElementById('btnSimpanPelengkap');
         btn.disabled = true; btn.innerText = 'MENYIMPAN...';
-        AdapterAPI.tambahPosNeraca({ kategori: jenis, nama_pos: nama, nilai, tanggal, keterangan: JSON.stringify(meta) }).then(res => {
+        AdapterAPI.tambahPosNeraca({ kategori: kategoriDatabaseDataPelengkap(jenis), nama_pos: nama, nilai, tanggal, keterangan: JSON.stringify(meta) }).then(res => {
             if (String(res).startsWith('Gagal')) throw new Error(res);
             alert(jenis === 'aset_tetap_pelengkap' ? 'Aset berhasil disimpan. Sumber aset dan pasangan neracanya dibuat otomatis tanpa mengubah saldo kas.' : 'Data berhasil disimpan dan akan masuk otomatis ke laporan.');
             document.getElementById('pelengkapNama').value = '';
