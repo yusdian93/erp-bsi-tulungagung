@@ -380,6 +380,12 @@
     .menu-hub-section-title span { color:var(--text-muted); font-size:11px; font-weight:600; }
     .menu-hub-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
     .finance-data-grid { display:grid; grid-template-columns:minmax(300px,.9fr) minmax(420px,1.4fr); gap:20px; align-items:start; }
+    .pelengkap-manual { margin-top:18px; border:1px solid var(--border); border-radius:12px; overflow:hidden; background:#fff; }
+    .pelengkap-manual > summary { cursor:pointer; list-style:none; padding:15px 18px; font-weight:800; color:#174239; background:#f8fafc; display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .pelengkap-manual > summary::-webkit-details-marker { display:none; }
+    .pelengkap-manual > summary::after { content:'›'; font-size:24px; transition:transform .2s ease; }
+    .pelengkap-manual[open] > summary::after { transform:rotate(90deg); }
+    .pelengkap-manual .finance-data-grid { padding:18px; }
     .menu-hub-card {
         position:relative; overflow:hidden; min-height:142px; padding:18px; border:1px solid var(--border); border-radius:17px;
         background:#fff; box-shadow:var(--shadow-sm); cursor:pointer; text-align:left; font-family:inherit; transition:.22s ease;
@@ -1332,7 +1338,7 @@
                     <button class="nav-btn" data-label="Skema Bagi Hasil BSU" data-group="grp-keuangan" onclick="pindahTab('bagihasil', this); loadBagiHasilInduk();" title="Mengatur persentase hak nasabah dan operasional pengelola"><span class="nav-ic">%</span><span class="nav-text">Skema Bagi Hasil</span></button>
                     <button class="nav-btn" data-label="Saldo BSU di BSI" data-group="grp-keuangan" onclick="pindahTab('saldobsi', this); loadSaldoTabunganBSI();" title="Melihat saldo dan riwayat keuangan setiap BSU"><span class="nav-ic">💾</span><span class="nav-text">Saldo BSU di BSI</span></button>
                     <button class="nav-btn" data-label="Pencairan Saldo BSU" data-group="grp-keuangan" onclick="pindahTab('tarikbsu', this); loadTarikTabunganBSU();" title="Mencatat pencairan saldo dan status pembayaran kepada BSU"><span class="nav-ic">💸</span><span class="nav-text">Pencairan Saldo BSU</span></button>
-                    <button class="nav-btn" data-label="Data Pelengkap Laporan Keuangan" data-group="grp-keuangan" onclick="pindahTab('datapelengkap', this); loadDataPelengkapNeraca();" title="Mencatat saldo awal, piutang, utang, modal, aset, stok, dan penyesuaian akhir bulan"><span class="nav-ic">🧾</span><span class="nav-text">Data Pelengkap Neraca</span><span class="nav-tag nav-tag-main">Baru</span></button>
+                    <button class="nav-btn" data-label="Perhitungan Otomatis Neraca" data-group="grp-keuangan" onclick="pindahTab('datapelengkap', this); loadDataPelengkapNeraca();" title="Memeriksa data transaksi yang dihitung otomatis dan menambahkan informasi di luar aplikasi bila diperlukan"><span class="nav-ic">🧾</span><span class="nav-text">Data Otomatis Neraca</span><span class="nav-tag nav-tag-main">Otomatis</span></button>
                 </div>
             </div>
 
@@ -1456,15 +1462,23 @@
     <div id="datapelengkap" class="content-section">
         <div class="panel">
             <div class="panel-header" style="flex-wrap:wrap;gap:10px;">
-                <div><h2>🧾 DATA PELENGKAP LAPORAN KEUANGAN</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12.5px;">Isi hanya data yang belum tercatat melalui transaksi utama. Sistem akan memasukkannya ke laporan secara otomatis tanpa debit dan kredit manual.</p></div>
-                <button class="btn-sync" onclick="loadDataPelengkapNeraca()">🔄 Muat Ulang</button>
+                <div><h2>🧾 PERHITUNGAN OTOMATIS LAPORAN KEUANGAN</h2><p style="margin:6px 0 0;color:var(--text-muted);font-size:12.5px;">Tidak perlu mengisi ulang transaksi. Sistem langsung memakai data pengiriman BSU, penjualan, stok, pencairan saldo, biaya, hibah, dan investasi yang sudah ada.</p></div>
+                <button class="btn-sync" id="btnHitungOtomatisPelengkap" onclick="jalankanOtomatisPelengkap()">🔄 Hitung Ulang Otomatis</button>
             </div>
 
             <div class="cards" id="pelengkapCards" style="margin:18px 0;"></div>
 
+            <div style="padding:16px;border-radius:12px;background:#ecfdf5;border:1px solid #a7f3d0;margin-bottom:18px;">
+                <div style="display:flex;align-items:flex-start;gap:12px;"><span style="font-size:24px;">✅</span><div><h3 style="margin:0 0 5px;color:#065f46;">Data aplikasi sudah dihitung otomatis</h3><p style="margin:0;color:#166534;font-size:12.5px;line-height:1.6;">Bagian di bawah menunjukkan sumber angka yang sudah ditemukan. Anda hanya perlu membuka formulir tambahan jika memiliki aset lama, utang, piutang, atau koreksi stok yang belum pernah dicatat di aplikasi.</p></div></div>
+            </div>
+
+            <div id="pelengkapStatusOtomatis" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;"></div>
+
+            <details class="pelengkap-manual" id="pelengkapManualDetails">
+                <summary><span>➕ Tambahkan data yang belum ada di aplikasi <small style="display:block;font-weight:500;color:var(--text-muted);margin-top:3px;">Opsional — tidak perlu dibuka jika seluruh data sudah tercatat</small></span></summary>
             <div class="finance-data-grid">
                 <div style="background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:16px;">
-                    <h3 style="margin:0 0 5px;">Tambah Data</h3>
+                    <h3 style="margin:0 0 5px;">Tambah Data di Luar Aplikasi</h3>
                     <p id="pelengkapBantuan" style="margin:0 0 14px;color:var(--text-muted);font-size:12px;line-height:1.5;"></p>
                     <form id="formDataPelengkap" onsubmit="simpanDataPelengkap(event)">
                         <div class="form-group"><label>Jenis Data</label>
@@ -1501,13 +1515,14 @@
                 </div>
 
                 <div>
-                    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;"><h3 style="margin:0;">Data yang Sudah Tercatat</h3><input type="search" id="cariDataPelengkap" class="form-control" style="max-width:230px;" placeholder="Cari data..." oninput="renderDataPelengkapNeraca()"></div>
+                    <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;"><h3 style="margin:0;">Tambahan Manual yang Tersimpan</h3><input type="search" id="cariDataPelengkap" class="form-control" style="max-width:230px;" placeholder="Cari data..." oninput="renderDataPelengkapNeraca()"></div>
                     <div class="table-container" style="max-height:580px;overflow:auto;"><table>
                         <thead><tr><th>TANGGAL</th><th>JENIS &amp; URAIAN</th><th>RINCIAN</th><th class="text-right">NILAI</th><th></th></tr></thead>
                         <tbody id="tbodyDataPelengkap"><tr><td colspan="5" class="text-center">Memuat data...</td></tr></tbody>
                     </table></div>
                 </div>
             </div>
+            </details>
         </div>
     </div>
 
@@ -6923,6 +6938,50 @@
         });
     }
 
+    function renderRingkasanOtomatisPelengkap() {
+        let cards = document.getElementById('pelengkapCards');
+        let statusWrap = document.getElementById('pelengkapStatusOtomatis');
+        if (!cards || !statusWrap) return;
+        let tgl = tanggalIsoLokal(new Date());
+        let n = hitungDataNeraca(tgl);
+        let rp = v => 'Rp ' + Math.round(Number(v) || 0).toLocaleString('id-ID');
+        let kg = v => Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: 2 }) + ' Kg';
+        cards.innerHTML = `
+            <div class="card card-blue"><h3>Kas &amp; Bank Otomatis</h3><p>${rp(n.kas)}</p></div>
+            <div class="card card-green"><h3>Nilai Stok Otomatis</h3><p>${rp(n.persediaan.nilai)}</p></div>
+            <div class="card card-blue"><h3>Aset BSI Otomatis</h3><p>${rp(n.aset_tetap_otomatis)}</p></div>
+            <div class="card card-red"><h3>Saldo BSU Belum Dicairkan</h3><p>${rp(n.kewajiban_tabungan)}</p></div>`;
+
+        let transaksiSah = (globalTransaksi || []).filter(t => (Number(t.total) || 0) > 0 && (Number(t.berat) || 0) > 0);
+        let investasi = (globalPemeliharaan || []).filter(p => p.jenis === 'Investasi Alat');
+        let namaAsetBernilai = new Set([
+            ...investasi.map(p => String(p.nama_alat || '').trim().toLowerCase()),
+            ...(globalDataPelengkapNeraca || []).filter(p => p.kategori === 'aset_tetap_pelengkap').map(p => String(p.nama_pos || '').trim().toLowerCase())
+        ].filter(Boolean));
+        let alatTanpaNilai = (globalAlat || []).filter(a => !namaAsetBernilai.has(String(a.nama_alat || '').trim().toLowerCase()));
+        let manual = globalDataPelengkapNeraca || [];
+        let kotak = (ikon, judul, nilai, keterangan, perhatian = false) => `<div style="padding:14px;border-radius:11px;border:1px solid ${perhatian ? '#fed7aa' : '#bbf7d0'};background:${perhatian ? '#fff7ed' : '#f0fdf4'};"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px;"><strong style="color:${perhatian ? '#9a3412' : '#166534'};">${ikon} ${escHtml(judul)}</strong><span style="font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:${perhatian ? '#ffedd5' : '#dcfce7'};color:${perhatian ? '#9a3412' : '#166534'};">${perhatian ? 'PERLU DICEK' : 'OTOMATIS'}</span></div><div style="font-size:20px;font-weight:900;margin:8px 0 3px;color:#173c34;">${escHtml(nilai)}</div><p style="margin:0;color:var(--text-muted);font-size:11.5px;line-height:1.5;">${escHtml(keterangan)}</p></div>`;
+        statusWrap.innerHTML = [
+            kotak('📥', 'Penerimaan dari BSU', `${transaksiSah.length} transaksi · ${kg(transaksiSah.reduce((a, t) => a + (Number(t.berat) || 0), 0))}`, 'Langsung dari pengiriman yang diterima BSI. Tidak perlu diisi lagi.'),
+            kotak('📤', 'Penjualan & Hasil Usaha', `${(globalPenjualan || []).length} transaksi · ${rp(n.totalPenjualan)}`, 'Langsung dari menu Penjualan Off-taker.'),
+            kotak('💳', 'Kas, Biaya & Hibah', `${getDataKasIndukOtomatis().length} catatan`, 'Kas masuk dan keluar dihitung dari penjualan, pencairan BSU, biaya, hibah, serta investasi.'),
+            kotak('🧰', 'Investasi Alat Bernilai', `${investasi.length} catatan · ${rp(investasi.reduce((a, p) => a + (Number(p.biaya) || 0), 0))}`, 'Aset yang memiliki nilai investasi langsung masuk laporan dan disusutkan otomatis.'),
+            kotak('🔎', 'Inventaris Belum Memiliki Nilai', `${alatTanpaNilai.length} alat`, alatTanpaNilai.length ? `Nilai tidak dapat ditebak sistem: ${alatTanpaNilai.slice(0, 4).map(a => a.nama_alat).join(', ')}${alatTanpaNilai.length > 4 ? ', dan lainnya' : ''}. Buka formulir opsional hanya untuk alat ini.` : 'Seluruh inventaris yang terdaftar sudah memiliki sumber nilai.', alatTanpaNilai.length > 0),
+            kotak('📝', 'Data di Luar Aplikasi', `${manual.length} data tambahan`, manual.length ? 'Data tambahan ikut dihitung bersama transaksi utama.' : 'Tidak ada tambahan manual. Ini tidak masalah jika seluruh kegiatan sudah melalui aplikasi.')
+        ].join('');
+    }
+
+    function jalankanOtomatisPelengkap() {
+        let btn = document.getElementById('btnHitungOtomatisPelengkap');
+        if (btn) { btn.disabled = true; btn.innerText = '⏳ Menghitung...'; }
+        return loadDataTambahan().then(() => {
+            renderDataPelengkapNeraca();
+            renderNeraca();
+            alert('Selesai. Seluruh data yang sudah ada di aplikasi telah dihitung ulang otomatis. Tidak ada transaksi yang disalin atau digandakan.');
+        }).catch(() => alert('Sebagian data belum berhasil dimuat. Periksa koneksi lalu coba lagi.'))
+        .finally(() => { if (btn) { btn.disabled = false; btn.innerText = '🔄 Hitung Ulang Otomatis'; } });
+    }
+
     function renderDataPelengkapNeraca() {
         let tbody = document.getElementById('tbodyDataPelengkap');
         if (!tbody) return;
@@ -6930,16 +6989,7 @@
         let cari = (document.getElementById('cariDataPelengkap')?.value || '').trim().toLowerCase();
         let list = (globalDataPelengkapNeraca || []).filter(p => [LABEL_DATA_PELENGKAP[p.kategori], p.nama_pos, p.keterangan].join(' ').toLowerCase().includes(cari)).slice().sort((a, b) => uraikanTanggalInput(b.tanggal) - uraikanTanggalInput(a.tanggal));
         let rp = v => 'Rp ' + Math.round(Math.abs(Number(v) || 0)).toLocaleString('id-ID');
-        let ringkas = ringkasDataPelengkapNeraca(tanggalIsoLokal(new Date()));
-        let piutang = ringkas.piutang;
-        let utang = ringkas.utangLain;
-        let modal = ringkas.modalTercatat;
-        let cards = document.getElementById('pelengkapCards');
-        if (cards) cards.innerHTML = `
-            <div class="card card-blue"><h3>Jumlah Data</h3><p>${globalDataPelengkapNeraca.length}</p></div>
-            <div class="card card-green"><h3>Piutang Bersih</h3><p>${rp(piutang)}</p></div>
-            <div class="card card-red"><h3>Utang Lain</h3><p>${rp(utang)}</p></div>
-            <div class="card card-blue"><h3>Modal Tercatat</h3><p>${rp(modal)}</p></div>`;
+        renderRingkasanOtomatisPelengkap();
         if (!list.length) {
             tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">Belum ada data pelengkap. Laporan tetap memakai transaksi utama yang sudah tercatat.</td></tr>';
             return;
