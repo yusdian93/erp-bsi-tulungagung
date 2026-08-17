@@ -3648,8 +3648,14 @@
         if (btnSimpanJual) { btnSimpanJual.disabled = true; btnSimpanJual.innerText = '⏳ Menyimpan...'; }
 
         AdapterAPI.tambahPenjualan(form).then(res => {
-            alert(res);
-            if (String(res).startsWith('Gagal')) return;
+            const pesanSimpan = String(res || '');
+            const tabelPenjualanBelumAda = /public\.penjualan|table ['\"]?penjualan|schema cache/i.test(pesanSimpan);
+            if (tabelPenjualanBelumAda) {
+                alert('Fitur Penjualan ke Off-taker belum terpasang di database. Jalankan satu kali berkas supabase-setup-penjualan.sql melalui Supabase SQL Editor, lalu muat ulang halaman.');
+                return;
+            }
+            alert(pesanSimpan);
+            if (pesanSimpan.startsWith('Gagal')) return;
             // Sengaja TIDAK mereset Tanggal & Off-taker, agar riwayat hari ini langsung
             // terlihat sebagai konfirmasi bahwa input sudah masuk & terekap (sama seperti
             // pola pada Transaksi / Setoran BSU).
